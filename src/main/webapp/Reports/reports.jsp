@@ -34,11 +34,12 @@
         /* =====================================
            2️⃣ COUNT QUERY – DYNAMIC REPORT COUNT
            ===================================== */
-        countPs = conn.prepareStatement(
-            "SELECT COUNT(*) AS total_count " +
-            "FROM ACL.PROGRAM " +
-            "WHERE UPPER(\"SCHEMA\") LIKE ?"
-        );
+        		   countPs = conn.prepareStatement(
+        				    "SELECT COUNT(*) AS total_count " +
+        				    "FROM ACL.PROGRAM " +
+        				    "WHERE UPPER(\"SCHEMA\") LIKE ? " +
+        				    "AND PROGRAM_ID = 999999"
+        				);
 
         while (rs.next()) {
 

@@ -525,8 +525,8 @@
 	</li>
 
 	<!-- Transactions -->
-	<li data-page="Transactions/transactions.jsp">
-	    <a href="#" onclick="loadPage('Transactions/transactions.jsp', 'Transactions', this); return false;">
+	<li data-page="Transactions/transactionsCards.jsp">
+	    <a href="#" onclick="loadPage('Transactions/transactionsCards.jsp', 'Transactions', this); return false;">
 	        <img src="images/right-arrow.png" width="18" height="18" alt="">
 	        <span>Transactions</span>
 	    </a>

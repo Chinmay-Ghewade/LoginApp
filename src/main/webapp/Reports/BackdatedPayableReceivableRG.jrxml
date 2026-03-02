@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="BackdatedPayableReceivableRG1" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="18c221e9-4a42-447c-9c00-1bd72f5e4ccd">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="agent_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select substr(t.product_code,1,1) schme_code,
+t.product_code,fn_get_product_name(t.product_code) name,  abs(sum(t.LEDGERBALANCE)) ledger_bal,
+ t.GLACCOUNT_CODE gl_code, G.DESCRIPTION DESCRIPTION,
+ abs(Fn_Get_Balance_N ( $P{branch_code}  , t.GLACCOUNT_CODE, $P{as_on_date})) gl_bal
+  from BANKDATA.TEMP_BALANCECERTIFICATE_back t , headoffice.glaccount g
+ where t.GLACCOUNT_CODE= g.GLACCOUNT_CODE
+ and t.branch_code=$P{branch_code} and t.LEDGERBALANCE<>0
+ group by t.product_code,t.GLACCOUNT_CODE,G.DESCRIPTION
+ order by t.product_code]]>
+	</queryString>
+	<field name="SCHME_CODE" class="java.lang.String"/>
+	<field name="PRODUCT_CODE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="LEDGER_BAL" class="java.math.BigDecimal"/>
+	<field name="GL_CODE" class="java.lang.String"/>
+	<field name="DESCRIPTION" class="java.lang.String"/>
+	<field name="GL_BAL" class="java.math.BigDecimal"/>
+	<variable name="totalLedg" class="java.math.BigDecimal" resetType="Group" resetGroup="glcode" calculation="Sum">
+		<variableExpression><![CDATA[$F{LEDGER_BAL}]]></variableExpression>
+	</variable>
+	<variable name="diffbalance" class="java.math.BigDecimal"/>
+	<variable name="diffrence" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{GL_BAL}.subtract$V{totalLedg}]]></variableExpression>
+	</variable>
+	<group name="glcode">
+		<groupExpression><![CDATA[$F{GL_CODE}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement uuid="cd16a616-709f-4e41-aab6-6b67a6a6c924" x="38" y="0" width="116" height="20"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{GL_CODE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="16462a26-9a0a-43e1-8225-e0dc645aca49" x="171" y="0" width="160" height="20"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement uuid="afeff109-ee82-4746-a5d1-e75a3625f011" x="45" y="16" width="294" height="1"/>
+				</line>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="23">
+				<textField pattern="#,##0.00">
+					<reportElement uuid="477f6e01-3de0-413a-a49d-6d0f7350c476" x="433" y="3" width="100" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{GL_BAL}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement uuid="ca52faaf-e6c7-4738-bdcc-198319ee6f43" x="294" y="3" width="100" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{totalLedg}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement uuid="83a32178-1307-49b0-9b0a-687f3da61d38" x="556" y="3" width="100" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{diffrence}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement uuid="034a2b09-f151-4701-9220-34912b9fdfd0" x="3" y="2" width="748" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="ba1bb39c-46b9-40be-9acb-e4e53b07d6a0" x="3" y="20" width="748" height="1"/>
+				</line>
+				<staticText>
+					<reportElement uuid="319eab70-6b32-441b-a327-cb7b3c8add41" x="151" y="3" width="100" height="20"/>
+					<textElement textAlignment="Center">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="61" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="67bfb5c5-726e-4758-aae4-83d5fa94d6f2" x="255" y="37" width="259" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="13" isBold="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[PAYABLE RECEIVABLE REPORT]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="e4a66ed1-2b8f-4903-8245-b6ff62dd7295" x="2" y="54" width="748" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="d0a0eb6c-21b2-4235-ba65-385d88ed2507" x="29" y="0" width="699" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{agent_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="e2836092-b8f2-459d-9e54-574b47f94799" x="644" y="37" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="a9b7fc40-3d8f-4108-b3c5-91aeada620f2" x="613" y="37" width="36" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c51a95d8-3d34-448c-ae11-c03b8c884179" x="299" y="21" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Branch Code:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="5c7f7bf6-9f2d-462e-953d-6617074eeeb6" x="375" y="21" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{branch_code}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="c27c3722-154e-4169-abe2-6b2c416c5bd9" x="38" y="2" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Product Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2b0727f0-4712-4fb8-87b7-08fb86416aac" x="167" y="2" width="100" height="20"/>
+				<textElement textAlignment="Left">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="24838c1c-cdb8-44ca-90e0-ee2ca418aaea" x="294" y="2" width="100" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ledger Balance]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="0ec09b67-4bfa-48e3-a6a0-552c4b9faa97" x="2" y="19" width="748" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="d7c25b54-f9c1-44ef-9968-56b81fe136b3" x="433" y="2" width="100" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[GL Balance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bc593f63-e81e-4c36-b008-47994aab06f1" x="556" y="2" width="100" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Difference]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement uuid="56d74980-a99f-4151-beea-b06bd634ae82" x="38" y="2" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{PRODUCT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="bf288ca7-2823-44e4-ac76-e4cdb015d0ec" x="167" y="2" width="100" height="20"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="c2c7453c-ac79-465c-987a-54bba8022099" x="294" y="2" width="100" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{LEDGER_BAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

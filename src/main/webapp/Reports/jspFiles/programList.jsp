@@ -72,9 +72,10 @@
         conn = DBConnection.getConnection();
 
         String countSql =
-            "SELECT COUNT(*) FROM ACL.PROGRAM " +
-            "WHERE UPPER(\"SCHEMA\") LIKE ? " +
-            "AND UPPER(PROGRAM_NAME) LIKE ?";
+        	    "SELECT COUNT(*) FROM ACL.PROGRAM " +
+        	    "WHERE UPPER(\"SCHEMA\") LIKE ? " +
+        	    "AND UPPER(PROGRAM_NAME) LIKE ? " +
+        	    "AND PROGRAM_ID = 999999";
 
         ps = conn.prepareStatement(countSql);
         ps.setString(1, "%" + schemaParam.toUpperCase() + "%");
@@ -93,13 +94,14 @@
         int start = (currentPage - 1) * recordsPerPage;
 
         String dataSql =
-            "SELECT PROGRAM_NAME, PAGE_LINK FROM (" +
-            " SELECT PROGRAM_NAME, PAGE_LINK, ROW_NUMBER() OVER (ORDER BY PROGRAM_NAME) rn " +
-            " FROM ACL.PROGRAM " +
-            " WHERE UPPER(\"SCHEMA\") LIKE ? " +
-            " AND UPPER(PROGRAM_NAME) LIKE ? " +
-            ") WHERE rn BETWEEN ? AND ?";
-
+        	    "SELECT PROGRAM_NAME, PAGE_LINK FROM (" +
+        	    " SELECT PROGRAM_NAME, PAGE_LINK, ROW_NUMBER() OVER (ORDER BY PROGRAM_NAME) rn " +
+        	    " FROM ACL.PROGRAM " +
+        	    " WHERE UPPER(\"SCHEMA\") LIKE ? " +
+        	    " AND UPPER(PROGRAM_NAME) LIKE ? " +
+        	    " AND PROGRAM_ID = 999999 " +
+        	    ") WHERE rn BETWEEN ? AND ?";
+        
         ps = conn.prepareStatement(dataSql);
         ps.setString(1, "%" + schemaParam.toUpperCase() + "%");
         ps.setString(2, "%" + searchParam.toUpperCase() + "%");

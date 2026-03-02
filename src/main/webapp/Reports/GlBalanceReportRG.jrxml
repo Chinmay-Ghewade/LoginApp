@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GlBalanceReportRG" language="groovy" pageWidth="653" pageHeight="842" columnWidth="613" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f819f237-d304-4052-b023-d16a14429e37">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ROWNUM AS SERIALNUMBER,
+       ACCOUNTCODE,
+       ACCOUNTNAME,
+       OPENBALANCE,
+       TOTALDEBIT,
+       TOTALCREDIT,
+       CLOSINGBALANCE,
+       REMARK,
+       LL,
+       CC,
+       DD
+FROM (
+    SELECT
+        Y.GLACCOUNT_CODE AS ACCOUNTCODE,
+        INITCAP(Y.DESCRIPTION) AS ACCOUNTNAME,
+        X.OPENINGBALANCE AS OPENBALANCE,
+
+        (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0)) AS TOTALDEBIT,
+
+        (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0)) AS TOTALCREDIT,
+
+        (X.OPENINGBALANCE
+         - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+         + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0))
+        ) AS CLOSINGBALANCE,
+
+        CASE
+            WHEN (X.OPENINGBALANCE < 0 AND
+                 (X.OPENINGBALANCE
+                  - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+                  + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0))) > 0)
+            OR
+                 (X.OPENINGBALANCE > 0 AND
+                 (X.OPENINGBALANCE
+                  - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+                  + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0))) < 0)
+            THEN '**'
+        END AS REMARK,
+
+        CASE
+            WHEN Y.CODETYPE = 'LL'
+            THEN (X.OPENINGBALANCE
+                  - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+                  + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0)))
+        END AS LL,
+
+        CASE
+            WHEN Y.CODETYPE = 'CC'
+            THEN (X.OPENINGBALANCE
+                  - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+                  + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0)))
+        END AS CC,
+
+        CASE
+            WHEN Y.CODETYPE = 'DD'
+            THEN (X.OPENINGBALANCE
+                  - (NVL(X.DEBITCASH,0) + NVL(X.DEBITTRANSFER,0) + NVL(X.DEBITCLEARING,0))
+                  + (NVL(X.CREDITCASH,0) + NVL(X.CREDITTRANSFER,0) + NVL(X.CREDITCLEARING,0)))
+        END AS DD
+
+    FROM BALANCE.BRANCHGLHISTORY X
+    JOIN HEADOFFICE.GLACCOUNT Y
+      ON X.GLACCOUNT_CODE = Y.GLACCOUNT_CODE
+
+    WHERE X.BRANCH_CODE = $P{branch_code} -- change branch code here
+      AND X.TXN_DATE = TO_DATE($P{as_on_date},'DD-MM-YYYY')  -- change date here
+      AND (
+            NVL(X.OPENINGBALANCE,0) <> 0 OR
+            NVL(X.DEBITCASH,0) <> 0 OR
+            NVL(X.DEBITTRANSFER,0) <> 0 OR
+            NVL(X.DEBITCLEARING,0) <> 0 OR
+            NVL(X.CREDITCASH,0) <> 0 OR
+            NVL(X.CREDITTRANSFER,0) <> 0 OR
+            NVL(X.CREDITCLEARING,0) <> 0
+          )
+
+    ORDER BY X.GLACCOUNT_CODE
+)]]>
+	</queryString>
+	<field name="SERIALNUMBER" class="java.math.BigDecimal"/>
+	<field name="ACCOUNTCODE" class="java.lang.String"/>
+	<field name="ACCOUNTNAME" class="java.lang.String"/>
+	<field name="OPENBALANCE" class="java.math.BigDecimal"/>
+	<field name="TOTALDEBIT" class="java.math.BigDecimal"/>
+	<field name="TOTALCREDIT" class="java.math.BigDecimal"/>
+	<field name="CLOSINGBALANCE" class="java.math.BigDecimal"/>
+	<field name="REMARK" class="java.lang.String"/>
+	<field name="LL" class="java.math.BigDecimal"/>
+	<field name="CC" class="java.math.BigDecimal"/>
+	<field name="DD" class="java.math.BigDecimal"/>
+	<variable name="sumofdd" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DD}]]></variableExpression>
+	</variable>
+	<variable name="sumofLL" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LL}]]></variableExpression>
+	</variable>
+	<variable name="sumofCC" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CC}]]></variableExpression>
+	</variable>
+	<variable name="totalDebit" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTALDEBIT}]]></variableExpression>
+	</variable>
+	<variable name="totalcredit" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTALCREDIT}]]></variableExpression>
+	</variable>
+	<title>
+		<band height="48" splitType="Stretch">
+			<subreport>
+				<reportElement x="1" y="0" width="612" height="48" uuid="30fea78e-2fac-499d-a11a-36baa801c09d"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="613" height="1" uuid="b657f0d9-e4aa-4732-89c7-e301aaf819f1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="29" width="613" height="1" uuid="cf85c20a-4827-4191-a3ae-f1d6bc31f8fd"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="28" uuid="58e666b0-d369-47b0-9561-6eef5be32617"/>
+			</line>
+			<line>
+				<reportElement x="51" y="1" width="1" height="28" uuid="77a5e70d-7bf4-4898-9595-c7a82c4f741f"/>
+			</line>
+			<line>
+				<reportElement x="137" y="1" width="1" height="28" uuid="cb3b5526-1681-4afd-99ac-4aa9c8b3b4f5"/>
+			</line>
+			<line>
+				<reportElement x="309" y="1" width="1" height="28" uuid="83edeae6-442d-48d9-ae97-95e4a820e813"/>
+			</line>
+			<line>
+				<reportElement x="390" y="1" width="1" height="28" uuid="4d627e65-6876-4999-9057-df00f8575bfa"/>
+			</line>
+			<line>
+				<reportElement x="470" y="1" width="1" height="28" uuid="61cb2d92-00e7-4683-8d76-46040f2763a9"/>
+			</line>
+			<line>
+				<reportElement x="546" y="1" width="1" height="28" uuid="7542cea5-adf6-4a63-a8d8-a272f36796fb"/>
+			</line>
+			<line>
+				<reportElement x="612" y="1" width="1" height="28" uuid="19b0c707-6b2c-4edd-9a7d-a990cf439418"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="0" width="51" height="29" uuid="a682e548-8243-4bdf-a8a5-8079f925b427"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="2" width="85" height="26" uuid="e9e33a10-9ae1-4746-8492-7d0335f00190"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="137" y="2" width="171" height="27" uuid="b57c208a-c8ec-462c-bff3-492ea7f9393a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Account Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="310" y="1" width="82" height="27" uuid="e636bae0-a950-446b-999e-9fea0f37eee6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Opening Balance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="391" y="1" width="79" height="27" uuid="4a0bbaba-e567-4182-b31a-df3548ff25c5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Debit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="471" y="1" width="75" height="28" uuid="56058b89-cd25-4c3c-a756-189133718155"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Credit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="547" y="0" width="65" height="28" uuid="6d1da733-da53-496e-aed2-f072b1af20ba"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Closing Balance  ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="-1" y="-1" width="53" height="19" uuid="6e6b3715-85a6-4389-9895-1528a45bfeeb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SERIALNUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="52" y="-1" width="85" height="17" uuid="f1f6a681-f7e2-463d-be54-3ad67a3b5519"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNTCODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="309" y="-1" width="79" height="17" uuid="08ae7efe-85ac-4213-8152-5eb95413714f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OPENBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="391" y="-2" width="78" height="18" uuid="5ff3e89f-f437-4658-9dd0-975d60c60db9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TOTALDEBIT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="473" y="-1" width="73" height="17" uuid="da62d4b9-b358-41f4-9a82-3081107197ab"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TOTALCREDIT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="546" y="-2" width="67" height="18" uuid="45baf78e-0394-4675-897f-9b8e80ddf85c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CLOSINGBALANCE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-8" width="1" height="25" uuid="53e1967d-84b8-44ce-bff6-26763e86e04e"/>
+			</line>
+			<line>
+				<reportElement x="51" y="-9" width="1" height="25" uuid="d621d8ac-db09-481e-b298-e7eeaef5604f"/>
+			</line>
+			<textField>
+				<reportElement x="140" y="0" width="168" height="16" uuid="7b054f61-8134-4d6f-92ec-80e344132046"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNTNAME}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="137" y="-8" width="1" height="25" uuid="806b371a-6418-4e6f-a757-962375637001"/>
+			</line>
+			<line>
+				<reportElement x="309" y="-8" width="1" height="25" uuid="c497afab-12d6-46ef-97b4-4122b96afef1"/>
+			</line>
+			<line>
+				<reportElement x="390" y="-8" width="1" height="25" uuid="ce6b1bee-d697-44b6-9a7b-aa49c663dfa0"/>
+			</line>
+			<line>
+				<reportElement x="470" y="-9" width="1" height="25" uuid="6d3656a6-9e60-4e87-b0cc-9623b1914a91"/>
+			</line>
+			<line>
+				<reportElement x="546" y="-7" width="1" height="25" uuid="e7c5539f-eade-4039-b4f2-663b68d5b2e5"/>
+			</line>
+			<line>
+				<reportElement x="612" y="-8" width="1" height="25" uuid="160e5e94-2aee-4a05-a3a7-41190bc0c8b9"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="37" width="41" height="17" uuid="5f6cdac5-c8c6-43d1-95ca-8ef9bfa8a43e"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="30" y="37" width="96" height="17" uuid="c2b31567-b3ce-4b3e-ad42-72e09b3e1e69"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="520" y="33" width="58" height="20" uuid="28ba28ea-86db-4dbf-98c6-337b1d7d04df"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="578" y="33" width="34" height="20" uuid="40e16763-49e7-4473-bcf2-186a30528286"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-3" width="613" height="1" uuid="7943af1d-5545-47f4-abd6-c1c22e444978"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="113" splitType="Stretch">
+			<staticText>
+				<reportElement x="52" y="8" width="53" height="20" uuid="fb15a083-0e30-4371-86c0-d3acf9b96054"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="52" y="28" width="87" height="17" uuid="045cb332-c065-42ee-ba48-768c0da6771b"/>
+				<text><![CDATA[ Advance Amount :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="51" y="45" width="88" height="15" uuid="e1bd00ff-12a8-4276-ae58-9d4bcf448e59"/>
+				<text><![CDATA[ Deposit Amount :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="138" y="45" width="100" height="15" uuid="f3672549-b5aa-482e-b9dd-aa88cf2d00a8"/>
+				<textFieldExpression><![CDATA[$V{sumofdd}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="395" y="9" width="76" height="20" uuid="31628ce6-1126-4348-acb8-2dc3eddfc6f5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{totalDebit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="469" y="10" width="78" height="20" uuid="ca535c2f-5694-4725-8144-c1d7373a94d6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{totalcredit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="139" y="28" width="100" height="15" uuid="c6f1c6c6-a90b-4422-be16-2ffd3714de13"/>
+				<textFieldExpression><![CDATA[$V{sumofLL}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="1" y="66" width="612" height="47" uuid="1fa68659-2ccf-489f-8939-4b0437aa3756"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "A4_clerk-manager.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="-1" y="2" width="614" height="1" uuid="fce18b3c-b1df-4cba-a91c-1a33a9660f83"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>
