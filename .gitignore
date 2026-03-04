@@ -1,0 +1,27 @@
+# ======================
+# Java / Eclipse Project
+# ======================
+
+# Build folders
+/build/
+/bin/
+/target/
+/out/
+
+# Compiled class files
+*.class
+
+# Logs
+*.log
+
+# Eclipse project settings
+.settings/
+.project
+.classpath
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
