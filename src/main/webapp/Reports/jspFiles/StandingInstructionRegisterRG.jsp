@@ -201,7 +201,7 @@ if (!"preview".equals(action) && !"download".equals(action)) {
         <button type="submit"
                 class="download-button"
                 id="previewBtn">
-            Preview Report
+            Generate Report
         </button>
 
     </form>
