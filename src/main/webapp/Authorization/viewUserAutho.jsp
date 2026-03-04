@@ -326,6 +326,79 @@ input[type="password"] {
 
 .btn-cancel { background-color: #e0e0e0; color: #555; }
 .btn-cancel:hover { background-color: #d0d0d0; transform: translateY(-1px); }
+
+/* ===== PASSWORD STRENGTH & RULES ===== */
+.strength-bar-wrapper {
+    margin-top: 8px;
+    display: none;
+}
+.strength-bar-track {
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.strength-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.4s ease, background 0.4s ease;
+}
+.strength-label {
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+.password-rules {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: none;
+}
+.password-rules.visible {
+    display: block;
+}
+.rule-item {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s;
+}
+.rule-item.passed {
+    color: #22c55e;
+}
+.rule-item .rule-icon {
+    font-size: 13px;
+    width: 16px;
+    text-align: center;
+}
+
+.alert-custom {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    display: none;
+    font-weight: 500;
+}
+
+.alert-error-custom {
+    background-color: #fee;
+    border: 2px solid #fcc;
+    color: #d32f2f;
+}
+
+.alert-success-custom {
+    background-color: #efe;
+    border: 2px solid #cfc;
+    color: #2d5016;
+}
 </style>
 </head>
 
@@ -445,6 +518,8 @@ if (pendingRoles.isEmpty()) {
 <fieldset>
 <legend>Password Details</legend>
 
+<div class="alert-custom alert-error-custom" id="passwordAlert"></div>
+
 <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:80px; align-items:end; max-width:900px; margin:0 auto;">
 
     <div class="form-group">
@@ -460,7 +535,21 @@ if (pendingRoles.isEmpty()) {
                 </svg>
             </span>
         </div>
-        <div class="error-message" id="passwordError">Password is required</div>
+        <!-- Strength Bar -->
+        <div class="strength-bar-wrapper">
+            <div class="strength-bar-track">
+                <div class="strength-bar-fill" id="strengthBarFill"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel"></div>
+        </div>
+        <!-- Rules Checklist -->
+        <div class="password-rules" id="passwordRules">
+            <div class="rule-item" id="rule-length"><span class="rule-icon">✗</span> Minimum 8 characters</div>
+            <div class="rule-item" id="rule-upper"><span class="rule-icon">✗</span> At least 1 uppercase letter</div>
+            <div class="rule-item" id="rule-lower"><span class="rule-icon">✗</span> At least 1 lowercase letter</div>
+            <div class="rule-item" id="rule-number"><span class="rule-icon">✗</span> At least 1 number</div>
+            <div class="rule-item" id="rule-special"><span class="rule-icon">✗</span> At least 1 special character (!@#$%^&*)</div>
+        </div>
     </div>
 
     <div class="form-group">
@@ -476,7 +565,6 @@ if (pendingRoles.isEmpty()) {
                 </svg>
             </span>
         </div>
-        <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
     </div>
 
 </div>
@@ -498,6 +586,7 @@ if (pendingRoles.isEmpty()) {
 
     <form id="authorizeForm" action="UserAuthorizationServlet" method="post" style="display:inline;">
         <input type="hidden" name="userId" value="<%=userId%>">
+        <input type="hidden" name="branchCode" value="<%=branchCode%>">
         <input type="hidden" name="status" value="A">
         <input type="hidden" name="password" id="hiddenPassword">
         <button type="button" onclick="showAuthorizeConfirmation(event)"
@@ -512,6 +601,7 @@ if (pendingRoles.isEmpty()) {
 
     <form id="rejectForm" action="UserAuthorizationServlet" method="post" style="display:inline;">
         <input type="hidden" name="userId" value="<%=userId%>">
+        <input type="hidden" name="branchCode" value="<%=branchCode%>">
         <input type="hidden" name="status" value="R">
         <button type="button" onclick="showRejectConfirmation(event)"
             style="padding:10px 22px; background:linear-gradient(45deg,#dc3545,#e74c3c);
@@ -531,7 +621,7 @@ if (pendingRoles.isEmpty()) {
             Confirm Authorization
         </div>
         <div class="modal-body">
-            Are you sure you want to <strong>authorize</strong> this application?<br>
+            Are you sure you want to <strong>authorize</strong> this user?<br>
             User ID: <span class="app-number"><%=userId%></span>
         </div>
         <div class="modal-footer">
@@ -548,7 +638,7 @@ if (pendingRoles.isEmpty()) {
             Confirm Rejection
         </div>
         <div class="modal-body">
-            Are you sure you want to <strong>reject</strong> this application?<br>
+            Are you sure you want to <strong>reject</strong> this user?<br>
             User ID: <span class="app-number"><%=userId%></span>
         </div>
         <div class="modal-footer">
@@ -590,52 +680,122 @@ function togglePassword(fieldId) {
     }
 }
 
+// ========== PASSWORD STRENGTH CHECKER ==========
+function checkPasswordStrength(password) {
+    const rules = {
+        length:  password.length >= 8,
+        upper:   /[A-Z]/.test(password),
+        lower:   /[a-z]/.test(password),
+        number:  /[0-9]/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"|,.<>\/?]/.test(password)
+    };
+
+    Object.keys(rules).forEach(function(key) {
+        const el = document.getElementById('rule-' + key);
+        if (!el) return;
+        const icon = el.querySelector('.rule-icon');
+        if (rules[key]) {
+            el.classList.add('passed');
+            icon.textContent = '✓';
+        } else {
+            el.classList.remove('passed');
+            icon.textContent = '✗';
+        }
+    });
+
+    const score = Object.values(rules).filter(Boolean).length;
+    const bar = document.getElementById('strengthBarFill');
+    const label = document.getElementById('strengthLabel');
+
+    if (password.length === 0) {
+        bar.style.width = '0%';
+        bar.style.background = '';
+        label.textContent = '';
+    } else if (score <= 2) {
+        bar.style.width = '33%';
+        bar.style.background = '#ef4444';
+        label.textContent = 'Weak';
+        label.style.color = '#ef4444';
+    } else if (score <= 4) {
+        bar.style.width = '66%';
+        bar.style.background = '#f59e0b';
+        label.textContent = 'Medium';
+        label.style.color = '#f59e0b';
+    } else {
+        bar.style.width = '100%';
+        bar.style.background = '#22c55e';
+        label.textContent = 'Strong';
+        label.style.color = '#22c55e';
+    }
+}
+
+// Show password strength and rules on input
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            document.querySelector('.strength-bar-wrapper').style.display = this.value.length > 0 ? 'block' : 'none';
+            document.getElementById('passwordRules').classList.toggle('visible', this.value.length > 0);
+            checkPasswordStrength(this.value);
+        });
+    }
+});
+
 function validatePasswords() {
     const password        = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
-    const passwordError        = document.getElementById("passwordError");
-    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    const alert = document.getElementById("passwordAlert");
 
-    passwordError.style.display        = "none";
-    confirmPasswordError.style.display = "none";
+    alert.style.display = "none";
+    alert.textContent = "";
 
     if (!password || password.trim() === "") {
-        passwordError.textContent  = "Password is required";
-        passwordError.style.display = "block";
+        alert.textContent  = "❌ Password is required";
+        alert.style.display = "block";
         return false;
     }
-    if (password.length < 6) {
-        passwordError.textContent  = "Password must be at least 6 characters";
-        passwordError.style.display = "block";
+    if (password.length < 8) {
+        alert.textContent  = "❌ Password must be at least 8 characters";
+        alert.style.display = "block";
         return false;
     }
+
+    // Validate strong password rules
+    const pwRules = {
+        length:  password.length >= 8,
+        upper:   /[A-Z]/.test(password),
+        lower:   /[a-z]/.test(password),
+        number:  /[0-9]/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"|,.<>\/?]/.test(password)
+    };
+    const ruleMessages = {
+        length:  'at least 8 characters',
+        upper:   'at least 1 uppercase letter',
+        lower:   'at least 1 lowercase letter',
+        number:  'at least 1 number',
+        special: 'at least 1 special character'
+    };
+    const failedRules = Object.keys(pwRules).filter(k => !pwRules[k]);
+    if (failedRules.length > 0) {
+        alert.textContent = '❌ Password must contain ' + failedRules.map(k => ruleMessages[k]).join(', ') + '.';
+        alert.style.display = 'block';
+        return false;
+    }
+
     if (!confirmPassword || confirmPassword.trim() === "") {
-        confirmPasswordError.textContent  = "Please confirm your password";
-        confirmPasswordError.style.display = "block";
+        alert.textContent  = "❌ Please confirm your password";
+        alert.style.display = "block";
         return false;
     }
     if (password !== confirmPassword) {
-        confirmPasswordError.textContent  = "Passwords do not match";
-        confirmPasswordError.style.display = "block";
+        alert.textContent  = "❌ Passwords do not match";
+        alert.style.display = "block";
         return false;
     }
     return true;
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("password").addEventListener('input', function() {
-        if (this.value.trim() !== "") document.getElementById("passwordError").style.display = "none";
-    });
-    document.getElementById("confirmPassword").addEventListener('input', function() {
-        if (this.value.trim() !== "") document.getElementById("confirmPasswordError").style.display = "none";
-        const password = document.getElementById("password").value;
-        if (this.value && password !== this.value) {
-            document.getElementById("confirmPasswordError").style.display = "block";
-        } else {
-            document.getElementById("confirmPasswordError").style.display = "none";
-        }
-    });
-});
 
 function goBackToList() {
     window.location.href = "<%=request.getContextPath()%>/Authorization/authorizationPendingUsers.jsp";

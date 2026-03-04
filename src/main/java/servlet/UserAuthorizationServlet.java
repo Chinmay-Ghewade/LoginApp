@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import db.DBConnection; 
+import db.DBConnection;
+import db.AESEncryption;
 
 @WebServlet("/Authorization/UserAuthorizationServlet")
 public class UserAuthorizationServlet extends HttpServlet {
@@ -24,10 +25,12 @@ public class UserAuthorizationServlet extends HttpServlet {
         String userId       = request.getParameter("userId");
         String status       = request.getParameter("status");
         String password     = request.getParameter("password");
+        String branchCode   = request.getParameter("branchCode");
         String authorizedBy = (session != null) ? (String) session.getAttribute("userId") : null;
 
         System.out.println("=== UserAuthorizationServlet START ===");
         System.out.println("userId       = " + userId);
+        System.out.println("branchCode   = " + branchCode);
         System.out.println("status       = " + status);
         System.out.println("authorizedBy = " + authorizedBy);
 
@@ -48,17 +51,39 @@ public class UserAuthorizationServlet extends HttpServlet {
             // ================= AUTHORIZE =================
             if ("A".equals(status)) {
 
-                // STEP 1: Update USERREGISTER — STATUS='A', encrypt password, record authorizer
-                System.out.println("STEP 1: Updating USERREGISTER...");
+                // Encrypt password using AES-256 (replaces oracle toolkit.encrypt)
+                String encryptedPassword;
+                try {
+                    encryptedPassword = AESEncryption.encrypt(password);
+                    System.out.println("Password encrypted with AES-256");
+                } catch (Exception e) {
+                    System.out.println("PASSWORD ENCRYPTION ERROR: " + e.getMessage());
+                    e.printStackTrace();
+                    conn.rollback();
+                    if (session != null) {
+                        session.setAttribute("message", "Password encryption failed: " + e.getMessage());
+                        session.setAttribute("messageType", "error");
+                    }
+                    response.sendRedirect(request.getContextPath() + "/Authorization/authorizationPendingUsers.jsp");
+                    return;
+                }
+
+                // STEP 1: Update USERREGISTER — STATUS='A', AES encrypted password, record authorizer
+                System.out.println("STEP 1: Updating USERREGISTER with AES encrypted password...");
                 try (PreparedStatement ps = conn.prepareStatement(
                         "UPDATE ACL.USERREGISTER " +
-                        "SET STATUS = 'A', PASSWD = acl.toolkit.encrypt(?), AUTHORIZED_BY = ? " +
-                        "WHERE USER_ID = ?")) {
-                    ps.setString(1, password);
+                        "SET STATUS = 'A', PASSWD = ?, AUTHORIZED_BY = ? " +
+                        "WHERE USER_ID = ? AND BRANCH_CODE = ?")) {
+                    ps.setString(1, encryptedPassword);  // AES encrypted password
                     ps.setString(2, authorizedBy);
                     ps.setString(3, userId);
+                    ps.setString(4, branchCode);
                     int rows = ps.executeUpdate();
                     System.out.println("STEP 1 done: rows updated in USERREGISTER = " + rows);
+                    
+                    if (rows == 0) {
+                        System.out.println("WARNING: No rows updated for userId=" + userId + ", branchCode=" + branchCode);
+                    }
                 }
 
                 // STEP 2: Update USERPENDINGROLES — STATUS='A', record authorizer + date
@@ -96,24 +121,25 @@ public class UserAuthorizationServlet extends HttpServlet {
                 }
 
                 conn.commit();
-                System.out.println("COMMIT done - Authorize complete");
+                System.out.println("COMMIT done - Authorize complete with AES encryption");
 
-                session.setAttribute("message",     "Authorized Successfully!");
+                session.setAttribute("message",     "User Authorized Successfully! Password encrypted with AES-256");
                 session.setAttribute("messageType", "success");
             }
 
             // ================= REJECT =================
             else if ("R".equals(status)) {
 
-                // STEP 1: Update USERREGISTER — revert STATUS back to 'A' (was authorized before edit)
-                // so the user is NOT locked out after rejection; their previous state is restored
+                // STEP 1: Update USERREGISTER — STATUS='R', record authorizer
+                // Note: No password update on rejection, just status
                 System.out.println("STEP 1: Updating USERREGISTER for REJECT...");
                 try (PreparedStatement ps = conn.prepareStatement(
                         "UPDATE ACL.USERREGISTER " +
                         "SET STATUS = 'R', AUTHORIZED_BY = ? " +
-                        "WHERE USER_ID = ?")) {
+                        "WHERE USER_ID = ? AND BRANCH_CODE = ?")) {
                     ps.setString(1, authorizedBy);
                     ps.setString(2, userId);
+                    ps.setString(3, branchCode);
                     int rows = ps.executeUpdate();
                     System.out.println("STEP 1 done: rows updated in USERREGISTER = " + rows);
                 }
@@ -133,7 +159,7 @@ public class UserAuthorizationServlet extends HttpServlet {
                 conn.commit();
                 System.out.println("COMMIT done - Reject complete");
 
-                session.setAttribute("message",     "Rejected Successfully!");
+                session.setAttribute("message",     "User Rejected Successfully!");
                 session.setAttribute("messageType", "success");
             }
 

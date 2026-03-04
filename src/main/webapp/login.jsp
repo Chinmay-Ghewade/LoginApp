@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*, db.DBConnection" %> 
+<%@ page import="java.sql.*, db.DBConnection, db.AESEncryption" %> 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <%
@@ -21,63 +21,81 @@
         try {
             conn = DBConnection.getConnection();
             
-            // First, verify the credentials and check current login status
-            String sql = "SELECT USER_ID, CURRENTLOGIN_STATUS FROM ACL.USERREGISTER WHERE USER_ID=? AND acl.toolkit.decrypt(PASSWD)=? AND BRANCH_CODE=?";
+            // First, retrieve the encrypted password from database
+            String sql = "SELECT USER_ID, PASSWD, CURRENTLOGIN_STATUS FROM ACL.USERREGISTER WHERE USER_ID=? AND BRANCH_CODE=?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, userId);
-            pstmt.setString(2, password);
-            pstmt.setString(3, branchCode);
+            pstmt.setString(2, branchCode);
             rs = pstmt.executeQuery();
 
             if (rs.next()) {
+                String encryptedPassword = rs.getString("PASSWD");
                 String currentLoginStatus = rs.getString("CURRENTLOGIN_STATUS");
                 
-                // Check if user is already logged in
-                if ("L".equals(currentLoginStatus)) {
-                    errorMessage = "User is already logged in from another machine/session. Please logout from the other session first or contact administrator.";
-                } else {
-                    // User credentials are valid and not logged in elsewhere, proceed with login
-                    session.setAttribute("userId", userId);
-                    session.setAttribute("branchCode", branchCode);
+                try {
+                    // Decrypt the password from database and compare with user input
+                    String decryptedPassword = AESEncryption.decrypt(encryptedPassword);
                     
-                    // Insert login history with LOGIN_TIME
-                    PreparedStatement historyStmt = null;
-                    try {
-                        String historySql = "INSERT INTO ACL.USERREGISTERLOGINHISTORY (USER_ID, BRANCH_CODE, LOGIN_TIME) VALUES (?, ?, SYSDATE)";
-                        historyStmt = conn.prepareStatement(historySql);
-                        historyStmt.setString(1, userId);
-                        historyStmt.setString(2, branchCode);
-                        historyStmt.executeUpdate();
-                    } catch (Exception historyEx) {
-                        // Log the error but don't prevent login
-                        System.err.println("Error inserting login history: " + historyEx.getMessage());
-                    } finally {
-                        try { if (historyStmt != null) historyStmt.close(); } catch (Exception ignored) {}
+                    if (decryptedPassword.equals(password)) {
+                        // Password is correct
+                        
+                        // Check if user is already logged in
+                        if ("L".equals(currentLoginStatus)) {
+                            errorMessage = "User is already logged in from another machine/session. Please logout from the other session first or contact administrator.";
+                        } else {
+                            // User credentials are valid and not logged in elsewhere, proceed with login
+                            session.setAttribute("userId", userId);
+                            session.setAttribute("branchCode", branchCode);
+                            
+                            // Insert login history with LOGIN_TIME
+                            PreparedStatement historyStmt = null;
+                            try {
+                                String historySql = "INSERT INTO ACL.USERREGISTERLOGINHISTORY (USER_ID, BRANCH_CODE, LOGIN_TIME) VALUES (?, ?, SYSDATE)";
+                                historyStmt = conn.prepareStatement(historySql);
+                                historyStmt.setString(1, userId);
+                                historyStmt.setString(2, branchCode);
+                                historyStmt.executeUpdate();
+                            } catch (Exception historyEx) {
+                                // Log the error but don't prevent login
+                                System.err.println("Error inserting login history: " + historyEx.getMessage());
+                            } finally {
+                                try { if (historyStmt != null) historyStmt.close(); } catch (Exception ignored) {}
+                            }
+                            
+                            // Update CURRENTLOGIN_STATUS to 'L' in USERREGISTER table
+                            PreparedStatement statusStmt = null;
+                            try {
+                                String statusSql = "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'L' WHERE USER_ID = ? AND BRANCH_CODE = ?";
+                                statusStmt = conn.prepareStatement(statusSql);
+                                statusStmt.setString(1, userId);
+                                statusStmt.setString(2, branchCode);
+                                statusStmt.executeUpdate();
+                            } catch (Exception statusEx) {
+                                // Log the error but don't prevent login
+                                System.err.println("Error updating login status: " + statusEx.getMessage());
+                            } finally {
+                                try { if (statusStmt != null) statusStmt.close(); } catch (Exception ignored) {}
+                            }
+                            
+                            response.sendRedirect("main.jsp");
+                            showForm = false;
+                        }
+                    } else {
+                        // Password doesn't match
+                        errorMessage = "Invalid username or password";
                     }
-                    
-                    // Update CURRENTLOGIN_STATUS to 'L' in USERREGISTER table
-                    PreparedStatement statusStmt = null;
-                    try {
-                        String statusSql = "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'L' WHERE USER_ID = ? AND BRANCH_CODE = ?";
-                        statusStmt = conn.prepareStatement(statusSql);
-                        statusStmt.setString(1, userId);
-                        statusStmt.setString(2, branchCode);
-                        statusStmt.executeUpdate();
-                    } catch (Exception statusEx) {
-                        // Log the error but don't prevent login
-                        System.err.println("Error updating login status: " + statusEx.getMessage());
-                    } finally {
-                        try { if (statusStmt != null) statusStmt.close(); } catch (Exception ignored) {}
-                    }
-                    
-                    response.sendRedirect("main.jsp");
-                    showForm = false;
+                } catch (Exception decryptEx) {
+                    // Error decrypting password
+                    System.err.println("Error decrypting password: " + decryptEx.getMessage());
+                    errorMessage = "Invalid username or password";
                 }
             } else {
                 errorMessage = "Invalid username or password";
             }
         } catch (Exception e) {
             errorMessage = "Database Error: " + e.getMessage();
+            System.err.println("Login Error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             try { if (rs != null) rs.close(); } catch (Exception ignored) {}
             try { if (pstmt != null) pstmt.close(); } catch (Exception ignored) {}

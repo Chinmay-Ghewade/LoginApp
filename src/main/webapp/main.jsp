@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*, db.DBConnection" %>
+<%@ page import="java.sql.*, db.DBConnection, db.AESEncryption" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <%
@@ -16,7 +16,7 @@
         return;
     }
     
-    // Handle AJAX password change request
+    // Handle AJAX password change request with AES encryption
     if ("changePassword".equals(request.getParameter("action"))) {
         String newPassword = request.getParameter("newPassword");
         
@@ -25,12 +25,15 @@
             PreparedStatement pstmt = null;
             
             try {
+                // Encrypt the password using AES
+                String encryptedPassword = AESEncryption.encrypt(newPassword);
+                
                 conn = DBConnection.getConnection();
                 
-                // Update password and set CREATED_BY to USER_ID (so they match and popup won't show again)
-                String sql = "UPDATE ACL.USERREGISTER SET PASSWD = acl.toolkit.encrypt(?), CREATED_BY = USER_ID WHERE USER_ID = ? AND BRANCH_CODE = ?";
+                // Update password with AES encrypted password and set CREATED_BY = USER_ID
+                String sql = "UPDATE ACL.USERREGISTER SET PASSWD = ?, CREATED_BY = USER_ID WHERE USER_ID = ? AND BRANCH_CODE = ?";
                 pstmt = conn.prepareStatement(sql);
-                pstmt.setString(1, newPassword);
+                pstmt.setString(1, encryptedPassword);
                 pstmt.setString(2, userId);
                 pstmt.setString(3, branchCode);
                 
@@ -276,13 +279,13 @@
             color: #d32f2f;
         }
         
-        /* Success Popup - clean centered card */
+        /* Success Popup */
         .success-popup-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.45);
+            background: rgba(0, 0, 0, 0.45);
             z-index: 99999;
             align-items: center;
             justify-content: center;
@@ -291,9 +294,9 @@
             display: flex;
         }
         .success-popup-card {
-            background: white;
+            background: #fff;
             border-radius: 16px;
-            padding: 50px 40px 40px;
+            padding: 50px 50px 40px;
             text-align: center;
             width: 380px;
             max-width: 90%;
@@ -305,9 +308,9 @@
             to   { transform: scale(1);    opacity: 1; }
         }
         .success-popup-icon {
-            font-size: 52px;
+            font-size: 56px;
             color: #22c55e;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             line-height: 1;
         }
         .success-popup-title {
@@ -389,77 +392,15 @@
             text-align: center;
         }
 
-        /* Success Popup */
-        .success-popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: 99999;
-            align-items: center;
-            justify-content: center;
-        }
-        .success-popup-overlay.active {
-            display: flex;
-        }
-        .success-popup-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 50px 50px 40px;
-            text-align: center;
-            width: 380px;
-            max-width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            animation: popIn 0.3s ease;
-        }
-        @keyframes popIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to   { transform: scale(1);    opacity: 1; }
-        }
-        .success-popup-icon {
-            font-size: 56px;
-            color: #22c55e;
-            margin-bottom: 12px;
-            line-height: 1;
-        }
-        .success-popup-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 28px;
-        }
-        .btn-ok {
-            padding: 13px 60px;
-            background: #22c55e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn-ok:hover {
-            background: #16a34a;
-        }
-        .countdown-text {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 14px;
-        }
-
-        /* Remove default password reveal eye (Edge / IE) */
+        /* Remove default password reveal eye */
         input[type="password"]::-ms-reveal {
             display: none;
         }
 
-        /* Remove clear (X) icon if visible */
         input[type="password"]::-ms-clear {
             display: none;
         }
 
-        /* Extra safety for Chromium browsers */
         input[type="password"]::-webkit-credentials-auto-fill-button,
         input[type="password"]::-webkit-password-toggle-button {
             display: none !important;
@@ -668,7 +609,7 @@
     </div>
 </div>
 
-<!-- Success Popup - clean simple card (shown after password change) -->
+<!-- Success Popup -->
 <div class="success-popup-overlay" id="successPopupOverlay">
     <div class="success-popup-card">
         <div class="success-popup-icon">✔</div>
@@ -690,7 +631,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 <% } %>
 
-// *** FIX: Logout after password change so DB status resets to 'U' ***
+// *** Logout after password change so DB status resets to 'U' ***
 function doLogout() {
     sessionStorage.clear();
     window.location.href = "logout.jsp";
@@ -716,12 +657,6 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmPasswordInput.addEventListener('input', function() {
             eyeIconConfirm.style.display = this.value.length > 0 ? 'block' : 'none';
         });
-        // Hide rules and strength bar when user moves to confirm password field
-        confirmPasswordInput.addEventListener('focus', function() {
-            document.getElementById('passwordRules').classList.remove('visible');
-            document.querySelector('.strength-bar-wrapper').style.display = 'none';
-        });
-        // Show rules again if user goes back to new password field
     }
     
     if (newPasswordInput) {
@@ -853,7 +788,7 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
     submitBtn.disabled = true;
     submitBtn.textContent = 'Changing Password...';
     
-    // Send AJAX request
+    // Send AJAX request to change password (AES encrypted)
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'main.jsp?action=changePassword', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -864,12 +799,9 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
                 const response = JSON.parse(xhr.responseText);
                 
                 if (response.success) {
-                    // Show success message and start countdown to auto-logout
-                    // Hide password change modal, show clean success popup
+                    // Show success message
                     document.getElementById('modalOverlay').classList.remove('active');
                     document.getElementById('successPopupOverlay').classList.add('active');
-
-                    // User must click OK to logout
 
                 } else {
                     errorAlert.textContent = '❌ ' + response.message;
@@ -908,7 +840,6 @@ function checkSession() {
         .then(response => response.json())
         .then(data => {
             if (!data.sessionValid) {
-                // Session expired - redirect entire page to login
                 sessionStorage.clear();
                 window.top.location.href = 'login.jsp';
             }
@@ -921,14 +852,12 @@ function checkSession() {
 // Check session every 30 seconds
 setInterval(checkSession, 30000);
 
-// Check session on page visibility change (when user returns to tab)
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
         checkSession();
     }
 });
 
-// Check session on any user interaction
 ['click', 'keydown', 'mousemove'].forEach(event => {
     document.addEventListener(event, function() {
         if (!window.lastSessionCheck || Date.now() - window.lastSessionCheck > 10000) {
@@ -948,13 +877,11 @@ function openUserProfile() {
 }
 
 // ========== PAGE STATE PERSISTENCE ==========
-// This stack tracks the navigation history automatically
 const navigationStack = [];
 
 function loadPage(page, title, anchorEl) {
     let breadcrumbPath = buildBreadcrumbPath(page);
     
-    // Add to navigation stack
     addToNavigationStack(page, breadcrumbPath);
     
     sessionStorage.setItem('currentPage', page);
@@ -972,7 +899,6 @@ function loadPage(page, title, anchorEl) {
     }
 }
 
-//Load navigation stack from session
 function loadNavigationStack() {
     const stored = sessionStorage.getItem('navigationStack');
     if (stored) {
@@ -984,7 +910,6 @@ function loadNavigationStack() {
 function addToNavigationStack(page, breadcrumbPath) {
     const entry = { page, breadcrumbPath };
     
-    // Remove any entries after current position (when navigating back then forward)
     const currentIndex = navigationStack.findIndex(e => e.breadcrumbPath === breadcrumbPath);
     if (currentIndex !== -1) {
         navigationStack.splice(currentIndex + 1);
@@ -992,12 +917,10 @@ function addToNavigationStack(page, breadcrumbPath) {
         navigationStack.push(entry);
     }
     
-    // Persist to sessionStorage
     sessionStorage.setItem('navigationStack', JSON.stringify(navigationStack));
 }
 
 function navigateToBreadcrumb(page, title) {
-    // Auto-build breadcrumb
     let path = buildBreadcrumbPath(page);
     
     sessionStorage.setItem('currentPage', page);
@@ -1009,15 +932,12 @@ function navigateToBreadcrumb(page, title) {
 
 // ========== BREADCRUMB FUNCTIONS ==========
 
-// Simple debounce to coalesce rapid calls (100ms)
 let _breadcrumbTimeout = null;
 let _currentBreadcrumbPath = null;
 
 function updateBreadcrumb(path) {
-    // If path is same as current, skip (fast path)
     if (path === _currentBreadcrumbPath) return;
 
-    // Debounce multiple rapid calls
     if (_breadcrumbTimeout) {
         clearTimeout(_breadcrumbTimeout);
     }
@@ -1053,7 +973,6 @@ function _doUpdateBreadcrumb(path) {
     sessionStorage.setItem('currentBreadcrumb', path);
 }
 
-// Small helper to avoid XSS when injecting text
 function escapeHtml(text) {
     return String(text)
         .replace(/&/g, '&amp;')
@@ -1099,18 +1018,15 @@ function updateWorkingDateAndBankName() {
                 bankNameElement.innerText = "Error Loading Bank Name";
                 branchNameElement.innerText = "Error";
             } else {
-                // Update Working Date
                 dateElement.innerText = "Working Date: " + data.workingDate;
                 sessionStorage.setItem('workingDate', data.workingDate);
                 
-                // Update Bank Name
                 if (data.bankName) {
                     bankNameElement.innerText = data.bankName.toUpperCase();
                     sessionStorage.setItem('bankName', data.bankName);
                     sessionStorage.setItem('bankCode', data.bankCode);
                 }
                 
-                // Update Branch Name (without "BRANCH:" prefix)
                 if (data.branchName) {
                     branchNameElement.innerText = data.branchName.toUpperCase();
                     sessionStorage.setItem('branchName', data.branchName);
@@ -1130,7 +1046,7 @@ function updateWorkingDateAndBankName() {
 
 window.onload = function () {
     checkSession();
-    loadNavigationStack(); // Load navigation history
+    loadNavigationStack();
     
     const savedPage = sessionStorage.getItem('currentPage');
     const savedBreadcrumb = sessionStorage.getItem('currentBreadcrumb');
@@ -1198,10 +1114,8 @@ function navigateToBreadcrumbByIndex(index) {
     const currentParts = currentPath.split(' > ');
     const targetPath = currentParts.slice(0, index + 1).join(' > ');
     
-    // Search navigation stack for matching breadcrumb
     const navStack = JSON.parse(sessionStorage.getItem('navigationStack') || '[]');
     
-    // Find the most recent entry with this breadcrumb path
     for (let i = navStack.length - 1; i >= 0; i--) {
         if (navStack[i].breadcrumbPath === targetPath) {
             const targetPage = navStack[i].page;
@@ -1216,7 +1130,6 @@ function navigateToBreadcrumbByIndex(index) {
 }
 
 window.updateParentBreadcrumb = function(path, currentPage) {
-    // If currentPage is provided, add it to navigation stack
     if (currentPage) {
         addToNavigationStack(currentPage, path);
     }

@@ -22,8 +22,8 @@
             pstmt.close();
             
             // 2. Update LOGOUT_TIME in USERREGISTERLOGINHISTORY table for the latest login record
-            String updateLogoutTimeSql = "UPDATE ACL.USERREGISTERLOGINHISTORY SET LOUGOUT_TIME = SYSDATE " +
-                                         "WHERE USER_ID = ? AND BRANCH_CODE = ? AND LOUGOUT_TIME IS NULL " +
+            String updateLogoutTimeSql = "UPDATE ACL.USERREGISTERLOGINHISTORY SET LOGOUT_TIME = SYSDATE " +
+                                         "WHERE USER_ID = ? AND BRANCH_CODE = ? AND LOGOUT_TIME IS NULL " +
                                          "AND LOGIN_TIME = (SELECT MAX(LOGIN_TIME) FROM ACL.USERREGISTERLOGINHISTORY " +
                                          "WHERE USER_ID = ? AND BRANCH_CODE = ?)";
             pstmt = conn.prepareStatement(updateLogoutTimeSql);
