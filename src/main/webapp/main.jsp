@@ -556,6 +556,14 @@
 	    </a>
 	</li>
 	
+	<!-- Shares -->
+	<li data-page="Utility/utility.jsp">
+	    <a href="#" onclick="loadPage('Shares/shares.jsp', 'Shares', this); return false;">
+	        <img src="images/right-arrow.png" width="18" height="18" alt="">
+	        <span>Shares</span>
+	    </a>
+	</li>
+	
 </ul>
 
     <div class="logout">

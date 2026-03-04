@@ -125,6 +125,7 @@ java.util.function.Function<String, String> esc = s ->
 <head>
     <meta charset="UTF-8">
     <title>User Details - <%=esc.apply(dbUserId)%></title>
+    <link rel="stylesheet" href="../css/totalCustomers.css">
     <style>
         :root { --bg: #E6E6FA; --navy: #2b0d73; --border: #B8B8E6; --ro-bg: #E0E0E0; }
         * { box-sizing: border-box; margin: 0; padding: 0; }

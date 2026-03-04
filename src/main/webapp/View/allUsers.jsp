@@ -76,60 +76,57 @@ try {
 <head>
     <meta charset="UTF-8">
     <title>All Users for Branch: <%=selectedBranch%></title>
-    <link rel="stylesheet" href="../css/totalCustomers.css">
     <style>
     body { font-family: Arial, sans-serif; background: #E6E6FA; margin: 0; padding: 20px; }
     html, body { overflow-x: hidden; }
     .container { max-width: 1400px; margin: auto; }
-    h2 { text-align: center; color: #2b0d73; font-weight: 700; margin-bottom: 20px; font-size: 24px; }
+    h2 { text-align: center; color: #2b0d73; font-weight: 700; margin-bottom: 18px; font-size: 24px; }
 
     /* ── Filter Card ── */
     .filter-card {
-        background: #fff; border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+        background: #fff; border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.10);
         border: 1px solid #B8B8E6;
-        padding: 18px 16px; margin-bottom: 20px;
+        padding: 16px 20px; margin-bottom: 18px;
     }
     .filter-card form {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        gap: 20px; align-items: start; width: 100%;
+        gap: 16px; align-items: end; width: 100%;
     }
-
-    /* Branch + Description groups */
-    .filter-group { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
-    .filter-group label { font-size: 14px; font-weight: 600; color: #2b0d73; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 13px; font-weight: 600; color: #2b0d73; }
     .filter-group select,
     .filter-group input {
-        width: 100%; height: 40px; padding: 0 12px; max-width: 100%;
-        border: 1px solid #B8B8E6; border-radius: 5px;
-        font-size: 14px; font-family: Arial, sans-serif;
+        width: 100%; height: 34px; padding: 0 10px;
+        border: 1px solid #B8B8E6; border-radius: 4px;
+        font-size: 13px; font-family: Arial, sans-serif;
         color: #444; background: #FFFFFF; box-sizing: border-box;
     }
     .filter-group select { cursor: pointer; }
-    .filter-group input[readonly] { background: #f5f5f5; color: #555; cursor: default; }
+    .filter-group input[readonly] { background: #f5f5f5; color: #555; }
 
     /* Status radio group */
-    .status-group { display: flex; flex-direction: column; gap: 7px; min-width: 0; width: 100%; }
-    .status-group .status-label { font-size: 14px; font-weight: 600; color: #2b0d73; }
+    .status-group { display: flex; flex-direction: column; gap: 5px; }
+    .status-group .status-label { font-size: 13px; font-weight: 600; color: #2b0d73; }
     .radio-row {
         display: flex; align-items: center;
-        height: 40px; width: 100%; gap: 24px;
+        height: 34px; width: 100%; gap: 24px;
     }
     .radio-row label {
         display: flex; align-items: center; gap: 7px;
-        font-size: 14px; font-weight: 600; color: #2b0d73;
+        font-size: 13px; font-weight: 600; color: #2b0d73;
         cursor: pointer; user-select: none;
     }
     .radio-row input[type="radio"] {
-        accent-color: #2b0d73; width: 16px; height: 16px; cursor: pointer;
+        accent-color: #2b0d73; width: 15px; height: 15px; cursor: pointer;
     }
 
     /* ── Search Box ── */
     .search-box { width: 650px; margin: 0 auto 18px auto; }
     .search-box input {
-        width: 100%; padding: 9px 14px; border-radius: 5px;
-        border: 1px solid #B8B8E6; font-size: 14px;
+        width: 100%; padding: 8px 12px; border-radius: 4px;
+        border: 1px solid #B8B8E6; font-size: 13px;
         background: #FFFFFF; box-sizing: border-box; color: #444;
     }
 
@@ -140,21 +137,21 @@ try {
         overflow: auto; border: 1px solid #B8B8E6;
     }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead tr { background: #303F9F; }
+    thead tr { background: #2b0d73; }
     th {
-        color: #FFFFFF; padding: 8px 10px; text-align: center;
-        font-weight: 600; font-size: 13px;
+        color: #FFFFFF; padding: 6px 8px; text-align: center;
+        font-weight: 600; font-size: 12.5px;
         border-right: 1px solid rgba(255,255,255,0.2);
     }
     th:last-child { border-right: none; }
     tbody tr:nth-child(odd)  { background: #F7F7F7; }
     tbody tr:nth-child(even) { background: #FFFFFF; }
-    td { padding: 6px 10px; text-align: left; border-right: 1px solid #e3e3e3; }
+    td { padding: 5px 8px; text-align: left; border-right: 1px solid #e3e3e3; }
     td:last-child { border-right: none; }
 
     .view-btn {
         background: #2b0d73; color: #FFFFFF; border: none;
-        padding: 4px 12px; border-radius: 3px; font-size: 12px;
+        padding: 3px 10px; border-radius: 3px; font-size: 12px;
         cursor: pointer; font-weight: 400;
         text-decoration: none; display: inline-block;
     }
@@ -172,7 +169,7 @@ try {
         font-size: 14px; font-weight: 700; font-family: Arial, sans-serif;
         cursor: pointer; display: flex; align-items: center; gap: 8px;
         transition: background 0.18s, transform 0.12s, box-shadow 0.12s;
-        box-shadow: 0 3px 10px rgba(43,13,115,0.22);
+        box-shadow: 0 3px 10px rgba(43,13,115,0.22); letter-spacing: 0.01em;
     }
     .btn-prev:hover:not(:disabled), .btn-next:hover:not(:disabled) {
         background: #3d1f99; transform: translateY(-1px);
@@ -192,7 +189,6 @@ try {
     <!-- Filter Card -->
     <div class="filter-card">
         <form method="get" action="" id="filterForm">
-            <!-- Branch dropdown -->
             <div class="filter-group">
                 <label for="branchSelect">Branch</label>
                 <select name="branch" id="branchSelect" onchange="updateDescription(); submitForm();">
@@ -203,27 +199,23 @@ try {
                 </select>
             </div>
 
-            <!-- Description (read-only) -->
             <div class="filter-group">
                 <label>Description</label>
                 <input type="text" id="branchDesc" value="<%=branchDescription%>" readonly>
             </div>
 
-            <!-- Status radio buttons — auto-submit on change -->
             <div class="status-group">
                 <span class="status-label">Status</span>
                 <div class="radio-row">
                     <label>
                         <input type="radio" name="status" value="all"
                                <%="all".equals(selectedStatus) ? "checked" : ""%>
-                               onchange="submitForm()">
-                        All
+                               onchange="submitForm()"> All
                     </label>
                     <label>
                         <input type="radio" name="status" value="live"
                                <%="live".equals(selectedStatus) ? "checked" : ""%>
-                               onchange="submitForm()">
-                        Live
+                               onchange="submitForm()"> Live
                     </label>
                 </div>
             </div>
@@ -292,10 +284,7 @@ try {
     const allRows = Array.from(document.querySelectorAll('#tableBody tr[data-search]'));
     initPagination();
 
-    // Auto-submit form (used by radio buttons and branch dropdown)
-    function submitForm() {
-        document.getElementById('filterForm').submit();
-    }
+    function submitForm() { document.getElementById('filterForm').submit(); }
 
     function filterTable() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -306,22 +295,16 @@ try {
         renderPage();
     }
 
-    function initPagination() {
-        filteredRows = allRows.slice();
-        renderPage();
-    }
+    function initPagination() { filteredRows = allRows.slice(); renderPage(); }
 
     function renderPage() {
         const totalPages = Math.max(1, Math.ceil(filteredRows.length / ROWS_PER_PAGE));
         if (currentPage > totalPages) currentPage = totalPages;
         const start = (currentPage - 1) * ROWS_PER_PAGE;
         const end   = start + ROWS_PER_PAGE;
-
         allRows.forEach(function(r) { r.style.display = 'none'; });
-
         const dynRow = document.getElementById('dynamicNoRecord');
         if (dynRow) dynRow.remove();
-
         if (totalFromServer === 0) {
             const tbody = document.getElementById('tableBody');
             const tr = document.createElement('tr');
@@ -342,7 +325,6 @@ try {
                 }
             });
         }
-
         document.getElementById('pageInfo').textContent = 'Page ' + currentPage + ' of ' + totalPages;
         document.getElementById('btnPrev').disabled = (currentPage <= 1);
         document.getElementById('btnNext').disabled = (currentPage >= totalPages);

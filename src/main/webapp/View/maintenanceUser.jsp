@@ -245,6 +245,7 @@ java.util.function.Function<String, String> esc = s ->
 <head>
     <meta charset="UTF-8">
     <title>Edit User - <%=esc.apply(dbUserId)%></title>
+    <link rel="stylesheet" href="../css/totalCustomers.css">
     <style>
         :root { --bg: #E6E6FA; --navy: #2b0d73; --border: #B8B8E6; --ro-bg: #E0E0E0; --edit-bg: #fff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -353,10 +354,10 @@ java.util.function.Function<String, String> esc = s ->
         /* ── Action buttons ── */
         .btn-row { display: flex; justify-content: center; gap: 14px; margin-top: 20px; }
         .btn-save {
-            padding: 10px 34px; background: #1a6b30; color: white;
+            padding: 10px 34px; background: #3cb554; color: white;
             border: none; border-radius: 5px; font-size: 15px; font-weight: bold; cursor: pointer;
         }
-        .btn-save:hover { background: #145526; }
+        .btn-save:hover { background: #3cb554; }
         .btn-cancel {
             padding: 10px 34px; background: #888; color: white;
             border: none; border-radius: 5px; font-size: 15px; font-weight: bold; cursor: pointer;
@@ -393,10 +394,10 @@ java.util.function.Function<String, String> esc = s ->
             padding: 13px 60px; border: none; border-radius: 50px;
             font-size: 16px; font-weight: 700; cursor: pointer;
             font-family: Arial, sans-serif; letter-spacing: 0.5px;
-            background: #28a745; color: #fff;
+            background: #3cb554; color: #fff;
             transition: background 0.2s;
         }
-        .modal-btn-ok:hover { background: #218838; }
+        .modal-btn-ok:hover { background: #3cb554 ; }
         .modal-btn-err {
             padding: 13px 60px; border: none; border-radius: 50px;
             font-size: 16px; font-weight: 700; cursor: pointer;

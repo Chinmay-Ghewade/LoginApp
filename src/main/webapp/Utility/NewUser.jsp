@@ -172,7 +172,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
             --navy-blue:     #2b0d73;
             --border-color:  #B8B8E6;
             --readonly-bg:   #E0E0E0;
-            --success-green: #28a745;
+            --success-green: #3cb554;
             --error-red:     #dc3545;
             --info-blue:     #2196F3;
         }
@@ -588,9 +588,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }
 
         .msg-icon        { font-size: 45px; color: var(--success-green); margin-bottom: 15px; display: block; }
-        .msg-title       { font-size: 20px; font-weight: bold; color: #2c0b5d; margin-bottom: 20px; }
+        .msg-title       { font-size: 20px; font-weight: bold; color: #3cb554 ; margin-bottom: 20px; }
         .msg-confirm-btn {
-            background-color: #28a745;
+            background-color: #3cb554;
             color: white;
             padding: 12px 40px;
             border: none;
@@ -771,7 +771,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
             <!-- ── Save Button ── -->
             <div style="text-align: center; margin-top: 20px;">
                 <input type="submit" value="Save" id="submitBtn"
-                       style="padding: 10px 55px; background: #2b0d73; color: white;
+                       style="padding: 10px 55px; background: #3cb554; color: white;
                               border: none; border-radius: 5px; font-size: 15px; cursor: pointer;">
             </div>
 
