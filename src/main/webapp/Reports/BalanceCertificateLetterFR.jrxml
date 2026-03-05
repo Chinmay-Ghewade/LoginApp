@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="BalanceCertificateLetterFR" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5eb9afff-4bf6-4394-908c-20e17b39370f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="account_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Rs_in_word" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="account_balance" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="customer_address1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="customer_address2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="customer_address3" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="customer_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select account_code,name from account.account  where account_code= $P{account_code}]]>
+	</queryString>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<detail>
+		<band height="359" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="21" uuid="d70764b8-dacc-4edc-b93d-4e2a6e6f4fd6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BHEDASGAON NAGARI SAHAKARI PATH SANSTHA.LTD
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="43" width="555" height="20" uuid="188bb8dd-2fb5-4171-9faf-800d006fb337"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Balance Certificate
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="69" width="31" height="17" uuid="ee5bc13c-45f9-43da-9672-c172eafbf805"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Date :]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="31" y="69" width="524" height="17" uuid="97a62177-12da-4acd-8352-cef17e3997ca"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="89" width="555" height="17" uuid="3a4a2fb4-406f-46d9-b28b-ad7aad4aff0b"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[To,]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="108" width="555" height="15" uuid="4d9f59bf-c8da-44be-9418-be218d6738df"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="208" width="555" height="17" uuid="a9de8ce9-5400-4798-a6c7-545bbfa2d8fe"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Dear Sir / Madam,  ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="1" y="228" width="207" height="17" uuid="db8f175a-db97-42aa-ba06-50320cb513c9"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["This is to inform you that your account No."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="208" y="228" width="98" height="17" uuid="627c5408-a8f2-4f91-9fad-94814786b2af"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1" y="248" width="190" height="16" uuid="1c7f5a02-475a-45e9-88cf-7135a01d5181"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[with this branch carries a balance Rs.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="248" width="37" height="16" uuid="bdd8a704-02e7-4d54-8763-519c349b52d1"/>
+				<text><![CDATA[as on]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="307" y="248" width="88" height="16" uuid="7867f0a0-e68e-4151-8e4a-b707a7288aa4"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="267" width="555" height="15" uuid="1bc9c50c-d8f5-4863-8f08-55e6244291bc"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Kindly get in touch with us if not confirmed by you.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="284" width="92" height="14" uuid="5d0b343a-6999-442a-a7b3-f4c238da2c50"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Balance Rupees ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="93" y="284" width="360" height="14" uuid="eaec8e06-c023-4a0b-92fd-2beaf94cafa0"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Rs_in_word}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="304" width="93" height="15" uuid="3eb341be-73da-43a0-bdaa-f6515631e41f"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Yours Faithfully,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="321" width="165" height="15" uuid="6206cb5f-fe4f-424e-8c1d-42d1b00d047d"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[(MANAGER / ACCOUNTANT)
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="339" width="50" height="15" uuid="6ceb710f-a4b8-46a2-b8f4-69a61622ffbe"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[User Id :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="50" y="339" width="60" height="15" uuid="099145dc-be00-4633-b507-0871fe05b87a"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="191" y="248" width="60" height="16" uuid="f90f93a1-9b50-4cf5-9f57-bcdfb16a2bbb"/>
+				<textElement textAlignment="Right">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{account_balance}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="21" width="555" height="20" uuid="f4af9f93-bfbe-4dda-b1e5-b3909f81bce4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{branch_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="126" width="554" height="18" uuid="b4e9b666-c196-4486-8a08-4130329621e0"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{customer_address1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="148" width="555" height="17" uuid="77353540-63ce-4d61-839b-4b8e6bbba4c3"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{customer_address2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="170" width="555" height="17" uuid="4e53f37a-b036-45aa-8562-0e232e5446d6"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{customer_address3}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

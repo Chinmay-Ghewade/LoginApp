@@ -1,10 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page trimDirectiveWhitespaces="true"%>
+<%@ page buffer="none" %>
 
 <%@ page import="java.sql.*"%>
 <%@ page import="java.util.*"%>
 <%@ page import="java.io.*"%>
 <%@ page import="java.text.SimpleDateFormat"%>
+<%@ page import="java.text.DecimalFormat"%>
 
 <%@ page import="net.sf.jasperreports.engine.*"%>
 <%@ page import="net.sf.jasperreports.engine.export.*"%>
@@ -13,20 +15,69 @@
 
 <%@ page import="db.DBConnection"%>
 
+<%!
+/* =====================================================
+   NUMBER TO WORDS
+===================================================== */
+
+public String convertToWords(long n){
+
+    String[] units = {"","One","Two","Three","Four","Five","Six","Seven",
+    "Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen",
+    "Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"};
+
+    String[] tens = {"","","Twenty","Thirty","Forty","Fifty",
+    "Sixty","Seventy","Eighty","Ninety"};
+
+    if(n < 20)
+        return units[(int)n];
+
+    if(n < 100)
+        return tens[(int)n/10] + " " + units[(int)n%10];
+
+    if(n < 1000)
+        return units[(int)n/100] + " Hundred " + convertToWords(n%100);
+
+    if(n < 100000)
+        return convertToWords(n/1000) + " Thousand " + convertToWords(n%1000);
+
+    if(n < 10000000)
+        return convertToWords(n/100000) + " Lakh " + convertToWords(n%100000);
+
+    return convertToWords(n/10000000) + " Crore " + convertToWords(n%10000000);
+}
+
+public String numberToWords(double amount){
+
+    if(amount == 0)
+        return "Zero Rupees Only";
+
+    long rupees = (long)Math.abs(amount);
+
+    return convertToWords(rupees) + " Rupees Only";
+}
+%>
+
 <%
+
 String action = request.getParameter("action");
 
-if ("download".equals(action)) {
+if("download".equals(action)){
 
     String reporttype = request.getParameter("reporttype");
     String branchCode = request.getParameter("branch_code");
-    String asOnDate   = request.getParameter("as_on_date");
+    String asOnDate = request.getParameter("as_on_date");
 
+    /* Default Date = 29-Mar-2025 */
+    if(asOnDate == null || asOnDate.trim().equals("")){
+        asOnDate = "2025-03-29";
+    }
     Connection conn = null;
 
-    try {
+    try{
 
         response.reset();
+
         response.setHeader("Cache-Control","no-store, no-cache");
         response.setHeader("Pragma","no-cache");
         response.setDateHeader("Expires",0);
@@ -57,26 +108,30 @@ if ("download".equals(action)) {
 
 
         /* ======================
-           CALCULATE TOTAL CREDIT/DEBIT
+           TOTAL CREDIT / DEBIT
         ====================== */
 
         double totalCredit = 0;
         double totalDebit  = 0;
 
         PreparedStatement psTotals = conn.prepareStatement(
+
         "SELECT " +
-        "SUM(CASE WHEN TRANSACTIONINDICATOR_CODE='TRCR' THEN AMOUNT ELSE 0 END) TOTALCREDIT, " +
+        "SUM(CASE WHEN TRANSACTIONINDICATOR_CODE='TRCR' THEN AMOUNT ELSE 0 END) TOTALCREDIT," +
         "SUM(CASE WHEN TRANSACTIONINDICATOR_CODE='TRDR' THEN AMOUNT ELSE 0 END) TOTALDEBIT " +
         "FROM TRANSACTION.TRANSACTION_HT_VIEW " +
         "WHERE BRANCH_CODE=? AND TXN_DATE=? " +
-        "AND TRANSACTIONINDICATOR_CODE IN ('TRCR','TRDR')");
+        "AND TRANSACTIONINDICATOR_CODE IN ('TRCR','TRDR')"
 
-        psTotals.setString(1, branchCode);
-        psTotals.setString(2, oracleDate);
+        );
+
+        psTotals.setString(1,branchCode);
+        psTotals.setString(2,oracleDate);
 
         ResultSet rsTotals = psTotals.executeQuery();
 
         if(rsTotals.next()){
+
             totalCredit = rsTotals.getDouble("TOTALCREDIT");
             totalDebit  = rsTotals.getDouble("TOTALDEBIT");
         }
@@ -86,14 +141,17 @@ if ("download".equals(action)) {
 
 
         /* ======================
-           GET OPENING BALANCE
+           OPENING BALANCE
         ====================== */
 
         double openingBalance = 0;
 
         PreparedStatement psOpen = conn.prepareStatement(
+
         "SELECT OPENINGBALANCE FROM BALANCE.BRANCHGLHISTORY " +
-        "WHERE BRANCH_CODE=? AND TXN_DATE=?");
+        "WHERE BRANCH_CODE=? AND TXN_DATE=?"
+
+        );
 
         psOpen.setString(1,branchCode);
         psOpen.setString(2,oracleDate);
@@ -101,6 +159,7 @@ if ("download".equals(action)) {
         ResultSet rsOpen = psOpen.executeQuery();
 
         if(rsOpen.next()){
+
             openingBalance = Math.abs(rsOpen.getDouble("OPENINGBALANCE"));
         }
 
@@ -117,6 +176,16 @@ if ("download".equals(action)) {
 
 
         /* ======================
+           BALANCE IN WORDS
+        ====================== */
+
+        String closingBalanceWords =
+        numberToWords(closingBalance);
+        DecimalFormat df = new DecimalFormat("#,##,##0");
+        String formattedBalance = df.format(closingBalance);
+
+
+        /* ======================
            LOAD JASPER
         ====================== */
 
@@ -126,6 +195,7 @@ if ("download".equals(action)) {
         File jasperFile = new File(jasperPath);
 
         if(!jasperFile.exists()){
+
             throw new RuntimeException(
             "Jasper file not found : " + jasperPath);
         }
@@ -143,10 +213,15 @@ if ("download".equals(action)) {
 
         parameters.put("branch_code",branchCode);
         parameters.put("as_on_date",oracleDate);
+
         parameters.put("TOTALCREDIT",totalCredit);
         parameters.put("TOTALDEBIT",totalDebit);
+
         parameters.put("OPENINGBALANCE",openingBalance);
         parameters.put("CLOSINGBALANCE",closingBalance);
+
+        parameters.put("CLOSING_BALANCE_WORDS",closingBalanceWords);
+        parameters.put("STR_BALANCE", formattedBalance);
 
         parameters.put("report_title",
         "CASH RECEIPT AND PAYMENT");
@@ -154,8 +229,7 @@ if ("download".equals(action)) {
         parameters.put("SUBREPORT_DIR",
         application.getRealPath("/Reports/"));
 
-        parameters.put("user_id",
-        session.getAttribute("user_id"));
+        parameters.put("user_id", "admin");
 
         parameters.put("IMAGE_PATH",
         application.getRealPath("/images/UPSB MONO.png"));
@@ -178,24 +252,24 @@ if ("download".equals(action)) {
 
         if("pdf".equalsIgnoreCase(reporttype)){
 
+            response.reset();
             response.setContentType("application/pdf");
-
             response.setHeader(
-            "Content-Disposition",
-            "inline; filename=CashReceiptPayment.pdf");
+                "Content-Disposition",
+                "inline; filename=\"CashReceiptPayment.pdf\""
+            );
 
-            ServletOutputStream outStream =
-            response.getOutputStream();
+            ServletOutputStream outStream = response.getOutputStream();
 
-            JasperExportManager
-            .exportReportToPdfStream(
-            jasperPrint,outStream);
+            JasperExportManager.exportReportToPdfStream(
+                jasperPrint,outStream
+            );
 
             outStream.flush();
             outStream.close();
-            return;
-        }
 
+            return;   // VERY IMPORTANT
+        }
 
         /* ======================
            EXPORT EXCEL
@@ -203,36 +277,33 @@ if ("download".equals(action)) {
 
         else if("xls".equalsIgnoreCase(reporttype)){
 
-            response.setContentType(
-            "application/vnd.ms-excel");
+            response.reset();
+            response.setContentType("application/vnd.ms-excel");
 
             response.setHeader(
-            "Content-Disposition",
-            "attachment; filename=CashReceiptPayment.xls");
+                "Content-Disposition",
+                "attachment; filename=\"CashReceiptPayment.xls\""
+            );
 
-            ServletOutputStream outStream =
-            response.getOutputStream();
+            ServletOutputStream outStream = response.getOutputStream();
 
-            JRXlsExporter exporter =
-            new JRXlsExporter();
+            JRXlsExporter exporter = new JRXlsExporter();
 
-            exporter.setExporterInput(
-            new SimpleExporterInput(jasperPrint));
+            exporter.setParameter(
+                JRXlsExporterParameter.JASPER_PRINT,
+                jasperPrint
+            );
 
-            exporter.setExporterOutput(
-            new SimpleOutputStreamExporterOutput(outStream));
-
-            SimpleXlsReportConfiguration xlsConfig =
-            new SimpleXlsReportConfiguration();
-
-            xlsConfig.setDetectCellType(true);
-
-            exporter.setConfiguration(xlsConfig);
+            exporter.setParameter(
+                JRXlsExporterParameter.OUTPUT_STREAM,
+                outStream
+            );
 
             exporter.exportReport();
 
             outStream.flush();
             outStream.close();
+
             return;
         }
 
@@ -241,18 +312,26 @@ if ("download".equals(action)) {
 
         out.println("<h2 style='color:red'>Error Generating Report</h2>");
         out.println("<pre>");
-        e.printStackTrace(new PrintWriter(out));
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+
+        out.println(sw.toString());
         out.println("</pre>");
     }
     finally{
 
         if(conn!=null){
-            try{conn.close();}catch(Exception ex){}
+
+            try{conn.close();}
+            catch(Exception ex){}
         }
     }
 }
 %>
 
+<% if (!"download".equals(action)) { %>
 
 <!DOCTYPE html>
 <html>
@@ -299,6 +378,7 @@ required>
 <input type="date"
 name="as_on_date"
 class="input-field"
+value="<%= (request.getParameter("as_on_date")==null ? "2025-03-29" : request.getParameter("as_on_date")) %>"
 required>
 </div>
 
@@ -340,3 +420,4 @@ Generate Report
 
 </body>
 </html>
+<% } %>

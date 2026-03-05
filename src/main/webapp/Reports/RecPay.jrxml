@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Recpay" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="07ab9b3c-1fb6-4b0f-b08b-b23e60e3864e">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="branch_code" class="java.lang.String">
@@ -207,10 +207,6 @@ ORDER BY
 	</detail>
 	<pageFooter>
 		<band height="17" splitType="Stretch">
-			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="57" y="1" width="90" height="15" uuid="29c06d34-94ff-44cd-bd14-a4c38af41f78"/>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="454" y="1" width="61" height="15" uuid="d13c44cd-99a0-47a3-ac42-b7364a6fe270"/>
 				<textElement textAlignment="Right"/>
@@ -223,6 +219,10 @@ ORDER BY
 			<textField>
 				<reportElement x="0" y="1" width="57" height="15" uuid="7b6e901f-faaf-43fa-8552-0a1d83192fc2"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="54" y="0" width="100" height="16" uuid="b1cf1e0b-30be-498d-aa2b-9bb9fe8dcfc2"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>
