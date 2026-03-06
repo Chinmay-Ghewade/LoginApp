@@ -1,15 +1,26 @@
+/* ================= GLOBAL FIX ================= */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;   /* remove horizontal scroll */
+}
 
 /* ================= PAGE ================= */
 body {
     background: #cfc9e6;
     font-family: Arial, sans-serif;
-    margin: 0;
 }
 
 /* ================= CONTAINER ================= */
 .container {
     width: 95%;
     margin: 30px auto;
+    overflow-x: hidden;
 }
 
 /* ================= TITLE ================= */
@@ -29,11 +40,14 @@ body {
 .card-wrapper {
     background: transparent;
     padding: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* ================= TABLE ================= */
 .program-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background: #f2f2f2;
     border-radius: 8px;
@@ -43,7 +57,7 @@ body {
 
 /* ================= HEADER ================= */
 .program-table thead {
-    background: #2f0f73;   /* exact header color */
+    background: #2f0f73;
 }
 
 .program-table th {
@@ -63,30 +77,31 @@ body {
 .program-table td {
     padding: 8px 10px;
     font-size: 13px;
-    font-weight: normal;     /* records NOT bold */
+    font-weight: normal;
     border: 1px solid #c8c8c8;
     text-align: center;
     background: #e6e6e6;
     color: #000;
+    word-wrap: break-word;
 }
 
 /* Alternate rows */
-.program-table tbody tr:nth-child(even) td {
+.program-table tbody tr:nth-child(even) td:not(.active) {
     background: #f3f3f3;
 }
 
-/* ================= CLICKABLE CELL ONLY ================= */
+/* ================= CLICKABLE CELL ================= */
 .program-cell {
     cursor: pointer;
-    font-weight: normal;     /* ensure not bold */
+    font-weight: normal;
     color: #2b0d73;
     transition: 0.2s ease;
 }
 
-/* Hover only on clickable cell */
-.program-cell:hover {
-    background: #3c1b8f;
-    color: #ffffff;
+.program-cell:hover,
+.program-cell.active {
+    background: #3c1b8f !important;
+    color: #ffffff !important;
 }
 
 /* ================= PAGINATION ================= */
@@ -129,7 +144,8 @@ body {
     color: #2b0d73;
     font-size: 16px;
 }
-/* SEARCH BAR */
+
+/* ================= SEARCH BAR ================= */
 .search-box {
     max-width: 650px;
     margin: 0 auto 20px auto;
@@ -141,4 +157,23 @@ body {
     border-radius: 8px;
     border: 1px solid #c9c6ff;
     font-size: 14px;
+}
+
+/* ================= FORM CONTAINER ================= */
+#formContainer {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 30px;
+    max-height: 80vh;
+    overflow-y: auto;     /* scroll only if form large */
+    overflow-x: hidden;
+}
+
+/* ================= IFRAME ================= */
+#formFrame {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    display: block;
 }

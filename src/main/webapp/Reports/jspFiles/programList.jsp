@@ -41,7 +41,7 @@
 <title>Report List</title>
 
 <link rel="stylesheet"
-      href="<%=request.getContextPath()%>/Reports/common-table.css">
+      href="<%=request.getContextPath()%>/css/common-table.css?v=4">
 
 </head>
 
@@ -228,7 +228,9 @@ function autoSearch() {
 // 🔥 SAFE CLICK HANDLER (Logic Same)
 document.addEventListener("DOMContentLoaded", function () {
 
-    document.querySelectorAll(".program-cell").forEach(function(cell) {
+    const cells = document.querySelectorAll(".program-cell");
+
+    cells.forEach(function(cell) {
 
         cell.addEventListener("click", function() {
 
@@ -237,6 +239,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const iframe = document.getElementById("formFrame");
             const container = document.getElementById("formContainer");
 
+            /* remove highlight from all */
+            cells.forEach(c => c.classList.remove("active"));
+
+            /* highlight clicked */
+            this.classList.add("active");
+
             container.style.display = "block";
             iframe.src = url;
 
@@ -244,17 +252,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 top: container.offsetTop - 20,
                 behavior: "smooth"
             });
+
         });
     });
 
 });
 
 function closeForm() {
+
     const iframe = document.getElementById("formFrame");
     const container = document.getElementById("formContainer");
 
     container.style.display = "none";
     iframe.src = "";
+
+    document.querySelectorAll(".program-cell")
+        .forEach(c => c.classList.remove("active"));
 }
 
 function resizeIframe(iframe) {
