@@ -301,7 +301,7 @@ ORDER BY SERIALNUMBER]]>
 				<text><![CDATA[ Page Acc. Total]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="788" y="16" width="42" height="20" uuid="a1a76ae7-ef22-476a-9bd2-81fd09e27e94"/>
+				<reportElement x="788" y="17" width="42" height="20" uuid="a1a76ae7-ef22-476a-9bd2-81fd09e27e94"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$V{total_amount}]]></textFieldExpression>
 			</textField>

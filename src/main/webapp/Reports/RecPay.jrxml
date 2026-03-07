@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Recpay" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="07ab9b3c-1fb6-4b0f-b08b-b23e60e3864e">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="0"/>
+	<property name="ireport.y" value="23"/>
 	<parameter name="branch_code" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -159,7 +159,7 @@ ORDER BY
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="17" splitType="Stretch">
+		<band height="16" splitType="Stretch">
 			<textField>
 				<reportElement x="1" y="0" width="77" height="15" uuid="f9b5a895-5f67-4147-943b-371025cc2d38"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -186,44 +186,47 @@ ORDER BY
 				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="-19" width="1" height="36" uuid="b747b78c-9c13-42d7-bf7c-e27a98028848"/>
+				<reportElement x="0" y="-15" width="1" height="31" uuid="b747b78c-9c13-42d7-bf7c-e27a98028848"/>
 			</line>
 			<line>
-				<reportElement x="78" y="-19" width="1" height="36" uuid="63ad1938-3044-4c32-8850-fae242a8dd9d"/>
+				<reportElement x="78" y="-17" width="1" height="32" uuid="63ad1938-3044-4c32-8850-fae242a8dd9d"/>
 			</line>
 			<line>
-				<reportElement x="180" y="-19" width="1" height="36" uuid="615ce9a4-d979-49e8-aa82-6e2da30350bc"/>
+				<reportElement x="180" y="-16" width="1" height="32" uuid="615ce9a4-d979-49e8-aa82-6e2da30350bc"/>
 			</line>
 			<line>
-				<reportElement x="350" y="-19" width="1" height="36" uuid="b16ddc0c-7cdd-45c5-8bd7-04d74be82ac0"/>
+				<reportElement x="350" y="-17" width="1" height="32" uuid="b16ddc0c-7cdd-45c5-8bd7-04d74be82ac0"/>
 			</line>
 			<line>
-				<reportElement x="454" y="-19" width="1" height="36" uuid="cc2c99c7-ffa2-4e9d-8cb3-76382d33c2ec"/>
+				<reportElement x="454" y="-16" width="1" height="32" uuid="cc2c99c7-ffa2-4e9d-8cb3-76382d33c2ec"/>
 			</line>
 			<line>
-				<reportElement x="555" y="-19" width="1" height="36" uuid="5e6596d9-b383-446c-8934-74e2b36b9872"/>
+				<reportElement x="555" y="-16" width="1" height="32" uuid="5e6596d9-b383-446c-8934-74e2b36b9872"/>
 			</line>
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="17" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<textField>
-				<reportElement x="454" y="1" width="61" height="15" uuid="d13c44cd-99a0-47a3-ac42-b7364a6fe270"/>
+				<reportElement x="454" y="15" width="61" height="15" uuid="d13c44cd-99a0-47a3-ac42-b7364a6fe270"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="515" y="1" width="40" height="15" uuid="3ac3d3d8-51e6-498a-9a3e-a11d914b273f"/>
+				<reportElement x="515" y="15" width="40" height="15" uuid="3ac3d3d8-51e6-498a-9a3e-a11d914b273f"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="1" width="57" height="15" uuid="7b6e901f-faaf-43fa-8552-0a1d83192fc2"/>
+				<reportElement x="0" y="14" width="57" height="15" uuid="7b6e901f-faaf-43fa-8552-0a1d83192fc2"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="54" y="0" width="100" height="16" uuid="b1cf1e0b-30be-498d-aa2b-9bb9fe8dcfc2"/>
+				<reportElement x="54" y="14" width="100" height="16" uuid="b1cf1e0b-30be-498d-aa2b-9bb9fe8dcfc2"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="1" y="-2" width="555" height="1" uuid="5fb63776-ff73-417b-b511-a90e56dc347d"/>
+			</line>
 		</band>
 	</pageFooter>
 	<summary>

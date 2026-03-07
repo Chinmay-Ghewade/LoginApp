@@ -19,8 +19,7 @@ String asOnDateUI = request.getParameter("as_on_date");
 
 if (branchCode == null) branchCode = "0002";
 if (asOnDateUI == null) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    asOnDateUI = sdf.format(new java.util.Date());
+    asOnDateUI = "2025-03-29";
 }
 
 /* =====================================================
@@ -61,10 +60,12 @@ if ("download".equals(action)) {
 
         /* PARAMETERS */
         Map<String, Object> params = new HashMap<>();
-        params.put("branch_code", branchCode);
-        params.put("as_on_date", oracleDate);
-        params.put("report_title", "Monthly Branch Include Exp Statement");
+params.put("branch_code", branchCode);
+params.put("as_on_date", oracleDate);
+params.put("report_title", "Monthly Branch Include Exp Statement");
 
+/* SUBREPORT DIRECTORY */
+params.put("SUBREPORT_DIR", reportsDir);
 
         /* FILL REPORT */
         JasperPrint jasperPrint =

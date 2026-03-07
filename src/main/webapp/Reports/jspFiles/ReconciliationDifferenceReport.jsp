@@ -84,9 +84,15 @@ if ("download".equals(action)) {
         parameters.put("branch_code", branchCode);
         parameters.put("report_title", "RECONCILIATION DIFFERENCE REPORT");
         parameters.put("SUBREPORT_DIR", application.getRealPath("/Reports/"));
-        parameters.put("user_id", session.getAttribute("user_id"));
-        parameters.put("IMAGE_PATH",
-                application.getRealPath("/images/UPSB MONO.png"));
+        String userId = (String) session.getAttribute("user_id");
+
+        if(userId == null || userId.trim().equals("")){
+            userId = "admin";
+        }
+
+        parameters.put("user_id", userId);        
+        
+        parameters.put("IMAGE_PATH", application.getRealPath("/images/UPSB MONO.png"));
 
         /* =========================
            FILL REPORT
@@ -183,13 +189,13 @@ if ("download".equals(action)) {
             <div class="parameter-group">
                 <div class="parameter-label">Branch Code</div>
                 <input type="text" name="branch_code"
-                       class="input-field" value="0002" required>
+                       class="input-field" value="0003" required>
             </div>
 
             <div class="parameter-group">
                 <div class="parameter-label">As On Date</div>
                 <input type="date" name="as_on_date"
-                       class="input-field" required>
+                       class="input-field" value="2025-03-29" required>
             </div>
 
         </div>
