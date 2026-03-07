@@ -610,10 +610,8 @@
 
     <!-- ── Action Buttons ── -->
     <div class="act-bar">
-        <button class="btn-secondary" type="button" onclick="doValidate()">Validate</button>
         <button class="btn-primary"   type="button" onclick="doSave()">Save</button>
-        <button class="btn-secondary" type="button" onclick="doVouchers()">Display Vouchers</button>
-        <button class="btn-danger"    type="button" onclick="doCancel()">Cancel</button>
+        <button class="btn-danger"    type="button" onclick="doCancel()">Clear</button>
     </div>
 
     <script>
