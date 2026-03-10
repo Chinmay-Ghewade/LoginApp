@@ -199,22 +199,20 @@
 </div>
 
 <!-- ================= FORM CONTAINER ================= -->
+
 <div id="formContainer" style="display:none; margin-top:30px;">
-    <div style="text-align:right; margin-bottom:10px;">
-        <button onclick="closeForm()" class="nav-btn">Close</button>
-    </div>
 
     <iframe id="formFrame"
             style="width:100%; border:1px solid #ccc; border-radius:8px;"
             scrolling="no"
             onload="resizeIframe(this)">
     </iframe>
-</div>
 
+</div>
 <!-- ================= SCRIPT ================= -->
 <script>
 
-// Auto search delay
+//Auto search delay
 let typingTimer;
 let doneTypingInterval = 500;
 
@@ -225,7 +223,8 @@ function autoSearch() {
     }, doneTypingInterval);
 }
 
-// 🔥 SAFE CLICK HANDLER (Logic Same)
+/* ================= PROGRAM CLICK ================= */
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const cells = document.querySelectorAll(".program-cell");
@@ -239,10 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const iframe = document.getElementById("formFrame");
             const container = document.getElementById("formContainer");
 
-            /* remove highlight from all */
             cells.forEach(c => c.classList.remove("active"));
-
-            /* highlight clicked */
             this.classList.add("active");
 
             container.style.display = "block";
@@ -254,9 +250,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
         });
+
     });
 
 });
+
+
+/* ================= CLOSE FORM ================= */
 
 function closeForm() {
 
@@ -270,15 +270,45 @@ function closeForm() {
         .forEach(c => c.classList.remove("active"));
 }
 
+
+/* ================= IFRAME LOAD ================= */
+
 function resizeIframe(iframe) {
+
     try {
+
+        const doc = iframe.contentWindow.document;
+
         iframe.style.height =
-            iframe.contentWindow.document.documentElement.scrollHeight + "px";
+            doc.documentElement.scrollHeight + "px";
+
+        /* detect click on CSS close icon area */
+        doc.addEventListener("click", function(e){
+
+            const container = doc.querySelector(".report-container");
+            if(!container) return;
+
+            const rect = container.getBoundingClientRect();
+
+            const x = e.clientX;
+            const y = e.clientY;
+
+            if(
+                x > rect.right - 40 &&
+                x < rect.right &&
+                y > rect.top &&
+                y < rect.top + 40
+            ){
+                closeForm();
+            }
+
+        });
+
     } catch (e) {
         iframe.style.height = "700px";
     }
-}
 
+}
 </script>
 
 </body>

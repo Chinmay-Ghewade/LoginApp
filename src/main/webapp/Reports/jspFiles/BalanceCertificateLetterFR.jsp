@@ -334,8 +334,7 @@ if ("download".equals(action)) {
 <title>Balance Certificate Letter</title>
 
 <link rel="stylesheet"
-href="<%=request.getContextPath()%>/Reports/common-report.css?v=10">
-
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
 </head>
 
 <body>

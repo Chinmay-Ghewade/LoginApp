@@ -198,7 +198,8 @@ if ("download".equals(action)) {
 
     <!-- SAME CSS LIKE TFORM -->
     <link rel="stylesheet"
-          href="<%=request.getContextPath()%>/Reports/common-report.css">
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+
 </head>
 
 <body>

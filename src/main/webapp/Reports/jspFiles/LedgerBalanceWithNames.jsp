@@ -139,7 +139,8 @@ if ("download".equals(action)) {
     <title>Ledger Balance With Names</title>
 
     <link rel="stylesheet"
-          href="<%=request.getContextPath()%>/Reports/common-report.css">
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+
 </head>
 
 <body>

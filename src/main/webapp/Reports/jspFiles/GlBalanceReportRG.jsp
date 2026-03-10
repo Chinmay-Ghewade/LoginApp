@@ -133,8 +133,9 @@ if ("download".equals(action)) {
 <head>
     <title>Daily GL Balance Report</title>
 
-    <link rel="stylesheet"
-          href="<%=request.getContextPath()%>/Reports/common-report.css">
+   <link rel="stylesheet"
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+
 </head>
 
 <body>

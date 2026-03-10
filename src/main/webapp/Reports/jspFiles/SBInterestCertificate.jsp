@@ -168,7 +168,8 @@ if ("download".equals(action)) {
 <head>
 <title>Saving Bank Interest Certificate</title>
 <link rel="stylesheet"
-      href="<%=request.getContextPath()%>/Reports/common-report.css?v=10">
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+
 </head>
 
 <body>

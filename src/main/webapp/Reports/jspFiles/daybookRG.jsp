@@ -250,7 +250,9 @@ if (!"download".equals(action)) {
 <html>
 <head>
     <title>DayBookRG Report</title>
-<link rel="stylesheet" href="<%=request.getContextPath()%>/Reports/common-report.css?v=10">
+<link rel="stylesheet"
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+
   <style>
 html, body {
     margin: 0;

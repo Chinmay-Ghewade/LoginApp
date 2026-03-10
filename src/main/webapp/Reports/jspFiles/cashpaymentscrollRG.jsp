@@ -129,7 +129,7 @@ if (!"download".equals(action)) {
 <head>
     <title>Cash Payment Scroll Report</title>
     <link rel="stylesheet"
-          href="<%=request.getContextPath()%>/Reports/common-report.css">
+href="<%=request.getContextPath()%>/css/common-report.css?v=4">
 </head>
 
 <body>
