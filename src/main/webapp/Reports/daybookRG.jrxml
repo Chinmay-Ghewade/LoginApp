@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daybookRG" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="eb397dc2-6066-4b5b-b355-dffd9ad91a99">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="161"/>
+	<property name="ireport.y" value="158"/>
 	<parameter name="as_on_date" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -446,7 +446,7 @@ INDEXER,
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "clerk_manager.jasper"]]></subreportExpression>
 			</subreport>
 			<subreport>
-				<reportElement x="-2" y="22" width="200" height="100" uuid="b26214a1-0f57-430b-9f1c-a8d4736af106"/>
+				<reportElement x="0" y="21" width="200" height="68" uuid="b26214a1-0f57-430b-9f1c-a8d4736af106"/>
 				<subreportParameter name="session_date">
 					<subreportParameterExpression><![CDATA[$P{session_date}]]></subreportParameterExpression>
 				</subreportParameter>

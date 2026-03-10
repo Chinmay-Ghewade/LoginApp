@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DepositMature2DateRG" language="groovy" pageWidth="842" pageHeight="763" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="595e38ef-1efd-4085-8a80-6c01f8941c0f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="product_toall" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="is_account_close" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ROWNUM AS SRNO, ACCOUNT_CODE, PRODUCT_CODE,
+    		MATURITYVALUE, DESCRIPTION, NAME, INTERESTRATE ,
+    		DEPOSITAMOUNT, UNITOFPERIOD, PERIODOFDEPOSIT, B,
+    		PROCESSFOR_MATURITY, A, C, LEDGERBALANCE, INTERESTPAID, INT,
+    		 AMOUNT FROM (  SELECT B.ACCOUNT_CODE ,SUBSTR(B.ACCOUNT_CODE,5,3) AS PRODUCT_CODE  ,
+    		B.MATURITYVALUE, K.DESCRIPTION ,INITCAP(A.NAME) AS NAME ,B.INTERESTRATE ,
+    		B.DEPOSITAMOUNT, B.UNITOFPERIOD, B.PERIODOFDEPOSIT,
+    		to_char(B.MATURITYDATE,'DD/MM/YYYY') AS B, B.PROCESSFOR_MATURITY,
+    		to_char(A.DATEACCOUNTOPEN,'DD/MM/YYYY') AS A ,
+    		to_char(A.DATEACCOUNTCLOSE,'DD/MM/YYYY') AS C, C.LEDGERBALANCE, INTERESTPAID, '' AS INT,
+    		 0 AS AMOUNT
+         FROM ACCOUNT.ACCOUNTDEPOSIT B,ACCOUNT.ACCOUNT A, BALANCE.ACCOUNT C ,
+    		 HEADOFFICE.PRODUCT K
+         WHERE
+        -- B.ACCOUNT_CODE LIKE '402' AND
+         B.ACCOUNT_CODE = A.ACCOUNT_CODE   AND B.ACCOUNT_CODE= C.ACCOUNT_CODE
+    		 AND SUBSTR(B.ACCOUNT_CODE, 5, 3)= K.PRODUCT_CODE
+        AND  SUBSTR(B.ACCOUNT_CODE,1,4) = $P{branch_code}
+    		 AND B.MATURITYDATE BETWEEN $P{from_date}
+        AND $P{to_date}
+    		 ORDER BY B.ACCOUNT_CODE) ORDER BY SRNO]]>
+	</queryString>
+	<field name="SRNO" class="java.math.BigDecimal"/>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="PRODUCT_CODE" class="java.lang.String"/>
+	<field name="MATURITYVALUE" class="java.math.BigDecimal"/>
+	<field name="DESCRIPTION" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="INTERESTRATE" class="java.math.BigDecimal"/>
+	<field name="DEPOSITAMOUNT" class="java.math.BigDecimal"/>
+	<field name="UNITOFPERIOD" class="java.lang.String"/>
+	<field name="PERIODOFDEPOSIT" class="java.math.BigDecimal"/>
+	<field name="B" class="java.lang.String"/>
+	<field name="PROCESSFOR_MATURITY" class="java.lang.String"/>
+	<field name="A" class="java.lang.String"/>
+	<field name="C" class="java.lang.String"/>
+	<field name="LEDGERBALANCE" class="java.math.BigDecimal"/>
+	<field name="INTERESTPAID" class="java.math.BigDecimal"/>
+	<field name="INT" class="java.lang.String"/>
+	<field name="AMOUNT" class="java.math.BigDecimal"/>
+	<variable name="TOTAL_DEPAMOUNT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEPOSITAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_MATAMOUNT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MATURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_PAIDINT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTERESTPAID}]]></variableExpression>
+	</variable>
+	<variable name="GRANDTOTAL_DEPOSITE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DEPOSITAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="GRANDTOTAL_MATURITY" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MATURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="GRANDTOTAL_PAIDINT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INTERESTPAID}]]></variableExpression>
+	</variable>
+	<group name="product_sum">
+		<groupExpression><![CDATA[$F{PRODUCT_CODE}]]></groupExpression>
+		<groupHeader>
+			<band height="17">
+				<textField>
+					<reportElement x="37" y="2" width="87" height="15" uuid="29d6d927-0375-40c6-a2ba-2864782639c1"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{PRODUCT_CODE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="131" y="1" width="140" height="15" uuid="b5ec7220-ac5a-482d-874b-6ad844347878"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="25">
+				<staticText>
+					<reportElement x="131" y="0" width="100" height="14" uuid="c45d3ec3-5699-46eb-bd19-5edbc44950b4"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle"/>
+					<text><![CDATA[Scheme Total :]]></text>
+				</staticText>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="491" y="0" width="51" height="14" uuid="36fa505b-92be-4262-b1b9-10b663c092a1"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{TOTAL_DEPAMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="542" y="0" width="50" height="14" uuid="5f754272-9cab-4487-9be8-d976c7ad11b3"/>
+					<textElement textAlignment="Left"/>
+					<textFieldExpression><![CDATA[$V{TOTAL_MATAMOUNT}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00" isBlankWhenNull="true">
+					<reportElement x="591" y="0" width="54" height="14" uuid="3a48bdf2-3f41-4e0a-8b7a-44fe578fec20"/>
+					<textElement verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$V{TOTAL_PAIDINT}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="0" width="802" height="1" uuid="6cd96e0f-5360-4b2b-a3df-df4c9db7f54b"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="56" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="802" height="56" uuid="6b6463a0-4333-4865-92a4-504e1e65524e"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="55" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="802" height="1" uuid="b6488792-c73d-48fa-a91e-05b47025e80d"/>
+			</line>
+			<line>
+				<reportElement x="0" y="54" width="802" height="1" uuid="6ca6e0b0-fc38-4e58-820c-1730830fa8ca"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="0" width="1" height="54" uuid="30e9b17a-853e-41eb-83d2-3917f8fcd8bc"/>
+			</line>
+			<line>
+				<reportElement x="35" y="0" width="1" height="54" uuid="2f6de5fb-e98a-4e24-b71e-a2afe5ada320"/>
+			</line>
+			<line>
+				<reportElement x="124" y="0" width="1" height="54" uuid="69259328-b0e7-4b26-b7e5-d7e54fc52f3b"/>
+			</line>
+			<line>
+				<reportElement x="324" y="1" width="1" height="53" uuid="784c719c-cda9-4568-a2da-6d91ba0acb3e"/>
+			</line>
+			<line>
+				<reportElement x="271" y="1" width="1" height="53" uuid="5490c2f7-2ca1-4467-ac47-5f62deb2fbd6"/>
+			</line>
+			<line>
+				<reportElement x="374" y="0" width="1" height="54" uuid="501a34f9-585b-4363-8547-5d826c1c6a6d"/>
+			</line>
+			<line>
+				<reportElement x="413" y="1" width="1" height="53" uuid="af9ecd40-2a39-40ff-a554-db4f5b0b5237"/>
+			</line>
+			<line>
+				<reportElement x="452" y="0" width="1" height="54" uuid="1d4b067f-8311-4665-9dcb-0c3dab77bbe5"/>
+			</line>
+			<line>
+				<reportElement x="491" y="1" width="1" height="53" uuid="770fdc43-e492-4853-a7e2-f59c8bc423fe"/>
+			</line>
+			<line>
+				<reportElement x="591" y="1" width="1" height="53" uuid="f99e80c6-4cc0-47c9-a8d9-6db6416b2d71"/>
+			</line>
+			<line>
+				<reportElement x="643" y="1" width="1" height="53" uuid="17fc3575-e613-4384-8f3d-466824c12cb9"/>
+			</line>
+			<line>
+				<reportElement x="801" y="1" width="1" height="53" uuid="12001f0b-af17-437a-9f77-1317419f61e2"/>
+			</line>
+			<line>
+				<reportElement x="644" y="26" width="157" height="1" uuid="57605775-2b2a-498b-931a-3973d0f2af84"/>
+			</line>
+			<line>
+				<reportElement x="699" y="26" width="1" height="29" uuid="952d5c77-3df7-44c8-89e8-9be0169b9ec6"/>
+			</line>
+			<line>
+				<reportElement x="750" y="27" width="1" height="28" uuid="7d9afddc-fdc2-48bd-bb68-9329358fa168"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="35" height="53" uuid="99bc373b-6501-4271-b807-804ed5c7836d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="35" y="1" width="89" height="53" uuid="1652eb0c-3863-4190-b9f6-feddbb056e3c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Account No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="125" y="1" width="146" height="53" uuid="fe8a8405-050a-4771-8c46-062061369b63"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="1" width="55" height="53" uuid="652bdc1e-9780-4f5e-962a-8a5d6fcc3c80"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[A/C Open Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="325" y="1" width="49" height="54" uuid="2ef7cf2e-f3d0-4f7e-8c5a-b89b967956f9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Maturity Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="375" y="1" width="40" height="53" uuid="671935f4-1bda-43d2-8b51-8861eb9e9463"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle" rotation="None">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Unit of  Period]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="414" y="1" width="39" height="54" uuid="cc56b892-610b-4696-bd86-0691d733f973"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Period]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="453" y="1" width="39" height="53" uuid="190659ea-84c0-4f96-bdaf-15cab1f73c31"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Interest Rate]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="492" y="1" width="50" height="53" uuid="295137b5-4d86-44db-baf4-de2cdee1fa80"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Deposit Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="542" y="1" width="49" height="53" uuid="d1c1bd39-e2fe-4a11-ad9a-887dd6160f6b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Maturity  Amount ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="645" y="1" width="156" height="25" uuid="5544a2c3-2871-4d35-9098-f7fc66c09056"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Transfer to Mature ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="644" y="27" width="55" height="27" uuid="702c82cd-f306-4573-bc3d-d90ed4dd1ddf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Payble Int.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="701" y="27" width="49" height="28" uuid="fe60777f-0d07-455c-8661-82397d4dc4c1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Payble
+Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="751" y="26" width="51" height="28" uuid="3b5ea808-4122-4a28-a6d8-ad9764822e3c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total
+Pay.Amt.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="592" y="1" width="51" height="53" uuid="e8d92605-b775-48b8-a4b5-4d3a7b372949"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Total Paid  Interest]]></text>
+			</staticText>
+			<line>
+				<reportElement x="542" y="1" width="1" height="53" uuid="2ff02cfc-07ca-4100-aeb1-25dd4e5d5d1e"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField>
+				<reportElement x="-1" y="0" width="26" height="15" uuid="cacc4b0a-7bc0-4310-958c-25e8bb3fb1bb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SRNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="37" y="0" width="87" height="15" uuid="412f4233-73ec-42a8-b0e5-c41fd4ba8391"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="131" y="0" width="140" height="15" uuid="127947c8-c558-4ea4-9d30-a10d1421450c"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="276" y="0" width="42" height="15" uuid="c49ce4e9-51d7-4313-be33-e1a700858672"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{A}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="330" y="0" width="38" height="15" uuid="fac31415-c6a1-439c-b5da-10570510c91f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{B}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="384" y="0" width="26" height="15" uuid="82fd0c12-a14c-407f-8b78-e3e35ed27c76"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{UNITOFPERIOD}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="420" y="0" width="26" height="15" uuid="de5d79cc-4667-4712-ad1e-72e375fb56b3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PERIODOFDEPOSIT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="459" y="0" width="27" height="15" uuid="c88e9462-a9e5-4c9b-9385-bf38881aadb6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INTERESTRATE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="499" y="0" width="38" height="15" uuid="2d51f37f-1954-4a4f-8329-709e184cb161"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEPOSITAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="551" y="0" width="39" height="15" uuid="1dade539-864f-431c-864e-becfb6aac788"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{MATURITYVALUE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="600" y="0" width="41" height="15" uuid="d40e9ecc-b6e9-42ac-90f3-a486c9e2b1e7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INTERESTPAID}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="652" y="0" width="44" height="15" uuid="9865156d-a916-4578-b61f-c87bf237a637"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="706" y="0" width="40" height="15" uuid="c62d8835-1603-41a4-a1c7-56d34d5b7939"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="759" y="0" width="40" height="15" uuid="364ec7f6-e04b-44c1-b184-1ac585ac8b3e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="27" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="0" y="7" width="100" height="20" uuid="f9eb5b34-e7d6-4599-84cb-e65abd195f79"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="683" y="7" width="80" height="20" uuid="07270cf3-e9f7-42ac-8a72-4b7d59f1d974"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="762" y="7" width="40" height="20" uuid="c9cb1b90-8fdd-4f03-b637-45e44c30b1a8"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="56" splitType="Stretch">
+			<staticText>
+				<reportElement x="125" y="3" width="45" height="15" uuid="4236d483-abf1-47ff-ae73-e2697a822a6f"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="492" y="3" width="50" height="15" uuid="a26313f5-d7e9-43c8-b1ea-70efcc45fa3f"/>
+				<textFieldExpression><![CDATA[$V{GRANDTOTAL_DEPOSITE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-1" width="802" height="1" uuid="4f30272d-6faa-44df-9711-d70c7e65fbf8"/>
+			</line>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="544" y="3" width="47" height="15" uuid="2e2ffc43-b346-4625-93c4-00422985c3fe"/>
+				<textFieldExpression><![CDATA[$V{GRANDTOTAL_MATURITY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="598" y="3" width="47" height="14" uuid="1e1c34b6-3e18-42f6-89b2-0ab68ee23079"/>
+				<textFieldExpression><![CDATA[$V{GRANDTOTAL_PAIDINT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
