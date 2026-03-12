@@ -22,9 +22,9 @@
        "FN_GET_AC_GL(?) AS GL_ACCOUNT_CODE, " +
        "Fn_Get_Account_name(FN_GET_AC_GL(?)) AS GL_ACCOUNT_NAME, " +
        "FN_GET_CUSTOMER_ID(?) AS CUSTOMER_ID, " +
-       "Fn_Get_Cust_aadhar(FN_GET_CUSTOMER_ID(?)) AS AADHAR_NUMBER, " +
+       "Fn_Get_Customer_Aadhar(FN_GET_CUSTOMER_ID(?)) AS AADHAR_NUMBER, " +
        "Fn_Get_Cust_PAN(FN_GET_CUSTOMER_ID(?)) AS PAN_NUMBER, " +
-       "Fn_Get_Cust_ZIPNO(FN_GET_CUSTOMER_ID(?)) AS ZIPCODE " +  // ADD THIS LINE
+       "Fn_Get_Cust_ZIPNO(FN_GET_CUSTOMER_ID(?)) AS ZIPCODE " +  
        "FROM BALANCE.ACCOUNT " +
        "WHERE ACCOUNT_CODE = ?";
         
@@ -34,7 +34,7 @@
         ps.setString(3, accountCode);  // For FN_GET_CUSTOMER_ID function
         ps.setString(4, accountCode);  // For Fn_Get_Cust_aadhar(FN_GET_CUSTOMER_ID(?))
         ps.setString(5, accountCode);  // For Fn_Get_Cust_PAN(FN_GET_CUSTOMER_ID(?))
-        ps.setString(6, accountCode);  // For Fn_Get_Cust_ZIPNO(FN_GET_CUSTOMER_ID(?)) - ADD THIS LINE
+        ps.setString(6, accountCode);  // For Fn_Get_Cust_ZIPNO(FN_GET_CUSTOMER_ID(?)) 
         ps.setString(7, accountCode);  // For the WHERE clause - CHANGE FROM 6 to 7
         rs = ps.executeQuery();
         
@@ -78,7 +78,7 @@
                 panNumber = "";
             }
             
-            // Clean up ZIP code - ADD THIS BLOCK
+            // Clean up ZIP code 
             if (zipcode != null) {
                 zipcode = zipcode.trim();
                 // Check if it's the default error value from function
@@ -88,7 +88,7 @@
             } else {
                 zipcode = "";
             }
-            // Build JSON response
+            
          // Build JSON response
             out.print("{");
             out.print("\"success\": true,");

@@ -231,7 +231,7 @@ body {
 /* Collapsed: centre the icon */
 .sidebar.collapsed .menu li a {
     justify-content: center;
-    padding: 13px 0;
+    padding: 14px 21px;
     gap: 0;
     transform: none;
     overflow: visible;

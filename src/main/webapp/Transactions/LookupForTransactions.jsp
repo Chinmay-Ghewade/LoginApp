@@ -49,7 +49,7 @@
                 productCodePattern = "%";
         }
         
-        // Build query based on category - ADD PRODUCT DESCRIPTION
+        // Build query based on category 
         if ("loan".equals(accountCategory)) {
             // Special case for loan (5 or 7)
             query = "SELECT ACCOUNT_CODE, NAME, " +

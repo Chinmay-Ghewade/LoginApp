@@ -161,7 +161,6 @@ function showToast(message, type = 'info') {
 }
 
 function validateForm() {
-    // Add validation logic here
     return true;
 }
 

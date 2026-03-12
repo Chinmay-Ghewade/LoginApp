@@ -471,7 +471,7 @@ function populateChequeTypeDropdown(selectedSeries) {
         return;
     }
 
-    // ✅ Add all trimmed unique types to dropdown
+    
     typeSet.forEach(function(typeCode) {
         const opt = document.createElement('option');
         opt.value = typeCode;
@@ -591,7 +591,7 @@ function toggleLoanFields() {
     const loanFieldsSection = document.getElementById('loanFieldsSection');
 	const transactionType = document.querySelector("input[name='transactionTypeRadio']:checked").value;
 	
-	// ✅ ADD THIS CHECK - Don't show loan fields in closing mode
+	
 	    if (transactionType === 'closing') {
 	        loanFieldsSection.classList.remove('active');
 	        clearLoanFields();
@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	const categoryDropdown = document.getElementById('accountCategory');
 	if (categoryDropdown) {
 	    categoryDropdown.addEventListener('change', function() {
-	        // ✅ ADD THIS - Refetch closing columns if in closing mode
+	        
 	        const transactionType = document.querySelector("input[name='transactionTypeRadio']:checked").value;
 	        if (transactionType === 'closing') {
 	            fetchClosingSequenceColumns();
@@ -922,7 +922,7 @@ function submitTransactionForm() {
         form.submit();
         showToast('Loading transaction form...', 'info');
         
-        // ✅ ADD THIS: Fetch loan receivable data if it's a loan account
+        
         if (accountCategory === 'loan' && accountCode) {
             setTimeout(() => {
                 fetchLoanReceivableData(accountCode);
@@ -1567,7 +1567,7 @@ function calculateNewBalanceInIframe() {
 	            };
 	        });
 	        
-	        // ✅ Add total field
+	        
 	        const totalReceivableEl = document.getElementById('totalReceivable');
 	        const totalReceivedEl = document.getElementById('totalReceived');
 	        const totalRemainingEl = document.getElementById('totalRemaining');
@@ -1578,7 +1578,7 @@ function calculateNewBalanceInIframe() {
 	            remaining: totalRemainingEl ? totalRemainingEl.value : ''
 	        };
 	        
-	        // ✅ Add principle field
+	        
 	        const principleReceivedEl = document.getElementById('principleReceived');
 	        loanFieldsData['principle'] = {
 	            received: principleReceivedEl ? principleReceivedEl.value : ''
@@ -1923,12 +1923,12 @@ function buildLoanFieldsTable() {
                        'placeholder="0.00" readonly></td>';
     });
     
-	// ✅ ADD PRINCIPLE COLUMN CELLS (before Total column)
+	
 	receivableRow += '<td><input type="text" id="principleReceivable" placeholder="0.00" readonly style="background-color: #e6ffe6;"></td>';
 	receivedRow   += '<td><input type="text" id="principleReceived" placeholder="0.00" readonly style="background-color: #e6ffe6; font-weight: bold; color: #2e7d32;"></td>';
 	remainingRow  += '<td><input type="text" id="principleRemaining" placeholder="0.00" readonly style="background-color: #e6ffe6;"></td>';
 	
-	// ADD TOTAL COLUMN CELLS
+	
 	receivableRow += '<td><input type="text" id="totalReceivable" placeholder="0.00" readonly></td>';
 	receivedRow   += '<td><input type="text" id="totalReceived" placeholder="0.00"></td>';
 	remainingRow  += '<td><input type="text" id="totalRemaining"  placeholder="0.00" readonly></td>';
@@ -2018,7 +2018,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-//Add this function after the buildLoanFieldsTable() function
+
 
 function fetchLoanReceivableData(accountCode) {
     if (!accountCode || accountCode.trim() === '') {
@@ -2045,10 +2045,10 @@ function fetchLoanReceivableData(accountCode) {
 }
 
 function fetchClosingSequenceColumns() {
-    // ✅ ADD THIS - Get current account type
+    
     const accountCategory = document.getElementById('accountCategory').value;
     
-    // ✅ MODIFY FETCH URL - Add accountType parameter
+    // ✅ MODIFY FETCH URL 
     fetch('GetClosingSequenceColumns.jsp?accountType=' + encodeURIComponent(accountCategory))
         .then(response => response.json())
         .then(data => {
@@ -2124,7 +2124,7 @@ function clearLoanFields() {
         });
     });
 	
-	// ✅ ADD THIS - Clear total fields
+	//  Clear total fields
 	    const totalReceivable = document.getElementById('totalReceivable');
 	    const totalReceived = document.getElementById('totalReceived');
 	    const totalRemaining = document.getElementById('totalRemaining');
@@ -2141,7 +2141,7 @@ function clearLoanFields() {
 	}
 
 
-// Add this new function to handle sequential loan deduction
+
 function calculateSequentialLoanDeduction() {
     const transactionAmountInput = document.getElementById('transactionamount');
     const transactionAmount = parseFloat(transactionAmountInput.value) || 0;
@@ -2283,7 +2283,7 @@ function calculateSequentialLoanDeduction() {
     }
 }
 
-// Add reset function to clear loan received fields when needed
+
 function resetLoanReceivedFields() {
     if (!loanRecoveryColumns || loanRecoveryColumns.length === 0) return;
     
@@ -2547,7 +2547,7 @@ function saveLoanRecoveryTransactions(accountCode, sessionWorkingDate) {
     formData.append('accountCategory', 'loan');
     formData.append('operationType', 'deposit');
     
-    // Add all loan received fields
+
     loanRecoveryColumns.forEach(function(col) {
         if (!col || !col.columnName) return;
         const fieldName = col.columnName.toLowerCase().trim();
@@ -2559,7 +2559,7 @@ function saveLoanRecoveryTransactions(accountCode, sessionWorkingDate) {
         }
     });
     
-    // ✅ NEW: ADD PRINCIPLE RECEIVED AMOUNT
+
     const principleReceivedEl = document.getElementById('principleReceived');
     if (principleReceivedEl && principleReceivedEl.value && parseFloat(principleReceivedEl.value) > 0) {
         formData.append('principleReceived', principleReceivedEl.value);

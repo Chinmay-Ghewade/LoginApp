@@ -7,7 +7,7 @@
 
     String accountType = request.getParameter("accountType");
     
-    // ✅ ADD LOGGING
+ 
     System.out.println("=== GetClosingSequenceColumns DEBUG ===");
     System.out.println("Received accountType parameter: [" + accountType + "]");
 
@@ -27,7 +27,7 @@
         
         query += "ORDER BY SEQUENCE_NO";
         
-        // ✅ ADD LOGGING
+ 
         System.out.println("Query: " + query);
         
         ps = con.prepareStatement(query);
@@ -54,7 +54,7 @@
             String columnName = rs.getString("COLUMN_NAME");
             String dbAccountType = rs.getString("ACCOUNT_TYPE");
             
-            // ✅ ADD LOGGING
+ 
             System.out.println("Row " + rowCount + ": ACCOUNT_TYPE=[" + dbAccountType + "], COLUMN_NAME=[" + columnName + "]");
             
             // Skip rows with null or empty column names
@@ -69,7 +69,7 @@
             columnsArray.put(column);
         }
         
-        // ✅ ADD LOGGING
+
         System.out.println("Total rows found: " + rowCount);
         System.out.println("Valid columns after filtering: " + columnsArray.length());
         System.out.println("=====================================");
