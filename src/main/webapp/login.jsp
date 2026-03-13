@@ -196,170 +196,55 @@ body::after {
     font-weight: 500;
 }
 
-/* ── 3-D bank card ── */
-.card-scene {
+/* ── Banking illustration (SVG, no external image needed) ── */
+.sys-illustration {
     width: 100%;
-    perspective: 900px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     animation: fadeUp 0.9s 0.3s ease both;
+    display: flex;
+    justify-content: center;
 }
 
-.card-3d {
-    width: 320px;
-    height: 195px;
-    margin: 0 auto;
-    border-radius: 20px;
-    background: linear-gradient(135deg,
-        rgba(255,255,255,0.18) 0%,
-        rgba(255,255,255,0.06) 50%,
-        rgba(59,118,247,0.28) 100%);
-    border: 1px solid rgba(255,255,255,0.22);
-    backdrop-filter: blur(20px);
-    box-shadow:
-        0 32px 64px rgba(0,0,0,0.5),
-        0 8px 24px rgba(0,0,0,0.3),
-        inset 0 1px 0 rgba(255,255,255,0.25);
-    position: relative;
-    overflow: hidden;
-    transform: rotateX(8deg) rotateY(-8deg);
-    transition: transform 0.6s ease;
-    animation: cardFloat 6s ease-in-out infinite;
-    cursor: default;
-}
-
-/* shine sweep */
-.card-3d::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(105deg,
-        transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
-    background-size: 200% 100%;
-    animation: cardShine 4s ease-in-out infinite;
-    border-radius: 20px;
-}
-
-/* subtle grid */
-.card-3d::after {
-    content: '';
-    position: absolute; inset: 0;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 28px 28px;
-    border-radius: 20px;
-}
-
-.card-inner {
-    position: relative; z-index: 2;
-    padding: 22px 26px;
-    height: 100%;
-    display: flex; flex-direction: column; justify-content: space-between;
-}
-
-.card-row-top {
-    display: flex; justify-content: space-between; align-items: flex-start;
-}
-
-.card-bank-name {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 2.5px; text-transform: uppercase;
-    color: rgba(255,255,255,0.88);
-}
-
-.card-chip {
-    width: 38px; height: 28px;
-    background: linear-gradient(135deg, #f0c040, #c9910e);
-    border-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    position: relative; overflow: hidden;
-}
-.card-chip::before {
-    content: '';
-    position: absolute; top: 50%; left: 50%;
-    width: 68%; height: 68%;
-    transform: translate(-50%,-50%);
-    border: 1.5px solid rgba(0,0,0,0.18);
-    border-radius: 3px;
-}
-.card-chip::after {
-    content: '';
-    position: absolute; top: 50%; left: 0; right: 0;
-    height: 1.5px; background: rgba(0,0,0,0.15);
-    transform: translateY(-50%);
-}
-
-.card-number {
-    display: flex; gap: 12px; align-items: center;
-}
-
-.card-number-group {
-    font-size: 14px; font-family: 'DM Sans', monospace;
-    font-weight: 600; letter-spacing: 3px;
-    color: rgba(255,255,255,0.88);
-}
-
-.card-number-group.hidden {
-    letter-spacing: 5px; font-size: 12px;
-    color: rgba(255,255,255,0.55);
-}
-
-.card-row-bottom {
-    display: flex; justify-content: space-between; align-items: flex-end;
-}
-
-.card-label-small {
-    font-size: 8.5px; letter-spacing: 1.5px;
-    text-transform: uppercase; color: rgba(255,255,255,0.4);
-    margin-bottom: 3px;
-}
-
-.card-value {
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 1px; color: rgba(255,255,255,0.9);
-}
-
-.card-network { display: flex; align-items: center; }
-
-.card-ring {
-    width: 26px; height: 26px; border-radius: 50%; opacity: 0.8;
-}
-.card-ring:first-child { background: rgba(240,80,80,0.75); margin-right: -9px; position: relative; z-index: 1; }
-.card-ring:last-child  { background: rgba(255,180,30,0.75); }
-
-/* ── Stats row ── */
-.stats-row {
-    display: flex; gap: 12px; width: 100%;
+/* ── Info cards grid ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
     animation: fadeUp 0.9s 0.5s ease both;
 }
 
-.stat-pill {
-    flex: 1;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.11);
-    border-radius: 14px;
+.info-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
     padding: 13px 14px;
-    backdrop-filter: blur(10px);
-    position: relative; overflow: hidden;
-    transition: background 0.3s, transform 0.3s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
 }
 
-.stat-pill:hover {
-    background: rgba(255,255,255,0.13);
-    transform: translateY(-3px);
+.info-card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
 }
 
-.stat-pill::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 2px; border-radius: 14px 14px 0 0;
+.info-card-title {
+    font-size: 11.5px; font-weight: 700;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.3;
+    margin-bottom: 3px;
 }
-.stat-pill.green::before  { background: linear-gradient(90deg,#4ADE80,#22D3EE); }
-.stat-pill.blue::before   { background: linear-gradient(90deg,#60A5FA,#818CF8); }
-.stat-pill.yellow::before { background: linear-gradient(90deg,#FBBF24,#F59E0B); }
-
-.stat-icon  { font-size: 17px; margin-bottom: 5px; display: block; }
-.stat-value { font-size: 15px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 3px; }
-.stat-label { font-size: 9.5px; letter-spacing: 0.7px; text-transform: uppercase; color: rgba(255,255,255,0.43); }
+.info-card-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.36);
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+}
 
 /* ── Ticker ── */
 .activity-ticker {
@@ -483,30 +368,7 @@ body::after {
 }
 .eye-toggle:hover { opacity: 0.75; }
 
-.captcha-row { display: flex; gap: 10px; align-items: stretch; margin-bottom: 16px; }
 
-.captcha-image-box {
-    flex: 1; min-height: 44px;
-    background: linear-gradient(135deg, #e8edf8, #dce4f5);
-    border: 1.5px solid var(--gray-300); border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-}
-
-.captcha-placeholder {
-    font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700;
-    letter-spacing: 6px; color: var(--navy); opacity: 0.55;
-    user-select: none; text-decoration: line-through; text-decoration-style: dotted;
-}
-
-.captcha-refresh-btn {
-    width: 44px; height: 44px; background: var(--sky);
-    border: 1.5px solid var(--gray-300); border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.3s; flex-shrink: 0;
-}
-.captcha-refresh-btn:hover { background: #dce8ff; border-color: var(--blue); transform: rotate(180deg); }
-.captcha-refresh-btn svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .btn-login {
     width: 100%; height: 46px;
@@ -555,17 +417,6 @@ body::after {
     to   { opacity:1; transform:translateY(0); }
 }
 
-@keyframes cardFloat {
-    0%,100% { transform: rotateX(8deg)  rotateY(-8deg)  translateY(0px);  }
-    33%      { transform: rotateX(5deg)  rotateY(-4deg)  translateY(-8px); }
-    66%      { transform: rotateX(10deg) rotateY(-12deg) translateY(-4px); }
-}
-
-@keyframes cardShine {
-    0%  { background-position: -200% 0; }
-    60% { background-position:  200% 0; }
-    100%{ background-position:  200% 0; }
-}
 
 @keyframes tickerPulse {
     0%,100% { box-shadow:0 0 8px #4ADE80; transform:scale(1); }
@@ -614,54 +465,66 @@ input[type="password"]::-webkit-password-toggle-button { display:none !important
                 <span class="idsspl-tagline">Info Dynamic Software Systems Pvt Ltd</span>
             </div>
 
-            <!-- Animated 3-D bank card -->
-            <div class="card-scene">
-                <div class="card-3d" id="bankCard">
-                    <div class="card-inner">
-                        <div class="card-row-top">
-                            <div class="card-bank-name" id="cardBankLabel">CBS BANK</div>
-                            <div class="card-chip"></div>
-                        </div>
-                        <div class="card-number">
-                            <span class="card-number-group hidden">••••</span>
-                            <span class="card-number-group hidden">••••</span>
-                            <span class="card-number-group hidden">••••</span>
-                            <span class="card-number-group">4823</span>
-                        </div>
-                        <div class="card-row-bottom">
-                            <div>
-                                <div class="card-label-small">Card Holder</div>
-                                <div class="card-value">ACCOUNT HOLDER</div>
-                            </div>
-                            <div>
-                                <div class="card-label-small">Expires</div>
-                                <div class="card-value">12/29</div>
-                            </div>
-                            <div class="card-network">
-                                <div class="card-ring"></div>
-                                <div class="card-ring"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Subtle banking SVG illustration -->
+            <div class="sys-illustration">
+                <svg viewBox="0 0 340 160" fill="none" xmlns="http://www.w3.org/2000/svg" width="320">
+                    <!-- building columns -->
+                    <rect x="60" y="60" width="220" height="90" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.2"/>
+                    <!-- columns -->
+                    <rect x="80"  y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <rect x="112" y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <rect x="144" y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <rect x="176" y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <rect x="208" y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <rect x="240" y="72" width="16" height="78" rx="2" fill="rgba(255,255,255,0.07)"/>
+                    <!-- pediment / roof -->
+                    <path d="M55 60 L170 20 L285 60 Z" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.14)" stroke-width="1.2" stroke-linejoin="round"/>
+                    <!-- top triangle detail -->
+                    <path d="M130 60 L170 38 L210 60 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+                    <!-- base step -->
+                    <rect x="50" y="148" width="240" height="7" rx="2" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <rect x="42" y="153" width="256" height="5" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <!-- door -->
+                    <rect x="155" y="110" width="30" height="40" rx="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+                    <!-- door knob -->
+                    <circle cx="180" cy="132" r="2" fill="rgba(255,255,255,0.3)"/>
+                    <!-- coin/shield icon on pediment -->
+                    <circle cx="170" cy="46" r="6" fill="rgba(255,255,255,0.0)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                    <text x="170" y="50" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.25)" font-family="sans-serif">₹</text>
+                    <!-- ground line -->
+                    <line x1="20" y1="158" x2="320" y2="158" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                </svg>
             </div>
 
-            <!-- Stats pills -->
-            <div class="stats-row">
-                <div class="stat-pill green">
-                    <span class="stat-icon">🔒</span>
-                    <div class="stat-value">256-bit</div>
-                    <div class="stat-label">SSL Encrypted</div>
+            <!-- System info cards (2x2 grid) -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-icon">🏦</div>
+                    <div>
+                        <div class="info-card-title">Core Banking Platform</div>
+                        <div class="info-card-sub">Dynamic Bank Soft v3.1</div>
+                    </div>
                 </div>
-                <div class="stat-pill blue">
-                    <span class="stat-icon">⚡</span>
-                    <div class="stat-value">99.9%</div>
-                    <div class="stat-label">Uptime SLA</div>
+                <div class="info-card">
+                    <div class="info-card-icon">⚙️</div>
+                    <div>
+                        <div class="info-card-title">Technology Stack</div>
+                        <div class="info-card-sub">Java / Oracle / Linux</div>
+                    </div>
                 </div>
-                <div class="stat-pill yellow">
-                    <span class="stat-icon">🏦</span>
-                    <div class="stat-value">v3.1</div>
-                    <div class="stat-label">CBS Platform</div>
+                <div class="info-card">
+                    <div class="info-card-icon">🔐</div>
+                    <div>
+                        <div class="info-card-title">Secure Internal Network</div>
+                        <div class="info-card-sub">Intranet access only</div>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">🪪</div>
+                    <div>
+                        <div class="info-card-title">Authorized Staff Only</div>
+                        <div class="info-card-sub">Monitored &amp; audited</div>
+                    </div>
                 </div>
             </div>
 
@@ -759,28 +622,7 @@ input[type="password"]::-webkit-password-toggle-button { display:none !important
                     </div>
                 </div>
 
-                <!-- CAPTCHA -->
-                <div class="field-group">
-                    <label>Security Verification</label>
-                    <div class="captcha-row">
-                        <div class="captcha-image-box" id="captchaBox">
-                            <span class="captcha-placeholder" id="captchaText">X4P9R</span>
-                        </div>
-                        <button type="button" class="captcha-refresh-btn" id="captchaRefreshBtn" title="Refresh CAPTCHA">
-                            <svg viewBox="0 0 24 24">
-                                <polyline points="23 4 23 10 17 10"/>
-                                <polyline points="1 20 1 14 7 14"/>
-                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="field-wrap">
-                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        <input type="text" id="captchaInput" name="captchaInput" placeholder="Enter the characters above" maxlength="10">
-                    </div>
-                </div>
+
 
                 <button type="submit" class="btn-login">Sign In to CBS</button>
 
@@ -837,15 +679,7 @@ passwordInput.addEventListener("input", function() {
     eyeIcon.style.display = passwordInput.value.length > 0 ? "block" : "none";
 });
 
-// ── CAPTCHA ──────────────────────────────────────────────────
-var captchaChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-function generateCaptcha() {
-    var code = '';
-    for (var i = 0; i < 5; i++) code += captchaChars[Math.floor(Math.random() * captchaChars.length)];
-    document.getElementById('captchaText').textContent = code;
-    document.getElementById('captchaInput').value = '';
-}
-document.getElementById('captchaRefreshBtn').addEventListener('click', generateCaptcha);
+
 
 // ── Left panel: floating particles ──────────────────────────
 (function() {
@@ -895,27 +729,7 @@ document.getElementById('captchaRefreshBtn').addEventListener('click', generateC
     }, 3500);
 })();
 
-// ── Left panel: card tilt on mouse move ──────────────────────
-(function() {
-    var card  = document.getElementById('bankCard');
-    var panel = document.querySelector('.left-panel');
-    if (!card || !panel) return;
 
-    panel.addEventListener('mousemove', function(e) {
-        var rect = card.getBoundingClientRect();
-        var dx = (e.clientX - (rect.left + rect.width  / 2)) / (rect.width  / 2);
-        var dy = (e.clientY - (rect.top  + rect.height / 2)) / (rect.height / 2);
-        card.style.animation  = 'none';
-        card.style.transition = 'transform 0.12s ease';
-        card.style.transform  = 'rotateX(' + (-dy*14) + 'deg) rotateY(' + (dx*14) + 'deg) translateY(-5px) scale(1.025)';
-    });
-
-    panel.addEventListener('mouseleave', function() {
-        card.style.transition = 'transform 0.7s ease';
-        card.style.animation  = 'cardFloat 6s ease-in-out infinite';
-        card.style.transform  = '';
-    });
-})();
 </script>
 
 </body>
