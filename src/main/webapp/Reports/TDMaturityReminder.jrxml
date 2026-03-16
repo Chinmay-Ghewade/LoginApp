@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TDMaturityReminder" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3e750ff7-a0f9-45eb-b183-c63be509a4a9">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="73"/>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="To_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+    D.ACCOUNT_CODE,
+    D.DEPOSITAMOUNT,
+    TO_CHAR(D.MATURITYDATE,'DD/MM/YYYY') MATURITYDATE,
+    TO_CHAR(A.DATEACCOUNTOPEN,'DD/MM/YYYY') DATEACCOUNTOPEN,
+    R.RECEIPT_NUMBER,
+    A.NAME,
+    C.ADDRESS1||' '||C.ADDRESS2||' '||C.ADDRESS3 ADDRESS
+FROM
+    ACCOUNT.ACCOUNTDEPOSIT D,
+    ACCOUNT.RECEIPT_INVENTORY R,
+    ACCOUNT.ACCOUNT A,
+    CUSTOMER.CUSTOMER C
+WHERE
+  D.ACCOUNT_CODE = A.ACCOUNT_CODE
+AND D.ACCOUNT_CODE = R.ACCOUNT_CODE
+--AND A.CUSTOMER_ID = C.CUSTOMER_ID
+--AND A.ACCOUNT_STATUS IN ('L','M')
+--AND A.DATEACCOUNTCLOSE IS NULL
+AND SUBSTR(D.ACCOUNT_CODE,1,4)=$P{branch_code}
+AND D.MATURITYDATE BETWEEN $P{from_date} AND $P{To_date}
+ORDER BY D.ACCOUNT_CODE]]>
+	</queryString>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="DEPOSITAMOUNT" class="java.math.BigDecimal"/>
+	<field name="MATURITYDATE" class="java.lang.String"/>
+	<field name="DATEACCOUNTOPEN" class="java.lang.String"/>
+	<field name="RECEIPT_NUMBER" class="java.math.BigDecimal"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRESS" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="451" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="96" width="33" height="20" uuid="b1e09dfd-d05d-44f0-bef6-a79d0a5e5691"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Date : ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="33" y="96" width="118" height="20" uuid="079b8947-3eb4-46d4-bc43-928986fe1d84"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="117" width="23" height="18" uuid="20da7fc6-bbf0-4195-b560-12515e8e9c07"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[To,]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="136" width="503" height="20" uuid="3ec08f20-4de6-4b7f-9ca2-6dbb4ab067f6"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="158" width="503" height="20" uuid="4434895c-9143-438a-a5a9-218815ebe999"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ADDRESS}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="181" width="99" height="20" uuid="49efc60b-f959-44b3-a107-b803bd64cd7b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Dear Sir / Madam,
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="23" y="202" width="53" height="20" uuid="1bfd7a50-3904-47ae-82d9-a5ca6ce6c40d"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Your No. :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="77" y="202" width="268" height="20" uuid="4b977660-c2c4-43ae-b653-4def0eeaba02"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="23" y="224" width="76" height="20" uuid="cabd6583-1d60-43a9-9527-b2bfa427261c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[ Receipt No. :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="224" width="119" height="20" uuid="4f8bcde9-1f6a-4c7d-a727-01052f1a226c"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RECEIPT_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="283" y="224" width="42" height="20" uuid="68f4a3c4-58d9-4370-9420-731922709d09"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Dated :]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="326" y="224" width="139" height="20" uuid="56f49c8e-fea7-4bce-bf66-7f63b193e033"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MATURITYDATE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="23" y="245" width="54" height="20" uuid="2396bfcb-9855-42d4-8c10-f54e459a9154"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[ For Rs. : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="267" width="236" height="20" uuid="8b99e8e9-e0a9-4869-839d-68a097f59763"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[The above mentioned Receipt is falling due on : ]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="237" y="267" width="108" height="20" uuid="6c9b14c9-fbef-422c-9cfe-d2cd3be62c3d"/>
+				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="1" y="289" width="302" height="20" uuid="0b0c07d3-bf1e-4456-822c-e9e74348da20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[In this context you are requested to call this office with the
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="310" width="355" height="20" uuid="1e3f1586-1f5c-45e9-aae8-3a8e25a87677"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[receipt duly discharged on the reverse along with the instructions
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="332" width="151" height="19" uuid="5651c7f8-4536-4482-9f34-377c91da5dae"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[for Renewal/Payment. ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="352" width="473" height="18" uuid="b0c4315f-6026-4c86-9a4e-a3f87ffc0d7a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[We assume you for our best services..
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="372" width="76" height="20" uuid="c35ac27f-5424-463b-9fc1-7eb719169c92"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Thanking You. ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="402" width="90" height="20" uuid="3e8533d2-0453-4671-a1e5-198591e53959"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[  Yours Faithfully,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="423" width="90" height="20" uuid="e0d8b1c9-8371-495e-82bb-f2dbb49be099"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[Branch Manager]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="413" width="48" height="20" uuid="332b802c-8e17-4717-a4c7-dc05ac313610"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<text><![CDATA[User ID :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="51" y="413" width="66" height="20" uuid="13dfd146-8671-44e0-8079-aee9f3641215"/>
+				<textElement verticalAlignment="Middle">
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="77" y="245" width="115" height="20" uuid="97baa1b0-db32-4c4d-bea3-2a77d2758d85"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEPOSITAMOUNT}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="2" y="29" width="553" height="45" uuid="b4aae925-5078-4a87-a2d7-7895c73466a2"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>

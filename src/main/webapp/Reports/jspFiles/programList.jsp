@@ -41,7 +41,7 @@
 <title>Report List</title>
 
 <link rel="stylesheet"
-      href="<%=request.getContextPath()%>/css/common-table.css?v=4">
+      href="<%=request.getContextPath()%>/css/common-table.css?v=10">
 
 </head>
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TDinterest" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a8da8aa3-b7e3-4e13-8240-2681218ef981">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="account_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+    A.NAME AS NAME,
+    B.DEPOSITAMOUNT AS DEPOSITAMOUNT,
+    B.INTERESTRATE AS INTERESTRATE
+FROM ACCOUNT.ACCOUNT A,
+     ACCOUNT.ACCOUNTDEPOSIT B
+WHERE A.ACCOUNT_CODE = $P{account_code}
+AND A.ACCOUNT_CODE = B.ACCOUNT_CODE]]>
+	</queryString>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="DEPOSITAMOUNT" class="java.math.BigDecimal"/>
+	<field name="INTERESTRATE" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="57" splitType="Stretch">
+			<staticText>
+				<reportElement x="12" y="0" width="100" height="21" uuid="52bcc57a-3e4f-4cc6-b1ad-5fc5d060aa7d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="9" y="16" width="100" height="20" uuid="c8b24965-caec-465d-b807-ac0de9af0034"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Deposit Amount :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="9" y="33" width="100" height="20" uuid="fcd015e3-d7e3-4353-a917-7e435dd53794"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Int Rate :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="111" y="1" width="100" height="20" uuid="dd40838e-6075-44e7-8a9e-7f18b9a3bd46"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="113" y="19" width="100" height="20" uuid="7af49574-0927-4dfd-86c0-bc67734fe208"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEPOSITAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="113" y="34" width="95" height="20" uuid="c447191f-ee4c-4448-9cd6-15cbef323596"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INTERESTRATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
