@@ -412,7 +412,7 @@
 
 <div class="sidebar" id="sidebar">
     <div class="profile-section" style="cursor: pointer;" onclick="openUserProfile()">
-        <img src="images/user.png" alt="Profile" class="profile-pic">
+        <img src="images/profile_pic.png" alt="Profile" class="profile-pic">
         <div class="user-name"><%= userName.toUpperCase() %></div>
     </div>
 
