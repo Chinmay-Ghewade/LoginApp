@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GoldLoanSubmisionReport" language="groovy" pageWidth="720" pageHeight="864" orientation="Landscape" columnWidth="706" leftMargin="7" rightMargin="7" topMargin="14" bottomMargin="21" uuid="ab8b7dad-9c37-47f9-b322-b3f9b0d32812">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String"/>
+	<parameter name="branch_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT  rownum as SR_NO,to_number(substr(L.ACCOUNT_CODE,8,7))ACCOUNT_CODE,
+SUBSTR(L.ACCOUNT_CODE,5,3) PRODUCT_CODE,
+fn_get_br_name(substr(L.ACCOUNT_CODE,1,4)) branch_name,
+fn_get_product_name(SUBSTR(L.ACCOUNT_CODE,5,3)) PRODUCT_NAME,
+Fn_Get_Account_name(L.ACCOUNT_CODE) NAME,GOLDRECIEPTNO,
+TO_CHAR(AB.DATEACCOUNTOPEN,'DD/MM/YYYY') DATEACCOUNTOPEN ,
+TEMP.GROSTOTALGMS, TEMP.WEIGHTTOTALGMS,RATEPER10GMS,
+TEMP.SECURITYVALUE,L.SANCTIONAMOUNT
+	  FROM ACCOUNT.ACCOUNTLOAN L,ACCOUNT.ACCOUNT AB,
+  (
+  SELECT S.ACCOUNT_CODE,S.GOLDRECIEPTNO,sum(S.GROSTOTALGMS) GROSTOTALGMS,
+       sum(S.WEIGHTTOTALGMS) WEIGHTTOTALGMS,S.RATEPER10GMS RATEPER10GMS,sum((S.WEIGHTTOTALGMS * S.RATEPER10GMS))SECURITYVALUE
+	FROM ACCOUNT.ACCOUNTSECURITYGOLDSILVER S,ACCOUNT.ACCOUNT A
+	where S.ACCOUNT_CODE=A.ACCOUNT_CODE(+)
+          --and A.DATEACCOUNTOPEN BETWEEN CDATE('22-APR-17')
+	--AND CDATE('22-APR-17')
+	AND SUBSTR(S.ACCOUNT_CODE,1,4)=$P{branch_code}
+	--AND SUBSTR(S.ACCOUNT_CODE,5,3)= '115'
+
+          group by s.account_code,S.GOLDRECIEPTNO,S.RATEPER10GMS
+          ORDER BY S.ACCOUNT_CODE) TEMP
+          WHERE TEMP.ACCOUNT_CODE=L.ACCOUNT_CODE(+)
+	AND TEMP.ACCOUNT_CODE=AB.ACCOUNT_CODE(+)
+			ORDER BY  SR_NO]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="ACCOUNT_CODE" class="java.math.BigDecimal"/>
+	<field name="PRODUCT_CODE" class="java.lang.String"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="PRODUCT_NAME" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="GOLDRECIEPTNO" class="java.math.BigDecimal"/>
+	<field name="DATEACCOUNTOPEN" class="java.lang.String"/>
+	<field name="GROSTOTALGMS" class="java.math.BigDecimal"/>
+	<field name="WEIGHTTOTALGMS" class="java.math.BigDecimal"/>
+	<field name="RATEPER10GMS" class="java.math.BigDecimal"/>
+	<field name="SECURITYVALUE" class="java.math.BigDecimal"/>
+	<field name="SANCTIONAMOUNT" class="java.math.BigDecimal"/>
+	<variable name="Sanction_Total" class="java.math.BigDecimal" resetType="Group" resetGroup="schme_type" calculation="Sum">
+		<variableExpression><![CDATA[$F{SANCTIONAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="Sub_Total" class="java.math.BigDecimal" resetType="Group" resetGroup="schme_type" calculation="Sum">
+		<variableExpression><![CDATA[$F{SECURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="Sub_Gross" class="java.math.BigDecimal" resetType="Group" resetGroup="schme_type" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="Sub_Weig" class="java.math.BigDecimal" resetType="Group" resetGroup="schme_type" calculation="Sum">
+		<variableExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="Sub_Sanction" class="java.math.BigDecimal" resetType="Group" resetGroup="schme_type" calculation="Sum">
+		<variableExpression><![CDATA[$F{SANCTIONAMOUNT}]]></variableExpression>
+	</variable>
+	<group name="schme_type">
+		<groupExpression><![CDATA[$F{PRODUCT_CODE}]]></groupExpression>
+		<groupHeader>
+			<band height="25">
+				<textField>
+					<reportElement x="91" y="4" width="31" height="20" uuid="9eeb9117-6105-409d-b724-557e6901e413"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_CODE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="129" y="4" width="261" height="20" uuid="d94607a9-1503-4ed6-b097-d251b1c1cb26"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="14" y="4" width="77" height="20" uuid="68270076-10de-4d46-a16b-1c87f661d02c"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Schem Type]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="39">
+				<line>
+					<reportElement x="0" y="6" width="680" height="1" uuid="5a980ef9-3399-43f6-9bad-8ca4a84227fa"/>
+				</line>
+				<textField pattern="###0.00">
+					<reportElement x="504" y="12" width="42" height="20" uuid="8af88611-f0bf-49aa-bdb7-f8e83def7aba"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{Sub_Total}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.000">
+					<reportElement x="390" y="12" width="30" height="20" uuid="2cd2f8c2-9864-4146-b77c-470582f56c84"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{Sub_Gross}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.000">
+					<reportElement x="436" y="11" width="25" height="20" uuid="50592fe6-d24f-4fe4-a90e-df7057b1e0cc"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{Sub_Weig}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="1" y="35" width="677" height="1" uuid="6be95094-9ba5-4c19-be30-d857d9700668"/>
+				</line>
+				<textField pattern="###0.00">
+					<reportElement x="549" y="12" width="49" height="20" uuid="905f4352-3d73-41a7-850d-732e17136dad"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{Sub_Sanction}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="151" y="14" width="55" height="15" uuid="750f19bb-b11e-4dca-b556-71338a78bdb5"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Total :]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="64" splitType="Stretch">
+			<textField>
+				<reportElement x="35" y="1" width="562" height="25" uuid="80c4475c-8735-4e10-b938-860c5489b53a"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{report_title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="168" y="23" width="243" height="19" uuid="c0b6b9f8-9919-4996-8d0b-6519a308f68d"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gold Loan Submission Report  From Date]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="406" y="24" width="82" height="19" uuid="63ad036a-27a4-4840-a2c9-c38e0213bae0"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="488" y="25" width="17" height="19" uuid="1b5a381d-a076-4e66-9131-590cff83a70e"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="510" y="25" width="90" height="19" uuid="d1886698-83bd-443a-80cb-580070aa5c96"/>
+				<textElement textAlignment="Justified">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="38" y="42" width="316" height="20" uuid="adfd7042-85b0-4673-8ec0-a1df5ca67adb"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="55" splitType="Stretch">
+			<staticText>
+				<reportElement x="16" y="14" width="34" height="20" uuid="0f25771c-c1bc-4b43-beaf-f279b6f101cb"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="50" y="14" width="42" height="26" uuid="ea699655-8ce8-4137-a8a4-40f7ae1e4897"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open
+Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="14" width="50" height="26" uuid="98b173c6-c7e9-4235-806d-16c52ef125fc"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account
+Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="156" y="14" width="75" height="20" uuid="9d08dd46-5ed9-43fd-b698-80f1587d018a"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="384" y="14" width="36" height="26" uuid="6a1ff55f-adc6-4bff-b7ca-e6fcf9bdd6db"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gross
+  Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="425" y="14" width="36" height="26" uuid="d4da49e1-c5d4-4024-9a23-a8cde90c0df6"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Weight
+  Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="504" y="14" width="40" height="26" uuid="329d601f-1ba2-4519-84c1-21bae27c379c"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total
+Vaule]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="549" y="14" width="47" height="26" uuid="a2c2514a-9871-4ac7-84cb-7468ec233020"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sanction
+Amount]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="46" width="680" height="1" uuid="162b53ed-e3bd-40fe-87aa-7d243358c820"/>
+			</line>
+			<line>
+				<reportElement x="0" y="9" width="680" height="1" uuid="1c059536-95ec-4585-9129-9551b9e35f20"/>
+			</line>
+			<staticText>
+				<reportElement x="471" y="14" width="27" height="20" uuid="650e9c8b-06cb-42ee-a2ca-0b84a6b6d06c"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rate]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="337" y="14" width="42" height="26" uuid="f04eac28-3532-4818-ac05-13a03fae704f"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[   Bag
+Number]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="13" y="10" width="27" height="20" uuid="bb32cc56-729b-4db1-806f-0f4ae32b29d8"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{SR_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="40" y="10" width="52" height="20" uuid="6fb1c574-a743-4317-840e-573cb5e0e3dc"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="97" y="10" width="39" height="20" uuid="a3bc3b85-e78f-4238-8af6-7376d5f2f2d5"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="149" y="10" width="188" height="20" uuid="c8ce2e16-5c0e-4dfd-a9d5-cf780a43af18"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="388" y="10" width="32" height="20" uuid="f6ea260a-792d-4e57-87d4-f797783f7880"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{GROSTOTALGMS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="438" y="10" width="23" height="20" uuid="109f88e6-d863-4f55-a6f5-0dc43e104362"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="504" y="10" width="42" height="20" uuid="3b011792-1072-46e0-a65e-e27b802c4aea"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{SECURITYVALUE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="549" y="10" width="51" height="20" uuid="d4cd1e16-d906-4a72-b56c-76fd2cf8e6af"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{SANCTIONAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="471" y="10" width="27" height="20" uuid="c7a3f003-d87a-4dcd-9c3c-2255f02093be"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{RATEPER10GMS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="343" y="10" width="41" height="20" uuid="e929576c-3eeb-4f31-83a8-215c62d4c574"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{GOLDRECIEPTNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="34">
+			<line>
+				<reportElement x="1" y="2" width="679" height="1" uuid="ab4234d8-db29-4acb-be83-0716266ea3c7"/>
+			</line>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="1" y="14" width="100" height="20" uuid="e230ce1d-c197-41e7-a625-63524d8e3ecc"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="612" y="14" width="53" height="20" uuid="2601d442-912d-47d0-9087-8a514950e0a7"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="665" y="14" width="40" height="20" uuid="a1708801-d222-45d5-b732-2536d5bbc8f4"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

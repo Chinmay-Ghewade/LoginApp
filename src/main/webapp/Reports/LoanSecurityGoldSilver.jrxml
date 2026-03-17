@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LoanSecurityGoldSilver" language="groovy" pageWidth="1080" pageHeight="864" orientation="Landscape" columnWidth="1040" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c9c05644-f1ef-4c60-a416-f847482a19c3">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT TO_NUMBER(SUBSTR(L.ACCOUNT_CODE,8,7)) ACCOUNT_CODE,SUBSTR(L.ACCOUNT_CODE,5,3) PRODUCT_CODE,
+fn_get_product_name(SUBSTR(L.ACCOUNT_CODE,5,3)) PRODUCT_NAME,        Fn_Get_Account_name(L.ACCOUNT_CODE) NAME,
+fn_get_account_address(L.ACCOUNT_CODE) ADDRES,
+TO_CHAR(AB.DATEACCOUNTOPEN,'DD/MM/YYYY') DATEACCOUNTOPEN ,
+TO_CHAR(L.ACCOUNTREVIEWDATE,'DD/MM/YYYY') ACCOUNTREVIEWDATE,TEMP.PARTICULAR,
+TEMP.GROSTOTALGMS, TEMP.WEIGHTTOTALGMS,TEMP.SECURITYVALUE,L.SANCTIONAMOUNT
+FROM ACCOUNT.ACCOUNTLOAN L,ACCOUNT.ACCOUNT AB,
+(SELECT S.ACCOUNT_CODE,trim(S.PARTICULAR) PARTICULAR,
+			S.GROSTOTALGMS GROSTOTALGMS,
+			S.WEIGHTTOTALGMS WEIGHTTOTALGMS,
+		(S.RATEPER10GMS * S.WEIGHTTOTALGMS) SECURITYVALUE
+FROM ACCOUNT.ACCOUNTSECURITYGOLDSILVER S,ACCOUNT.ACCOUNT A
+where S.ACCOUNT_CODE=A.ACCOUNT_CODE(+)
+and A.DATEACCOUNTCLOSE IS NULL
+--and A.DATEACCOUNTOPEN BETWEEN CDATE('16-JUN-18')
+--AND CDATE('16-JUN-18')
+--AND SUBSTR(S.ACCOUNT_CODE,1,4)= '0002'
+--AND SUBSTR(S.ACCOUNT_CODE,5,3)= '515'
+ORDER BY S.ACCOUNT_CODE) TEMP
+ WHERE TEMP.ACCOUNT_CODE=L.ACCOUNT_CODE(+)  AND TEMP.ACCOUNT_CODE=AB.ACCOUNT_CODE(+)]]>
+	</queryString>
+	<field name="ACCOUNT_CODE" class="java.math.BigDecimal"/>
+	<field name="PRODUCT_CODE" class="java.lang.String"/>
+	<field name="PRODUCT_NAME" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRES" class="java.lang.String"/>
+	<field name="DATEACCOUNTOPEN" class="java.lang.String"/>
+	<field name="ACCOUNTREVIEWDATE" class="java.lang.String"/>
+	<field name="PARTICULAR" class="java.lang.String"/>
+	<field name="GROSTOTALGMS" class="java.math.BigDecimal"/>
+	<field name="WEIGHTTOTALGMS" class="java.math.BigDecimal"/>
+	<field name="SECURITYVALUE" class="java.math.BigDecimal"/>
+	<field name="SANCTIONAMOUNT" class="java.math.BigDecimal"/>
+	<variable name="sum" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SECURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="sum1" class="java.math.BigDecimal" resetType="Group" resetGroup="AC_TYPE" incrementType="Group" incrementGroup="ACCOUNT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{SANCTIONAMOUNT}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<variable name="gross_total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="total_wt" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="Tot_Grms" class="java.math.BigDecimal" resetType="Group" resetGroup="ACCOUNT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="Tot Weigth" class="java.math.BigDecimal" resetType="Group" resetGroup="ACCOUNT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="Totl_Sec" class="java.math.BigDecimal" resetType="Group" resetGroup="ACCOUNT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{SECURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="Gran_Total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{GROSTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="grand_totweight" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></variableExpression>
+	</variable>
+	<variable name="grand_totsuceur" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SECURITYVALUE}]]></variableExpression>
+	</variable>
+	<variable name="grand_tol_saction" class="java.math.BigDecimal" resetType="Group" resetGroup="AC_TYPE" incrementType="Group" incrementGroup="ACCOUNT_NO" calculation="Sum">
+		<variableExpression><![CDATA[$F{SANCTIONAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="Sr.No" class="java.lang.Number" resetType="Group" resetGroup="AC_TYPE" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{ACCOUNT_CODE}]]></variableExpression>
+	</variable>
+	<group name="AC_TYPE" isReprintHeaderOnEachPage="true">
+		<groupExpression><![CDATA[$F{PRODUCT_CODE}]]></groupExpression>
+		<groupHeader>
+			<band height="28">
+				<textField>
+					<reportElement x="135" y="-3" width="32" height="20" uuid="df16a2ba-a888-4054-9238-77725bb4f44c"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_CODE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="183" y="-3" width="255" height="20" uuid="d22f71bc-66f7-4895-bc60-273f7e2e2160"/>
+					<textElement>
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="38" y="-3" width="83" height="20" uuid="26e74c4d-1473-4194-8246-491554b46afc"/>
+					<textElement>
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Schem Name:]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="42">
+				<line>
+					<reportElement x="5" y="6" width="1018" height="1" uuid="3ed7c1ab-4e55-4956-a6e2-fafdb3ce92ef"/>
+				</line>
+				<textField pattern="###0.000">
+					<reportElement x="667" y="14" width="48" height="20" printWhenGroupChanges="AC_TYPE" uuid="2d9784c1-0b8f-445e-8734-f938d4f97bb8"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{gross_total}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.000">
+					<reportElement x="741" y="14" width="43" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="3d9aa48a-9f8c-4123-9b47-eed93f2f4511"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{total_wt}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.00">
+					<reportElement x="796" y="14" width="54" height="20" printWhenGroupChanges="AC_TYPE" uuid="4875b77f-f303-46d8-a78a-d0281a259ad6"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sum}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="ACCOUNT_NO" pattern="###0.00">
+					<reportElement x="859" y="14" width="66" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="072c1c72-7769-4ae6-8c4e-7aaf8b4c0541"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sum1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="314" y="14" width="131" height="20" uuid="dab14b1e-21ee-4a20-98e0-f69e31ccb505"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Scheme Type Total]]></text>
+				</staticText>
+				<line>
+					<reportElement x="4" y="34" width="1019" height="1" uuid="7b15c9f8-f95d-4d62-8353-520788486447"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="ACCOUNT_NO">
+		<groupExpression><![CDATA[$F{ACCOUNT_CODE}]]></groupExpression>
+		<groupFooter>
+			<band height="26">
+				<textField evaluationTime="Group" evaluationGroup="ACCOUNT_NO" pattern="###0.000" isBlankWhenNull="false">
+					<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" mode="Transparent" x="668" y="6" width="47" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="38b5da7d-1239-471d-ad3f-4fd619000b0c"/>
+					<textElement textAlignment="Right">
+						<font size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Tot_Grms}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.000">
+					<reportElement x="741" y="6" width="43" height="20" uuid="b6989df2-7dd7-4893-879f-9fc48ea9a388"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Tot Weigth}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.00">
+					<reportElement x="793" y="6" width="57" height="20" uuid="7fda1abf-3482-44b3-9498-0c7aaac3b671"/>
+					<textElement textAlignment="Right">
+						<font fontName="Times New Roman" size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{Totl_Sec}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="662" y="2" width="361" height="1" uuid="259a0e69-6269-423c-83bb-29ff1e3e4411"/>
+				</line>
+				<line>
+					<reportElement x="5" y="21" width="1018" height="1" uuid="f841c6bc-607c-4d6b-b0e7-23b104e127a2"/>
+				</line>
+				<textField>
+					<reportElement isPrintRepeatedValues="false" x="196" y="-1" width="171" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="284bf14b-3c38-46a4-b830-6a0593466c89"/>
+					<textElement>
+						<font fontName="Times New Roman" size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ADDRES}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement isPrintRepeatedValues="false" x="121" y="0" width="63" height="18" printWhenGroupChanges="ACCOUNT_NO" uuid="73ca01dc-f06a-4086-b1e8-44bec0b333d9"/>
+					<textElement textAlignment="Center">
+						<font fontName="Times New Roman" size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ACCOUNTREVIEWDATE}]]></textFieldExpression>
+				</textField>
+				<break>
+					<reportElement x="0" y="24" width="1040" height="1" uuid="a746c9fc-5d96-41b4-9f98-de5447b42090">
+						<printWhenExpression><![CDATA[new Integer ($V{Sr.No}.intValue() % 10)==0]]></printWhenExpression>
+					</reportElement>
+				</break>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="70">
+			<staticText>
+				<reportElement x="292" y="40" width="200" height="29" uuid="735ad790-17af-4d2c-ac9c-d7562cd4e67a"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Loan Security Gold From Date]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="582" y="40" width="100" height="29" uuid="b48a7803-e6ba-433f-968e-d0b8b7a3c9d5"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="219" y="0" width="624" height="39" uuid="1e410a60-5d15-431a-aa0d-83660dceff2e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{report_title}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="560" y="40" width="20" height="29" uuid="395113b5-d528-4688-830e-4fc6620dfb88"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="483" y="40" width="100" height="29" isPrintInFirstWholeBand="true" uuid="d55dd392-fd9c-4a47-b62e-f3bc580e28fd"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="58" splitType="Stretch">
+			<line>
+				<reportElement x="5" y="2" width="1018" height="1" uuid="836711d1-0459-47e7-acd7-895647c185ff"/>
+			</line>
+			<staticText>
+				<reportElement x="70" y="8" width="53" height="30" uuid="c67eaa11-42d6-4df0-ad96-286a219429e0"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account No]]></text>
+			</staticText>
+			<line>
+				<reportElement x="10" y="51" width="1013" height="1" uuid="a946b988-c459-46f1-93b0-44c0c98160bf"/>
+			</line>
+			<staticText>
+				<reportElement x="241" y="8" width="73" height="20" uuid="78d68442-482f-4a1a-936a-1074b9fc98ae"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="733" y="8" width="51" height="29" uuid="d5c126c4-0cfd-42f4-aaca-ad9833aea0d4"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Weight]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="133" y="31" width="72" height="19" uuid="0ca45ff5-60e6-46f2-ae1b-a78dae986608"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Review Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="366" y="8" width="90" height="20" uuid="9935fdeb-7442-4cf1-bba4-a5f1b8b6a305"/>
+				<textElement textAlignment="Left">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Article Details]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="662" y="8" width="53" height="32" uuid="efdd661c-fb5c-4a46-a0b3-cf8d15e73130"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gross Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="241" y="31" width="73" height="20" uuid="ee691605-9ab4-4f43-a3ac-744c06cfb0e8"/>
+				<textElement textAlignment="Left">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Address]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="134" y="8" width="72" height="19" uuid="8d5432f0-fe4e-4187-8295-ce4898796636"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="807" y="8" width="55" height="33" uuid="8506e061-bc03-416c-877d-e5f003f59b65"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Security Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="871" y="8" width="53" height="33" uuid="366e635f-ad56-44ce-b3b6-1ef599353cc2"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sanction Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="25" y="8" width="34" height="20" uuid="1cdac719-088b-4ecf-a87f-2983450e9710"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement isPrintRepeatedValues="false" x="193" y="-1" width="192" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="b896aa10-ba9e-420a-a72a-8f4eb9d36bf4"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement isPrintRepeatedValues="false" x="121" y="-1" width="63" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="0f2ac8e6-4055-47de-bc0c-469e46506cb5"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="385" y="-1" width="262" height="20" uuid="9c885d10-491e-410d-9de8-d0923c5831d9"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PARTICULAR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="742" y="-1" width="42" height="20" uuid="7dfd48d6-1828-425a-9c20-72604316ff95"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WEIGHTTOTALGMS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="803" y="-2" width="47" height="20" uuid="6afc9a23-9a66-4083-bbbc-f93b51b3b273"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SECURITYVALUE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="668" y="-1" width="47" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="7a28baba-53a9-4d81-bfb3-10c84943f89a"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{GROSTOTALGMS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement isPrintRepeatedValues="false" x="59" y="-1" width="51" height="20" printWhenGroupChanges="ACCOUNT_NO" uuid="42d86518-0b54-4741-803f-6634918842c9"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0">
+				<reportElement isPrintRepeatedValues="false" x="34" y="-1" width="21" height="20" uuid="af728275-02c6-48c4-bcd8-6a512be17f11"/>
+				<textFieldExpression><![CDATA[$V{Sr.No}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="871" y="0" width="53" height="18" uuid="25b3e073-da7d-496d-93ee-6955cec25dd8"/>
+				<textElement textAlignment="Right">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SANCTIONAMOUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30">
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="2" y="10" width="100" height="20" uuid="2334a9ee-fe3e-4cfc-a7b8-351fac6212c1"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="935" y="10" width="65" height="20" uuid="4b111bad-6b0e-4fde-b550-3ee2d9e756fa"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="999" y="10" width="40" height="20" uuid="2b29617e-bbaf-43c6-95d9-ed81e84a0f69"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="31" splitType="Stretch">
+			<staticText>
+				<reportElement x="316" y="3" width="100" height="20" uuid="25b1a8be-0e77-488e-a55a-80b7b2dc1685"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<textField pattern="###0.000">
+				<reportElement x="741" y="3" width="43" height="20" uuid="0406f3cb-b834-4049-a06b-fa257b6a4425"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{grand_totweight}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="796" y="3" width="54" height="20" uuid="e33e2222-782b-42f2-9bf8-c5193bfa609a"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{grand_totsuceur}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="7" y="27" width="1016" height="1" uuid="5ff55f2e-228a-44ec-9167-bdab002ed44d"/>
+			</line>
+			<textField pattern="###0.00">
+				<reportElement x="858" y="3" width="67" height="20" uuid="45e0ead3-6e83-49e8-b708-ce7930dcdd9a"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{grand_tol_saction}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="664" y="3" width="51" height="20" uuid="70506640-16ae-4f35-ba79-ea6b1a7de86e"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Gran_Total}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
