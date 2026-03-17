@@ -123,23 +123,13 @@
                 <div class="product-badge">
                     <div class="product-badge-top">
                         <span class="product-dot"></span>
-                        <span class="product-name">Dynamic Bank Soft</span>
+                        <span class="product-name">Core Banking Solution</span>
                         <span class="product-version">v3.1</span>
                     </div>
-                    <div class="product-sub">Core Banking Solution</div>
                 </div>
 
                 <!-- Platform pills -->
-                <div class="platform-row">
-                    <div class="platform-pill">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                        Java / Oracle
-                    </div>
-                    <div class="platform-pill">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                        Linux / Windows
-                    </div>
-                </div>
+                
             </div>
         </div>
 
