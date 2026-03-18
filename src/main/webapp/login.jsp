@@ -90,11 +90,6 @@
 <!-- Arc pattern background -->
 <div class="bg-arc"></div>
 
-<!-- IDSSPL logo top-right -->
-<div class="idsspl-corner">
-    <img src="images/IDSSPL LOGO.jpeg" alt="IDSSPL Logo">
-    <div class="idsspl-corner-text">IDSSPL TECHNOLOGIES PVT LTD</div>
-</div>
 
 <!-- Licence modal overlay -->
 <div id="licenseOverlay">
@@ -109,7 +104,11 @@
         <button id="licenseOkBtn" onclick="handleLicenseOk()">OK</button>
     </div>
 </div>
-
+<!-- IDSSPL logo prominent at top -->
+                <div class="idsspl-logo-block">
+                    <img src="images/IDSSPL_LOGO.png" alt="IDSSPL Logo" class="idsspl-logo-img">
+                    
+                </div>
 <!-- ── CENTERED CARD ── -->
 <div class="page-wrapper">
     <div class="login-card">
@@ -117,9 +116,11 @@
         <!-- LEFT — illustration panel -->
         <div class="card-left">
             <div class="card-left-content">
+<div class="idsspl-logo-label">IDSSPL TECHNOLOGIES PVT LTD</div>
+                <!-- Banking illustration -->
                 <img src="images/online_banking.png" alt="Online Banking" class="banking-img">
 
-                <!-- Product badge -->
+                <!-- Product badge pill — matches screenshot exactly -->
                 <div class="product-badge">
                     <div class="product-badge-top">
                         <span class="product-dot"></span>
@@ -128,8 +129,6 @@
                     </div>
                 </div>
 
-                <!-- Platform pills -->
-                
             </div>
         </div>
 
