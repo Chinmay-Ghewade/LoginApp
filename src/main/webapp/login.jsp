@@ -104,23 +104,28 @@
         <button id="licenseOkBtn" onclick="handleLicenseOk()">OK</button>
     </div>
 </div>
-<!-- IDSSPL logo prominent at top -->
-                <div class="idsspl-logo-block">
-                    <img src="images/IDSSPL_LOGO.png" alt="IDSSPL Logo" class="idsspl-logo-img">
-                    
-                </div>
-<!-- ── CENTERED CARD ── -->
+
+<!-- ── PAGE WRAPPER — logo above + card below ── -->
 <div class="page-wrapper">
+
+    <!-- IDSSPL logo — above the card, centered -->
+    <div class="idsspl-above-card">
+        <img src="images/IDSSPL_LOGO.png" alt="IDSSPL Logo" class="idsspl-logo-img">
+    </div>
+
     <div class="login-card">
 
         <!-- LEFT — illustration panel -->
         <div class="card-left">
             <div class="card-left-content">
-<div class="idsspl-logo-label">IDSSPL TECHNOLOGIES PVT LTD</div>
+
+                <!-- Company label -->
+                <div class="idsspl-logo-label">IDSSPL TECHNOLOGIES PVT LTD</div>
+
                 <!-- Banking illustration -->
                 <img src="images/online_banking.png" alt="Online Banking" class="banking-img">
 
-                <!-- Product badge pill — matches screenshot exactly -->
+                <!-- Product badge — toned down -->
                 <div class="product-badge">
                     <div class="product-badge-top">
                         <span class="product-dot"></span>
