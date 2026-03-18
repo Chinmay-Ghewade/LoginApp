@@ -108,17 +108,17 @@
 <!-- ── PAGE WRAPPER — logo above + card below ── -->
 <div class="page-wrapper">
 
-    <!-- IDSSPL logo — above the card, centered -->
-    <div class="idsspl-above-card">
-        <img src="images/IDSSPL_LOGO.png" alt="IDSSPL Logo" class="idsspl-logo-img">
-    </div>
+    
 
     <div class="login-card">
 
         <!-- LEFT — illustration panel -->
         <div class="card-left">
             <div class="card-left-content">
-
+<!-- IDSSPL logo — above the card, centered -->
+    <div class="idsspl-above-card">
+        <img src="images/IDSSPL_LOGO.png" alt="IDSSPL Logo" class="idsspl-logo-img">
+    </div>
                 <!-- Company label -->
                 <div class="idsspl-logo-label">IDSSPL TECHNOLOGIES PVT LTD</div>
 
