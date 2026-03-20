@@ -1,25 +1,45 @@
 package db;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DBConnection {
 
-    //private static final String URL = "jdbc:oracle:thin:@192.168.1.117:1521:xe";
-	private static final String URL = "jdbc:oracle:thin:@203.193.140.138:1521:test";
-    private static final String USER = "system";
-    private static final String PASSWORD = "info123";
+    private static String url;
+    private static String userName;
+    private static String password;
+    private static String driver;
 
     static {
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            String tomcatHome = System.getProperty("catalina.home");
+            File configFile   = new File(tomcatHome + "/conf/cbs_database.conf");
+
+            Properties props = new Properties();
+            props.load(new FileInputStream(configFile));
+
+            driver   = props.getProperty("driver");
+            url      = props.getProperty("dbURL");
+            userName = props.getProperty("userName");
+            password = props.getProperty("password");
+
+            Class.forName(driver);
+
+            System.out.println("✅ DB config loaded from: " + configFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            throw new RuntimeException("❌ Cannot read database.conf from TOMCAT_HOME/conf/", e);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            throw new RuntimeException("❌ Oracle JDBC driver not found. Place ojdbc8.jar in TOMCAT_HOME/lib/", e);
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(url, userName, password);
     }
 }
