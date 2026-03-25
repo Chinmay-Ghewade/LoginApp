@@ -14,6 +14,36 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+// fallback
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
+String branchCodeVal = request.getParameter("branch_code");
+String productCodeVal = request.getParameter("product_code");
+String asOnDateVal = request.getParameter("as_on_date");
+
+if (branchCodeVal == null) branchCodeVal = "";
+if (productCodeVal == null) productCodeVal = "";
+if (asOnDateVal == null) asOnDateVal = "";
+%>
+<%
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
@@ -82,13 +112,10 @@ if ("download".equals(action)) {
         parameters.put("SUBREPORT_DIR",
                 application.getRealPath("/Reports/"));
 
-        String userId = (String)session.getAttribute("user_id");
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
+        parameters.put("user_id", userId);
 
-        if(userId == null || userId.trim().equals("")){
-            userId="admin";
-        }
-
-        parameters.put("user_id",userId);
 
         parameters.put("IMAGE_PATH",
                 application.getRealPath("/images/UPSB MONO.png"));
@@ -184,8 +211,38 @@ if ("download".equals(action)) {
 
 <title>Account Category Wise Report</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+<style>
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
 
 </head>
 
@@ -215,25 +272,47 @@ autocomplete="off">
 
 <div class="parameter-label">Branch Code</div>
 
-<input type="text"
-name="branch_code"
-class="input-field"
-value="0003"
-required>
+<div class="input-box">
+    <input type="text"
+           name="branch_code"
+           id="branch_code"
+           class="input-field"
+           value="<%= branchCodeVal %>"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
+</div>
 
 </div>
 
+<div class="parameter-group">
+    <div class="parameter-label">Branch Description</div>
+    <input type="text"
+           id="branchName"
+           class="input-field"
+           readonly>
+</div>
 
 
 <div class="parameter-group">
 
 <div class="parameter-label">Product Code</div>
 
-<input type="text"
-name="product_code"
-class="input-field"
-placeholder="Enter Product Code"
-required>
+<div class="input-box">
+    <input type="text"
+           name="product_code"
+           id="product_code"
+           class="input-field"
+           value="<%= productCodeVal %>"
+           placeholder="Enter Product Code"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openProductLookup()">…</button>
+</div>
 
 </div>
 
@@ -246,6 +325,7 @@ required>
 <input type="date"
 name="as_on_date"
 class="input-field"
+value="<%= sessionDate %>"
 required>
 
 </div>
@@ -288,5 +368,79 @@ Generate Report
 
 </div>
 
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
+<script>
+
+// 🔹 Branch Popup
+function openBranchLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Product Popup (ONLY CODE USE)
+function openProductLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=product")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Close Modal
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+}
+
+// 🔹 Select Branch (WITH DESCRIPTION)
+function selectBranch(code, name) {
+    document.getElementById("branch_code").value = code;
+
+    let field = document.getElementById("branchName");
+    if (field) {
+        field.value = name;
+    }
+
+    closeLookup();
+}
+
+// 🔹 Select Product (ONLY CODE)
+function selectProduct(code, name, type) {
+    document.getElementById("product_code").value = code;
+    closeLookup();
+}
+
+/* =========================
+   🔹 BRANCH AUTO FETCH (IMPORTANT)
+   ========================= */
+document.getElementById("branch_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    if (!code || code.trim() === "") return;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + encodeURIComponent(code))
+        .then(res => res.text())
+        .then(name => {
+
+            let field = document.getElementById("branchName");
+
+            if (field) {
+                field.value = name || "Not Found";
+            }
+        });
+});
+
+</script>
 </body>
 </html>

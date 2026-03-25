@@ -18,6 +18,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
     DATEDUE AS DATEDUE,
@@ -192,21 +195,25 @@ ORDER BY DATEDUE]]>
 	<pageFooter>
 		<band height="21" splitType="Stretch">
 			<textField>
-				<reportElement x="454" y="0" width="59" height="20" uuid="ae6f7598-4679-42be-8bd7-b3d2ca2ca013"/>
+				<reportElement x="454" y="1" width="59" height="20" uuid="ae6f7598-4679-42be-8bd7-b3d2ca2ca013"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="514" y="0" width="40" height="20" uuid="b9326baa-347b-494e-9d59-3b4a664a53a1"/>
+				<reportElement x="514" y="1" width="40" height="20" uuid="b9326baa-347b-494e-9d59-3b4a664a53a1"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="1" y="0" width="100" height="20" uuid="5b76b35b-372a-40f2-8f3a-12086a3cff14"/>
+				<reportElement x="47" y="1" width="100" height="20" uuid="5b76b35b-372a-40f2-8f3a-12086a3cff14"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="2" y="-1" width="552" height="1" uuid="97581380-f36a-417d-8247-a2fbf5c26135"/>
 			</line>
+			<textField>
+				<reportElement x="-1" y="1" width="47" height="20" uuid="97a27fc9-3b7b-4403-8897-88db89f307e6"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 	<summary>

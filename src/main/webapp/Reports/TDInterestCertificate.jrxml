@@ -24,6 +24,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
  AC_CODE,
@@ -242,12 +245,12 @@ GROUP BY
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{AC_NAME}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement x="282" y="0" width="78" height="16" uuid="b85f0fde-f99b-435c-8d74-78a20ab4ce8e"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{DEPOSITAMOUNT}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement x="373" y="0" width="83" height="16" uuid="65175bbe-036e-4389-894a-4b9b904487f4"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{INTERESTRATE}]]></textFieldExpression>
@@ -278,19 +281,23 @@ GROUP BY
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="20">
+		<band height="21">
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="1" y="0" width="100" height="20" uuid="a5c7b661-784a-4cea-aa9c-daf936d6b2b1"/>
+				<reportElement x="57" y="2" width="100" height="19" uuid="a5c7b661-784a-4cea-aa9c-daf936d6b2b1"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="451" y="-1" width="64" height="20" uuid="484b210e-dc27-4512-8183-56691b47a1dc"/>
+				<reportElement x="451" y="1" width="64" height="20" uuid="484b210e-dc27-4512-8183-56691b47a1dc"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="515" y="0" width="40" height="20" uuid="3539f9fe-e8da-45d9-81c9-47abfda4b232"/>
+				<reportElement x="515" y="1" width="40" height="20" uuid="3539f9fe-e8da-45d9-81c9-47abfda4b232"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="1" width="57" height="20" uuid="1993462c-2b0a-4463-9d9c-d98a064d1121"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

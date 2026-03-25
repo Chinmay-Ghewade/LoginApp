@@ -51,6 +51,8 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT NAME FROM ACCOUNT.ACCOUNT WHERE ACCOUNT_CODE=?";
                 } else if ("bank".equalsIgnoreCase(type)) {
                     query = "SELECT NAME FROM GLOBALCONFIG.BANK WHERE BANK_CODE=?";
+                } else if ("product".equalsIgnoreCase(type)) {
+                    query = "SELECT DESCRIPTION FROM HEADOFFICE.PRODUCT WHERE PRODUCT_CODE=?";
                 } else {
                     out.print("");
                     return;
@@ -81,6 +83,8 @@ public class CommonLookupServlet extends HttpServlet {
                 listAccount(conn, out, request);
             } else if ("bank".equalsIgnoreCase(type)) {
                 listBank(conn, out, request);
+            } else if ("product".equalsIgnoreCase(type)) {
+                listProduct(conn, out, request);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -180,23 +184,28 @@ public class CommonLookupServlet extends HttpServlet {
 
         String sql =
             "SELECT ACCOUNT_CODE, NAME FROM ACCOUNT.ACCOUNT " +
-            "WHERE ACCOUNT_STATUS='L' AND DATEACCOUNTCLOSE IS NULL AND BRANCH_CODE=? " +
+            "WHERE ACCOUNT_CODE LIKE ? " +
+            "AND ACCOUNT_STATUS = 'L' " +          // ✅ correct status
+            "AND DATEACCOUNTCLOSE IS NULL " +
             "ORDER BY ACCOUNT_CODE";
 
         PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setString(1, branchCode);
+        ps.setString(1, branchCode + "%");
 
         ResultSet rs = ps.executeQuery();
 
         printTableHeader(out, "Select Account", "Account Code", "Name", false);
 
+        boolean hasData = false;
+
         while (rs.next()) {
+            hasData = true;
 
             String code = rs.getString("ACCOUNT_CODE");
             String name = rs.getString("NAME");
 
-            code = code.replace("'", "\\'");
-            name = name.replace("'", "\\'");
+            code = code == null ? "" : code.replace("'", "\\'");
+            name = name == null ? "" : name.replace("'", "\\'");
 
             out.println("<tr class='lookup-row' onclick=\"selectAccount('"
                     + code + "','" + name + "')\">");
@@ -206,12 +215,16 @@ public class CommonLookupServlet extends HttpServlet {
             out.println("</tr>");
         }
 
+        if (!hasData) {
+            out.println("<tr><td colspan='2' style='text-align:center;color:red;'>No accounts found</td></tr>");
+        }
+
         printTableFooter(out);
 
         rs.close();
         ps.close();
     }
-
+    
     /* =========================
        BANK  ✅ NEW
        ========================= */
@@ -249,4 +262,55 @@ public class CommonLookupServlet extends HttpServlet {
         rs.close();
         ps.close();
     }
-}
+
+/* =========================
+PRODUCT  ✅ NEW
+========================= */
+    private void listProduct(Connection conn, PrintWriter out, HttpServletRequest request) throws Exception {
+
+        String sql =
+            "SELECT PRODUCT_CODE, DESCRIPTION, ACCOUNT_TYPE FROM HEADOFFICE.PRODUCT ORDER BY PRODUCT_CODE";
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        out.println("<div class='lookup-container'>");
+        out.println("<div class='lookup-title'>Select Product</div>");
+        out.println("<div class='lookup-table-wrapper'>");
+        out.println("<table class='lookup-table'>");
+
+        out.println("<tr>");
+        out.println("<th>Product Code</th>");
+        out.println("<th>Description</th>");
+        out.println("<th>Account Type</th>");
+        out.println("</tr>");
+
+        while (rs.next()) {
+
+            String code = rs.getString("PRODUCT_CODE");
+            String name = rs.getString("DESCRIPTION");
+            String type = rs.getString("ACCOUNT_TYPE");
+
+            if (code == null) code = "";
+            if (name == null) name = "";
+            if (type == null) type = "";
+
+            code = code.replace("'", "\\'");
+            name = name.replace("'", "\\'");
+            type = type.replace("'", "\\'");
+
+            out.println("<tr class='lookup-row' onclick=\"selectProduct('"
+                    + code + "','" + name + "','" + type + "')\">");
+
+            out.println("<td>" + code + "</td>");
+            out.println("<td>" + name + "</td>");
+            out.println("<td>" + type + "</td>");
+
+            out.println("</tr>");
+        }
+
+        printTableFooter(out);
+
+        rs.close();
+        ps.close();
+    }}

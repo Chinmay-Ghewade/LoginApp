@@ -15,6 +15,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT ROWNUM SR_NO,TO_NUMBER(SUBSTR(A.ACCOUNT_CODE,8,14))
     			AC_NO,A.NAME,D.DEPOSITAMOUNT,D.UNITOFPERIOD,
@@ -196,21 +199,25 @@ Rate]]></text>
 	<pageFooter>
 		<band height="33" splitType="Stretch">
 			<textField>
-				<reportElement x="471" y="12" width="68" height="20" uuid="b29ba1a8-b6a8-4100-9c75-9f6e19292050"/>
+				<reportElement x="471" y="13" width="68" height="20" uuid="b29ba1a8-b6a8-4100-9c75-9f6e19292050"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="539" y="12" width="40" height="20" uuid="d84e0c3b-b94e-4e4d-bc21-b9a928ec4433"/>
+				<reportElement x="539" y="13" width="40" height="20" uuid="d84e0c3b-b94e-4e4d-bc21-b9a928ec4433"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="1" y="11" width="100" height="20" uuid="9695e37a-8db2-4e85-beca-d85f67f6ab17"/>
+				<reportElement x="53" y="13" width="100" height="20" uuid="9695e37a-8db2-4e85-beca-d85f67f6ab17"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="-1" y="-2" width="581" height="1" uuid="df83f431-41ea-4942-933d-5bca5e4c52e0"/>
 			</line>
+			<textField>
+				<reportElement x="-1" y="13" width="54" height="20" uuid="c5bad38f-edd7-4821-869d-142ff1d9c731"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 	<summary>

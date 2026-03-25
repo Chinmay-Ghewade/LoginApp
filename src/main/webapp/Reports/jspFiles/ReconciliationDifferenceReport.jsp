@@ -246,7 +246,7 @@ if ("download".equals(action)) {
    🔹 CALL SERVLET (UPDATED)
    ========================= */
 function openBranchLookup() {
-    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&showcity=true")
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
         .then(res => res.text())
         .then(html => {
             document.getElementById("branchTable").innerHTML = html;

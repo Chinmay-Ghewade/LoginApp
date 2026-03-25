@@ -14,38 +14,54 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+// fallback
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
 /* ==============================
-   DEFAULT VALUES (Editable)
+   REMOVE DEFAULTS → USE REQUEST DIRECTLY
    ============================== */
-String defaultBranch = request.getParameter("branch_code") != null
-        ? request.getParameter("branch_code") : "0002";
 
-String defaultAccount = request.getParameter("account_code") != null
-        ? request.getParameter("account_code") : "00024020016659";
+String branchCode = request.getParameter("branch_code");
+String accountCode = request.getParameter("account_code");
+String fromDate = request.getParameter("from_date");
+String toDate = request.getParameter("to_date");
 
-String defaultFromDate = request.getParameter("from_date") != null
-        ? request.getParameter("from_date") : "2015-04-18";
-
-String defaultToDate = request.getParameter("to_date") != null
-        ? request.getParameter("to_date") : "2016-06-17";
-
+// avoid null issues
+if (branchCode == null) branchCode = "";
+if (accountCode == null) accountCode = "";
+if (fromDate == null) fromDate = "";
+if (toDate == null) toDate = "";
 
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
 
-    String reporttype  = request.getParameter("reporttype");
-
-    String branchCode  = defaultBranch.trim();
-    String accountCode = defaultAccount.trim();
-    String fromDate    = defaultFromDate;
-    String toDate      = defaultToDate;
+    String reporttype = request.getParameter("reporttype");
 
     Connection conn = null;
 
     try {
 
-        if (branchCode.isEmpty() || accountCode.isEmpty()) {
+        // ✅ validation
+        if (branchCode.trim().isEmpty() || accountCode.trim().isEmpty()) {
             throw new Exception("Branch Code and Account Code are required.");
         }
 
@@ -74,19 +90,10 @@ if ("download".equals(action)) {
            ========================== */
         Map<String, Object> parameters = new HashMap<>();
 
-        parameters.put("branch_code", branchCode);
-        parameters.put("account_code", accountCode);
+        parameters.put("branch_code", branchCode.trim());
+        parameters.put("account_code", accountCode.trim());
         parameters.put("from_date", fromDate);
         parameters.put("to_date", toDate);
-
-        // SESSION DATE
-        String sessionDate = (String) session.getAttribute("SESSION_DATE");
-
-        if (sessionDate == null || sessionDate.trim().isEmpty()) {
-            sessionDate = new SimpleDateFormat("dd-MM-yyyy")
-                                .format(new java.util.Date());
-        }
-
         parameters.put("session_date", sessionDate);
 
         JasperPrint jasperPrint =
@@ -109,6 +116,7 @@ if ("download".equals(action)) {
 
             ServletOutputStream outStream = response.getOutputStream();
             JasperExportManager.exportReportToPdfStream(jasperPrint, outStream);
+
             outStream.flush();
             outStream.close();
             return;
@@ -167,9 +175,38 @@ if ("download".equals(action)) {
 <html>
 <head>
 <title>Saving Bank Interest Certificate</title>
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/lookup.css">
+<style>
+.input-box { display:flex; gap:10px; }
 
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
 </head>
 
 <body>
@@ -190,30 +227,56 @@ href="<%=request.getContextPath()%>/css/common-report.css?v=4">
 
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
-<input type="text" name="branch_code"
-       class="input-field"
-       value="<%= defaultBranch %>" required>
+<div class="input-box">
+    <input type="text" name="branch_code"
+           id="branch_code"
+           class="input-field"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
+</div>
+</div>
+
+<div class="parameter-group">
+    <div class="parameter-label">Branch Name</div>
+    <input type="text" id="branch_name"
+           class="input-field" readonly>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">Account Code</div>
-<input type="text" name="account_code"
-       class="input-field"
-       value="<%= defaultAccount %>" required>
+<div class="input-box">
+    <input type="text" name="account_code"
+           id="account_code"
+           class="input-field"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openAccountLookup()">…</button>
+</div>
+</div>
+
+<div class="parameter-group">
+    <div class="parameter-label">Account Name</div>
+    <input type="text" id="account_name"
+           class="input-field" readonly>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
 <input type="date" name="from_date"
        class="input-field"
-       value="<%= defaultFromDate %>" required>
+       value="<%= sessionDate %>" required>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
 <input type="date" name="to_date"
        class="input-field"
-       value="<%= defaultToDate %>" required>
+       required>
 </div>
 
 </div>
@@ -241,5 +304,85 @@ Generate Certificate
 </form>
 
 </div>
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
+<script>
+
+// OPEN BRANCH LOOKUP
+function openBranchLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// OPEN ACCOUNT LOOKUP
+function openAccountLookup() {
+
+    let branch = document.getElementById("branch_code").value;
+
+    if (!branch || branch.trim() === "") {
+        alert("Please select branch first");
+        return;
+    }
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=account&branchCode=" + encodeURIComponent(branch))
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// CLOSE MODAL
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+}
+
+// SELECT BRANCH
+function selectBranch(code, name) {
+    document.getElementById("branch_code").value = code;
+    document.getElementById("branch_name").value = name;
+    closeLookup();
+}
+
+// SELECT ACCOUNT
+function selectAccount(code, name) {
+    document.getElementById("account_code").value = code;
+    document.getElementById("account_name").value = name;
+    closeLookup();
+}
+
+// FETCH NAME ON BLUR
+document.getElementById("branch_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("branch_name").value = name || "Not Found";
+        });
+});
+
+document.getElementById("account_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=account&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("account_name").value = name || "Not Found";
+        });
+});
+
+</script>
 </body>
 </html>

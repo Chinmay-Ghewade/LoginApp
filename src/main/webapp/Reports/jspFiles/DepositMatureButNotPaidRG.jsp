@@ -14,11 +14,32 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
 
     String reporttype  = request.getParameter("reporttype");
+    String reportMode = request.getParameter("report_mode");
     String branchCode  = request.getParameter("branch_code");
     String asOnDate    = request.getParameter("as_on_date");
     String productCode = request.getParameter("product_code");
@@ -59,9 +80,17 @@ if ("download".equals(action)) {
 
         /* REPORT */
 
-        String jasperPath =
-            application.getRealPath("/Reports/DepositMatureButNotPaidRG.jasper");
+        String jasperFile;
 
+        if("SUMMARY".equalsIgnoreCase(reportMode)){
+            jasperFile = "DepositMatureButNotPaidRG_summary.jasper";
+        }else{
+            jasperFile = "DepositMatureButNotPaidRG.jasper";
+        }
+
+        String jasperPath =
+        application.getRealPath("/Reports/" + jasperFile);
+        
         JasperReport jasperReport =
             (JasperReport)JRLoader.loadObject(new File(jasperPath));
 
@@ -71,8 +100,11 @@ if ("download".equals(action)) {
 
         parameters.put("branch_code",branchCode);
         parameters.put("as_on_date",oracleDateStr);
-        parameters.put("to_date",oracleDateStr);
         parameters.put("report_title","DEPOSIT MATURE BUT NOT PAID");
+        
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
+        parameters.put("user_id", userId);
 
         parameters.put("SUBREPORT_DIR",
             application.getRealPath("/Reports/"));
@@ -192,8 +224,8 @@ if ("download".equals(action)) {
 
 <title>Deposit Mature But Not Paid</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/lookup.css">
 
 <style>
 .radio-container{
@@ -206,6 +238,35 @@ href="<%=request.getContextPath()%>/css/common-report.css?v=4">
     background-color:#e0e0e0;
     color:#666;
     cursor:not-allowed;
+}
+
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
 }
 </style>
 
@@ -232,23 +293,43 @@ DEPOSIT MATURE BUT NOT PAID
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
 
-<input type="text"
-       name="branch_code"
-       class="input-field"
-       value="0002"
-       required>
+<div class="input-box">
+    <input type="text"
+           name="branch_code"
+           id="branch_code"
+           class="input-field"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
+</div>
 </div>
 
+<div class="parameter-group">
+    <div class="parameter-label">Branch Description</div>
+    <input type="text"
+           id="branchName"
+           class="input-field"
+           readonly>
+</div>
 
 <!-- Product Code -->
 <div class="parameter-group">
 
 <div class="parameter-label">Product Code</div>
 
-<input type="text"
-       name="product_code"
-       class="input-field"
-       placeholder="Enter Product Code">
+<div class="input-box">
+    <input type="text"
+           name="product_code"
+           id="product_code"
+           class="input-field"
+           placeholder="Enter Product Code">
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openProductLookup()">…</button>
+</div>
 
 <div class="radio-container">
 
@@ -282,37 +363,55 @@ All
 <input type="date"
        name="as_on_date"
        class="input-field"
-       value="2009-12-09"
+       value="<%=sessionDate%>"
        required>
        
 </div>
 
 </div>
 
+<div style="display:flex; gap:120px; align-items:center; margin-top:30px;">
+    <!-- REPORT TYPE FIRST -->
+    <div class="parameter-group">
 
-<div class="format-section">
+        <div class="parameter-label">Report Type</div>
 
-<div class="parameter-label">Report Type</div>
+<div class="format-options" style="display:flex; gap:30px;">
 
-<div class="format-options">
+            <div class="format-option">
+                <input type="radio" name="reporttype" value="pdf" checked>
+                PDF
+            </div>
 
-<div class="format-option">
-<input type="radio"
-       name="reporttype"
-       value="pdf"
-       checked> PDF
+            <div class="format-option">
+                <input type="radio" name="reporttype" value="xls">
+                Excel
+            </div>
+
+        </div>
+    </div>
+
+    <!-- REPORT MODE NEXT -->
+    <div class="parameter-group">
+
+        <div class="parameter-label">Report Mode</div>
+
+        <div class="format-options" style="display:flex; gap:20px;">
+
+            <div class="format-option">
+                <input type="radio" name="report_mode" value="DETAIL" checked>
+                Details
+            </div>
+
+            <div class="format-option">
+                <input type="radio" name="report_mode" value="SUMMARY">
+                Summary
+            </div>
+
+        </div>
+    </div>
+
 </div>
-
-<div class="format-option">
-<input type="radio"
-       name="reporttype"
-       value="xls"> Excel
-</div>
-
-</div>
-
-</div>
-
 
 <button type="submit" class="download-button">
 Generate Report
@@ -320,6 +419,13 @@ Generate Report
 
 </form>
 
+</div>
+
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
 </div>
 
 
@@ -350,6 +456,62 @@ function toggleProduct(){
 window.onload=function(){
     toggleProduct();
 }
+
+</script>
+
+<script>
+
+// 🔹 Branch Popup
+function openBranchLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Product Popup
+function openProductLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=product")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Close
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+}
+
+// 🔹 Select Branch (WITH DESCRIPTION)
+function selectBranch(code, name) {
+    document.getElementById("branch_code").value = code;
+    document.getElementById("branchName").value = name;
+    closeLookup();
+}
+
+// 🔹 Select Product (ONLY CODE)
+function selectProduct(code, name, type) {
+    document.getElementById("product_code").value = code;
+    closeLookup();
+}
+
+/* 🔹 AUTO FETCH BRANCH NAME */
+document.getElementById("branch_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    if (!code) return;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("branchName").value = name || "Not Found";
+        });
+});
 
 </script>
 

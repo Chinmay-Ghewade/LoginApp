@@ -13,6 +13,34 @@
 
 <%@ page import="db.DBConnection" %>
 
+<%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
+String branchCode = request.getParameter("branch_code");
+String accountCode = request.getParameter("account_code");
+
+if (branchCode == null) branchCode = "";
+if (accountCode == null) accountCode = "";
+%>
+
 <%!
 /* =========================
    NUMBER TO WORDS FUNCTION
@@ -62,8 +90,6 @@ String action = request.getParameter("action");
 if ("download".equals(action)) {
 
     String reporttype = request.getParameter("reporttype");
-    String branchCode = request.getParameter("branch_code");
-    String accountCode = request.getParameter("account_code");
     String asOnDate = request.getParameter("as_on_date");
 
     Connection conn = null;
@@ -221,7 +247,7 @@ if ("download".equals(action)) {
         parameters.put("customer_address2", address2);
         parameters.put("customer_address3", address3);
 
-        String userId = (String) session.getAttribute("user_id");
+        String userId = (String) session.getAttribute("userId");
 
         if(userId == null || userId.trim().equals("")){
             userId = "admin";
@@ -333,17 +359,46 @@ if ("download".equals(action)) {
 
 <title>Balance Certificate Letter</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+
+<style>
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="report-container">
 
-<h1 class="report-title">
-BALANCE CERTIFICATE LETTER
-</h1>
+<h1 class="report-title">BALANCE CERTIFICATE LETTER</h1>
 
 <form method="post"
 action="<%=request.getContextPath()%>/Reports/jspFiles/BalanceCertificateLetterFR.jsp"
@@ -356,42 +411,61 @@ autocomplete="off">
 
 <div class="parameter-group">
 
-<div class="parameter-label">
-Branch Code
+<div class="parameter-label">Branch Code</div>
+
+<div class="input-box">
+    <input type="text"
+           name="branch_code"
+           id="branch_code"
+           class="input-field"
+           value="<%= branchCode %>"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
 </div>
-
-<input type="text"
-name="branch_code"
-class="input-field"
-value="0002"
-required>
-
-</div>
-
-<div class="parameter-group">
-
-<div class="parameter-label">
-Account Code
-</div>
-
-<input type="text"
-name="account_code"
-class="input-field"
-value="00022010003387"
-required>
 
 </div>
 
 <div class="parameter-group">
-
-<div class="parameter-label">
-As On Date
+    <div class="parameter-label">Description</div>
+    <input type="text" id="branch_name"
+           class="input-field" readonly>
 </div>
+
+<div class="parameter-group">
+
+<div class="parameter-label">Account Code</div>
+
+<div class="input-box">
+    <input type="text"
+           name="account_code"
+           id="account_code"
+           class="input-field"
+           value="<%= accountCode %>"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openAccountLookup()">…</button>
+</div>
+
+</div>
+<div class="parameter-group">
+    <div class="parameter-label">Account Name</div>
+    <input type="text" id="account_name"
+           class="input-field" readonly>
+</div>
+
+<div class="parameter-group">
+
+<div class="parameter-label">As On Date</div>
 
 <input type="date"
 name="as_on_date"
 class="input-field"
-value="2025-03-29"
+value="<%= sessionDate %>"
 required>
 
 </div>
@@ -400,32 +474,140 @@ required>
 
 <div class="format-section">
 
-<div class="parameter-label">
-Report Type
-</div>
+<div class="parameter-label">Report Type</div>
 
 <label>
-<input type="radio" name="reporttype" value="pdf" checked>
-PDF
-</label>
+<input type="radio" name="reporttype" value="pdf" checked>PDF</label>
 
 <label>
-<input type="radio" name="reporttype" value="xls">
-Excel
-</label>
+<input type="radio" name="reporttype" value="xls">Excel</label>
 
 </div>
 
-<button type="submit"
-class="download-button">
-
-Generate Certificate
-
-</button>
+<button type="submit"class="download-button">Generate Certificate</button>
 
 </form>
 
 </div>
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
+<script>
+
+// ==========================
+// OPEN BRANCH LOOKUP
+// ==========================
+function openBranchLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        })
+        .catch(err => {
+            console.error("Branch lookup error:", err);
+        });
+}
+
+// ==========================
+// OPEN ACCOUNT LOOKUP
+// ==========================
+function openAccountLookup() {
+
+    let branch = document.getElementById("branch_code").value;
+
+    // ✅ IMPORTANT VALIDATION
+    if (!branch || branch.trim() === "") {
+        alert("Please select branch first");
+        return;
+    }
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=account&branchCode=" + encodeURIComponent(branch))
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        })
+        .catch(err => {
+            console.error("Account lookup error:", err);
+        });
+}
+
+// ==========================
+// CLOSE MODAL
+// ==========================
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+}
+
+// ==========================
+// SELECT BRANCH
+// ==========================
+function selectBranch(code, name) {
+    console.log("Selected Branch:", code, name); // debug
+
+    document.getElementById("branch_code").value = code;
+    document.getElementById("branch_name").value = name;
+
+    // ✅ Clear account when branch changes
+    document.getElementById("account_code").value = "";
+    if (document.getElementById("account_name")) {
+        document.getElementById("account_name").value = "";
+    }
+
+    closeLookup();
+}
+
+// ==========================
+// SELECT ACCOUNT
+// ==========================
+function selectAccount(code, name) {
+    console.log("Selected Account:", code, name); // debug
+
+    document.getElementById("account_code").value = code;
+
+    // ✅ OPTIONAL (recommended)
+    let accNameField = document.getElementById("account_name");
+    if (accNameField) {
+        accNameField.value = name;
+    }
+
+    closeLookup();
+}
+
+document.getElementById("branch_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    if (!code) return;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("branch_name").value = name || "Not Found";
+        })
+        .catch(err => console.error(err));
+});
+
+document.getElementById("account_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    if (!code) return;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=account&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("account_name").value = name || "Not Found";
+        })
+        .catch(err => console.error(err));
+});
+
+</script>
 
 </body>
 </html>
