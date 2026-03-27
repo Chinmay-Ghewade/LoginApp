@@ -89,26 +89,35 @@ document.addEventListener("DOMContentLoaded", function() {
   document.querySelectorAll(".kyc-section table tr").forEach(row => {
     const checkbox = row.querySelector('input[type="checkbox"]');
     const inputs = row.querySelectorAll('input[id="date"], input[type="text"]');
-    
+
     if (checkbox) {
       inputs.forEach(input => input.disabled = true);
       checkbox.addEventListener("change", () => {
-        inputs.forEach(input => input.disabled = !checkbox.checked);
+        if (checkbox.checked) {
+          // Enable inputs when checkbox is checked
+          inputs.forEach(input => input.disabled = false);
+        } else {
+          // Disable AND CLEAR inputs when checkbox is unchecked
+          inputs.forEach(input => {
+            input.disabled = true;
+            clearKYCFieldCache(input);
+          });
+        }
       });
     }
   });
-  
+
   // Birth date change listener
   const birthDateField = document.getElementById('birthDate');
   if (birthDateField) {
       birthDateField.addEventListener('change', checkMinorStatus);
-      
+
       birthDateField.addEventListener('input', function() {
           if (!this.value) {
               const isMinorYes = document.getElementById('isMinor1');
               const isMinorNo = document.getElementById('isMinor2');
               const radioGroup = isMinorYes?.closest('.radio-group');
-              
+
               if (isMinorYes) {
                   isMinorYes.disabled = false;
                   isMinorYes.style.cursor = 'pointer';
@@ -125,6 +134,20 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 });
+
+// ========== KYC CACHE CLEAR FUNCTION ==========
+function clearKYCFieldCache(inputField) {
+    inputField.value = '';
+    inputField.style.borderColor = '';
+    inputField.style.backgroundColor = '';
+    
+    const errorDiv = inputField.parentNode.querySelector('.error-message');
+    if (errorDiv) {
+        errorDiv.remove();
+    }
+    
+    console.log(`✅ Cleared: ${inputField.name}`);
+}
 
 // Validation patterns
 const validationPatterns = {
