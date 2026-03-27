@@ -1,3 +1,4 @@
+
 // ===============================
 // COMMON LOOKUP JS (REUSABLE)
 // ===============================
@@ -135,28 +136,6 @@ function initProductAutoFetch() {
 // ===============================
 window.addEventListener("DOMContentLoaded", function () {
     initBranchAutoFetch();
-    initProductAutoFetch();
-	applyBranchControl();   // ✅ NEW
+    initProductAutoFetch();  // ✅ NEW
 });
 
-// ===============================
-// 🔹 HANDLE BRANCH FIELD UI (COMMON)
-// ===============================
-function applyBranchControl() {
-
-    let branchField = document.getElementById("branch_code");
-    if (!branchField) return;
-
-    // Get support flag from hidden input (we will set once in JSP OR assume default)
-    let isSupportUser = document.body.getAttribute("data-support-user");
-
-    if (isSupportUser !== "Y") {
-
-        // ✅ NORMAL USER → READ ONLY
-        branchField.readOnly = true;
-
-        // Remove lookup button if exists
-        let btn = branchField.parentElement.querySelector("button");
-        if (btn) btn.style.display = "none";
-    }
-}
