@@ -18,6 +18,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
     ROWNUM AS SRNO,
@@ -141,7 +144,7 @@ FROM
 	<title>
 		<band height="60" splitType="Stretch">
 			<subreport>
-				<reportElement x="0" y="0" width="1017" height="60" uuid="9abaae9e-2811-4474-b71f-cf1aa1d661fb"/>
+				<reportElement x="209" y="0" width="649" height="60" uuid="9abaae9e-2811-4474-b71f-cf1aa1d661fb"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -356,7 +359,7 @@ FROM
 	<pageFooter>
 		<band height="21" splitType="Stretch">
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="0" y="1" width="100" height="20" uuid="a911da54-22f4-495f-962d-24cff2693667"/>
+				<reportElement x="60" y="1" width="100" height="20" uuid="a911da54-22f4-495f-962d-24cff2693667"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -367,6 +370,10 @@ FROM
 			<textField evaluationTime="Report">
 				<reportElement x="973" y="1" width="40" height="20" uuid="e1c6169c-ec49-4efb-a5b1-48f5c3253ccd"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-1" y="1" width="62" height="20" uuid="176c28fb-fdb6-4a14-91d9-3cd72b670768"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

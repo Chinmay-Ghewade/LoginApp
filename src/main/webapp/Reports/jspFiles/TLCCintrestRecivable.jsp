@@ -13,16 +13,36 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+// fallback
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
 String action = request.getParameter("action");
 
 String branchCode = request.getParameter("branch_code");
 String toDateUI = request.getParameter("to_date");
 
-if(branchCode==null) branchCode="0002";
+if(branchCode==null) branchCode="";
 
-if(toDateUI==null){
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    toDateUI = sdf.format(new java.util.Date());
+if(toDateUI==null || toDateUI.trim().isEmpty()){
+    toDateUI = sessionDate;
 }
 
 if("download".equals(action)){
@@ -121,6 +141,11 @@ if("download".equals(action)){
         params.put("to_date",oracleDate);
         params.put("report_title","RECEIVABLE LOAN REPORT");
         params.put("IMAGE_PATH",application.getRealPath("/images/UPSB MONO.png"));
+        
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
+        params.put("user_id", userId);
+
 
         JasperPrint jasperPrint =
         JasperFillManager.fillReport(jasperReport,params,jrds);
@@ -194,15 +219,47 @@ if(!"download".equals(action)){
 <html>
 <head>
 
+<script>
+var contextPath = "<%=request.getContextPath()%>";
+</script>
+<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
+
 <title>Receivable Loan Report</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
 
 <style>
+
 .input-field:disabled{
     background-color:#e0e0e0;
     color:#666;
+}
+
+.input-box { display:flex; gap:10px; }
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
 }
 </style>
 
@@ -244,12 +301,28 @@ target="_blank">
 
 <div class="parameter-label">Branch Code</div>
 
+<div class="input-box">
 <input type="text"
 name="branch_code"
+id="branch_code"
 class="input-field"
 value="<%=branchCode%>"
 required>
 
+<button type="button"
+class="icon-btn"
+onclick="openLookup('branch')">…</button>
+</div>
+
+</div>
+
+<div class="parameter-group">
+<div class="parameter-label">Branch Description</div>
+
+<input type="text"
+id="branchName"
+class="input-field"
+readonly>
 </div>
 
 
@@ -258,10 +331,17 @@ required>
 
 <div class="parameter-label">Product Code</div>
 
+<div class="input-box">
 <input type="text"
-       name="product_code"
-       class="input-field"
-       placeholder="Enter Product Code">
+name="product_code"
+id="product_code"
+class="input-field"
+placeholder="Enter Product Code">
+
+<button type="button"
+class="icon-btn"
+onclick="openLookup('product')">…</button>
+</div>
 
 <div class="radio-container">
 
@@ -326,6 +406,13 @@ Generate Report
 
 </form>
 
+</div>
+
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
 </div>
 
 <script>

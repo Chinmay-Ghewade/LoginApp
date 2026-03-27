@@ -18,6 +18,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
 ROWNUM AS SRNO,
@@ -88,7 +91,7 @@ AND B.DEPOSITAMOUNT <> 0]]>
 	<title>
 		<band height="40" splitType="Stretch">
 			<subreport>
-				<reportElement x="0" y="0" width="991" height="40" uuid="c2a2ba03-68bf-403a-a703-dcc9b7adebee"/>
+				<reportElement x="222" y="0" width="628" height="40" uuid="c2a2ba03-68bf-403a-a703-dcc9b7adebee"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -121,7 +124,7 @@ AND B.DEPOSITAMOUNT <> 0]]>
 				<reportElement x="121" y="1" width="1" height="43" uuid="86bb0e1f-b916-490b-ac46-13bea705f7a0"/>
 			</line>
 			<line>
-				<reportElement x="306" y="1" width="1" height="43" uuid="c011e5d1-4ba2-400a-8088-10844b0a0d07"/>
+				<reportElement x="313" y="1" width="1" height="43" uuid="c011e5d1-4ba2-400a-8088-10844b0a0d07"/>
 			</line>
 			<line>
 				<reportElement x="389" y="1" width="1" height="43" uuid="4c3e065d-2a4f-42f8-b5c2-9c2881571639"/>
@@ -175,14 +178,14 @@ No]]></text>
 				<text><![CDATA[Account No]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="122" y="1" width="184" height="43" uuid="d3a12f44-4600-4c1c-bf30-e58435c1e595"/>
+				<reportElement x="122" y="1" width="191" height="43" uuid="d3a12f44-4600-4c1c-bf30-e58435c1e595"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Name]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="307" y="2" width="81" height="42" uuid="317d891b-67c5-4654-a522-7b0d9a3c8a64"/>
+				<reportElement x="313" y="2" width="75" height="42" uuid="317d891b-67c5-4654-a522-7b0d9a3c8a64"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
@@ -282,7 +285,7 @@ No.]]></text>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement x="125" y="0" width="184" height="21" uuid="5f877937-788f-41ef-a6a2-b1c4d5729b74"/>
+				<reportElement x="125" y="0" width="189" height="21" uuid="5f877937-788f-41ef-a6a2-b1c4d5729b74"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
 			</textField>
@@ -356,7 +359,7 @@ No.]]></text>
 				<reportElement x="121" y="-29" width="1" height="50" uuid="6e089314-8451-491b-8e35-568b9c53fb6a"/>
 			</line>
 			<line>
-				<reportElement x="306" y="-29" width="1" height="50" uuid="d0400e28-415f-4da3-832c-08c5d3c28989"/>
+				<reportElement x="313" y="-29" width="1" height="50" uuid="d0400e28-415f-4da3-832c-08c5d3c28989"/>
 			</line>
 			<line>
 				<reportElement x="389" y="-29" width="1" height="50" uuid="7005af21-a0ca-492a-8f8c-83c569af5575"/>
@@ -408,12 +411,16 @@ No.]]></text>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="0" y="5" width="100" height="20" uuid="5dfc0ff9-325a-4c74-bcbb-a6269302ffb2"/>
+				<reportElement x="60" y="6" width="100" height="20" uuid="5dfc0ff9-325a-4c74-bcbb-a6269302ffb2"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="0" y="-1" width="992" height="1" uuid="036194f3-9044-4a4b-829b-43353ff994d3"/>
 			</line>
+			<textField>
+				<reportElement x="-1" y="6" width="61" height="20" uuid="47a629be-4059-485d-addd-55f1d4c1a08b"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageFooter>
 	<summary>

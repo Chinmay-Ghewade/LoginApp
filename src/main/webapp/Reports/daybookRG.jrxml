@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="daybookRG" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="eb397dc2-6066-4b5b-b355-dffd9ad91a99">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="110"/>
+	<property name="ireport.y" value="0"/>
 	<parameter name="as_on_date" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -104,7 +104,7 @@ INDEXER,
 	<pageHeader>
 		<band height="60">
 			<subreport>
-				<reportElement x="2" y="0" width="801" height="60" uuid="e04e10f2-31c5-42ce-a758-4c79d68707da"/>
+				<reportElement x="126" y="0" width="605" height="60" uuid="e04e10f2-31c5-42ce-a758-4c79d68707da"/>
 				<subreportParameter name="as_on_date">
 					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
 				</subreportParameter>

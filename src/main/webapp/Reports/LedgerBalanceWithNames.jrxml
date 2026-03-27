@@ -18,6 +18,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT ROWNUM AS SERIALNUMBER,
        ACCOUNT_CODE,
@@ -115,7 +118,7 @@ ORDER BY SERIALNUMBER]]>
 	<title>
 		<band height="68" splitType="Stretch">
 			<subreport>
-				<reportElement x="1" y="0" width="832" height="67" uuid="a4873562-7ea5-4a6d-9235-b864b9a0b631"/>
+				<reportElement x="114" y="0" width="679" height="67" uuid="a4873562-7ea5-4a6d-9235-b864b9a0b631"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -297,7 +300,7 @@ ORDER BY SERIALNUMBER]]>
 	<pageFooter>
 		<band height="37" splitType="Stretch">
 			<staticText>
-				<reportElement x="1" y="16" width="87" height="20" uuid="d4a261dc-e358-4f47-b5b4-76e5b8baf295"/>
+				<reportElement x="57" y="17" width="87" height="20" uuid="d4a261dc-e358-4f47-b5b4-76e5b8baf295"/>
 				<text><![CDATA[ Page Acc. Total]]></text>
 			</staticText>
 			<textField>
@@ -308,10 +311,10 @@ ORDER BY SERIALNUMBER]]>
 			<staticText>
 				<reportElement x="716" y="17" width="79" height="20" uuid="28caf315-2062-488c-a638-5c9cf4a4b704"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<text><![CDATA[ Page Total]]></text>
+				<text><![CDATA[ Page Amt Total]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="81" y="17" width="37" height="20" uuid="4e4f6e53-29ec-4aa2-98d8-72b395651510"/>
+				<reportElement x="136" y="17" width="37" height="20" uuid="4e4f6e53-29ec-4aa2-98d8-72b395651510"/>
 				<textFieldExpression><![CDATA[$V{page_count}]]></textFieldExpression>
 			</textField>
 			<line>
@@ -325,6 +328,14 @@ ORDER BY SERIALNUMBER]]>
 			<textField evaluationTime="Report">
 				<reportElement x="484" y="17" width="40" height="20" uuid="0dddc3af-9e12-44fa-99f4-59fb6403c078"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="17" width="56" height="20" uuid="df6c73f1-00e5-495b-b29e-c3a73d0a2003"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="216" y="17" width="100" height="20" uuid="2e1f1113-be1a-4bc5-8643-8dcfa741e58b"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

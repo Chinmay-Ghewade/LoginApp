@@ -224,6 +224,12 @@ if ("download".equals(action)) {
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=5">
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css?v=5">
 
+<script>
+var contextPath = "<%=request.getContextPath()%>";
+</script>
+
+<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
+
 <style>
 .input-box { display:flex; gap:10px; }
 .icon-btn {
@@ -266,28 +272,13 @@ if ("download".equals(action)) {
 
 <div class="parameter-section">
 
-    <!-- BANK -->
-    <div class="parameter-group">
-        <div class="parameter-label">Bank Code</div>
-
-        <div class="input-box">
-            <input type="text" id="bankCode" name="bank_code" class="input-field">
-            <button type="button" class="icon-btn" onclick="openBankLookup()">…</button>
-        </div>
-    </div>
-
-    <div class="parameter-group">
-        <div class="parameter-label">Bank Name</div>
-        <input type="text" id="bankName" class="input-field" readonly>
-    </div>
-
     <!-- BRANCH -->
     <div class="parameter-group">
         <div class="parameter-label">Branch Code</div>
 
         <div class="input-box">
-            <input type="text" id="branchCode" name="branch_code" class="input-field">
-            <button type="button" class="icon-btn" onclick="openBranchLookup()">…</button>
+            <input type="text" id="branch_code" name="branch_code" class="input-field">
+            <button type="button" class="icon-btn" onclick="openLookup('branch')">…</button>
         </div>
     </div>
 
@@ -319,74 +310,15 @@ if ("download".equals(action)) {
 
 </div>
 
-<!-- BANK POPUP -->
-<div id="bankModal" class="modal">
-    <div class="modal-content">
-        <button onclick="closeBankLookup()" style="float:right;">✖</button>
-        <div id="bankTable"></div>
-    </div>
-</div>
 
 <!-- BRANCH POPUP -->
-<div id="branchModal" class="modal">
+<div id="lookupModal" class="modal">
     <div class="modal-content">
-        <button onclick="closeBranchLookup()" style="float:right;">✖</button>
-        <div id="branchTable"></div>
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
     </div>
 </div>
 
-<script>
-
-/* BANK */
-function openBankLookup() {
-    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=bank")
-        .then(res => res.text())
-        .then(html => {
-            document.getElementById("bankTable").innerHTML = html;
-            document.getElementById("bankModal").style.display = "flex";
-        });
-}
-function closeBankLookup() {
-    document.getElementById("bankModal").style.display = "none";
-}
-function selectBank(code, name) {
-    document.getElementById("bankCode").value = code;
-    document.getElementById("bankName").value = name;
-    closeBankLookup();
-}
-
-/* BRANCH */
-function openBranchLookup() {
-    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
-        .then(res => res.text())
-        .then(html => {
-            document.getElementById("branchTable").innerHTML = html;
-            document.getElementById("branchModal").style.display = "flex";
-        });
-}
-function closeBranchLookup() {
-    document.getElementById("branchModal").style.display = "none";
-}
-function selectBranch(code, name) {
-    document.getElementById("branchCode").value = code;
-    document.getElementById("branchName").value = name;
-    closeBranchLookup();
-}
-
-/* AUTO FETCH */
-document.getElementById("bankCode").addEventListener("blur", function() {
-    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=bank&action=getName&code=" + this.value)
-        .then(res => res.text())
-        .then(name => document.getElementById("bankName").value = name || "Not Found");
-});
-
-document.getElementById("branchCode").addEventListener("blur", function() {
-    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + this.value)
-        .then(res => res.text())
-        .then(name => document.getElementById("branchName").value = name || "Not Found");
-});
-
-</script>
 
 </body>
 </html>

@@ -11,6 +11,37 @@
 
 <%@ page import="db.DBConnection" %>
 
+<% 
+/* SESSION DATE */
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+
+/* SESSION BRANCH */
+String branchCodeSession =
+    (String) session.getAttribute("branchCode");
+
+String branchDescSession =
+    (String) session.getAttribute("branchDesc");
+
+if(branchCodeSession == null) branchCodeSession = "";
+if(branchDescSession == null) branchDescSession = "";
+%>
+
 <%
 String action = request.getParameter("action");
 
@@ -19,10 +50,10 @@ String txnDateUI = request.getParameter("txn_date");
 String productCode = request.getParameter("product_code");
 String singleAll = request.getParameter("single_all");
 
-if (branchCode == null) branchCode = "0002";
+if (branchCode == null) branchCode = "";
 
 if (txnDateUI == null || txnDateUI.trim().isEmpty()) {
-    txnDateUI = "2025-03-29";   // ✅ Fixed date here
+    txnDateUI = "";   // ✅ Fixed date here
 }
 
 
@@ -128,10 +159,8 @@ if ("download".equals(action)) {
         params.put("branch_code", branchCode);
         params.put("as_on_date", oracleDate);        // ✅ must match JRXML
         params.put("report_title", "PRODUCT DAILY TRANSFER SCROLL"); 
-        String userId = (String) session.getAttribute("user_id");
-        if (userId == null || userId.trim().isEmpty()) {
-            userId = "admin";
-        }
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
         params.put("user_id", userId);
 
         params.put("SUBREPORT_DIR", reportsDir);
@@ -197,8 +226,58 @@ if ("download".equals(action)) {
     <title>Product Daily Transfer Scroll</title>
 
     <!-- SAME CSS LIKE TFORM -->
-    <link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+
+<script>
+var contextPath = "<%=request.getContextPath()%>";
+</script>
+
+<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
+
+<style>
+.radio-container{
+    margin-top:8px;
+    display:flex;
+    gap:40px;
+}
+
+.input-field:disabled{
+    background-color:#e0e0e0;
+    color:#666;
+    cursor:not-allowed;
+}
+
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
+
 
 </head>
 
@@ -224,64 +303,111 @@ href="<%=request.getContextPath()%>/css/common-report.css?v=4">
 
         <input type="hidden" name="action" value="download"/>
 
-        <div class="parameter-section">
+       <div class="parameter-section">
 
-            <div class="parameter-group">
-                <div class="parameter-label">Branch Code</div>
-                <input type="text" name="branch_code"
-                       class="input-field"
-                       value="<%=branchCode%>" required>
-            </div>
+    <!-- BRANCH -->
+    <div class="parameter-group">
 
-            <div class="parameter-group">
-                <div class="parameter-label">Transaction Date</div>
-                <input type="date" name="txn_date"
-                       class="input-field"
-                       value="<%=txnDateUI%>" required>
-            </div>
+        <div class="parameter-label">Branch Code</div>
 
-           <div class="parameter-group">
+        <div class="input-box">
+            <input type="text"
+                   name="branch_code"
+                   id="branch_code"
+                   class="input-field"
+                   value="<%=branchCodeSession%>"
+                   required>
 
-    <table style="width:400px;">
-        <tr>
-            <td style="width:120px;">Select</td>
-            <td style="text-align:center;">Single</td>
-            <td style="text-align:center;">All</td>
-        </tr>
+            <button type="button"
+                    class="icon-btn"
+                    onclick="openLookup('branch')">…</button>
+        </div>
 
-        <tr>
-            <td></td>
-            <td style="text-align:center;">
-                <input type="radio" name="single_all" value="S"
-                       onclick="toggleProduct()"
-                       <%= "S".equals(singleAll) || singleAll == null ? "checked" : "" %>>
-            </td>
+    </div>
 
-            <td style="text-align:center;">
-                <input type="radio" name="single_all" value="A"
-                       onclick="toggleProduct()"
-                       <%= "A".equals(singleAll) ? "checked" : "" %>>
-            </td>
-        </tr>
-    </table>
+    <div class="parameter-group">
+
+        <div class="parameter-label">Branch Description</div>
+
+        <input type="text"
+               name="branchName"
+               id="branchName"
+               class="input-field"
+               value="<%=branchDescSession%>"
+               readonly>
+
+    </div>
+
+    <!-- DATE -->
+    <div class="parameter-group">
+
+        <div class="parameter-label">Transaction Date</div>
+
+        <input type="date"
+               name="txn_date"
+               class="input-field"
+               value="<%=sessionDate%>"
+               required>
+
+    </div>
+
+    <!-- PRODUCT -->
+    <div class="parameter-group">
+
+        <div class="parameter-label">Product Code</div>
+
+        <div class="input-box">
+            <input type="text"
+                   name="product_code"
+                   id="product_code"
+                   class="input-field">
+
+            <button type="button"
+                    class="icon-btn"
+                    onclick="openLookup('product')">…</button>
+        </div>
+
+        <div class="radio-container">
+
+            <label>
+                <input type="radio"
+                       name="single_all"
+                       value="S"
+                       checked
+                       onclick="toggleProduct()">
+                Single
+            </label>
+
+            <label>
+                <input type="radio"
+                       name="single_all"
+                       value="A"
+                       onclick="toggleProduct()">
+                All
+            </label>
+
+        </div>
+
+    </div>
 
 </div>
 
+<!-- REPORT TYPE -->
+<div class="format-section">
 
-            <div class="parameter-group">
-                <div class="parameter-label">Product Code</div>
-                <input type="text" name="product_code"
-                       class="input-field"
-                       placeholder="Enter product code">
-            </div>
+    <div class="parameter-label">Report Type</div>
 
-        </div>
+    <label>
+        <input type="radio" name="reporttype" value="pdf" checked>
+        PDF
+    </label>
 
-        <div class="format-section">
-            <div class="parameter-label">Report Type</div>
-            <input type="radio" name="reporttype" value="pdf" checked> PDF
-            <input type="radio" name="reporttype" value="xls"> Excel
-        </div>
+    <label>
+        <input type="radio" name="reporttype" value="xls">
+        Excel
+    </label>
+
+</div>
 
         <button type="submit" class="download-button">
             Generate Report
@@ -289,6 +415,14 @@ href="<%=request.getContextPath()%>/css/common-report.css?v=4">
 
     </form>
 </div>
+
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
 <script>
 function toggleProduct() {
     var single = document.querySelector('input[name="single_all"][value="S"]').checked;

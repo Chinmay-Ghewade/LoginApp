@@ -12,6 +12,34 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+/* ===== SESSION DATE ===== */
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+
+/* ===== SESSION BRANCH ===== */
+String branchCodeSession = (String) session.getAttribute("branchCode");
+
+if(branchCodeSession == null || branchCodeSession.trim().equals("")){
+    branchCodeSession = "0001";
+}
+%>
+
+<%
 String action = request.getParameter("action");
 
 String branchCode = request.getParameter("branch_code");
@@ -19,10 +47,30 @@ String toDateUI = request.getParameter("to_date");
 String productCode = request.getParameter("product_code");
 String singleAll = request.getParameter("single_all");
 
-if (branchCode == null) branchCode = "0002";
-if (toDateUI == null || toDateUI.trim().isEmpty()) toDateUI = "2025-03-29";
-
 if ("download".equals(action)) {
+
+    /* =========================
+       VALIDATION (NO DEFAULTS)
+    ========================= */
+
+    if(branchCode == null || branchCode.trim().equals("")){
+        out.println("<h3 style='color:red'>Please enter Branch Code</h3>");
+        return;
+    }
+
+    if(toDateUI == null || toDateUI.trim().equals("")){
+        out.println("<h3 style='color:red'>Please select Date</h3>");
+        return;
+    }
+
+    if(singleAll == null){
+        singleAll = "S"; // safe default (optional)
+    }
+
+    if("S".equals(singleAll) && (productCode == null || productCode.trim().equals(""))){
+        out.println("<h3 style='color:red'>Please enter Product Code</h3>");
+        return;
+    }
 
     Connection conn = null;
     PreparedStatement pstmt = null;
@@ -118,11 +166,10 @@ if ("download".equals(action)) {
         params.put("as_on_date", oracleDate);
         params.put("report_title", "PAYABLE DEPOSIT REPORT");
 
-        String userId = (String) session.getAttribute("user_id");
-        if (userId == null) userId = "admin";
-
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
         params.put("user_id", userId);
-
+        
         params.put("SUBREPORT_DIR", reportsDir);
         params.put("REPORT_CONNECTION", conn);
 
@@ -190,8 +237,35 @@ if ("download".equals(action)) {
 
 <title>Deposit Payable Report</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet"href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+<style>
+.input-box { display:flex; gap:10px; }
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
 
 </head>
 
@@ -221,53 +295,79 @@ session.removeAttribute("errorMessage");
 
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
-<input type="text" name="branch_code"
+<div class="input-box">
+    <input type="text"
+           name="branch_code"
+           id="branch_code"
+           class="input-field"
+           value="<%=branchCodeSession%>"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
+</div>
+</div>
+
+<!-- Branch Name -->
+<div class="parameter-group">
+    <div class="parameter-label">Branch Description</div>
+
+    <input type="text"
+           id="branchName"
+           class="input-field"
+           readonly>
+</div>
+
+<div class="parameter-group">
+<div class="parameter-label">As on Date</div>
+<input type="date"
+       name="as_on_date"
        class="input-field"
-       value="<%=branchCode%>" required>
+       value="<%=sessionDate%>"
+       required>
 </div>
 
-<div class="parameter-group">
-<div class="parameter-label">To Date</div>
-<input type="date" name="to_date"
-       class="input-field"
-       value="<%=toDateUI%>" required>
-</div>
-
+<!-- Product Code -->
 <div class="parameter-group">
 
-<table style="width:400px;">
-<tr>
-<td style="width:120px;">Select</td>
-<td style="text-align:center;">Single</td>
-<td style="text-align:center;">All</td>
-</tr>
-
-<tr>
-<td></td>
-
-<td style="text-align:center;">
-<input type="radio" name="single_all" value="S"
-onclick="toggleProduct()"
-<%= "S".equals(singleAll) || singleAll == null ? "checked" : "" %>>
-</td>
-
-<td style="text-align:center;">
-<input type="radio" name="single_all" value="A"
-onclick="toggleProduct()"
-<%= "A".equals(singleAll) ? "checked" : "" %>>
-</td>
-
-</tr>
-</table>
-
-</div>
-
-<div class="parameter-group">
 <div class="parameter-label">Product Code</div>
-<input type="text" name="product_code"
-class="input-field"
-value="<%=productCode!=null?productCode:""%>"
-placeholder="Enter product code">
+
+<div class="input-box">
+    <div class="input-box">
+    <input type="text"
+           name="product_code"
+           id="product_code"
+           class="input-field"
+           placeholder="Enter Product Code">
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openProductLookup()">…</button>
+</div>
+</div>
+
+<div class="radio-container">
+
+<label>
+<input type="radio"
+       name="single_all"
+       value="S"
+       onclick="toggleProduct()"
+       checked>
+Single
+</label>
+
+<label>
+<input type="radio"
+       name="single_all"
+       value="A"
+       onclick="toggleProduct()">
+All
+</label>
+
+</div>
+
 </div>
 
 </div>
@@ -286,35 +386,114 @@ Generate Report
 
 </div>
 
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
 <script>
 
+/* =========================
+PRODUCT TOGGLE
+========================= */
 function toggleProduct(){
+ var single =
+     document.querySelector('input[name="single_all"][value="S"]').checked;
 
-var single =
-document.querySelector('input[name="single_all"][value="S"]').checked;
+ var productField =
+     document.getElementById("product_code");
 
-var productField =
-document.querySelector('input[name="product_code"]');
-
-if(single){
-
-productField.disabled = false;
-productField.readOnly = false;
-
-}else{
-
-productField.value="";
-productField.disabled=true;
-productField.readOnly=true;
-
+ if(single){
+     productField.disabled = false;
+     productField.readOnly = false;
+ }else{
+     productField.value = "";
+     productField.disabled = true;
+     productField.readOnly = true;
+ }
 }
 
+/* =========================
+OPEN BRANCH POPUP
+========================= */
+function openBranchLookup() {
+ fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+     .then(res => res.text())
+     .then(html => {
+         document.getElementById("lookupTable").innerHTML = html;
+         document.getElementById("lookupModal").style.display = "flex";
+     });
 }
 
+/* =========================
+OPEN PRODUCT POPUP
+========================= */
+function openProductLookup() {
+ fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=product")
+     .then(res => res.text())
+     .then(html => {
+         document.getElementById("lookupTable").innerHTML = html;
+         document.getElementById("lookupModal").style.display = "flex";
+     });
+}
+
+/* =========================
+CLOSE POPUP
+========================= */
+function closeLookup() {
+ document.getElementById("lookupModal").style.display = "none";
+}
+
+/* =========================
+SELECT BRANCH
+========================= */
+function selectBranch(code, name) {
+ document.getElementById("branch_code").value = code;
+ document.getElementById("branchName").value = name;
+ closeLookup();
+}
+
+/* =========================
+SELECT PRODUCT
+========================= */
+function selectProduct(code, name, type) {
+ document.getElementById("product_code").value = code;
+ closeLookup();
+}
+
+/* =========================
+FETCH BRANCH NAME
+========================= */
+function fetchBranchName(code){
+
+ if (!code) return;
+
+ fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
+     .then(res => res.text())
+     .then(name => {
+         document.getElementById("branchName").value = name || "Not Found";
+     });
+}
+
+/* =========================
+PAGE LOAD
+========================= */
 window.onload = function(){
-toggleProduct();
-};
 
+ toggleProduct();
+
+ let code = document.getElementById("branch_code").value;
+
+ if(code){
+     fetchBranchName(code);
+ }
+
+ document.getElementById("branch_code").addEventListener("blur", function() {
+     fetchBranchName(this.value);
+ });
+};
 </script>
 
 </body>

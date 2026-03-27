@@ -13,6 +13,31 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+
+    if (obj instanceof java.sql.Date) {
+
+        sessionDate =
+            new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format((java.sql.Date) obj);
+
+    } else {
+
+        sessionDate = obj.toString();
+    }
+}
+
+/* ❌ NO DEFAULT TODAY DATE */
+if (sessionDate == null) {
+    sessionDate = "";
+}
+%>
+
+<%
 
 String action = request.getParameter("action");
 
@@ -174,8 +199,42 @@ if ("download".equals(action)) {
 
 <title>TD Maturity Reminder Letter</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+
+<script>
+var contextPath = "<%=request.getContextPath()%>";
+</script>
+
+<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
+
+<style>
+.input-box { display:flex; gap:10px; }
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
+}
+</style>
 
 </head>
 
@@ -199,29 +258,61 @@ autocomplete="off">
 
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
-<input type="text" name="branch_code"
-class="input-field" value="0003" required>
+<div class="input-box">
+            <input type="text"
+                   name="branch_code"
+                   id="branch_code"
+                   class="input-field"
+                   required>
+
+            <button type="button"
+                    class="icon-btn"
+                    onclick="openLookup('branch')">…</button>
+        </div>
 </div>
 
 
 <div class="parameter-group">
 <div class="parameter-label">Product Code</div>
-<input type="text" name="product_code"
-class="input-field" placeholder="Enter Product Code">
+<div class="input-box">
+            <input type="text"
+                   name="product_code"
+                   id="product_code"
+                   class="input-field">
+
+            <button type="button"
+                    class="icon-btn"
+                    onclick="openLookup('product')">…</button>
+        </div>
+        
+</div>
+
+<div class="parameter-group">
+<div class="parameter-label">Product Description</div>
+
+<input type="text"
+       name="productName"
+       id="productName"
+       class="input-field"
+       readonly>
 </div>
 
 
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
 <input type="date" name="from_date"
-class="input-field" required>
+class="input-field" 
+value="<%=sessionDate%>"
+required>
 </div>
 
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
-<input type="date" name="to_date"
-class="input-field" required>
+<input type="date"
+       name="to_date"
+       class="input-field"
+       required>
 </div>
 
 </div>
@@ -277,6 +368,13 @@ Generate Report
 
 </form>
 
+</div>
+
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
 </div>
 
 </body>

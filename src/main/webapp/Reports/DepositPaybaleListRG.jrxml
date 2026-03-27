@@ -18,6 +18,9 @@
 	<parameter name="product_code_filter" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT SRNO,ACCOUNT_NO,AC_NAME,DESCRIPTION,product_code,BALANCE_AMT,(PAYBALE_AMT *(-1)) PAYBALE_AMT,Blank
 FROM (
@@ -254,8 +257,12 @@ WHERE (BALANCE_AMT<>0 OR PAYBALE_AMT<>0)]]>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="0" y="1" width="100" height="20" uuid="409e63ed-8978-420e-83f1-8d6342892790"/>
+				<reportElement x="50" y="1" width="100" height="20" uuid="409e63ed-8978-420e-83f1-8d6342892790"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="1" width="50" height="20" uuid="9aa32fbf-dbb5-47f7-91ac-8f28aeb5f79a"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

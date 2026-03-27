@@ -14,6 +14,26 @@
 <%@ page import="db.DBConnection" %>
 
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+%>
+
+<%
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
@@ -114,13 +134,10 @@ if ("download".equals(action)) {
         parameters.put("SUBREPORT_DIR",
             application.getRealPath("/Reports/"));
 
-        String userId = (String) session.getAttribute("user_id");
-
-        if(userId == null || userId.trim().equals("")){
-            userId = "admin";
-        }
-
+        /* ✅ USER ID (FIXED) */
+        String userId = (String) session.getAttribute("userId");
         parameters.put("user_id", userId);
+
 
         parameters.put("IMAGE_PATH",
             application.getRealPath("/images/UPSB MONO.png"));
@@ -272,14 +289,43 @@ if ("download".equals(action)) {
 
 <title>Deposit Mature But Not Paid</title>
 
-<link rel="stylesheet"
-href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
 
 <style>
 .radio-container{
     margin-top:8px;
     display:flex;
     gap:40px;
+}
+
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
+    background:#2D2B80;
+    color:white;
+    border:none;
+    width:40px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
 }
 </style>
 
@@ -306,11 +352,25 @@ DEPOSIT MATURE BUT NOT PAID
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
 
-<input type="text"
-       name="branch_code"
-       class="input-field"
-       value="0002"
-       required>
+<div class="input-box">
+    <input type="text"
+           name="branch_code"
+           id="branch_code"
+           class="input-field"
+           required>
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openBranchLookup()">…</button>
+</div>
+</div>
+
+<div class="parameter-group">
+    <div class="parameter-label">Branch Description</div>
+    <input type="text"
+           id="branchName"
+           class="input-field"
+           readonly>
 </div>
 
 
@@ -318,10 +378,17 @@ DEPOSIT MATURE BUT NOT PAID
 <div class="parameter-group">
 <div class="parameter-label">Product Code</div>
 
-<input type="text"
-       name="product_code"
-       class="input-field"
-       placeholder="Enter Product Code">
+<div class="input-box">
+    <input type="text"
+           name="product_code"
+           id="product_code"
+           class="input-field"
+           placeholder="Enter Product Code">
+
+    <button type="button"
+            class="icon-btn"
+            onclick="openProductLookup()">…</button>
+</div>
 
 <!-- Radio Buttons moved below -->
 <div class="radio-container">
@@ -355,7 +422,7 @@ All
 <input type="date"
        name="from_date"
        class="input-field"
-       value="2008-08-25"
+       value="<%=sessionDate%>"
        required>
 </div>
 
@@ -367,7 +434,6 @@ All
 <input type="date"
        name="to_date"
        class="input-field"
-       value="2009-09-25"
        required>
 </div>
 
@@ -403,6 +469,13 @@ Generate Report
 
 </div>
 
+<div id="lookupModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
+</div>
+
 
 <script>
 
@@ -427,6 +500,61 @@ function toggleProduct() {
 window.onload = function(){
     toggleProduct();
 }
+
+</script>
+<script>
+
+// 🔹 Branch Popup
+function openBranchLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Product Popup
+function openProductLookup() {
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=product")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("lookupTable").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+        });
+}
+
+// 🔹 Close
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+}
+
+// 🔹 Select Branch (WITH DESCRIPTION)
+function selectBranch(code, name) {
+    document.getElementById("branch_code").value = code;
+    document.getElementById("branchName").value = name;
+    closeLookup();
+}
+
+// 🔹 Select Product (ONLY CODE)
+function selectProduct(code, name, type) {
+    document.getElementById("product_code").value = code;
+    closeLookup();
+}
+
+/* 🔹 AUTO FETCH BRANCH NAME */
+document.getElementById("branch_code").addEventListener("blur", function() {
+
+    let code = this.value;
+
+    if (!code) return;
+
+    fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
+        .then(res => res.text())
+        .then(name => {
+            document.getElementById("branchName").value = name || "Not Found";
+        });
+});
 
 </script>
 
