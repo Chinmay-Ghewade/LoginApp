@@ -725,7 +725,7 @@ function capturePhoto() {
     
     const imageData = canvas.toDataURL('image/jpeg', 0.95);
     
-    showToast('⏳ Processing photo...', 'info');
+   
     
     compressImage(imageData, IMAGE_CONFIG.photo)
         .then(compressedImage => {
@@ -738,7 +738,6 @@ function capturePhoto() {
             markFieldAsComplete('photoPreviewIcon');
             
             const finalSize = Math.round((compressedImage.length * 3) / 4);
-            showToast(`✅ Photo captured successfully!\nSize: ${(finalSize / 1024).toFixed(1)}KB (${IMAGE_CONFIG.photo.width}x${IMAGE_CONFIG.photo.height}px)`, 'success');
         })
         .catch(error => {
             showToast('❌ Failed to process photo: ' + error.message, 'error');
@@ -808,7 +807,7 @@ function captureSignature() {
     
     const imageData = canvas.toDataURL('image/jpeg', 0.95);
     
-    showToast('⏳ Processing signature...', 'info');
+    
     
     compressImage(imageData, IMAGE_CONFIG.signature)
         .then(compressedImage => {
@@ -821,7 +820,7 @@ function captureSignature() {
             markFieldAsComplete('signaturePreviewIcon');
             
             const finalSize = Math.round((compressedImage.length * 3) / 4);
-            showToast(`✅ Signature captured successfully!\nSize: ${(finalSize / 1024).toFixed(1)}KB (${IMAGE_CONFIG.signature.width}x${IMAGE_CONFIG.signature.height}px)`, 'success');
+            
         })
         .catch(error => {
             showToast('❌ Failed to process signature: ' + error.message, 'error');

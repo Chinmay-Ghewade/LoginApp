@@ -423,7 +423,7 @@
           <tr>
             <td><input type="checkbox" name="passport_check"></td>
             <td>Passport</td>
-            <td><input type="date" name="passport_expiry"></td>
+            <td><input id="date" type="date" name="passport_expiry"></td>
             <td><input type="text" name="passportNumber" id="passportNumber"></td>
           </tr>
           <tr>
@@ -441,7 +441,7 @@
           <tr>
             <td><input type="checkbox" name="dl_check"></td>
             <td>Driving License</td>
-            <td><input type="date" name="dl_expiry"></td>
+            <td><input id="date" type="date" name="dl_expiry"></td>
             <td><input type="text" name="dl" id="dl" style="text-transform:uppercase;"></td>
           </tr>
           <tr>
@@ -469,25 +469,25 @@
           <tr>
             <td><input type="checkbox" name="telephone_check"></td>
             <td>Telephone Bill</td>
-            <td><input type="date" name="telephone_expiry"></td>
+            <td><input id="date" type="date" name="telephone_expiry"></td>
             <td><input type="text" name="telephone"></td>
           </tr>
           <tr>
             <td><input type="checkbox" name="bank_check"></td>
             <td>Bank Statement</td>
-            <td><input type="date" name="bank_expiry"></td>
+            <td><input id="date" type="date" name="bank_expiry"></td>
             <td><input type="text" name="bank_statement"></td>
           </tr>
           <tr>
             <td><input type="checkbox" name="govt_check"></td>
             <td>Govt. Documents</td>
-            <td><input type="date" name="govt_expiry"></td>
+            <td><input id="date" type="date" name="govt_expiry"></td>
             <td><input type="text" name="govt_doc"></td>
           </tr>
           <tr>
             <td><input type="checkbox" name="electricity_check"></td>
             <td>Electricity Bill</td>
-            <td><input type="date" name="electricity_expiry"></td>
+            <td><input id="date" type="date" name="electricity_expiry"></td>
             <td><input type="text" name="electricity"></td>
           </tr>
           <tr>
@@ -508,11 +508,11 @@
         <h4>Accounts of Proprietary Concern</h4>
         <table>
           <tr><th>Select</th><th>Document</th><th>Expiry Date</th></tr>
-          <tr><td><input type="checkbox" name="rent_check"></td><td>Registered Rent Agreement Copy</td><td><input type="date" name="rent_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="cert_check"></td><td>Certificate / License</td><td><input type="date" name="cert_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="tax_check"></td><td>Sales and Income Tax Returns</td><td><input type="date" name="tax_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="cst_check"></td><td>CST / VAT Certificate</td><td><input type="date" name="cst_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="reg_check"></td><td>License issued by Registering Authority</td><td><input type="date" name="reg_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="rent_check"></td><td>Registered Rent Agreement Copy</td><td><input id="date" type="date" name="rent_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="cert_check"></td><td>Certificate / License</td><td><input id="date" type="date" name="cert_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="tax_check"></td><td>Sales and Income Tax Returns</td><td><input id="date" type="date" name="tax_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="cst_check"></td><td>CST / VAT Certificate</td><td><input id="date" type="date" name="cst_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="reg_check"></td><td>License issued by Registering Authority</td><td><input id="date" type="date" name="reg_expiry"></td></tr>
         </table>
       </div>
 
@@ -523,9 +523,9 @@
         <h4>Business Concern</h4>
         <table>
           <tr><th>Select</th><th>Document</th><th>Expiry Date</th></tr>
-          <tr><td><input type="checkbox" name="inc_check"></td><td>Certificate of Incorporation</td><td><input type="date" name="inc_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="board_check"></td><td>Resolution of the Board of Directors</td><td><input type="date" name="board_expiry"></td></tr>
-          <tr><td><input type="checkbox" name="poa_check"></td><td>Power of Attorney granted to its Managers</td><td><input type="date" name="poa_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="inc_check"></td><td>Certificate of Incorporation</td><td><input id="date" type="date" name="inc_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="board_check"></td><td>Resolution of the Board of Directors</td><td><input id="date" type="date" name="board_expiry"></td></tr>
+          <tr><td><input type="checkbox" name="poa_check"></td><td>Power of Attorney granted to its Managers</td><td><input id="date" type="date" name="poa_expiry"></td></tr>
         </table>
       </div>
     </div>
