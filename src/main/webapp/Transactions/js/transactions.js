@@ -954,9 +954,47 @@ function handleSaveTransaction() {
     // Use working date from session (defined in JSP)
     const sessionWorkingDate = typeof workingDate !== 'undefined' ? workingDate : 
         new Date().toLocaleDateString('en-GB').replace(/\//g, '/');
-    
 
-
+    // ✅ CHECK LEDGER BALANCE FOR ALL OPERATIONS
+    const iframe = document.getElementById('resultFrame');
+    try {
+        const iframeWindow = iframe.contentWindow;
+        const iframeDoc = iframeWindow.document;
+        
+        if (operationType === 'transfer') {
+            // For transfer, check BOTH debit and credit accounts
+            for (let i = 0; i < creditAccountsData.length; i++) {
+                const txn = creditAccountsData[i];
+                const ledgerField = txn.opType === 'Debit' 
+                    ? iframeDoc.getElementById('ledgerBalance')
+                    : iframeDoc.getElementById('creditLedgerBalance');
+                
+                if (ledgerField) {
+                    const ledgerBalance = parseFloat(ledgerField.value) || 0;
+                    if (txn.amount > ledgerBalance) {
+                        showToast('❌ ' + txn.opType + ' Amount cannot exceed Ledger Balance (₹' + 
+                                 ledgerBalance.toFixed(2) + ')', 'error');
+                        return;
+                    }
+                }
+            }
+        } else {
+            // For deposit/withdrawal, check single account
+            const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
+            if (ledgerBalanceField && operationType === 'withdrawal') {
+                const ledgerBalance = parseFloat(ledgerBalanceField.value) || 0;
+                const txnAmount = parseFloat(document.getElementById('transactionamount').value) || 0;
+                
+                if (txnAmount > ledgerBalance) {
+                    showToast('❌ Withdrawal Amount cannot exceed Ledger Balance (₹' + 
+                             ledgerBalance.toFixed(2) + ')', 'error');
+                    return;
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error checking balance:', e);
+    }
     
     // ✅ HANDLE TRANSFER MODE - Validate from creditAccountsData list
     if (operationType === 'transfer') {
@@ -1053,6 +1091,28 @@ function validateTransactionsSequentially(index, sessionWorkingDate) {
 
 // VALIDATE SINGLE TRANSACTION (for non-transfer)
 function validateSingleTransaction(accountCode, sessionWorkingDate, operationType, transactionAmount) {
+    
+    // ✅ VALIDATE AGAINST LEDGER BALANCE BEFORE SERVER VALIDATION
+    const iframe = document.getElementById('resultFrame');
+    try {
+        const iframeWindow = iframe.contentWindow;
+        const iframeDoc = iframeWindow.document;
+        const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
+        
+        if (ledgerBalanceField && operationType === 'withdrawal') {
+            const ledgerBalance = parseFloat(ledgerBalanceField.value) || 0;
+            const txnAmountValue = parseFloat(transactionAmount) || 0;
+            
+            if (txnAmountValue > ledgerBalance) {
+                showValidationError('Withdrawal Amount cannot exceed available Ledger Balance (₹' + 
+                                  ledgerBalance.toFixed(2) + ')');
+                return;
+            }
+        }
+    } catch (e) {
+        console.error('Error checking balance:', e);
+    }
+    
     // Determine transaction indicator
     let transactionIndicator = '';
     
@@ -1064,8 +1124,6 @@ function validateSingleTransaction(accountCode, sessionWorkingDate, operationTyp
         showToast('Invalid operation type', 'error');
         return;
     }
-    
-   
     
     const params = new URLSearchParams({
         accountCode: accountCode,
@@ -1520,6 +1578,14 @@ function calculateNewBalanceInIframe() {
 	            const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
 	            if (ledgerBalanceField && ledgerBalanceField.value.trim() !== '') {
 	                currentLedgerBalance = parseFloat(ledgerBalanceField.value) || 0;
+	                
+	                // ✅ VALIDATE AGAINST LEDGER BALANCE FOR DEBIT
+	                if (finalAmount > currentLedgerBalance) {
+	                    showToast(' Debit Amount cannot exceed Ledger Balance (₹' + 
+	                             currentLedgerBalance.toFixed(2) + ')', 'error');
+	                    return;
+	                }
+	                
 	                // Debit: subtract amount
 	                newAccountBalance = (currentLedgerBalance - parseFloat(finalAmount)).toFixed(2);
 	            }
@@ -1534,6 +1600,13 @@ function calculateNewBalanceInIframe() {
 	            } else if (regularLedgerBalanceField && regularLedgerBalanceField.value.trim() !== '') {
 	                // Regular section exists (transactionForm.jsp loaded with credit account)
 	                currentLedgerBalance = parseFloat(regularLedgerBalanceField.value) || 0;
+	            }
+	            
+	            // ✅ VALIDATE AGAINST LEDGER BALANCE FOR CREDIT
+	            if (finalAmount > currentLedgerBalance) {
+	                showToast('❌ Credit Amount cannot exceed Ledger Balance (₹' + 
+	                         currentLedgerBalance.toFixed(2) + ')', 'error');
+	                return;
 	            }
 	            
 	            // Credit: add amount
@@ -1567,7 +1640,6 @@ function calculateNewBalanceInIframe() {
 	            };
 	        });
 	        
-	        
 	        const totalReceivableEl = document.getElementById('totalReceivable');
 	        const totalReceivedEl = document.getElementById('totalReceived');
 	        const totalRemainingEl = document.getElementById('totalRemaining');
@@ -1578,35 +1650,34 @@ function calculateNewBalanceInIframe() {
 	            remaining: totalRemainingEl ? totalRemainingEl.value : ''
 	        };
 	        
-	        
 	        const principleReceivedEl = document.getElementById('principleReceived');
 	        loanFieldsData['principle'] = {
 	            received: principleReceivedEl ? principleReceivedEl.value : ''
 	        };
 	    }
 
-		// Capture cheque fields for Debit transfer rows
-		    let chequeData = { chequeType: '', chequeSeries: '', chequeNumber: '', chequeDate: '' };
-		    if (opType === 'Debit') {
-		        chequeData = {
-		            chequeType:   document.getElementById('chequeType').value   || '',
-		            chequeSeries: document.getElementById('chequeSeries').value || '',
-		            chequeNumber: document.getElementById('chequeNo').value      || '',
-		            chequeDate:   document.getElementById('chequeDate').value    || ''
-		        };
-		    }
+	    // Capture cheque fields for Debit transfer rows
+	    let chequeData = { chequeType: '', chequeSeries: '', chequeNumber: '', chequeDate: '' };
+	    if (opType === 'Debit') {
+	        chequeData = {
+	            chequeType:   document.getElementById('chequeType').value   || '',
+	            chequeSeries: document.getElementById('chequeSeries').value || '',
+	            chequeNumber: document.getElementById('chequeNo').value      || '',
+	            chequeDate:   document.getElementById('chequeDate').value    || ''
+	        };
+	    }
 
-		    creditAccountsData.push({
-		        id: Date.now(),
-		        code: accountCode,
-		        name: accountName,
-		        amount: finalAmount,
-		        particular: particular,
-		        opType: opType,
-		        loanFields: loanFieldsData,
-		        newAccountBalance: newAccountBalance,
-		        chequeData: chequeData   // ✅ Store cheque data per-row
-		    });
+	    creditAccountsData.push({
+	        id: Date.now(),
+	        code: accountCode,
+	        name: accountName,
+	        amount: finalAmount,
+	        particular: particular,
+	        opType: opType,
+	        loanFields: loanFieldsData,
+	        newAccountBalance: newAccountBalance,
+	        chequeData: chequeData   // ✅ Store cheque data per-row
+	    });
 
 	    // Clear input fields
 	    document.getElementById('accountCode').value = '';
