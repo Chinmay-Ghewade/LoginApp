@@ -216,7 +216,7 @@
       <!-- Row 6 -->
       <div>
         <label>Email ID</label>
-        <input type="email" name="email" required>
+        <input type="email" name="email">
       </div>
 
       <div>
@@ -393,17 +393,17 @@
 
       <div>
         <label>Mobile No</label>
-        <input type="text" name="mobileNo" required>
+        <input type="text" name="mobileNo">
       </div>
 
       <div>
         <label>Residence Phone</label>
-        <input type="text" name="residencePhone" value="" required>
+        <input type="text" name="residencePhone" value="">
       </div>
 
       <div>
         <label>Office Phone</label>
-        <input type="text" name="officePhone" value="" required>
+        <input type="text" name="officePhone" value="">
       </div>
 
     </div>
