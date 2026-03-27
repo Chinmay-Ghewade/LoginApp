@@ -971,11 +971,11 @@ function handleSaveTransaction() {
                 
                 if (ledgerField) {
                     const ledgerBalance = parseFloat(ledgerField.value) || 0;
-                    if (txn.amount > ledgerBalance) {
-                        showToast('❌ ' + txn.opType + ' Amount cannot exceed Ledger Balance (₹' + 
-                                 ledgerBalance.toFixed(2) + ')', 'error');
-                        return;
-                    }
+					if (txn.amount > ledgerBalance) {
+					    showValidationError(txn.opType + ' Amount cannot exceed Ledger Balance (₹' + 
+					                       ledgerBalance.toFixed(2) + ')');
+					    return;
+					}
                 }
             }
         } else {
@@ -985,11 +985,11 @@ function handleSaveTransaction() {
                 const ledgerBalance = parseFloat(ledgerBalanceField.value) || 0;
                 const txnAmount = parseFloat(document.getElementById('transactionamount').value) || 0;
                 
-                if (txnAmount > ledgerBalance) {
-                    showToast('❌ Withdrawal Amount cannot exceed Ledger Balance (₹' + 
-                             ledgerBalance.toFixed(2) + ')', 'error');
-                    return;
-                }
+				if (txnAmount > ledgerBalance) {
+				    showValidationError('Withdrawal Amount cannot exceed Ledger Balance (₹' + 
+				                       ledgerBalance.toFixed(2) + ')');
+				    return;
+				}
             }
         }
     } catch (e) {
@@ -1579,12 +1579,12 @@ function calculateNewBalanceInIframe() {
 	            if (ledgerBalanceField && ledgerBalanceField.value.trim() !== '') {
 	                currentLedgerBalance = parseFloat(ledgerBalanceField.value) || 0;
 	                
-	                // ✅ VALIDATE AGAINST LEDGER BALANCE FOR DEBIT
-	                if (finalAmount > currentLedgerBalance) {
-	                    showToast(' Debit Amount cannot exceed Ledger Balance (₹' + 
-	                             currentLedgerBalance.toFixed(2) + ')', 'error');
-	                    return;
-	                }
+					// ✅ VALIDATE AGAINST LEDGER BALANCE FOR DEBIT
+					if (finalAmount > currentLedgerBalance) {
+					    showValidationError('Debit Amount cannot exceed Ledger Balance (₹' + 
+					                       currentLedgerBalance.toFixed(2) + ')');
+					    return;
+					}
 	                
 	                // Debit: subtract amount
 	                newAccountBalance = (currentLedgerBalance - parseFloat(finalAmount)).toFixed(2);
@@ -1602,12 +1602,12 @@ function calculateNewBalanceInIframe() {
 	                currentLedgerBalance = parseFloat(regularLedgerBalanceField.value) || 0;
 	            }
 	            
-	            // ✅ VALIDATE AGAINST LEDGER BALANCE FOR CREDIT
-	            if (finalAmount > currentLedgerBalance) {
-	                showToast('❌ Credit Amount cannot exceed Ledger Balance (₹' + 
-	                         currentLedgerBalance.toFixed(2) + ')', 'error');
-	                return;
-	            }
+				// ✅ VALIDATE AGAINST LEDGER BALANCE FOR CREDIT
+				if (finalAmount > currentLedgerBalance) {
+				    showValidationError('Credit Amount cannot exceed Ledger Balance (₹' + 
+				                       currentLedgerBalance.toFixed(2) + ')');
+				    return;
+				}
 	            
 	            // Credit: add amount
 	            newAccountBalance = (currentLedgerBalance + parseFloat(finalAmount)).toFixed(2);
