@@ -383,73 +383,96 @@ function clearError(field) {
 // Form validation before submit
 function validateForm() {
     let isValid = true;
-    const errors = [];
 
-    const gstin = document.querySelector('input[name="gstinNo"]').value;
-    if (gstin && !validationPatterns.gstin.test(gstin)) {
-        errors.push('• Invalid GSTIN number');
+    // GSTIN validation
+    const gstinField = document.querySelector('input[name="gstinNo"]');
+    if (gstinField && gstinField.value && !validationPatterns.gstin.test(gstinField.value)) {
+        showError(gstinField, 'Invalid GSTIN format (e.g., 22AAAAA0000A1Z5)');
+        isValid = false;
+    } else {
+        clearError(gstinField);
+    }
+
+    // Mobile validation
+    const mobileField = document.querySelector('input[name="mobileNo"]');
+    if (mobileField && !mobileField.value) {
+        showError(mobileField, 'Mobile number is required');
+        isValid = false;
+    } else if (mobileField && mobileField.value && !validationPatterns.mobile.test(mobileField.value)) {
+        showError(mobileField, 'Mobile must be 10 digits starting with 6-9');
+        isValid = false;
+    } else {
+        clearError(mobileField);
+    }
+
+    // ZIP validation
+    const zipField = document.querySelector('input[name="zip"]');
+    if (zipField && zipField.value && !validationPatterns.zip.test(zipField.value)) {
+        showError(zipField, 'Invalid ZIP (6 digits, starts with 4 or 5)');
+        isValid = false;
+    } else {
+        clearError(zipField);
+    }
+
+    // PAN validation
+    const panField = document.getElementById('pan');
+    if (panField && panField.value && !validationPatterns.pan.test(panField.value)) {
+        showError(panField, 'PAN format: ABCDE1234F');
+        isValid = false;
+    } else {
+        clearError(panField);
+    }
+
+    // Aadhar validation
+    const aadharField = document.querySelector('input[name="aadhar"]');
+    if (aadharField && aadharField.value && !validationPatterns.aadhar.test(aadharField.value)) {
+        showError(aadharField, 'Aadhar must be 12 digits');
+        isValid = false;
+    } else {
+        clearError(aadharField);
+    }
+
+    // Passport validation
+    const passportField = document.getElementById('passportNumber');
+    if (passportField && passportField.value && !validationPatterns.passport.test(passportField.value)) {
+        showError(passportField, 'Passport: 1 letter + 7 digits');
+        isValid = false;
+    } else {
+        clearError(passportField);
+    }
+
+    // Voter ID validation
+    const voterIdField = document.getElementById('voterid');
+    if (voterIdField && voterIdField.value && !validationPatterns.voterId.test(voterIdField.value)) {
+        showError(voterIdField, 'Voter ID: ABC1234567');
+        isValid = false;
+    } else {
+        clearError(voterIdField);
+    }
+
+    // Driving License validation
+    const dlField = document.getElementById('dl');
+    if (dlField && dlField.value && !validationPatterns.drivingLicense.test(dlField.value)) {
+        showError(dlField, 'DL: AB1234567890123');
+        isValid = false;
+    } else {
+        clearError(dlField);
+    }
+
+    // Photo validation
+    const photoData = document.getElementById('photoData');
+    if (!photoData.value || photoData.value.trim() === '') {
+        const photoCard = photoData.closest('.upload-card') || document.querySelector('.upload-card:first-child');
+        showError(photoCard.querySelector('input[type="file"]'), 'Customer photo is required');
         isValid = false;
     }
 
-    const mobile = document.querySelector('input[name="mobileNo"]').value;
-    if (!mobile) {
-        errors.push('• Mobile number is required');
+    // Signature validation
+    const signatureData = document.getElementById('signatureData');
+    if (!signatureData.value || signatureData.value.trim() === '') {
+        const sigCard = signatureData.closest('.upload-card') || document.querySelector('.upload-card:last-child');
+        showError(sigCard.querySelector('input[type="file"]'), 'Customer signature is required');
         isValid = false;
-    } else if (!validationPatterns.mobile.test(mobile)) {
-        errors.push('• Invalid mobile number');
-        isValid = false;
-    }
-
-    const zip = document.querySelector('input[name="zip"]').value;
-    if (zip && !validationPatterns.zip.test(zip)) {
-        errors.push('• Invalid ZIP code');
-        isValid = false;
-    }
-
-    const pan = document.getElementById('pan').value;
-    if (pan && !validationPatterns.pan.test(pan)) {
-        errors.push('• Invalid PAN card number');
-        isValid = false;
-    }
-
-    const aadhar = document.querySelector('input[name="aadhar"]').value;
-    if (aadhar && !validationPatterns.aadhar.test(aadhar)) {
-        errors.push('• Invalid Aadhar number');
-        isValid = false;
-    }
-
-    const passport = document.getElementById('passportNumber').value;
-    if (passport && !validationPatterns.passport.test(passport)) {
-        errors.push('• Invalid Passport number');
-        isValid = false;
-    }
-
-    const voterId = document.getElementById('voterid').value;
-    if (voterId && !validationPatterns.voterId.test(voterId)) {
-        errors.push('• Invalid Voter ID');
-        isValid = false;
-    }
-
-    const dl = document.getElementById('dl').value;
-    if (dl && !validationPatterns.drivingLicense.test(dl)) {
-        errors.push('• Invalid Driving License number');
-        isValid = false;
-    }
-
-    const photoData = document.getElementById('photoData').value;
-    if (!photoData || photoData.trim() === '') {
-        errors.push('• Customer photo is required');
-        isValid = false;
-    }
-
-    const signatureData = document.getElementById('signatureData').value;
-    if (!signatureData || signatureData.trim() === '') {
-        errors.push('• Customer signature is required');
-        isValid = false;
-    }
-
-    if (!isValid && errors.length > 0) {
-        showToast('❌ Validation Errors:\n' + errors.join('\n'), 'error');
     }
 
     return isValid;
@@ -536,7 +559,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/jpg'];
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg'];
 
 // Validate file type
-function validateFileType(file, configType) {
+function validateFileType(file, configType, fieldElement) {
     const fileType = file.type.toLowerCase();
     const fileName = file.name.toLowerCase();
     
@@ -544,20 +567,22 @@ function validateFileType(file, configType) {
     const hasValidExtension = ALLOWED_EXTENSIONS.some(ext => fileName.endsWith(ext));
     
     if (!hasValidType && !hasValidExtension) {
-        showToast(`❌ Invalid file type for ${configType}!\nOnly JPG/JPEG files are allowed.`, 'error');
+        showError(fieldElement, 'Only JPG/JPEG files allowed');
         return false;
     }
+    clearError(fieldElement);
     return true;
 }
 
 // Validate file size
-function validateFileSize(file, config) {
+function validateFileSize(file, config, fieldElement) {
     if (file.size > config.maxSize) {
         const maxSizeMB = (config.maxSize / (1024 * 1024)).toFixed(1);
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
-        showToast(`❌ ${config.name} file size (${fileSizeMB}MB) exceeds maximum allowed size of ${maxSizeMB}MB!`, 'error');
+        showError(fieldElement, `File size (${fileSizeMB}MB) exceeds ${maxSizeMB}MB`);
         return false;
     }
+    clearError(fieldElement);
     return true;
 }
 
@@ -640,12 +665,15 @@ function compressToTargetSize(canvas, initialQuality, targetSize) {
 // Process image file
 function processImageFile(file, config, previewElementId, dataFieldId) {
     return new Promise((resolve, reject) => {
-        if (!validateFileType(file, config.name)) {
+        const fieldElement = document.getElementById(dataFieldId).previousElementSibling || 
+                           document.querySelector(`[name="${config.name.toLowerCase()}"]`);
+        
+        if (!validateFileType(file, config.name, fieldElement)) {
             reject(new Error('Invalid file type'));
             return;
         }
         
-        if (!validateFileSize(file, config)) {
+        if (!validateFileSize(file, config, fieldElement)) {
             reject(new Error('File too large'));
             return;
         }
@@ -653,8 +681,6 @@ function processImageFile(file, config, previewElementId, dataFieldId) {
         const reader = new FileReader();
         
         reader.onload = function(e) {
-            showToast(`⏳ Processing ${config.name.toLowerCase()}...`, 'info');
-            
             compressImage(e.target.result, config)
                 .then(compressedImage => {
                     const preview = document.getElementById(previewElementId);
@@ -662,22 +688,19 @@ function processImageFile(file, config, previewElementId, dataFieldId) {
                     preview.classList.add('preview-image');
                     
                     document.getElementById(dataFieldId).value = compressedImage;
-                    
                     markFieldAsComplete(previewElementId);
-                    
-                    const finalSize = Math.round((compressedImage.length * 3) / 4);
-                    showToast(`✅ ${config.name} uploaded successfully!\nSize: ${(finalSize / 1024).toFixed(1)}KB (${config.width}x${config.height}px)`, 'success');
+                    clearError(fieldElement);
                     
                     resolve(compressedImage);
                 })
                 .catch(error => {
-                    showToast(`❌ Failed to process ${config.name.toLowerCase()}: ${error.message}`, 'error');
+                    showError(fieldElement, `Failed to process: ${error.message}`);
                     reject(error);
                 });
         };
         
         reader.onerror = function() {
-            showToast(`❌ Failed to read ${config.name.toLowerCase()} file`, 'error');
+            showError(fieldElement, 'Failed to read file');
             reject(new Error('File read error'));
         };
         
@@ -692,7 +715,10 @@ document.getElementById('photoInput').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         processImageFile(file, IMAGE_CONFIG.photo, 'photoPreviewIcon', 'photoData')
-            .catch(() => { this.value = ''; });
+            .catch(() => { 
+                this.value = ''; 
+                showError(this, 'Photo upload failed');
+            });
     }
 });
 
