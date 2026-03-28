@@ -395,10 +395,7 @@ function validateForm() {
 
     // Mobile validation
     const mobileField = document.querySelector('input[name="mobileNo"]');
-    if (mobileField && !mobileField.value) {
-        showError(mobileField, 'Mobile number is required');
-        isValid = false;
-    } else if (mobileField && mobileField.value && !validationPatterns.mobile.test(mobileField.value)) {
+if (mobileField && mobileField.value && !validationPatterns.mobile.test(mobileField.value)) {
         showError(mobileField, 'Mobile must be 10 digits starting with 6-9');
         isValid = false;
     } else {

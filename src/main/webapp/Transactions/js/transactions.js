@@ -920,7 +920,7 @@ function submitTransactionForm() {
         let form = document.getElementById("transactionForm");
         form.action = pageMap[operationType];
         form.submit();
-        showToast('Loading transaction form...', 'info');
+        
         
         
         if (accountCategory === 'loan' && accountCode) {
@@ -955,46 +955,50 @@ function handleSaveTransaction() {
     const sessionWorkingDate = typeof workingDate !== 'undefined' ? workingDate : 
         new Date().toLocaleDateString('en-GB').replace(/\//g, '/');
 
-    // ✅ CHECK LEDGER BALANCE FOR ALL OPERATIONS
-    const iframe = document.getElementById('resultFrame');
-    try {
-        const iframeWindow = iframe.contentWindow;
-        const iframeDoc = iframeWindow.document;
-        
-        if (operationType === 'transfer') {
-            // For transfer, check BOTH debit and credit accounts
-            for (let i = 0; i < creditAccountsData.length; i++) {
-                const txn = creditAccountsData[i];
-                const ledgerField = txn.opType === 'Debit' 
-                    ? iframeDoc.getElementById('ledgerBalance')
-                    : iframeDoc.getElementById('creditLedgerBalance');
-                
-                if (ledgerField) {
-                    const ledgerBalance = parseFloat(ledgerField.value) || 0;
-					if (txn.amount > ledgerBalance) {
-					    showValidationError(txn.opType + ' Amount cannot exceed Ledger Balance (₹' + 
-					                       ledgerBalance.toFixed(2) + ')');
-					    return;
-					}
-                }
-            }
-        } else {
-            // For deposit/withdrawal, check single account
-            const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
-            if (ledgerBalanceField && operationType === 'withdrawal') {
-                const ledgerBalance = parseFloat(ledgerBalanceField.value) || 0;
-                const txnAmount = parseFloat(document.getElementById('transactionamount').value) || 0;
-                
-				if (txnAmount > ledgerBalance) {
-				    showValidationError('Withdrawal Amount cannot exceed Ledger Balance (₹' + 
-				                       ledgerBalance.toFixed(2) + ')');
-				    return;
-				}
-            }
-        }
-    } catch (e) {
-        console.error('Error checking balance:', e);
-    }
+		// ✅ CHECK LEDGER BALANCE - ONLY FOR WITHDRAWAL AND TRANSFER DEBIT
+		const iframe = document.getElementById('resultFrame');
+		try {
+		    const iframeWindow = iframe.contentWindow;
+		    const iframeDoc = iframeWindow.document;
+		    
+		    if (operationType === 'transfer') {
+		        // For transfer, check ONLY debit accounts (NOT credit)
+		        for (let i = 0; i < creditAccountsData.length; i++) {
+		            const txn = creditAccountsData[i];
+		            
+		            // Only validate for Debit transactions
+		            if (txn.opType === 'Debit') {
+		                const ledgerField = iframeDoc.getElementById('ledgerBalance');
+		                
+		                if (ledgerField) {
+		                    const ledgerBalance = parseFloat(ledgerField.value) || 0;
+		                    if (txn.amount > ledgerBalance) {
+		                        showValidationError('Debit Amount cannot exceed Ledger Balance (₹' + 
+		                                           ledgerBalance.toFixed(2) + ')');
+		                        return;
+		                    }
+		                }
+		            }
+		            // Credit transactions - NO validation needed
+		        }
+		    } else if (operationType === 'withdrawal') {
+		        // For withdrawal, check single account
+		        const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
+		        if (ledgerBalanceField) {
+		            const ledgerBalance = parseFloat(ledgerBalanceField.value) || 0;
+		            const txnAmount = parseFloat(document.getElementById('transactionamount').value) || 0;
+		            
+		            if (txnAmount > ledgerBalance) {
+		                showValidationError('Withdrawal Amount cannot exceed Ledger Balance (₹' + 
+		                                   ledgerBalance.toFixed(2) + ')');
+		                return;
+		            }
+		        }
+		    }
+		    // For deposit - NO validation needed
+		} catch (e) {
+		    console.error('Error checking balance:', e);
+		}
     
     // ✅ HANDLE TRANSFER MODE - Validate from creditAccountsData list
     if (operationType === 'transfer') {
@@ -1573,45 +1577,38 @@ function calculateNewBalanceInIframe() {
 	        // Get the ledger balance from the iframe (current account being displayed)
 	        let currentLedgerBalance = 0;
 	        
-	        if (opType === 'Debit') {
-	            // For Debit, check if debit section exists
-	            const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
-	            if (ledgerBalanceField && ledgerBalanceField.value.trim() !== '') {
-	                currentLedgerBalance = parseFloat(ledgerBalanceField.value) || 0;
-	                
-					// ✅ VALIDATE AGAINST LEDGER BALANCE FOR DEBIT
-					if (finalAmount > currentLedgerBalance) {
-					    showValidationError('Debit Amount cannot exceed Ledger Balance (₹' + 
-					                       currentLedgerBalance.toFixed(2) + ')');
-					    return;
-					}
-	                
-	                // Debit: subtract amount
-	                newAccountBalance = (currentLedgerBalance - parseFloat(finalAmount)).toFixed(2);
-	            }
-	        } else if (opType === 'Credit') {
-	            // For Credit, check BOTH sections (credit might be in either field depending on iframe load state)
-	            const creditLedgerBalanceField = iframeDoc.getElementById('creditLedgerBalance');
-	            const regularLedgerBalanceField = iframeDoc.getElementById('ledgerBalance');
-	            
-	            if (creditLedgerBalanceField && creditLedgerBalanceField.value.trim() !== '') {
-	                // Credit section exists (transferForm.jsp loaded with credit account)
-	                currentLedgerBalance = parseFloat(creditLedgerBalanceField.value) || 0;
-	            } else if (regularLedgerBalanceField && regularLedgerBalanceField.value.trim() !== '') {
-	                // Regular section exists (transactionForm.jsp loaded with credit account)
-	                currentLedgerBalance = parseFloat(regularLedgerBalanceField.value) || 0;
-	            }
-	            
-				// ✅ VALIDATE AGAINST LEDGER BALANCE FOR CREDIT
-				if (finalAmount > currentLedgerBalance) {
-				    showValidationError('Credit Amount cannot exceed Ledger Balance (₹' + 
-				                       currentLedgerBalance.toFixed(2) + ')');
-				    return;
-				}
-	            
-	            // Credit: add amount
-	            newAccountBalance = (currentLedgerBalance + parseFloat(finalAmount)).toFixed(2);
-	        }
+			if (opType === 'Debit') {
+			    // For Debit, check if debit section exists
+			    const ledgerBalanceField = iframeDoc.getElementById('ledgerBalance');
+			    if (ledgerBalanceField && ledgerBalanceField.value.trim() !== '') {
+			        currentLedgerBalance = parseFloat(ledgerBalanceField.value) || 0;
+			        
+			        // ✅ VALIDATE AGAINST LEDGER BALANCE FOR DEBIT ONLY
+			        if (finalAmount > currentLedgerBalance) {
+			            showValidationError('Debit Amount cannot exceed Ledger Balance (₹' + 
+			                               currentLedgerBalance.toFixed(2) + ')');
+			            return;
+			        }
+			        
+			        // Debit: subtract amount
+			        newAccountBalance = (currentLedgerBalance - parseFloat(finalAmount)).toFixed(2);
+			    }
+			} else if (opType === 'Credit') {
+			    // For Credit, NO ledger balance check needed
+			    const creditLedgerBalanceField = iframeDoc.getElementById('creditLedgerBalance');
+			    const regularLedgerBalanceField = iframeDoc.getElementById('ledgerBalance');
+			    
+			    if (creditLedgerBalanceField && creditLedgerBalanceField.value.trim() !== '') {
+			        // Credit section exists (transferForm.jsp loaded with credit account)
+			        currentLedgerBalance = parseFloat(creditLedgerBalanceField.value) || 0;
+			    } else if (regularLedgerBalanceField && regularLedgerBalanceField.value.trim() !== '') {
+			        // Regular section exists (transactionForm.jsp loaded with credit account)
+			        currentLedgerBalance = parseFloat(regularLedgerBalanceField.value) || 0;
+			    }
+			    
+			    // Credit: add amount (NO validation needed)
+			    newAccountBalance = (currentLedgerBalance + parseFloat(finalAmount)).toFixed(2);
+			}
 	        
 	        console.log('Captured ' + opType + ' balance: ' + newAccountBalance + ' (Ledger: ' + currentLedgerBalance + ', Amount: ' + finalAmount + ')');
 	        

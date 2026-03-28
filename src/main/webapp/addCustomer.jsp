@@ -59,8 +59,8 @@
       <div>
         <label>Is Individual</label>
         <div style="flex-direction: row;" class="radio-group">
-          <label><input type="radio" name="isIndividual" value="yes" checked required> Yes</label>
-          <label><input type="radio" name="isIndividual" value="no"> No</label>
+          <label><input type="radio" name="isIndividual" value="Y" checked required> Yes</label>
+          <label><input type="radio" name="isIndividual" value="N"> No</label>
         </div>
       </div>
 
