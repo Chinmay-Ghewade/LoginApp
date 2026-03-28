@@ -33,6 +33,12 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+
+String isSupportUser = (String) session.getAttribute("isSupportUser");
+String sessionBranchCode = (String) session.getAttribute("branchCode");
+
+if (isSupportUser == null) isSupportUser = "N";
+if (sessionBranchCode == null) sessionBranchCode = "";
 %>
 
 <%
@@ -173,6 +179,19 @@ if ("download".equals(action)) {
 
         JasperPrint jasperPrint =
         JasperFillManager.fillReport(jasperReport, parameters, conn);
+        
+     // 🔥 CHECK IF NO DATA
+        if (jasperPrint.getPages().isEmpty()) {
+
+            response.reset();
+            response.setContentType("text/html");
+
+            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println("No Records Found!");
+            out.println("</h2>");
+
+            return;
+        }
 
         String timestamp =
         new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
@@ -268,9 +287,14 @@ if ("download".equals(action)) {
 <head>
     <title>Daily Supplementary Report</title>
 
-    <link rel="stylesheet"
-     href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=4">
     <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+
+<script>
+var contextPath = "<%=request.getContextPath()%>";
+</script>
+
+<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
 
 <style>
 .input-box { display:flex; gap:10px; }
@@ -324,26 +348,27 @@ if ("download".equals(action)) {
             <div class="parameter-group">
                 <div class="parameter-label required">Branch Code</div>
                 <div class="input-box">
-       <input type="text" 
-           name="branch_code" 
-           id="branch_code"
-           class="input-field" 
-           required>
+      <input type="text" 
+       name="branch_code" 
+       id="branch_code"
+       class="input-field"
+       value="<%= sessionBranchCode %>"
+       <%= !"Y".equalsIgnoreCase(isSupportUser.trim()) ? "readonly" : "" %>
+       required>
 
-       <button type="button"
+      <% if ("Y".equalsIgnoreCase(isSupportUser.trim())) { %>
+    <button type="button"
             class="icon-btn"
-            onclick="openBranchLookup()">…</button>
+            onclick="openLookup('branch')">…</button>
+<% } %>
        </div>
 
        </div>
             
-       <div class="parameter-group">
-       <div class="parameter-label">Description</div>
-       <input type="text" 
-           id="branch_name"
-           class="input-field"
-           readonly>
-       </div>
+        <div class="parameter-group">
+    <div class="parameter-label">Branch Name</div>
+    <input type="text" id="branchName" class="input-field" readonly>
+</div>
 
         <div class="parameter-group">
         <div class="parameter-label required">As On Date</div>
@@ -379,82 +404,12 @@ if ("download".equals(action)) {
     </form>
 </div>
 <!-- POPUP -->
-<div id="branchModal" class="modal">
+<div id="lookupModal" class="modal">
     <div class="modal-content">
-        <button onclick="closeBranchLookup()" style="float:right;">✖</button>
-        <div id="branchTable"></div>
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
     </div>
 </div>
-
-
-
-<script>
-    
-    // Form validation and submission handling
-    document.getElementById('reportForm').addEventListener('submit', function(e) {
-        var branchCode = document.getElementById('branch_code').value;
-        var asOnDate = document.getElementById('as_on_date').value;
-        
-        if (!branchCode || !asOnDate) {
-            alert('Please fill all required fields');
-            e.preventDefault();
-            return false;
-        }
-        
-        // Show loading overlay
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        // Disable submit button
-        var submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Generating...';
-        
-        return true;
-    });
-    
-    // Hide loading when page is shown (back button)
-    window.addEventListener('pageshow', function(event) {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        var submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Generate Report';
-    });
-    
-    /* =========================
-    POPUP FUNCTIONS
-    ========================= */
-
- function openBranchLookup() {
-     fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch")
-         .then(res => res.text())
-         .then(html => {
-             document.getElementById("branchTable").innerHTML = html;
-             document.getElementById("branchModal").style.display = "flex";
-         });
- }
-
- function closeBranchLookup() {
-     document.getElementById("branchModal").style.display = "none";
- }
-
- function selectBranch(code, name) {
-     document.getElementById("branch_code").value = code;
-     document.getElementById("branch_name").value = name;
-     closeBranchLookup();
- }
-
- /* AUTO FETCH NAME */
- document.getElementById("branch_code").addEventListener("blur", function() {
-
-     let code = this.value;
-
-     fetch("<%=request.getContextPath()%>/CommonLookupServlet?type=branch&action=getName&code=" + code)
-         .then(res => res.text())
-         .then(name => {
-             document.getElementById("branch_name").value = name || "Not Found";
-         });
- });
-</script>
 
 </body>
 </html>

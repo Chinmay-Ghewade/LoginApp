@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="dailyTform" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ebc06a81-9ea3-4f2f-9478-e5ef8edaaee2">
 	<property name="ireport.zoom" value="1.8627639691774651"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="192"/>
+	<property name="ireport.y" value="0"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
@@ -119,12 +119,12 @@
 					<reportElement x="-1" y="-1" width="802" height="1" uuid="5a2ad0d7-dc6e-4dc5-a2cd-81dd6f808e57"/>
 				</line>
 				<textField pattern="#,##0.00">
-					<reportElement x="61" y="1" width="61" height="19" uuid="32f1d344-f42f-4812-954a-bee846a80b50"/>
+					<reportElement x="63" y="1" width="54" height="19" uuid="32f1d344-f42f-4812-954a-bee846a80b50"/>
 					<textElement textAlignment="Right" verticalAlignment="Middle"/>
 					<textFieldExpression><![CDATA[$V{GCtransfer_sum}]]></textFieldExpression>
 				</textField>
 				<textField pattern="#,##0.00">
-					<reportElement x="123" y="1" width="66" height="19" uuid="b4152976-92eb-404c-87f1-b27abbc6e290"/>
+					<reportElement x="124" y="1" width="60" height="19" uuid="b4152976-92eb-404c-87f1-b27abbc6e290"/>
 					<textElement textAlignment="Right" verticalAlignment="Middle"/>
 					<textFieldExpression><![CDATA[$V{GCtotal_sum}]]></textFieldExpression>
 				</textField>
@@ -159,15 +159,15 @@
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="67" splitType="Stretch">
+	<title>
+		<band height="55">
 			<subreport>
-				<reportElement x="0" y="0" width="802" height="66" uuid="8e40172f-1255-41ba-bf9e-b8a422505c13"/>
-				<subreportParameter name="as_on_date">
-					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
-				</subreportParameter>
+				<reportElement x="122" y="0" width="616" height="55" uuid="1eb3b573-4659-43ad-a474-9b581d83bab9"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="report_title">
 					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
@@ -176,7 +176,7 @@
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
 			</subreport>
 		</band>
-	</pageHeader>
+	</title>
 	<columnHeader>
 		<band height="52" splitType="Stretch">
 			<line>
@@ -301,19 +301,19 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="22" splitType="Stretch">
+		<band height="19" splitType="Stretch">
 			<textField pattern=" #,##0.00">
-				<reportElement x="0" y="-1" width="60" height="20" uuid="b1e60cd2-fb46-4f9d-9fb3-9811527b4889"/>
+				<reportElement x="11" y="-1" width="48" height="20" uuid="b1e60cd2-fb46-4f9d-9fb3-9811527b4889"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{CSCR}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="60" y="-1" width="62" height="20" uuid="1b17e19f-1fc6-4a87-8fd2-40cf3012d18f"/>
+				<reportElement x="68" y="-1" width="50" height="20" uuid="1b17e19f-1fc6-4a87-8fd2-40cf3012d18f"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{TRCR}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="123" y="-1" width="67" height="20" uuid="dccf8baf-fbc5-4588-aeba-a6335ecf9c6f"/>
+				<reportElement x="131" y="-1" width="53" height="20" uuid="dccf8baf-fbc5-4588-aeba-a6335ecf9c6f"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{TOTAL_CR}]]></textFieldExpression>
 			</textField>
@@ -322,28 +322,28 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="315" y="-2" width="171" height="20" uuid="6990d729-2b04-4e16-b468-3f01bef633b4"/>
+			<textField isBlankWhenNull="true">
+				<reportElement x="327" y="-2" width="159" height="20" uuid="6990d729-2b04-4e16-b468-3f01bef633b4"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="486" y="-2" width="121" height="20" uuid="620bda8f-4bc8-427b-bd56-0bf6cdb08099"/>
+				<reportElement x="500" y="-2" width="107" height="20" uuid="620bda8f-4bc8-427b-bd56-0bf6cdb08099"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{PARTICULAR}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="608" y="-2" width="62" height="20" uuid="841a3a81-e13d-4fdd-9086-f8eb6889d0b4"/>
+				<reportElement x="612" y="-2" width="51" height="20" uuid="841a3a81-e13d-4fdd-9086-f8eb6889d0b4"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{CSDR}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="670" y="-1" width="67" height="20" uuid="ae64f52a-3072-489d-b23f-8600fcf08edb"/>
+				<reportElement x="673" y="-1" width="58" height="20" uuid="ae64f52a-3072-489d-b23f-8600fcf08edb"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{TRDR}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="737" y="-2" width="65" height="20" uuid="18e0944b-e42a-4930-bdfa-2dfbcddd9b2b"/>
+				<reportElement x="743" y="-1" width="53" height="20" uuid="18e0944b-e42a-4930-bdfa-2dfbcddd9b2b"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{TOTAL_DR}]]></textFieldExpression>
 			</textField>
@@ -355,18 +355,23 @@
 	<pageFooter>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="63" y="0" width="60" height="20" uuid="f3dea76d-c144-4d20-b391-2ead622b9f6c"/>
+				<reportElement x="0" y="0" width="63" height="20" uuid="2f02876d-28bc-4522-8ed1-29d58b3e2f64"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="64" y="0" width="100" height="20" uuid="5b52351c-12e4-49e1-996a-36bac86bacc5"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="679" y="0" width="80" height="20" uuid="41c7be53-d3ee-4fdd-ae39-38de11d36254"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="122" y="0" width="40" height="20" uuid="880b9a5b-3d06-433b-9b55-79c57753cd87"/>
+				<reportElement x="761" y="0" width="40" height="20" uuid="920c1c44-d200-4af7-b8be-43aec01b3271"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="0" width="63" height="20" uuid="2f02876d-28bc-4522-8ed1-29d58b3e2f64"/>
-				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

@@ -145,7 +145,7 @@ function initProductAutoFetch() {
     });
 }
 
-////////////////
+////////////////PAGE LOAD /////////////
 
 function loadBranchNameOnPageLoad() {
 

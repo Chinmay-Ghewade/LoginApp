@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="cashreciptscrollrg" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d89132de-b182-43fb-8181-31a543032f09">
 	<property name="ireport.zoom" value="2.4200000000000004"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="12"/>
+	<property name="ireport.y" value="113"/>
 	<parameter name="branch_code" class="java.lang.String">
 		<defaultValueExpression><![CDATA["0002"]]></defaultValueExpression>
 	</parameter>
@@ -238,17 +238,12 @@
 	<summary>
 		<band height="109" splitType="Stretch">
 			<staticText>
-				<reportElement x="199" y="3" width="33" height="19" uuid="48eddd00-e897-460d-9e51-6c900b1d3f72"/>
+				<reportElement x="161" y="3" width="33" height="19" uuid="48eddd00-e897-460d-9e51-6c900b1d3f72"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[Total:]]></text>
 			</staticText>
-			<textField pattern=" #,##0.00">
-				<reportElement x="232" y="2" width="39" height="20" uuid="bcbb5cb5-2d57-4217-8940-5e356c4cb70f"/>
-				<textElement textAlignment="Right" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$V{amount_sum}]]></textFieldExpression>
-			</textField>
 			<line>
 				<reportElement x="2" y="1" width="551" height="1" uuid="678e6517-2994-4dad-96cc-a05b51cd2cc8"/>
 			</line>
@@ -257,6 +252,11 @@
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "A4_clerk-manager.jasper"]]></subreportExpression>
 			</subreport>
+			<textField>
+				<reportElement x="209" y="3" width="53" height="20" uuid="49f4f0d8-4a02-4751-bd13-598865e685e8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{amount_sum}]]></textFieldExpression>
+			</textField>
 		</band>
 	</summary>
 </jasperReport>

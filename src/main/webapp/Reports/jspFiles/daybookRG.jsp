@@ -84,7 +84,7 @@ if ("download".equals(action)) {
                             .toUpperCase();
         }
 
-        if (bankCode == null || bankCode.isEmpty()) bankCode = "";
+        if (bankCode == null || bankCode.isEmpty()) bankCode = "0100";
         if (branchCode == null || branchCode.isEmpty()) branchCode = "";
 
         /* =========================
@@ -115,6 +115,19 @@ if ("download".equals(action)) {
 
         JasperPrint jp =
                 JasperFillManager.fillReport(jasperReport, parameters, conn);
+        
+     // 🔥 CHECK IF NO DATA
+        if (jp.getPages().isEmpty()) {
+
+            response.reset();
+            response.setContentType("text/html");
+
+            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println("No Records Found!");
+            out.println("</h2>");
+
+            return;
+        }
 
         if ("pdf".equalsIgnoreCase(reporttype)) {
 
@@ -287,12 +300,12 @@ var contextPath = "<%=request.getContextPath()%>";
     <div class="input-box">
 
         <input type="text"
-               id="branch_code"
-               name="branch_code"
-               class="input-field"
-               value="<%= !"Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "") ? sessionBranchCode : "" %>"
-               <%= !"Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "") ? "readonly" : "" %> >
-
+       id="branch_code"
+       name="branch_code"
+       class="input-field"
+       value="<%= sessionBranchCode %>"
+       <%= !"Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "") ? "readonly" : "" %> >
+       
         <% if ("Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "")) { %>
             <button type="button"
                     class="icon-btn"
