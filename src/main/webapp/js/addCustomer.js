@@ -456,21 +456,6 @@ if (mobileField && mobileField.value && !validationPatterns.mobile.test(mobileFi
         clearError(dlField);
     }
 
-    // Photo validation
-    const photoData = document.getElementById('photoData');
-    if (!photoData.value || photoData.value.trim() === '') {
-        const photoCard = photoData.closest('.upload-card') || document.querySelector('.upload-card:first-child');
-        showError(photoCard.querySelector('input[type="file"]'), 'Customer photo is required');
-        isValid = false;
-    }
-
-    // Signature validation
-    const signatureData = document.getElementById('signatureData');
-    if (!signatureData.value || signatureData.value.trim() === '') {
-        const sigCard = signatureData.closest('.upload-card') || document.querySelector('.upload-card:last-child');
-        showError(sigCard.querySelector('input[type="file"]'), 'Customer signature is required');
-        isValid = false;
-    }
 
     return isValid;
 }
@@ -997,7 +982,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const message = urlParams.get('message');
     
     if (status === 'success') {
-        showToast("✅ Customer added successfully!\nCustomer ID: " + customerId, 'success');
+        showCustomerSuccessModal(customerId);
         setTimeout(function() {
             window.history.replaceState({}, document.title, "addCustomer.jsp");
         }, 100);
@@ -1010,3 +995,82 @@ window.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Image upload handlers initialized');
 });
+
+// Show success modal for customer
+function showCustomerSuccessModal(customerId) {
+    const modal = document.createElement('div');
+    modal.id = 'customerSuccessModal';
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            width: 500px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: center;
+        ">
+            <div style="
+                color: #2ecc71;
+                font-size: 48px;
+                margin-bottom: 20px;
+            ">✓</div>
+            
+            <div style="
+                font-size: 20px;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 15px;
+            ">
+                Customer added successfully!
+            </div>
+            
+            <div style="
+                font-size: 25px;
+                color: #666;
+                margin-bottom: 30px;
+                font-weight: bold;
+            ">
+                Customer ID: ${customerId}
+            </div>
+            
+            <button onclick="closeCustomerModal()" style="
+                background: #2ecc71;
+                color: white;
+                border: none;
+                padding: 12px 50px;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            " onmouseover="this.style.background='#27ae60'" 
+               onmouseout="this.style.background='#2ecc71'">
+                OK
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function closeCustomerModal() {
+    const modal = document.getElementById('customerSuccessModal');
+    if (modal) {
+        modal.remove();
+    }
+    // Optionally reset the form
+    document.querySelector('form').reset();
+}

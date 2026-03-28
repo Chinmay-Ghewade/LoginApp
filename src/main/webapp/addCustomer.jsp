@@ -59,8 +59,8 @@
       <div>
         <label>Is Individual</label>
         <div style="flex-direction: row;" class="radio-group">
-          <label><input type="radio" name="isIndividual" value="Y" checked required> Yes</label>
-          <label><input type="radio" name="isIndividual" value="N"> No</label>
+          <label><input type="radio" name="isIndividual" value="yes" checked required> Yes</label>
+          <label><input type="radio" name="isIndividual" value="no"> No</label>
         </div>
       </div>
 
@@ -123,7 +123,7 @@
       <!-- Row 3 -->
       <div>
         <label>Registration Date</label>
-        <input type="date" name="registrationDate" required>
+        <input type="date" name="registrationDate" id='registrationDate'required>
       </div>
 
       <div>
@@ -534,10 +534,10 @@
 
   <!-- Photo & Signature Upload -->
   <fieldset>
-    <legend>Photo & Signature Upload <span style="color: red;">*</span></legend>
+    <legend>Photo & Signature Upload</legend>
     <div class="upload-container">
       <div class="upload-card">
-        <h3>Upload Photo <span style="color: red;">*</span></h3>
+        <h3>Upload Photo</h3>
         <div class="upload-icon-container">
           <img src="images/photo-icon.png" alt="Photo" class="upload-icon" id="photoPreviewIcon">
         </div>
@@ -556,7 +556,7 @@
       </div>
 
       <div class="upload-card">
-        <h3>Upload Signature <span style="color: red;">*</span></h3>
+        <h3>Upload Signature</h3>
         <div class="upload-icon-container">
           <img src="images/signature-icon.png" alt="Signature" class="upload-icon" id="signaturePreviewIcon">
         </div>
@@ -728,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function toggleFieldsByIndividual(isIndividual) {
         var individualFields = ['birthDate','gender','salutationCode','motherName','fatherName',
             'maritalStatus','isMinor1','isMinor2','maritalStatus1','maritalStatus2','children','dependents'];
-        var nonIndividualFields = ['gstinNo','constitutionCode'];
+        var nonIndividualFields = ['gstinNo','constitutionCode','registrationDate'];
 
         if (isIndividual) {
             individualFields.forEach(function(id) {
