@@ -511,7 +511,7 @@ function resetFormWithUploads() {
       field.style.backgroundColor = '';
     });
     
-    showToast('🔄 Form has been reset including photo and signature', 'info');
+    showPopup('✓ Form has been reset including photo and signature', 'success');
   }, 10);
 }
 
@@ -727,7 +727,7 @@ function openPhotoCamera() {
         video.srcObject = stream;
     })
     .catch(function(err) {
-        showToast('❌ Error accessing camera: ' + err.message, 'error');
+        showPopup('❌ Error accessing camera:\n' + err.message, 'error');
         closePhotoCamera();
     });
 }
@@ -771,7 +771,7 @@ function capturePhoto() {
             const finalSize = Math.round((compressedImage.length * 3) / 4);
         })
         .catch(error => {
-            showToast('❌ Failed to process photo: ' + error.message, 'error');
+            showPopup('❌ Failed to process photo:\n' + error.message, 'error');
         });
 }
 
@@ -809,7 +809,7 @@ function openSignatureCamera() {
         video.srcObject = stream;
     })
     .catch(function(err) {
-        showToast('❌ Error accessing camera: ' + err.message, 'error');
+        showPopup('❌ Error accessing camera:\n' + err.message, 'error');
         closeSignatureCamera();
     });
 }
@@ -854,7 +854,7 @@ function captureSignature() {
             
         })
         .catch(error => {
-            showToast('❌ Failed to process signature: ' + error.message, 'error');
+            showPopup('❌ Failed to process signature:\n' + error.message, 'error');
         });
 }
 
@@ -913,34 +913,74 @@ window.addEventListener('click', function(event) {
     }
 });
 
-// Unified toast notification function
-function showToast(message, type = 'info') {
-    if (typeof Toastify === 'undefined') return;
-    
+// Unified popup notification function
+function showPopup(message, type = 'info') {
     const colors = {
-        success: '#4caf50',
-        error: '#f44336',
-        info: '#2196F3'
+        success: { bg: '#d4edda', border: '#28a745', text: '#155724', icon: '✓' },
+        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '✕' },
+        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: 'ℹ' }
     };
     
-    Toastify({
-        text: message,
-        duration: type === 'error' ? 5000 : 4000,
-        close: true,
-        gravity: "top",
-        position: "center",
-        style: {
-            background: "#fff",
-            color: "#333",
-            borderRadius: "8px",
-            fontSize: "14px",
-            padding: "16px 24px",
-            boxShadow: "0 3px 10px rgba(0,0,0,0.2)",
-            borderLeft: `5px solid ${colors[type]}`,
-            marginTop: "20px",
-            whiteSpace: "pre-line"
-        }
-    }).showToast();
+    const style = colors[type] || colors.info;
+    
+    const modal = document.createElement('div');
+    modal.className = 'popup-modal-overlay';
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            width: 400px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            border-left: 5px solid ${style.border};
+        ">
+            <div style="
+                color: ${style.text};
+                font-size: 32px;
+                margin-bottom: 15px;
+                font-weight: bold;
+            ">${style.icon}</div>
+            
+            <div style="
+                color: ${style.text};
+                font-size: 14px;
+                line-height: 1.6;
+                margin-bottom: 25px;
+                white-space: pre-line;
+            ">${message}</div>
+            
+            <button onclick="this.closest('.popup-modal-overlay').remove();" style="
+                background: ${style.border};
+                color: white;
+                border: none;
+                padding: 10px 40px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: background 0.3s;
+            " onmouseover="this.style.opacity='0.8'" 
+               onmouseout="this.style.opacity='1'">
+                OK
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
 }
 
 // Add visual indicator for successful upload
@@ -987,7 +1027,7 @@ window.addEventListener('DOMContentLoaded', function() {
             window.history.replaceState({}, document.title, "addCustomer.jsp");
         }, 100);
     } else if (status === 'error') {
-        showToast("❌ Error: " + (message || "Failed to add customer"), 'error');
+        showPopup("❌ Error:\n" + (message || "Failed to add customer"), 'error');
         setTimeout(function() {
             window.history.replaceState({}, document.title, "addCustomer.jsp");
         }, 100);

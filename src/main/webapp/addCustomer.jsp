@@ -852,7 +852,7 @@ function resetFormWithUploads() {
             f.style.backgroundColor = '';
         });
         if (typeof showInfoToast === 'function') {
-            showInfoToast('🔄 Form has been reset including photo and signature');
+        	showPopup('✓ Form has been reset including photo and signature', 'success');
         }
     }, 10);
 }
