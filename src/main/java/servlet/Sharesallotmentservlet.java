@@ -12,41 +12,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * SharesAllotmentServlet
- * ─────────────────────────────────────────────────────────────────────────────
- * Handles all backend AJAX actions for the Shares Allotment module.
- *
- * Actions (via ?action=...):
- *   search        – Search savings accounts (SUBSTR pos 5-7 = '901') by last digits
- *   lookup        – Alias for search
- *   searchtr      – Search transfer accounts (SUBSTR pos 5-7 = '201') by last digits
- *   get           – Fetch full details of a savings account (901)
- *   gettrdetails  – Fetch full details of a transfer account (201)
- *   gettr         – Fetch name-only of a transfer account (201) – quick validation
- *   save          – Save share allotment (INSERT into SHARES.CERTIFICATE_MASTER)
- *
- * Non-AJAX (no action param):
- *   Forward to sharesAllotment.jsp for page render.
- *
- * Mapped to:  /shares/allotment  (adjust in web.xml or @WebServlet below)
- * ─────────────────────────────────────────────────────────────────────────────
- */
 @WebServlet("/shares/allotment")
 public class Sharesallotmentservlet extends HttpServlet {
 
-    // ── Account type codes embedded in ACCOUNT_CODE (characters 5-7, 1-based) ──
-    private static final String AC_TYPE_SAVINGS  = "901"; // main share-receiver account
-    private static final String AC_TYPE_TRANSFER = "201"; // transfer / savings payer account
+    private static final String AC_TYPE_SAVINGS  = "901";
+    private static final String AC_TYPE_TRANSFER = "201";
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // GET  →  AJAX read actions  (search, lookup, searchtr, get, gettrdetails, gettr)
-    // ─────────────────────────────────────────────────────────────────────────
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Session guard
         HttpSession sess = req.getSession(false);
         if (sess == null || sess.getAttribute("branchCode") == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
@@ -56,12 +31,10 @@ public class Sharesallotmentservlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if (action == null || action.isEmpty()) {
-            // No action → render the JSP page
             req.getRequestDispatcher("/shares/sharesAllotment.jsp").forward(req, resp);
             return;
         }
 
-        // All other actions return JSON
         resp.reset();
         resp.setContentType("application/json; charset=UTF-8");
         PrintWriter pw = resp.getWriter();
@@ -89,7 +62,7 @@ public class Sharesallotmentservlet extends HttpServlet {
                     handleGetAccountName(req, pw);
                     break;
 
-default:
+                default:
                     pw.print("{\"error\":\"Unknown action\"}");
             }
         } finally {
@@ -97,14 +70,10 @@ default:
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // POST  →  save
-    // ─────────────────────────────────────────────────────────────────────────
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // Session guard
         HttpSession sess = req.getSession(false);
         if (sess == null || sess.getAttribute("branchCode") == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
@@ -131,12 +100,6 @@ default:
     // ACTION HANDLERS
     // =========================================================================
 
-    /**
-     * Search accounts by trailing digits.
-     * Returns: { "accounts": [ {"code":"...", "name":"..."}, … ] }
-     *
-     * @param acType  "901" for savings, "201" for transfer accounts
-     */
     private void handleSearch(HttpServletRequest req, PrintWriter pw, String acType) {
 
         String term = nvl(req.getParameter("term")).trim();
@@ -179,12 +142,6 @@ default:
         }
     }
 
-    /**
-     * Fetch full account details (code, name, customer ID, GL code/name, balances).
-     * Returns: { "ok":true, "n":"...", "ci":"...", "gc":"...", "gn":"...", "lb":"...", "ab":"..." }
-     *
-     * @param acType  "901" or "201"
-     */
     private void handleGetAccountDetails(HttpServletRequest req, PrintWriter pw, String acType) {
 
         String ac = nvl(req.getParameter("code")).trim();
@@ -235,10 +192,6 @@ default:
         }
     }
 
-    /**
-     * Quick validation: does a transfer account (201) with this code exist?
-     * Returns: { "ok":true, "n":"Account Name" }  or  { "error":"..." }
-     */
     private void handleGetAccountName(HttpServletRequest req, PrintWriter pw) {
 
         String ac = nvl(req.getParameter("code")).trim();
@@ -271,48 +224,22 @@ default:
         }
     }
 
-    /**
-     * Save share allotment.
-     *
-     * Does 2 things inside a single DB transaction:
-     *   A) INSERT into SHARES.CERTIFICATE_MASTER  (share receiver only)
-     *   B) INSERT into TRANSACTION.DAILYSCROLL    (one row per account involved)
-     *
-     * Daily scroll row logic:
-     *   Cash mode:
-     *     Row 1 – receiver (901)  : TRANSACTIONINDICATOR_CODE = CSCR, FORACCOUNT_CODE = null
-     *
-     *   Transfer mode:
-     *     Row 1       – receiver (901)       : TRCR, FORACCOUNT_CODE = payer with highest amount
-     *     Row 2..N    – each payer (201)     : TRDR, FORACCOUNT_CODE = receiver (901)
-     *
-     *   SCROLL_NUMBER   = NEXT_SCROLL_NO.NEXTVAL  (same for all rows in this transaction)
-     *   SUBSCROLL_NUMBER= 1, 2, 3 … incremented per row
-     *   BRANCH_CODE     = from session attribute "branchCode"
-     *   USER_ID         = from session attribute "userId"
-     *   SCROLL_DATE     = meetDate
-     *   TRANSACTIONSTATUS = 'A'  (Active)
-     *   IS_PASSBOOK_PRINTED = 'N'
-     *   ACCOUNTBALANCE  = current ledger balance + amount (for TRCR/CSCR) or - amount (for TRDR)
-     *   GLACCOUNT_CODE  = FN_GET_AC_GL(account_code)
-     *   GLACCOUNTBALANCE= current GL balance after transaction
-     *   PARTICULAR      = "Share Allotment"
-     */
     private void handleSave(HttpServletRequest req, PrintWriter pw) {
 
-        // ── Session attributes ──────────────────────────────────────────────
         HttpSession session = req.getSession(false);
         String branchCode = (session != null && session.getAttribute("branchCode") != null)
                             ? session.getAttribute("branchCode").toString().trim() : "";
         String userId     = (session != null && session.getAttribute("userId") != null)
                             ? session.getAttribute("userId").toString().trim() : "";
 
-        // ── Read & validate params ──────────────────────────────────────────
         String mainAccCode = nvl(req.getParameter("accountCode")).trim();
         String meetDateStr = nvl(req.getParameter("meetDate")).trim();
         String noSharesStr = nvl(req.getParameter("noShares")).trim();
         String modeOfPay   = nvl(req.getParameter("mode")).trim();
         String trCodesJson = nvl(req.getParameter("trCodes")).trim();
+
+        String particular  = nvl(req.getParameter("particular")).trim();
+        if (particular.isEmpty()) particular = "Share Allotment";
 
         if (mainAccCode.isEmpty()) { pw.print("{\"error\":\"Account code required\"}");  return; }
         if (meetDateStr.isEmpty()) { pw.print("{\"error\":\"Meeting date required\"}");   return; }
@@ -331,13 +258,60 @@ default:
         List<String[]> trList = parseTransferEntries(trCodesJson, isTransfer);
         if (trList == null) { pw.print("{\"error\":\"Invalid transfer data\"}"); return; }
 
-        // ── DB transaction ─────────────────────────────────────────────────
         Connection con = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
             con = DBConnection.getConnection();
             con.setAutoCommit(false);
 
-            // ── A1: MAX certificate number & TO_NUMBER ──────────────────────
+            java.math.BigDecimal totalAmt = new java.math.BigDecimal(noShares * 100L);
+            java.sql.Date workingDate     = getWorkingDate(con, branchCode);
+
+            // ── VALIDATION via Fn_Get_Valid_Transaction ────────────────────
+            String receiverTrnIndVal = isTransfer ? "TRCR" : "CSCR";
+            CallableStatement cs = null;
+            try {
+                cs = con.prepareCall("{? = call Fn_Get_Valid_Transaction(?, ?, ?, ?)}");
+                cs.registerOutParameter(1, Types.CHAR);
+                cs.setString    (2, mainAccCode);
+                cs.setDate      (3, workingDate);
+                cs.setString    (4, receiverTrnIndVal);
+                cs.setBigDecimal(5, totalAmt);
+                cs.execute();
+                String result = cs.getString(1);
+                if (result != null && result.charAt(0) == 'Y') {
+                    pw.print("{\"error\":\"" + jsonSafe(result.substring(1).trim()) + "\"}");
+                    return;
+                }
+            } finally {
+                try { if (cs != null) cs.close(); } catch (Exception ex) { /* ignore */ }
+            }
+
+            // Validate each payer account (Transfer mode only) — TRDR
+            if (isTransfer) {
+                for (String[] tr : trList) {
+                    String payerCode              = tr[0];
+                    java.math.BigDecimal payerAmt = new java.math.BigDecimal(tr[1]);
+                    try {
+                        cs = con.prepareCall("{? = call Fn_Get_Valid_Transaction(?, ?, ?, ?)}");
+                        cs.registerOutParameter(1, Types.CHAR);
+                        cs.setString    (2, payerCode);
+                        cs.setDate      (3, workingDate);
+                        cs.setString    (4, "TRDR");
+                        cs.setBigDecimal(5, payerAmt);
+                        cs.execute();
+                        String result = cs.getString(1);
+                        if (result != null && result.charAt(0) == 'Y') {
+                            pw.print("{\"error\":\"Account " + payerCode + ": "
+                                     + jsonSafe(result.substring(1).trim()) + "\"}");
+                            return;
+                        }
+                    } finally {
+                        try { if (cs != null) cs.close(); } catch (Exception ex) { /* ignore */ }
+                    }
+                }
+            }
+
+            // ── MAX certificate number & TO_NUMBER ──
             long maxCertNo = 0, maxToNo = 0;
             ps = con.prepareStatement(
                 "SELECT NVL(MAX(CERTIFICATE_NUMBER),0) AS MAX_CERT, " +
@@ -347,7 +321,7 @@ default:
             if (rs.next()) { maxCertNo = rs.getLong("MAX_CERT"); maxToNo = rs.getLong("MAX_TO"); }
             rs.close(); ps.close();
 
-            // ── A2: MAX member number ───────────────────────────────────────
+            // ── MAX member number ──
             long maxMemberNo = 0;
             ps = con.prepareStatement(
                 "SELECT NVL(MAX(MEMBER_NUMBER),0) AS MAX_MEM " +
@@ -360,39 +334,43 @@ default:
             long certNo       = maxCertNo   + 1;
             long fromNo       = maxToNo     + 1;
             long toNo         = fromNo + noShares - 1;
-            java.math.BigDecimal totalAmt = new java.math.BigDecimal(noShares * 100L);
 
-            // ── A3: Insert SHARES.CERTIFICATE_MASTER ───────────────────────
+            // ── Fetch CUSTOMER_ID from DB ──
+            String customerId = getCustomerId(con, mainAccCode);
+
+            // ── Insert SHARES.CERTIFICATE_MASTER (STATUS = 'E') ──
             ps = con.prepareStatement(
                 "INSERT INTO SHARES.CERTIFICATE_MASTER " +
-                "  (MEMBER_TYPE, MEMBER_NUMBER, CERTIFICATE_NUMBER, ISSUE_DATE, FACE_VALUE, " +
-                "   NUMBEROF_SHARES, FROM_NUMBER, TO_NUMBER, TOTAL_SHARESAMOUNT, ACCOUNT_NUMBER, PRINT_STATUS) " +
-                "VALUES ('A', ?, ?, ?, 100, ?, ?, ?, ?, ?, 'N')");
-            ps.setLong  (1, mainMemberNo); ps.setLong(2, certNo);
-            ps.setDate  (3, issueDate);    ps.setInt (4, noShares);
-            ps.setLong  (5, fromNo);       ps.setLong(6, toNo);
-            ps.setBigDecimal(7, totalAmt); ps.setString(8, mainAccCode);
+                "  (MEMBER_TYPE, MEMBER_NUMBER, CERTIFICATE_NUMBER, ISSUE_DATE, MEETING_DATE, FACE_VALUE, " +
+                "   NUMBEROF_SHARES, FROM_NUMBER, TO_NUMBER, TOTAL_SHARESAMOUNT, ACCOUNT_NUMBER, PRINT_STATUS, " +
+                "   USER_ID, CUSTOMER_ID, BR_CODE, STATUS) " +
+                "VALUES ('A', ?, ?, ?, ?, 100, ?, ?, ?, ?, ?, 'N', ?, ?, ?, 'E')");
+            ps.setLong      (1,  mainMemberNo);
+            ps.setLong      (2,  certNo);
+            ps.setDate      (3,  workingDate);       // ISSUE_DATE   = working date
+            ps.setDate      (4,  issueDate);         // MEETING_DATE = meeting date from form
+            ps.setInt       (5,  noShares);
+            ps.setLong      (6,  fromNo);
+            ps.setLong      (7,  toNo);
+            ps.setBigDecimal(8,  totalAmt);
+            ps.setString    (9,  mainAccCode);       // ACCOUNT_NUMBER
+            ps.setString    (10, userId);            // USER_ID     ← from session
+            ps.setString    (11, customerId);        // CUSTOMER_ID ← from DB
+            ps.setString    (12, branchCode);   
             ps.executeUpdate(); ps.close();
 
-            // ── B: Daily Scroll inserts ────────────────────────────────────
+            // ── Get next scroll number ──
+            long scrollNo  = getNextScrollNumber(con);
+            int  subScroll = 1;
 
-            // B1: Get next scroll number from sequence
-            long scrollNo = getNextScrollNumber(con);
-            int  subScroll = 1; // increments per row
-
-            // B2: Get GL code for receiver account
+            // ── Get GL code and ledger balance for receiver ──
             String mainGlCode = getGlCode(con, mainAccCode);
-
-            // B3: Get current ledger balance of receiver
             java.math.BigDecimal mainLedgerBal = getLedgerBalance(con, mainAccCode);
 
-            // B4: Determine FORACCOUNT_CODE for receiver row
-            //     Transfer → payer with highest amount
-            //     Cash     → null
-            String forAccCodeReceiver = null;
+            // ── Determine FORACCOUNT_CODE for receiver row ──
+            String forAccCodeReceiver = mainAccCode;
             if (isTransfer && !trList.isEmpty()) {
-                // find payer with highest amount
-                String[]  highestPayer    = trList.get(0);
+                String[] highestPayer = trList.get(0);
                 java.math.BigDecimal highestAmt = new java.math.BigDecimal(highestPayer[1]);
                 for (String[] tr : trList) {
                     java.math.BigDecimal amt = new java.math.BigDecimal(tr[1]);
@@ -401,43 +379,43 @@ default:
                 forAccCodeReceiver = highestPayer[0];
             }
 
-            // B5: Insert receiver row (TRCR or CSCR)
+            // ── Insert receiver row (TRCR or CSCR) ──
             String receiverTrnInd = isTransfer ? "TRCR" : "CSCR";
             java.math.BigDecimal receiverNewBal = mainLedgerBal.add(totalAmt);
-
-            // Get GL balance for receiver GL
-            java.math.BigDecimal mainGlBal = getGlBalance(con, branchCode, mainGlCode);
-            java.math.BigDecimal mainNewGlBal = mainGlBal.add(totalAmt);
+            java.math.BigDecimal mainGlBal      = getGlBalance(con, branchCode, mainGlCode);
+            java.math.BigDecimal mainNewGlBal   = mainGlBal.add(totalAmt);
 
             insertDailyScroll(con, ps,
-                branchCode, issueDate, scrollNo, subScroll++,
+                branchCode, workingDate, scrollNo, subScroll++,
                 mainAccCode, mainGlCode, forAccCodeReceiver,
                 receiverTrnInd, totalAmt,
                 receiverNewBal, mainNewGlBal,
-                userId, "Share Allotment");
+                userId, particular);
 
-            // B6: Insert payer rows (TRDR) — transfer mode only
+            // ── Insert payer rows (TRDR) — transfer mode only ──
             if (isTransfer) {
                 for (String[] tr : trList) {
                     String payerCode = tr[0];
-                    java.math.BigDecimal payerAmt = new java.math.BigDecimal(tr[1]);
-                    String payerGlCode = getGlCode(con, payerCode);
+                    java.math.BigDecimal payerAmt       = new java.math.BigDecimal(tr[1]);
+                    String payerGlCode                  = getGlCode(con, payerCode);
                     java.math.BigDecimal payerLedgerBal = getLedgerBalance(con, payerCode);
                     java.math.BigDecimal payerNewBal    = payerLedgerBal.subtract(payerAmt);
                     java.math.BigDecimal payerGlBal     = getGlBalance(con, branchCode, payerGlCode);
                     java.math.BigDecimal payerNewGlBal  = payerGlBal.subtract(payerAmt);
 
                     insertDailyScroll(con, ps,
-                        branchCode, issueDate, scrollNo, subScroll++,
-                        payerCode, payerGlCode, mainAccCode, // FORACCOUNT = receiver
+                        branchCode, workingDate, scrollNo, subScroll++,
+                        payerCode, payerGlCode, mainAccCode,
                         "TRDR", payerAmt,
                         payerNewBal, payerNewGlBal,
-                        userId, "Share Allotment");
+                        userId, particular);
                 }
             }
 
             con.commit();
+
             pw.print("{\"ok\":true,\"certNo\":" + certNo +
+                     ",\"scrollNo\":" + scrollNo +
                      ",\"msg\":\"Saved successfully! Certificate No: " + certNo + "\"}");
 
         } catch (Exception e) {
@@ -448,9 +426,6 @@ default:
         }
     }
 
-    /**
-     * Insert one row into TRANSACTION.DAILYSCROLL.
-     */
     private void insertDailyScroll(
             Connection con, PreparedStatement ps,
             String branchCode, java.sql.Date scrollDate,
@@ -460,16 +435,6 @@ default:
             java.math.BigDecimal accountBalance, java.math.BigDecimal glBalance,
             String userId, String particular) throws SQLException {
 
-        // Column mapping:
-        // IS_PASSBOOK_PRINTED  = 'N'          (hardcoded)
-        // TRANSACTIONSTATUS    = 'E'          (hardcoded — as per requirement)
-        // TRANIDENTIFICATION_ID= 0            (hardcoded)
-        // AUTHORISE_DATE       = NULL         (as per requirement)
-        // CASHHANDLING_NUMBER  = NULL         (as per requirement)
-        // GLBRANCH_CODE        = NULL         (as per requirement)
-        // CREATED_DATE         = SYSTIMESTAMP (system timestamp)
-        // MODIFIED_DATE        = SYSTIMESTAMP (system timestamp — as per requirement)
-        // RECON_CODE           = 0            (hardcoded)
         ps = con.prepareStatement(
             "INSERT INTO TRANSACTION.DAILYSCROLL " +
             "  (BRANCH_CODE, SCROLL_DATE, SCROLL_NUMBER, SUBSCROLL_NUMBER, " +
@@ -479,7 +444,7 @@ default:
             "   TRANIDENTIFICATION_ID, AUTHORISE_DATE, CASHHANDLING_NUMBER, " +
             "   GLBRANCH_CODE, CREATED_DATE, MODIFIED_DATE, RECON_CODE) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'N', 'E', " +
-            "        0, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NUll)");
+            "        0, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NULL)");
 
         ps.setString    (1,  branchCode);
         ps.setDate      (2,  scrollDate);
@@ -499,9 +464,22 @@ default:
         ps.close();
     }
 
-    /**
-     * Get GL account code for a given account using FN_GET_AC_GL.
-     */
+    // =========================================================================
+    // HELPERS
+    // =========================================================================
+
+    private String getCustomerId(Connection con, String accountCode) throws SQLException {
+        PreparedStatement ps = null; ResultSet rs = null;
+        try {
+            ps = con.prepareStatement(
+                "SELECT NVL(CUSTOMER_ID, '') AS CUSTOMER_ID FROM ACCOUNT.ACCOUNT WHERE ACCOUNT_CODE = ?");
+            ps.setString(1, accountCode);
+            rs = ps.executeQuery();
+            if (rs.next()) return clean(rs.getString("CUSTOMER_ID"));
+            return "";
+        } finally { closeQuietly(rs, ps, null); }
+    }
+
     private String getGlCode(Connection con, String accountCode) throws SQLException {
         PreparedStatement ps = null; ResultSet rs = null;
         try {
@@ -517,9 +495,6 @@ default:
         } finally { closeQuietly(rs, ps, null); }
     }
 
-    /**
-     * Get current ledger balance for a given account.
-     */
     private java.math.BigDecimal getLedgerBalance(Connection con, String accountCode) throws SQLException {
         PreparedStatement ps = null; ResultSet rs = null;
         try {
@@ -532,9 +507,6 @@ default:
         } finally { closeQuietly(rs, ps, null); }
     }
 
-    /**
-     * Get current GL balance for a branch + GL account code.
-     */
     private java.math.BigDecimal getGlBalance(Connection con, String branchCode, String glCode) throws SQLException {
         if (glCode == null || glCode.isEmpty()) return java.math.BigDecimal.ZERO;
         PreparedStatement ps = null; ResultSet rs = null;
@@ -550,9 +522,6 @@ default:
         } finally { closeQuietly(rs, ps, null); }
     }
 
-    /**
-     * Get next scroll number from sequence NEXT_SCROLL_NO.
-     */
     private long getNextScrollNumber(Connection con) throws SQLException {
         PreparedStatement ps = null; ResultSet rs = null;
         try {
@@ -563,23 +532,27 @@ default:
         } finally { closeQuietly(rs, ps, null); }
     }
 
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
+    private java.sql.Date getWorkingDate(Connection con, String branchCode) throws SQLException {
+        CallableStatement cs = null;
+        try {
+            cs = con.prepareCall("{? = call SYSTEM.FN_GET_WORKINGDATE(?, ?)}");
+            cs.registerOutParameter(1, Types.DATE);
+            cs.setString(2, "0100");
+            cs.setString(3, branchCode);
+            cs.execute();
+            java.sql.Date wd = cs.getDate(1);
+            return (wd != null) ? wd : new java.sql.Date(System.currentTimeMillis());
+        } finally {
+            try { if (cs != null) cs.close(); } catch (Exception ex) { /* ignore */ }
+        }
+    }
 
-    /**
-     * Parse the JSON transfer-entries array sent from the front-end.
-     * Format: [{"code":"XXX","amount":1000},{"code":"YYY","amount":500}]
-     *
-     * Returns a (possibly empty) list of String[]{code, amountStr},
-     * or null if parsing failed.
-     */
     private List<String[]> parseTransferEntries(String json, boolean isTransfer) {
         List<String[]> list = new ArrayList<>();
         if (!isTransfer || json == null || json.trim().isEmpty()) return list;
         try {
             json = json.trim();
-            json = json.substring(1, json.length() - 1).trim(); // strip [ ]
+            json = json.substring(1, json.length() - 1).trim();
             if (json.isEmpty()) return list;
 
             for (String entry : json.split("\\},\\{")) {
@@ -597,20 +570,13 @@ default:
             }
             return list;
         } catch (Exception ex) {
-            return null; // signal parse failure
+            return null;
         }
     }
 
-    /** Returns empty string instead of null. */
     private String nvl(String s) { return s == null ? "" : s; }
-
-    /** Trim and return empty string for null DB values. */
     private String clean(String s) { return s == null ? "" : s.trim(); }
 
-    /**
-     * Escape a DB string value for safe embedding in a JSON string literal.
-     * Handles backslash, double-quote, CR, LF.
-     */
     private String jsonSafe(String s) {
         if (s == null) return "";
         return s.trim()
@@ -620,14 +586,12 @@ default:
                 .replace("\n", "");
     }
 
-    /** Extract and JSON-safe the exception message for error responses. */
     private String jsonSafeErr(Exception e) {
         String msg = e.getMessage();
         if (msg == null) msg = "DB error";
         return msg.replace("\"", "'").replace("\r", "").replace("\n", " ");
     }
 
-    /** Close JDBC resources silently. */
     private void closeQuietly(ResultSet rs, PreparedStatement ps, Connection con) {
         try { if (rs  != null) rs.close();  } catch (Exception ex) { /* ignore */ }
         try { if (ps  != null) ps.close();  } catch (Exception ex) { /* ignore */ }

@@ -68,7 +68,6 @@
                     value = rs.next() ? String.valueOf(rs.getInt("TOTAL")) : "0";
 
                 } else if ("all_customers".equals(cardId)) {
-                    // All customers for logged in branch
                     ps = conn.prepareStatement(
                         "SELECT COUNT(*) as TOTAL FROM CUSTOMER.CUSTOMER " +
                         "WHERE SUBSTR(CUSTOMER_ID, 1, 4) = ?"
@@ -78,7 +77,6 @@
                     value = rs.next() ? String.valueOf(rs.getInt("TOTAL")) : "0";
 
                 } else if ("all_users".equals(cardId)) {
-                    // Total users for this branch
                     ps = conn.prepareStatement(
                         "SELECT COUNT(*) as TOTAL FROM ACL.USERREGISTER " +
                         "WHERE BRANCH_CODE = ?"
@@ -88,7 +86,6 @@
                     value = rs.next() ? String.valueOf(rs.getInt("TOTAL")) : "0";
 
                 } else if ("maintenance_users".equals(cardId)) {
-                    // Pending authorization users (STATUS = 'E') for this branch
                     ps = conn.prepareStatement(
                         "SELECT COUNT(*) as TOTAL FROM ACL.USERREGISTER " +
                         "WHERE BRANCH_CODE = ? AND STATUS = 'E'"
@@ -100,7 +97,6 @@
                 break;
                 
             case "reports":
-                // Reports cards - use function calls (same as dashboard)
                 ps = conn.prepareStatement(
                     "SELECT FUNCATION_NAME, PARAMITAR, TABLE_NAME, DESCRIPTION " +
                     "FROM GLOBALCONFIG.REPORTS " +
@@ -125,7 +121,6 @@
                 break;
                 
             case "masters":
-                // Masters cards - use function calls (same as dashboard and reports)
                 ps = conn.prepareStatement(
                     "SELECT FUNCATION_NAME, PARAMITAR, TABLE_NAME, DESCRIPTION " +
                     "FROM GLOBALCONFIG.MASTERS " +
@@ -210,8 +205,17 @@
                     ps.setString(1, branchCode);
                     rs = ps.executeQuery();
                     value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
+
+                } else if ("pending_shares".equals(cardId)) {
+                    ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM SHARES.CERTIFICATE_MASTER " +
+                        "WHERE BR_CODE = ? AND STATUS = 'E'"
+                    );
+                    ps.setString(1, branchCode);
+                    rs = ps.executeQuery();
+                    value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
                 }
-                break;   
+                break;
 
             default:
                 out.print("{\"error\": \"Unknown card type\"}");

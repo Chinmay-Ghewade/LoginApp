@@ -49,6 +49,11 @@
                 <h3>Authorization Pending Transaction (Transfer)</h3>
                 <p class="loading" id="pending-txn-transfer-value">Loading...</p>
             </div>
+            
+            <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingShares.jsp', 'Authorization > Pending Shares')">
+                <h3>Authorization Pending Shares </h3>
+                <p class="loading" id="pending-shares-value">Loading...</p>
+            </div>
         </div>  <%-- this closing div was already there --%>
     </div>
     

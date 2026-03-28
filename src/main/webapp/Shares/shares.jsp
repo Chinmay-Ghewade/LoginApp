@@ -26,16 +26,19 @@
         <!-- Shares Allotment Card -->
         <div class="card" onclick="navigateTo('Shares/sharesAllotment.jsp', 'Shares > Shares Allotment')">
             <h3>Shares Allotment</h3>
+            <p class="size-1">→</p>
         </div>
 
         <!-- Shares Refund Card -->
         <div class="card" onclick="navigateTo('Shares/sharesRefund.jsp', 'Shares > Shares Refund')">
             <h3>Shares Refund</h3>
+            <p class="size-1">→</p>
         </div>
 
         <!-- Dividend Calculation Card -->
         <div class="card" onclick="navigateTo('Shares/dividendCal.jsp', 'Shares > Dividend Calculation')">
             <h3>Dividend Calculation</h3>
+            <p class="size-1">→</p>
         </div>
 
     </div>
