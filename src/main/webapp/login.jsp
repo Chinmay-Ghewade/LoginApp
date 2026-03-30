@@ -6,11 +6,55 @@
     response.setHeader("Pragma", "no-cache");
     response.setDateHeader("Expires", 0);
 
-    String userId     = request.getParameter("username");
-    String password   = request.getParameter("password");
-    String branchCode = request.getParameter("branch");
+    String userId       = request.getParameter("username");
+    String password     = request.getParameter("password");
+    String branchCode   = request.getParameter("branch");
     String errorMessage = null;
-    boolean showForm  = true;
+    boolean showForm    = true;
+
+    // ── Force Login ──────────────────────────────────────────────
+    if ("forceLogin".equals(request.getParameter("action"))) {
+        String forceUserId     = request.getParameter("userId");
+        String forceBranchCode = request.getParameter("branchCode");
+        String forcePassword   = request.getParameter("password");
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = DBConnection.getConnection();
+
+            // 1. Reset CURRENTLOGIN_STATUS to 'U'
+            ps = conn.prepareStatement(
+                "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'U' " +
+                "WHERE USER_ID = ? AND BRANCH_CODE = ?"
+            );
+            ps.setString(1, forceUserId);
+            ps.setString(2, forceBranchCode);
+            ps.executeUpdate();
+            ps.close();
+
+            // 2. Redirect back to login with same credentials to login normally
+            response.sendRedirect("login.jsp?username=" + forceUserId + 
+                                  "&branch=" + forceBranchCode + 
+                                  "&password=" + java.net.URLEncoder.encode(forcePassword, "UTF-8") +
+                                  "&autoLogin=true");
+            showForm = false;
+
+        } catch (Exception e) {
+            errorMessage = "Force login failed: " + e.getMessage();
+        } finally {
+            try { if (ps   != null) ps.close();  } catch (Exception ignored) {}
+            try { if (conn != null) conn.close(); } catch (Exception ignored) {}
+        }
+    }
+
+ // Auto login after force login redirect
+    if ("true".equals(request.getParameter("autoLogin"))) {
+        userId     = request.getParameter("username");
+        password   = request.getParameter("password");
+        branchCode = request.getParameter("branch");
+    }
 
     if (userId != null && password != null && branchCode != null) {
         Connection conn = null;
@@ -243,13 +287,33 @@
                 <button type="submit" class="btn-login">Login</button>
 
                 <!-- Error messages -->
-                <% if (errorMessage != null) { %>
-                    <% if (errorMessage.contains("already logged in")) { %>
-                        <div class="alert alert-warning">
-                            <svg viewBox="0 0 20 20"><path d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/></svg>
-                            <%= errorMessage %>
-                        </div>
-                    <% } else { %>
+                <% if (errorMessage.contains("already logged in")) { %>
+			    <div class="alert alert-warning">
+			        <svg viewBox="0 0 20 20"><path d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"/></svg>
+			        <%= errorMessage %>
+			    </div>
+
+			    <!-- Force Login Form -->
+			    <form action="login.jsp" method="post" style="margin-top: 10px;">
+			        <input type="hidden" name="action"     value="forceLogin">
+			        <input type="hidden" name="userId"     value="<%= userId %>">
+			        <input type="hidden" name="branchCode" value="<%= branchCode %>">
+			        <input type="hidden" name="password"   value="<%= password %>">
+			        <button type="submit" style="
+			            width: 100%;
+			            padding: 10px;
+			            background: #f59e0b;
+			            color: white;
+			            border: none;
+			            border-radius: 6px;
+			            font-size: 14px;
+			            font-weight: 600;
+			            cursor: pointer;">
+			            ⚡ Force Login — End Other Session & Login
+			        </button>
+			    </form>
+
+			<% } else { %>		
                         <div class="alert alert-error">
                             <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
                             <%= errorMessage %>

@@ -712,6 +712,7 @@ window.addEventListener('DOMContentLoaded', function() {
 // *** Logout after password change so DB status resets to 'U' ***
 function doLogout() {
     sessionStorage.clear();
+    document.getElementById('contentFrame').src = 'about:blank';
     window.location.href = "logout.jsp";
 }
 
@@ -914,39 +915,38 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
 //========== SESSION MONITORING ==========
 
 function checkSession() {
-    fetch('sessionCheck.jsp')
-        .then(response => response.json())
-        .then(data => {
-            if (!data.sessionValid) {
-                sessionStorage.clear();
-                window.top.location.href = 'login.jsp';
-            }
-        })
-        .catch(error => {
-            console.error('Session check error:', error);
-        });
+ fetch('sessionCheck.jsp')
+     .then(response => response.json())
+     .then(data => {
+         if (!data.sessionValid) {
+             sessionStorage.clear();
+             // Stop iframe from making more requests
+             document.getElementById('contentFrame').src = 'about:blank';
+             window.top.location.href = 'login.jsp';
+         }
+     })
+     .catch(error => {
+         console.error('Session check error:', error);
+     });
 }
 
-// Check session every 30 seconds
+//Check session every 30 seconds
 setInterval(checkSession, 30000);
 
 document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        checkSession();
-    }
+ if (!document.hidden) {
+     checkSession();
+ }
 });
 
 ['click', 'keydown', 'mousemove'].forEach(event => {
-    document.addEventListener(event, function() {
-        if (!window.lastSessionCheck || Date.now() - window.lastSessionCheck > 10000) {
-            window.lastSessionCheck = Date.now();
-            checkSession();
-        }
-    }, { passive: true, once: false });
+ document.addEventListener(event, function() {
+     if (!window.lastSessionCheck || Date.now() - window.lastSessionCheck > 10000) {
+         window.lastSessionCheck = Date.now();
+         checkSession();
+     }
+ }, { passive: true, once: false });
 });
-
-// Track the currently active menu item
-let currentActiveMenu = null;
 
 // ========== USER PROFILE FUNCTION ==========
 
@@ -1169,6 +1169,7 @@ function closeLogoutModal() {
 
 function confirmLogout() {
     sessionStorage.clear();
+    document.getElementById('contentFrame').src = 'about:blank';
     window.location.href = "logout.jsp";
 }
 
