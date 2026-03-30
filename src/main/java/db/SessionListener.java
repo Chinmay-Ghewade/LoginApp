@@ -31,9 +31,10 @@ public class SessionListener implements HttpSessionListener {
             try {
                 conn = DBConnection.getConnection();
 
-                // 1. Reset login status
+                // 1. Reset login status AND clear SESSION_ID
                 ps = conn.prepareStatement(
-                    "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'U' " +
+                    "UPDATE ACL.USERREGISTER " +
+                    "SET CURRENTLOGIN_STATUS = 'U', SESSION_ID = NULL " +
                     "WHERE USER_ID = ? AND BRANCH_CODE = ?"
                 );
                 ps.setString(1, userId);
@@ -55,8 +56,8 @@ public class SessionListener implements HttpSessionListener {
                 ps.executeUpdate();
 
             } finally {
-                try { if (ps   != null) ps.close();   } catch (Exception ignored) {}
-                try { if (conn != null) conn.close();  } catch (Exception ignored) {}
+                try { if (ps   != null) ps.close();  } catch (Exception ignored) {}
+                try { if (conn != null) conn.close(); } catch (Exception ignored) {}
             }
 
         } catch (Exception e) {

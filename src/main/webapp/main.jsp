@@ -915,19 +915,22 @@ document.getElementById('changePasswordForm').addEventListener('submit', functio
 //========== SESSION MONITORING ==========
 
 function checkSession() {
- fetch('sessionCheck.jsp')
-     .then(response => response.json())
-     .then(data => {
-         if (!data.sessionValid) {
-             sessionStorage.clear();
-             // Stop iframe from making more requests
-             document.getElementById('contentFrame').src = 'about:blank';
-             window.top.location.href = 'login.jsp';
-         }
-     })
-     .catch(error => {
-         console.error('Session check error:', error);
-     });
+    fetch('sessionCheck.jsp')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.sessionValid) {
+                sessionStorage.clear();
+                document.getElementById('contentFrame').src = 'about:blank';
+                if (data.forcedOut) {
+                    window.top.location.href = 'login.jsp?reason=forcedout';
+                } else {
+                    window.top.location.href = 'login.jsp';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Session check error:', error);
+        });
 }
 
 //Check session every 30 seconds

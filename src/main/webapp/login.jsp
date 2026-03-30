@@ -12,6 +12,9 @@
     String errorMessage = null;
     boolean showForm    = true;
 
+    // ── Check if user was force logged out by someone else ───────────────────
+    boolean wasForcedOut = "forcedout".equals(request.getParameter("reason"));
+
     // ── Force Login ──────────────────────────────────────────────────────────
     if ("forceLogin".equals(request.getParameter("action"))) {
         String forceUserId     = request.getParameter("userId");
@@ -24,9 +27,10 @@
         try {
             connForce = DBConnection.getConnection();
 
-            // Reset CURRENTLOGIN_STATUS to 'U'
+            // Reset CURRENTLOGIN_STATUS to 'U' and clear SESSION_ID
+            // The old user's session will be detected as invalid on their next sessionCheck
             psForce = connForce.prepareStatement(
-                "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'U' " +
+                "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'U', SESSION_ID = NULL " +
                 "WHERE USER_ID = ? AND BRANCH_CODE = ?"
             );
             psForce.setString(1, forceUserId);
@@ -118,13 +122,14 @@
                                 try { if (historyStmt != null) historyStmt.close(); } catch (Exception e2) {}
                             }
 
-                            // Update login status to 'L'
+                            // Update login status to 'L' AND save SESSION_ID
                             PreparedStatement statusStmt = null;
                             try {
-                                String statusSql = "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'L' WHERE USER_ID = ? AND BRANCH_CODE = ?";
+                                String statusSql = "UPDATE ACL.USERREGISTER SET CURRENTLOGIN_STATUS = 'L', SESSION_ID = ? WHERE USER_ID = ? AND BRANCH_CODE = ?";
                                 statusStmt = conn.prepareStatement(statusSql);
-                                statusStmt.setString(1, userId);
-                                statusStmt.setString(2, branchCode);
+                                statusStmt.setString(1, session.getId()); // save session ID to DB
+                                statusStmt.setString(2, userId);
+                                statusStmt.setString(3, branchCode);
                                 statusStmt.executeUpdate();
                             } catch (Exception ignored) {
                             } finally {
@@ -174,11 +179,87 @@
 <title>CBS Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/login.css">
+<style>
+    /* ── Forced Out Popup ── */
+    .forcedout-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .forcedout-overlay.show {
+        display: flex;
+    }
+    .forcedout-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 40px 36px 32px;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+        from { transform: scale(0.85); opacity: 0; }
+        to   { transform: scale(1);    opacity: 1; }
+    }
+    .forcedout-icon {
+        font-size: 52px;
+        margin-bottom: 14px;
+        line-height: 1;
+    }
+    .forcedout-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #b91c1c;
+        margin-bottom: 12px;
+    }
+    .forcedout-message {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 28px;
+    }
+    .forcedout-btn {
+        padding: 12px 48px;
+        background: #4361d8;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .forcedout-btn:hover {
+        background: #3451c4;
+    }
+</style>
 </head>
 <body>
 
 <!-- Arc pattern background -->
 <div class="bg-arc"></div>
+
+<!-- ── Forced Out Popup — shown when A is kicked out by B ── -->
+<% if (wasForcedOut) { %>
+<div class="forcedout-overlay show" id="forcedOutOverlay">
+    <div class="forcedout-box">
+        <div class="forcedout-icon">⚠️</div>
+        <div class="forcedout-title">Session Terminated</div>
+        <div class="forcedout-message">
+            You have been logged out because someone logged in with your credentials from another device or location.
+            <br><br>
+            If this was not you, please contact your administrator immediately.
+        </div>
+        <button class="forcedout-btn" onclick="closeForcedOutPopup()">OK, Got It</button>
+    </div>
+</div>
+<% } %>
 
 <!-- Licence modal overlay -->
 <div id="licenseOverlay">
@@ -354,6 +435,12 @@
 </div>
 
 <script>
+// ── Forced Out Popup ──
+function closeForcedOutPopup() {
+    document.getElementById('forcedOutOverlay').classList.remove('show');
+}
+
+// ── Password Eye Toggle ──
 var passwordInput = document.getElementById("password");
 var eyeIcon       = document.getElementById("eyeIcon");
 var lockIcon      = document.getElementById("lockIcon");
