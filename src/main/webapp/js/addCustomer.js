@@ -946,7 +946,7 @@ function showPopup(message, type = 'info') {
             border-radius: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             text-align: center;
-            border-left: 5px solid ${style.border};
+            
         ">
             <div style="
                 color: ${style.text};
@@ -964,7 +964,7 @@ function showPopup(message, type = 'info') {
             ">${message}</div>
             
             <button onclick="this.closest('.popup-modal-overlay').remove();" style="
-                background: ${style.border};
+                background:rgb(229, 57, 53);
                 color: white;
                 border: none;
                 padding: 10px 40px;

@@ -360,10 +360,10 @@
                 }
             }
 
-            // Show specific KYC validation toast if errors exist
-            if (!isValid && errors.length > 0) {
-                showKYCValidationToast(errors);
-            }
+			// Show specific KYC validation popup if errors exist
+			if (!isValid && errors.length > 0) {
+			    showPopup('📋 KYC Document Validation:\n\n• ' + errors.join('\n• '), 'error');
+			}
         }
 
         // Tab 5: Validate photo and signature uploads
@@ -385,10 +385,10 @@
                 if (signatureCard) signatureCard.classList.add('field-error');
             }
 
-            // Show specific Photo/Signature validation toast if errors exist
-            if (!isValid && errors.length > 0) {
-                showPhotoSignatureValidationToast(errors);
-            }
+			// Show specific Photo/Signature validation popup if errors exist
+			if (!isValid && errors.length > 0) {
+			    showPopup('📸 Photo & Signature Required:\n\n• ' + errors.join('\n• '), 'error');
+			}
         }
 
         // Validate radio button groups
@@ -519,57 +519,7 @@
         return label ? label.textContent.trim() : field.name || 'Field';
     }
 
-    // Show KYC validation toast
-    function showKYCValidationToast(errors) {
-        if (typeof Toastify !== 'undefined') {
-            const errorMessage = '📋 KYC Document Validation\n\n' + errors.join('\n• ');
-            Toastify({
-                text: errorMessage,
-                duration: 5000,
-                close: true,
-                gravity: "top",
-                position: "center",
-                style: {
-                    background: "#fff",
-                    color: "#333",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    padding: "20px 30px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                    borderLeft: "5px solid #ff9800",
-                    marginTop: "20px",
-                    whiteSpace: "pre-line",
-                    maxWidth: "500px"
-                }
-            }).showToast();
-        }
-    }
 
-    // Show Photo/Signature validation toast
-    function showPhotoSignatureValidationToast(errors) {
-        if (typeof Toastify !== 'undefined') {
-            const errorMessage = '📸 Photo & Signature Required\n\n• ' + errors.join('\n• ');
-            Toastify({
-                text: errorMessage,
-                duration: 5000,
-                close: true,
-                gravity: "top",
-                position: "center",
-                style: {
-                    background: "#fff",
-                    color: "#333",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    padding: "20px 30px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                    borderLeft: "5px solid #2196f3",
-                    marginTop: "20px",
-                    whiteSpace: "pre-line",
-                    maxWidth: "500px"
-                }
-            }).showToast();
-        }
-    }
 
     // Clear errors on input change
     function setupFieldListeners() {
