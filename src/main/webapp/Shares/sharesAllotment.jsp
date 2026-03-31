@@ -236,9 +236,9 @@
                             <input type="number" id="payAmt" placeholder="0.00" min="0"/>
                             <button class="btn-add" type="button" onclick="doAddPayment()">Add</button>
                         </div>
-                        <span class="field-error-msg" id="errPayment">Please add a payment entry</span>
+                        <span class="field-error-msg" id="errPayment">Please add a payment entry again</span>
                     </div>
-                </div>
+                </div> 
                 <div class="fg-row">
                     <div class="fg">
                         <label>Transfer A/c. Code</label>
