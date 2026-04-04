@@ -37,11 +37,11 @@
             <ul class="tab-list" role="tablist">
                 ${TABS.map(tab => `
                     <li class="tab-item">
-                        <button class="tab-button ${tab.id === 1 ? 'active' : ''}" 
-                                data-tab="${tab.id}" 
-                                role="tab"
-                                aria-selected="${tab.id === 1}"
-                                ${tab.id !== 1 ? 'disabled' : ''}>
+					<button type="button" class="tab-button ${tab.id === 1 ? 'active' : ''}" 
+					        data-tab="${tab.id}" 
+					        role="tab"
+					        aria-selected="${tab.id === 1}"
+					        ${tab.id !== 1 ? 'disabled' : ''}>
                             <span class="tab-number">${tab.id}</span>
                             <span class="tab-label">${tab.name}</span>
                         </button>
