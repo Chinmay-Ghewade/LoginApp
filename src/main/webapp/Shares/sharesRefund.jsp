@@ -42,7 +42,6 @@
         input[readonly], input[disabled] { background: #ebebf5; color: #6060a0; border-color: #d0d0e8; cursor: default; }
         input::placeholder { color: #a0a0c8; font-size: .82rem; }
 
-        /* ── Field error state ── */
         input.field-error { border-color: #cc2222 !important; box-shadow: 0 0 0 2px rgba(200,30,30,.18) !important; }
         .field-error-msg { color: #cc2222; font-size: .70rem; margin-top: 2px; display: none; }
         .field-error-msg.show { display: block; }
@@ -50,17 +49,41 @@
         .hint-xs { color: #8080b0; font-size: .70rem; margin-top: 1px; }
         .ib { display: flex; gap: 5px; align-items: center; width: 100%; }
         .ib input { flex: 1; min-width: 0; }
+
+        /* ── Search Wrapper & Dropdown ── */
         .sw { position: relative; flex: 1; min-width: 0; }
         .sw input { width: 100%; }
-        .sdrop { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: #fff; border: 1px solid #c0c0e0; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; z-index: 2000; display: none; box-shadow: 0 6px 20px rgba(60,60,160,.14); }
+        .sdrop {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            width: 620px;
+            background: #fff;
+            border: 1.5px solid #c0c8e8;
+            border-radius: 8px;
+            box-shadow: 0 6px 24px rgba(40,40,120,.15);
+            z-index: 2000;
+            display: none;
+            overflow: hidden;
+        }
         .sdrop.on { display: block; }
-        .sr-item { padding: 8px 11px; cursor: pointer; border-bottom: 1px solid #f0f0f8; }
-        .sr-item:last-child { border: none; }
-        .sr-item:hover { background: #ebebff; }
-        .sr-code { font-weight: 700; color: #1a1a6e; font-size: .78rem; margin-bottom: 2px; }
-        .sr-name { color: #5050a0; font-size: .75rem; }
-        .sr-hint { padding: 8px 11px; color: #9898c0; font-size: .76rem; font-style: italic; }
-        .hl { background: #ffe066; border-radius: 2px; padding: 0 1px; }
+        .sr-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 13px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f8;
+            border-left: 4px solid #3535a0;
+        }
+        .sr-item:last-child { border-bottom: none; }
+        .sr-item:hover { background: #f0f0ff; }
+        .sr-code { font-size: .90rem; font-weight: 400; color: #1a1a6e; white-space: nowrap; flex-shrink: 0; min-width: 180px; }
+        .sr-name { font-size: .90rem; font-weight: 700; color: #2a2aaa; flex: 1; }
+        .sr-prod { font-size: .90rem; font-weight: 700; color: #cc2222; white-space: nowrap; flex-shrink: 0; }
+        .hl { background: #ffe000; border-radius: 2px; padding: 1px 3px; font-weight: 700; color: #1a1a6e; }
+        .sr-hint { padding: 10px 16px; color: #9898c0; font-size: .76rem; font-style: italic; }
+
         .btn-dot { height: 32px; min-width: 36px; padding: 0 8px; background: #3535a0; color: #fff; border: none; border-radius: 6px; font-size: .88rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background .12s; }
         .btn-dot:hover { background: #252588; }
         .btn-dot:disabled { background: #a0a0c8; cursor: default; }
@@ -73,7 +96,6 @@
         .spin { display: none; width: 14px; height: 14px; border: 2px solid #d0d0e8; border-top-color: #3535a0; border-radius: 50%; animation: sp .65s linear infinite; flex-shrink: 0; margin-left: 2px; }
         @keyframes sp { to { transform: rotate(360deg); } }
 
-        /* ── Payment / Transfer Tables ── */
         .tr-table-wrap { display: none; border: 1.5px solid #4a4aaa; border-radius: 0; overflow: hidden; margin: 20px 16px 0; }
         .tr-table-wrap.show { display: block; }
         .tr-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
@@ -91,13 +113,9 @@
         .btn-remove { height: 26px; padding: 0 10px; background: #fff; color: #b03030; border: 1px solid #e0a0a0; border-radius: 4px; font-size: .75rem; font-weight: 700; cursor: pointer; transition: background .12s; }
         .btn-remove:hover { background: #fff0f0; }
 
-        /* ── Panels ── */
         #acDetails { display: none; margin: 24px 16px 0; }
-        #acDetails.show { display: block; }
         #trDetails { display: none; margin: 24px 16px 0; }
-        #trDetails.show { display: block; }
         #trRowDetails { display: none; margin: 24px 16px 0; }
-        #trRowDetails.show { display: block; }
 
         .ac-info-box { background: #fff; border: 1.5px solid #c0c0e0; border-radius: 12px; padding: 22px 20px 20px; position: relative; }
         .ac-info-title { position: absolute; top: -11px; left: 14px; background: #fff; padding: 0 8px; font-size: .9rem; font-weight: 700; color: #1a1a6e; display: flex; align-items: center; gap: 8px; }
@@ -113,33 +131,36 @@
         .act-bar { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
         .btn-primary { height: 40px; padding: 0 48px; background: #1a1a6e; color: #fff; border: none; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
         .btn-primary:hover { background: #12126e; }
+        .btn-primary:disabled { background: #a0a0c8; cursor: default; }
         .btn-danger { height: 40px; padding: 0 28px; background: #fff; color: #cc2222; border: 1.5px solid #cc2222; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
         .btn-danger:hover { background: #fff5f5; }
 
         .lk-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,60,.5); z-index: 9999; align-items: flex-start; justify-content: center; padding-top: 60px; }
         .lk-overlay.open { display: flex; }
-        .lk-modal { background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(30,30,100,.25); width: 860px; max-width: 96vw; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
-        .lk-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #e8e8f4; flex-shrink: 0; }
-        .lk-head-title { font-size: 1.05rem; font-weight: 700; color: #1a1a6e; }
-        .lk-head-badge { background: #5050b0; color: #fff; font-size: .72rem; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
-        .lk-head-close { margin-left: auto; width: 32px; height: 32px; background: #d03030; color: #fff; border: none; border-radius: 7px; font-size: 1rem; font-weight: 900; cursor: pointer; line-height: 32px; text-align: center; }
-        .lk-head-close:hover { background: #b02020; }
-        .lk-search-wrap { padding: 10px 16px; border-bottom: 1px solid #f0f0f8; flex-shrink: 0; }
-        .lk-search-input { width: 100%; height: 36px; padding: 0 14px 0 38px; border: 1px solid #c0c0e0; border-radius: 20px; font-size: .88rem; font-family: inherit; color: #1a1a6e; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%235050b0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E") no-repeat 12px center; outline: none; }
-        .lk-search-input:focus { border-color: #5050b0; }
-        .lk-search-input::placeholder { color: #a0a0c8; }
+        .lk-modal { background: #fff; border-radius: 8px; box-shadow: 0 8px 40px rgba(30,30,100,.25); width: 900px; max-width: 96vw; max-height: 82vh; display: flex; flex-direction: column; overflow: hidden; }
+        .lk-head { display: flex; align-items: center; gap: 14px; padding: 18px 22px 14px; flex-shrink: 0; background: #fff; }
+        .lk-head-title { font-size: 1.22rem; font-weight: 700; color: #1a1a5e; }
+        .lk-head-badge { background: #ece9fc; color: #5540b5; font-size: .74rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; letter-spacing: .04em; }
+        .lk-head-close { margin-left: auto; width: 36px; height: 36px; background: #e02020; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; line-height: 36px; text-align: center; }
+        .lk-head-close:hover { background: #c01818; }
+        .lk-search-wrap { padding: 0 22px 14px; flex-shrink: 0; }
+        .lk-search-input { width: 100%; height: 42px; padding: 0 14px 0 42px; border: 1.5px solid #b8b8d8; border-radius: 5px; font-size: .90rem; font-family: inherit; color: #1a1a5e; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%237070c0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E") no-repeat 14px center; outline: none; }
+        .lk-search-input:focus { border-color: #5050b0; box-shadow: 0 0 0 2px rgba(80,80,180,.10); }
+        .lk-search-input::placeholder { color: #a0a0c0; }
         .lk-body { flex: 1; overflow-y: auto; }
         .lk-table { width: 100%; border-collapse: collapse; }
-        .lk-table thead tr { background: #3535a0; color: #fff; position: sticky; top: 0; z-index: 1; }
-        .lk-table thead th { padding: 10px 14px; text-align: center; font-size: .83rem; font-weight: 700; }
-        .lk-table tbody tr { border-bottom: 1px solid #f0f0f8; cursor: pointer; transition: background .1s; }
-        .lk-table tbody tr:hover { background: #ebebff; }
-        .lk-table tbody td { padding: 9px 14px; font-size: .83rem; color: #1a1a6e; }
-        .lk-table tbody td:first-child { font-weight: 700; }
+        .lk-table thead tr { background: #38388a; color: #fff; position: sticky; top: 0; z-index: 1; }
+        .lk-table thead th { padding: 12px 18px; text-align: left; font-size: .84rem; font-weight: 700; color: #fff; letter-spacing: .02em; border-right: 1px solid #5050a8; }
+        .lk-table thead th:last-child { border-right: none; }
+        .lk-table tbody tr { border-bottom: 1.5px solid #ededf8; cursor: pointer; background: #fff; transition: background .1s; border-left: 4px solid #3535a0; }
+        .lk-table tbody tr:hover { background: #f0f0ff; }
+        .lk-table tbody td { padding: 13px 18px; font-size: .90rem; color: #222222; font-weight: 400; vertical-align: middle; border-right: none; }
+        .lk-table tbody td:nth-child(1) { white-space: nowrap; }
+        .lk-table tbody td:nth-child(3) { white-space: nowrap; }
         .lk-msg { text-align: center; padding: 28px; color: #9898c0; font-style: italic; font-size: .88rem; }
         .lk-err { text-align: center; padding: 16px; color: #b03030; font-size: .85rem; }
-        .lk-hl  { background: #ffe066; border-radius: 2px; padding: 0 1px; }
-        .lk-status { padding: 6px 16px; font-size: .74rem; color: #7878a8; border-top: 1px solid #f0f0f8; flex-shrink: 0; }
+        .lk-hl  { background: #ffe000; border-radius: 2px; padding: 1px 3px; font-weight: 700; color: #1a1a6e; }
+        .lk-status { padding: 7px 18px; font-size: .73rem; color: #7878a8; border-top: 1px solid #f0f0f8; flex-shrink: 0; }
 
         .success-overlay { display: none; position: fixed; inset: 0; background: rgba(80,80,120,.35); z-index: 99999; align-items: center; justify-content: center; }
         .success-overlay.open { display: flex; }
@@ -166,14 +187,12 @@
     <div class="page-title">Shares Refund</div>
 
     <div class="box">
-        <!-- ── Column Headers ── -->
         <div class="shared-grid titles-row">
             <div class="cell"><span class="mod-title">Account Info</span></div>
             <div class="cell"><span class="mod-title">Share Details</span></div>
             <div class="cell"><span class="mod-title">Transaction Details</span></div>
         </div>
 
-        <!-- ── Row 1 ── -->
         <div class="shared-grid">
             <div class="cell">
                 <div class="fg">
@@ -220,7 +239,6 @@
             </div>
         </div>
 
-        <!-- ── Row 2 ── -->
         <div class="shared-grid">
             <div class="cell">
                 <div class="fg"><label>Account Name</label><input type="text" id="accountName" readonly placeholder="&mdash;"/></div>
@@ -228,19 +246,19 @@
             <div class="cell">
                 <div class="cell-inner">
                     <div class="fg">
-                        <label>Meeting Date</label>
-                        <input type="date" id="meetDate"
-                               oninput="clearFieldError('meetDate','errMeetDate');"/>
-                        <span class="field-error-msg" id="errMeetDate">Meeting date is required</span>
-                    </div>
-                    <div class="fg">
                         <label>Particular</label>
                         <input type="text" id="particular" placeholder="Enter particular"/>
                         <span class="field-error-msg" id="errParticular">Particular is required</span>
                     </div>
+                     <div class="fg">
+                        <label>Meeting Date</label>
+                        <input type="date" id="meetDate" oninput="clearFieldError('meetDate','errMeetDate');"/>
+                        <span class="field-error-msg" id="errMeetDate">Meeting date is required</span>
+                    </div>
                 </div>
             </div>
-            <div class="cell">
+            <!-- id="trCell" added so JS can measure the cell's right edge -->
+            <div class="cell" id="trCell">
                 <div class="cell-inner" style="align-items:flex-end;">
                     <div class="fg" style="flex:1;min-width:0;">
                         <label>Transfer A/c. Code</label>
@@ -264,118 +282,84 @@
             </div>
         </div>
 
-        <!-- ══ Cash Payment Table ══ -->
         <div class="tr-table-wrap" id="payTableWrap">
             <table class="tr-table">
-                <thead>
-                    <tr><th>Sr No</th><th>Mode</th><th>Amount (&#8377;)</th><th>Particular</th><th></th></tr>
-                </thead>
+                <thead><tr><th>Sr No</th><th>Mode</th><th>Amount (&#8377;)</th><th>Particular</th><th></th></tr></thead>
                 <tbody id="payTbody"></tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="2">Total Refunded</td>
-                        <td id="payTotal">&#8377;0.00</td>
-                        <td colspan="2"></td>
-                    </tr>
-                </tfoot>
+                <tfoot><tr><td colspan="2">Total Refunded</td><td id="payTotal">&#8377;0.00</td><td colspan="2"></td></tr></tfoot>
             </table>
         </div>
 
-        <!-- ══ Transfer Entries Table ══ -->
         <div class="tr-table-wrap" id="trTableWrap">
             <table class="tr-table">
-                <thead>
-                    <tr>
-                        <th>Sr No</th><th>Mode</th><th>Transfer A/c. Code</th>
-                        <th>Transfer A/c. Name</th><th>Amount (&#8377;)</th><th></th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Sr No</th><th>Mode</th><th>Transfer A/c. Code</th><th>Transfer A/c. Name</th><th>Amount (&#8377;)</th><th></th></tr></thead>
                 <tbody id="trTbody"></tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4">Total Transferred</td>
-                        <td id="trTotal">&#8377;0.00</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
+                <tfoot><tr><td colspan="4">Total Transferred</td><td id="trTotal">&#8377;0.00</td><td></td></tr></tfoot>
             </table>
         </div>
 
-        <!-- ══ Transfer Row Click Detail Panel ══ -->
         <div id="trRowDetails">
             <div class="ac-info-box">
-                <div class="ac-info-title">
-                    Transfer Account Information
-                    <span class="spin" id="spinTrRow" style="display:none;"></span>
-                </div>
+                <div class="ac-info-title">Transfer Account Information <span class="spin" id="spinTrRow" style="display:none;"></span></div>
                 <div class="ac-info-grid-4">
-                    <div class="ac-fg"><label>Account Code</label>      <input type="text" id="trRowAccCode"    readonly/></div>
-                    <div class="ac-fg"><label>Account Name</label>      <input type="text" id="trRowAccName"    readonly/></div>
-                    <div class="ac-fg"><label>GL Account Code</label>   <input type="text" id="trRowGlCode"     readonly/></div>
-                    <div class="ac-fg"><label>GL Account Name</label>   <input type="text" id="trRowGlName"     readonly/></div>
-                    <div class="ac-fg"><label>Customer ID</label>       <input type="text" id="trRowCustId"     readonly/></div>
-                    <div class="ac-fg"><label>Ledger Balance</label>    <input type="text" id="trRowLedger"     readonly/></div>
-                    <div class="ac-fg"><label>Available Balance</label> <input type="text" id="trRowAvail"      readonly/></div>
-                    <div class="ac-fg"><label>New Ledger Balance</label><input type="text" id="trRowNewLedger"  readonly/></div>
+                    <div class="ac-fg"><label>Account Code</label>      <input type="text" id="trRowAccCode"   readonly/></div>
+                    <div class="ac-fg"><label>Account Name</label>      <input type="text" id="trRowAccName"   readonly/></div>
+                    <div class="ac-fg"><label>GL Account Code</label>   <input type="text" id="trRowGlCode"    readonly/></div>
+                    <div class="ac-fg"><label>GL Account Name</label>   <input type="text" id="trRowGlName"    readonly/></div>
+                    <div class="ac-fg"><label>Customer ID</label>       <input type="text" id="trRowCustId"    readonly/></div>
+                    <div class="ac-fg"><label>Ledger Balance</label>    <input type="text" id="trRowLedger"    readonly/></div>
+                    <div class="ac-fg"><label>Available Balance</label> <input type="text" id="trRowAvail"     readonly/></div>
+                    <div class="ac-fg"><label>New Ledger Balance</label><input type="text" id="trRowNewLedger" readonly/></div>
                 </div>
             </div>
         </div>
 
-        <!-- ══ Main Account Details Panel ══ -->
         <div id="acDetails">
             <div class="ac-info-box">
                 <div class="ac-info-title">Account Information</div>
                 <div class="ac-info-grid">
-                    <div class="ac-fg"><label>GL Account Code</label>        <input type="text" id="glCode"  readonly/></div>
-                    <div class="ac-fg"><label>GL Account Name</label>        <input type="text" id="glName"  readonly/></div>
-                    <div class="ac-fg"><label>Customer ID</label>            <input type="text" id="custId"  readonly/></div>
-                    <div class="ac-fg"><label>Certificate Number</label>     <input type="text" id="certNo"  readonly/></div>
-                    <div class="ac-fg"><label>Member Number</label>          <input type="text" id="memNo"   readonly/></div>
-                    <div class="ac-fg"><label>Form No (From &mdash; To)</label><input type="text" id="formNo" readonly/></div>
+                    <div class="ac-fg"><label>GL Account Code</label>             <input type="text" id="glCode"  readonly/></div>
+                    <div class="ac-fg"><label>GL Account Name</label>             <input type="text" id="glName"  readonly/></div>
+                    <div class="ac-fg"><label>Customer ID</label>                 <input type="text" id="custId"  readonly/></div>
+                    <div class="ac-fg"><label>Certificate Number</label>          <input type="text" id="certNo"  readonly/></div>
+                    <div class="ac-fg"><label>Member Number</label>               <input type="text" id="memNo"   readonly/></div>
+                    <div class="ac-fg"><label>Form No (From &mdash; To)</label>   <input type="text" id="formNo"  readonly/></div>
                 </div>
             </div>
         </div>
 
-        <!-- ══ Transfer Account Details Panel ══ -->
         <div id="trDetails">
             <div class="ac-info-box">
-                <div class="ac-info-title">
-                    Transfer Account Information
-                    <span class="spin" id="spinTrDetails" style="display:none;"></span>
-                </div>
+                <div class="ac-info-title">Transfer Account Information <span class="spin" id="spinTrDetails" style="display:none;"></span></div>
                 <div class="ac-info-grid-4">
-                    <div class="ac-fg"><label>Account Code</label>      <input type="text" id="trDispCode"       readonly/></div>
-                    <div class="ac-fg"><label>Account Name</label>      <input type="text" id="trDispName"       readonly/></div>
-                    <div class="ac-fg"><label>GL Account Code</label>   <input type="text" id="trGlCode"         readonly/></div>
-                    <div class="ac-fg"><label>GL Account Name</label>   <input type="text" id="trGlName"         readonly/></div>
-                    <div class="ac-fg"><label>Customer ID</label>       <input type="text" id="trCustId"         readonly/></div>
-                    <div class="ac-fg"><label>Ledger Balance</label>    <input type="text" id="trLedgerBal"      readonly/></div>
-                    <div class="ac-fg"><label>Available Balance</label> <input type="text" id="trAvailBal"       readonly/></div>
-                    <div class="ac-fg"><label>New Ledger Balance</label><input type="text" id="trNewLedgerBal"   readonly/></div>
+                    <div class="ac-fg"><label>Account Code</label>      <input type="text" id="trDispCode"     readonly/></div>
+                    <div class="ac-fg"><label>Account Name</label>      <input type="text" id="trDispName"     readonly/></div>
+                    <div class="ac-fg"><label>GL Account Code</label>   <input type="text" id="trGlCode"       readonly/></div>
+                    <div class="ac-fg"><label>GL Account Name</label>   <input type="text" id="trGlName"       readonly/></div>
+                    <div class="ac-fg"><label>Customer ID</label>       <input type="text" id="trCustId"       readonly/></div>
+                    <div class="ac-fg"><label>Ledger Balance</label>    <input type="text" id="trLedgerBal"    readonly/></div>
+                    <div class="ac-fg"><label>Available Balance</label> <input type="text" id="trAvailBal"     readonly/></div>
+                    <div class="ac-fg"><label>New Ledger Balance</label><input type="text" id="trNewLedgerBal" readonly/></div>
                 </div>
             </div>
         </div>
 
-    </div><!-- /.box -->
+    </div>
 
     <div class="act-bar">
         <button class="btn-primary" type="button" onclick="doSave()">Save</button>
         <button class="btn-danger"  type="button" onclick="doCancel()">Clear</button>
     </div>
 
-    <!-- ── Success Popup ── -->
     <div class="success-overlay" id="successOverlay">
         <div class="success-modal">
             <div class="success-tick" style="color:#22aa55;">&#10003;</div>
             <div class="success-title">Shares Refund Processed!</div>
-            <div class="success-info">
-                Scroll No &nbsp;: &nbsp;<strong id="sc-scrollNo">&mdash;</strong>
-            </div>
+            <div class="success-info">Scroll No &nbsp;: &nbsp;<strong id="sc-scrollNo">&mdash;</strong></div>
             <button class="btn-ok" onclick="closeSuccess()">OK</button>
         </div>
     </div>
 
-    <!-- ── Confirm Clear Popup ── -->
     <div class="success-overlay" id="clearOverlay">
         <div class="success-modal">
             <div class="success-tick" style="color:#cc2222;">&#9888;</div>
@@ -388,7 +372,6 @@
         </div>
     </div>
 
-    <!-- ── Lookup Modal ── -->
     <div class="lk-overlay" id="lkOverlay" onclick="if(event.target===this)lkClose()">
         <div class="lk-modal">
             <div class="lk-head">
@@ -402,8 +385,8 @@
             </div>
             <div class="lk-body">
                 <table class="lk-table">
-                    <thead><tr><th>Code</th><th>Name</th></tr></thead>
-                    <tbody id="lkTbody"><tr><td colspan="2" class="lk-msg">Loading&#8230;</td></tr></tbody>
+                    <thead><tr><th>Code</th><th>Name</th><th>Product</th></tr></thead>
+                    <tbody id="lkTbody"><tr><td colspan="3" class="lk-msg">Loading&#8230;</td></tr></tbody>
                 </table>
             </div>
             <div class="lk-status" id="lkStatus">Click a row to select.</div>
@@ -419,737 +402,416 @@
 
         var _timer = null, _prev = '', _ledgerBal = 0;
         var _maxRefundAmt = 0, _maxShares = 0;
-        var _payEntries  = [];
-        var _trEntries   = [];
-        var _trLedgerMap = {};
+        var _payEntries = [], _trEntries = [], _trLedgerMap = {};
 
-        /* ═══════════════════════════════════════════════
-           TOAST
-        ═══════════════════════════════════════════════ */
+        /*
+         * positionDropTr — dynamically aligns #dropTr's RIGHT edge to the
+         * RIGHT edge of #trCell (the Transaction Details cell), so the
+         * dropdown never overflows the page regardless of screen width.
+         */
+        function positionDropTr() {
+            var drop     = document.getElementById('dropTr');
+            var sw       = document.getElementById('trCode').closest('.sw');
+            var cell     = document.getElementById('trCell');
+            var dropW    = 620; /* must match width in .sdrop CSS */
+
+            var swLeft    = sw.getBoundingClientRect().left;
+            var cellRight = cell.getBoundingClientRect().right;
+
+            /* How far left from the .sw origin the drop must start so its
+               right edge lines up with the cell's right edge */
+            var leftOffset = cellRight - swLeft - dropW;
+
+            drop.style.left  = leftOffset + 'px';
+            drop.style.right = 'auto';
+        }
+
         function showToast(msg, duration) {
             duration = duration || 3500;
             var wrap = document.getElementById('toastWrap');
             var t = document.createElement('div');
             t.className = 'toast';
-            t.innerHTML = '<div class="toast-icon">i</div>'
-                        + '<div class="toast-msg">' + xe(msg) + '</div>'
-                        + '<button class="toast-close" onclick="this.parentNode.remove()">&#215;</button>';
+            t.innerHTML = '<div class="toast-icon">i</div><div class="toast-msg">' + xe(msg) + '</div><button class="toast-close" onclick="this.parentNode.remove()">&#215;</button>';
             wrap.appendChild(t);
             setTimeout(function() { if (t.parentNode) t.remove(); }, duration);
         }
 
-        /* ═══════════════════════════════════════════════
-           FIELD ERROR HELPERS
-        ═══════════════════════════════════════════════ */
-        function setFieldError(inputId, msgId) {
-            var el = document.getElementById(inputId);
-            var mg = document.getElementById(msgId);
-            if (el) el.classList.add('field-error');
-            if (mg) mg.classList.add('show');
-        }
-        function clearFieldError(inputId, msgId) {
-            var el = document.getElementById(inputId);
-            var mg = document.getElementById(msgId);
-            if (el) el.classList.remove('field-error');
-            if (mg) mg.classList.remove('show');
-        }
+        function setFieldError(inputId, msgId) { var el=document.getElementById(inputId); var mg=document.getElementById(msgId); if(el) el.classList.add('field-error'); if(mg) mg.classList.add('show'); }
+        function clearFieldError(inputId, msgId) { var el=document.getElementById(inputId); var mg=document.getElementById(msgId); if(el) el.classList.remove('field-error'); if(mg) mg.classList.remove('show'); }
         function clearAllErrors() {
-            [['accountCode','errAccountCode'],['meetDate','errMeetDate'],['particular','errParticular']]
-                .forEach(function(p) { clearFieldError(p[0], p[1]); });
-            var pm = document.getElementById('errPayment');
-            if (pm) pm.classList.remove('show');
+            [['accountCode','errAccountCode'],['meetDate','errMeetDate'],['particular','errParticular']].forEach(function(p){ clearFieldError(p[0],p[1]); });
+            var pm=document.getElementById('errPayment'); if(pm) pm.classList.remove('show');
         }
 
-        /* ═══════════════════════════════════════════════
-           PANEL SWITCHING
-        ═══════════════════════════════════════════════ */
         function showMainPanel() {
             var hasData = document.getElementById('glCode').value.trim() !== '';
-            document.getElementById('acDetails').style.display    = hasData ? 'block' : 'none';
-            document.getElementById('trDetails').style.display    = 'none';
+            document.getElementById('acDetails').style.display = hasData ? 'block' : 'none';
+            document.getElementById('trDetails').style.display = 'none';
             hideTrRowDetails();
         }
         function showTrPanel() {
             var hasData = document.getElementById('trDispCode').value.trim() !== '';
-            document.getElementById('trDetails').style.display    = hasData ? 'block' : 'none';
-            document.getElementById('acDetails').style.display    = 'none';
+            document.getElementById('trDetails').style.display = hasData ? 'block' : 'none';
+            document.getElementById('acDetails').style.display = 'none';
             hideTrRowDetails();
         }
 
-        /* ═══════════════════════════════════════════════
-           LIVE SEARCH
-        ═══════════════════════════════════════════════ */
-        function onAcInput(v) {
-            clearFieldError('accountCode', 'errAccountCode');
-            if (v !== _prev) { clearAcDetails(); _prev = v; }
-            liveSearch(v, 'dropMain', 'main');
-        }
-        function onTrInput(v) {
-            hideTrDetails();
-            liveSearch(v, 'dropTr', 'tr');
-        }
+        function onAcInput(v) { clearFieldError('accountCode','errAccountCode'); if(v!==_prev){clearAcDetails();_prev=v;} liveSearch(v,'dropMain','main'); }
+        function onTrInput(v) { hideTrDetails(); liveSearch(v,'dropTr','tr'); }
 
         function liveSearch(val, dropId, target) {
             clearTimeout(_timer);
             var drop = document.getElementById(dropId);
             if (!val) { drop.classList.remove('on'); return; }
-            if (val.length < SEARCH_MIN) {
-                drop.innerHTML = '<div class="sr-hint">Type at least ' + SEARCH_MIN + ' digits\u2026</div>';
-                drop.classList.add('on'); return;
-            }
+
+            /* Position #dropTr dynamically before it becomes visible */
+            if (dropId === 'dropTr') positionDropTr();
+
+            if (val.length < SEARCH_MIN) { drop.innerHTML='<div class="sr-hint">Type at least '+SEARCH_MIN+' digits\u2026</div>'; drop.classList.add('on'); return; }
             drop.innerHTML = '<div class="sr-hint">Searching\u2026</div>';
             drop.classList.add('on');
-            var sa = (target === 'tr') ? 'searchTr' : 'search';
-            _timer = setTimeout(function() { doSearch(val, dropId, target, sa); }, WAIT_MS);
+            var sa = (target==='tr') ? 'searchTr' : 'search';
+            _timer = setTimeout(function(){ doSearch(val,dropId,target,sa); }, WAIT_MS);
         }
 
         function doSearch(term, dropId, target, sa) {
             var drop = document.getElementById(dropId);
-            ajaxGet(PAGE_URL + '?action=' + sa + '&term=' + encodeURIComponent(term), function(d) {
-                if (d.error) { drop.innerHTML = '<div class="sr-hint">' + xe(d.error) + '</div>'; return; }
+            ajaxGet(PAGE_URL+'?action='+sa+'&term='+encodeURIComponent(term), function(d) {
+                if (d.error) { drop.innerHTML='<div class="sr-hint">'+xe(d.error)+'</div>'; return; }
                 var list = d.accounts || [];
-                if (!list.length) { drop.innerHTML = '<div class="sr-hint">No accounts found</div>'; return; }
+                if (!list.length) { drop.innerHTML='<div class="sr-hint">No accounts found</div>'; return; }
                 drop.innerHTML = '';
-                for (var i = 0; i < list.length; i++) {
-                    var c = list[i].code || '', a = list[i].name || '';
+                for (var i=0; i<list.length; i++) {
+                    var c=list[i].code||'', a=list[i].name||'', p=list[i].product||'';
                     var item = document.createElement('div');
                     item.className = 'sr-item';
-                    item.innerHTML = '<div class="sr-code">' + hlMatch(c, term) + '</div>'
-                                   + '<div class="sr-name">' + xe(a) + '</div>';
-                    item.addEventListener('click', (function(code, name) {
-                        return function() { pick(code, name, target); };
-                    })(c, a));
+                    item.innerHTML = '<span class="sr-code">'+hlMatch(c,term)+'</span>'
+                                   + '<span class="sr-name">'+xe(a)+'</span>'
+                                   + '<span class="sr-prod">'+xe(p)+'</span>';
+                    item.addEventListener('click', (function(code,name){ return function(){ pick(code,name,target); }; })(c,a));
                     drop.appendChild(item);
                 }
-            }, function() { drop.innerHTML = '<div class="sr-hint">Error</div>'; });
+            }, function(){ drop.innerHTML='<div class="sr-hint">Error</div>'; });
         }
 
         function hlMatch(text, search) {
             var idx = text.toLowerCase().indexOf(search.toLowerCase());
-            if (idx === -1) return xe(text);
-            return xe(text.substring(0, idx))
-                 + '<span class="hl">' + xe(text.substring(idx, idx + search.length)) + '</span>'
-                 + xe(text.substring(idx + search.length));
+            if (idx===-1) return xe(text);
+            return xe(text.substring(0,idx))+'<span class="hl">'+xe(text.substring(idx,idx+search.length))+'</span>'+xe(text.substring(idx+search.length));
         }
 
         function pick(code, name, target) {
-            if (target === 'tr') {
+            if (target==='tr') {
                 document.getElementById('dropTr').classList.remove('on');
-                document.getElementById('trCode').value = code;
-                sv('trName', name);
-                fetchTrDetails(code);
+                document.getElementById('trCode').value=code; sv('trName',name); fetchTrDetails(code);
             } else {
                 document.getElementById('dropMain').classList.remove('on');
-                document.getElementById('accountCode').value = code;
-                sv('accountName', name);
-                _prev = code;
-                clearFieldError('accountCode', 'errAccountCode');
-                fetchAc(code);
+                document.getElementById('accountCode').value=code; sv('accountName',name);
+                _prev=code; clearFieldError('accountCode','errAccountCode'); fetchAc(code);
             }
         }
 
-        function triggerFetch() {
-            var code = document.getElementById('accountCode').value.trim();
-            if (!code) return;
-            document.getElementById('dropMain').classList.remove('on');
-            fetchAc(code);
-        }
-        function triggerTrFetch() {
-            var code = document.getElementById('trCode').value.trim();
-            if (!code) return;
-            document.getElementById('dropTr').classList.remove('on');
-            fetchTrDetails(code);
-        }
+        function triggerFetch() { var c=document.getElementById('accountCode').value.trim(); if(!c) return; document.getElementById('dropMain').classList.remove('on'); fetchAc(c); }
+        function triggerTrFetch() { var c=document.getElementById('trCode').value.trim(); if(!c) return; document.getElementById('dropTr').classList.remove('on'); fetchTrDetails(c); }
 
-        /* ═══════════════════════════════════════════════
-           FETCH MAIN ACCOUNT
-        ═══════════════════════════════════════════════ */
         function fetchAc(code) {
             showSpin('spinMain');
-            ajaxGet(PAGE_URL + '?action=get&code=' + encodeURIComponent(code), function(d) {
+            ajaxGet(PAGE_URL+'?action=get&code='+encodeURIComponent(code), function(d) {
                 hideSpin('spinMain');
-                if (d && d.ok === true) {
-                    _ledgerBal = parseFloat(d.lb) || 0;
-                    sv('accountName', d.n  || '');
-                    sv('glCode',      d.gc || '');
-                    sv('glName',      d.gn || '');
-                    sv('custId',      d.ci || '');
-                    document.getElementById('trDetails').style.display = 'none';
-                    document.getElementById('acDetails').style.display = 'block';
-                    hideTrRowDetails();
-                    fetchShares(code);
-                } else {
-                    clearAcDetails();
-                    showToast(d && d.error ? d.error : 'Account not found.');
-                }
-            }, function() { hideSpin('spinMain'); clearAcDetails(); });
+                if (d && d.ok===true) {
+                    _ledgerBal=parseFloat(d.lb)||0;
+                    sv('accountName',d.n||''); sv('glCode',d.gc||''); sv('glName',d.gn||''); sv('custId',d.ci||'');
+                    document.getElementById('trDetails').style.display='none';
+                    document.getElementById('acDetails').style.display='block';
+                    hideTrRowDetails(); fetchShares(code);
+                } else { clearAcDetails(); showToast(d&&d.error?d.error:'Account not found.'); }
+            }, function(){ hideSpin('spinMain'); clearAcDetails(); });
         }
 
-        /* ═══════════════════════════════════════════════
-           FETCH TRANSFER ACCOUNT DETAILS
-        ═══════════════════════════════════════════════ */
         function fetchTrDetails(code) {
             if (!code) { hideTrDetails(); return; }
             showSpin('spinTrDetails');
-            ajaxGet(PAGE_URL + '?action=getTr&code=' + encodeURIComponent(code), function(d) {
+            ajaxGet(PAGE_URL+'?action=getTr&code='+encodeURIComponent(code), function(d) {
                 hideSpin('spinTrDetails');
-                if (d && d.ok === true) {
-                    var lb = parseFloat(d.lb) || 0;
-                    _trLedgerMap[code] = lb;
-
-                    sv('trName',        d.n  || '');
-                    sv('trDispCode',    code);
-                    sv('trDispName',    d.n  || '');
-                    sv('trGlCode',      d.gc || '');
-                    sv('trGlName',      d.gn || '');
-                    sv('trCustId',      d.ci || '');
-                    svBal('trLedgerBal',  d.lb);
-                    svBal('trAvailBal',   d.ab);
-
-                    var refundAmt = parseFloat(document.getElementById('payAmt').value) || 0;
-                    svBal('trNewLedgerBal', (lb + refundAmt).toFixed(2));
-
-                    document.getElementById('acDetails').style.display = 'none';
-                    document.getElementById('trDetails').style.display = 'block';
+                if (d && d.ok===true) {
+                    var lb=parseFloat(d.lb)||0; _trLedgerMap[code]=lb;
+                    sv('trName',d.n||''); sv('trDispCode',code); sv('trDispName',d.n||'');
+                    sv('trGlCode',d.gc||''); sv('trGlName',d.gn||''); sv('trCustId',d.ci||'');
+                    svBal('trLedgerBal',d.lb); svBal('trAvailBal',d.ab);
+                    var refundAmt=parseFloat(document.getElementById('payAmt').value)||0;
+                    svBal('trNewLedgerBal',(lb+refundAmt).toFixed(2));
+                    document.getElementById('acDetails').style.display='none';
+                    document.getElementById('trDetails').style.display='block';
                     hideTrRowDetails();
-                } else {
-                    clearTrDetails();
-                    showToast(d && d.error ? d.error : 'Account not found.');
-                }
-            }, function() { hideSpin('spinTrDetails'); clearTrDetails(); });
+                } else { clearTrDetails(); showToast(d&&d.error?d.error:'Account not found.'); }
+            }, function(){ hideSpin('spinTrDetails'); clearTrDetails(); });
         }
 
         function hideTrDetails() {
-            document.getElementById('trDetails').style.display = 'none';
-            ['trDispCode','trDispName','trGlCode','trGlName','trCustId','trLedgerBal','trAvailBal','trNewLedgerBal'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) { el.value = ''; el.classList.remove('bal-pos','bal-neg'); }
-            });
+            document.getElementById('trDetails').style.display='none';
+            ['trDispCode','trDispName','trGlCode','trGlName','trCustId','trLedgerBal','trAvailBal','trNewLedgerBal'].forEach(function(id){ var el=document.getElementById(id); if(el){el.value='';el.classList.remove('bal-pos','bal-neg');} });
         }
 
-        /* ═══════════════════════════════════════════════
-           FETCH SHARES
-        ═══════════════════════════════════════════════ */
         function fetchShares(code) {
             showSpin('spinMain');
-            ajaxGet(PAGE_URL + '?action=getShares&code=' + encodeURIComponent(code), function(d) {
+            ajaxGet(PAGE_URL+'?action=getShares&code='+encodeURIComponent(code), function(d) {
                 hideSpin('spinMain');
-                if (d && d.ok === true) {
-                    sv('totalNoShares',  d.ts  != null ? String(d.ts) : '0');
-                    sv('totalFaceValue', fmtAmt(d.tfv));
-                    sv('totalAmount',    fmtAmt(d.ta));
-                    sv('certNo',  d.certNo || '');
-                    sv('memNo',   d.memNo  || '');
-                    sv('formNo',  (d.formNo || '0') + ' \u2014 ' + (d.toNo || '0'));
-                    _maxRefundAmt = parseFloat(d.ta)  || 0;
-                    _maxShares    = parseInt(d.ts, 10) || 0;
-                    var payEl = document.getElementById('payAmt');
-                    if (payEl && _maxRefundAmt > 0) {
-                        payEl.value = _maxRefundAmt.toFixed(2);
-                        payEl.max   = _maxRefundAmt;
-                    }
-                } else {
-                    clearShareFields();
-                }
-            }, function() { hideSpin('spinMain'); clearShareFields(); });
+                if (d && d.ok===true) {
+                    sv('totalNoShares', d.ts!=null?String(d.ts):'0');
+                    sv('totalFaceValue', fmtAmt(d.tfv)); sv('totalAmount', fmtAmt(d.ta));
+                    sv('certNo',d.certNo||''); sv('memNo',d.memNo||'');
+                    sv('formNo',(d.formNo||'0')+' \u2014 '+(d.toNo||'0'));
+                    _maxRefundAmt=parseFloat(d.ta)||0; _maxShares=parseInt(d.ts,10)||0;
+                    var payEl=document.getElementById('payAmt');
+                    if (payEl && _maxRefundAmt>0) { payEl.value=_maxRefundAmt.toFixed(2); payEl.max=_maxRefundAmt; }
+                } else { clearShareFields(); }
+            }, function(){ hideSpin('spinMain'); clearShareFields(); });
         }
 
-        /* ═══════════════════════════════════════════════
-           MODE OF PAYMENT
-        ═══════════════════════════════════════════════ */
         function onModeChange() {
-            var isT = document.getElementById('modeTransfer').checked;
-            document.getElementById('trCode').disabled = !isT;
-            document.getElementById('btnTr').disabled  = !isT;
-            document.getElementById('lblTransfer').classList.toggle('on',  isT);
-            document.getElementById('lblCash').classList.toggle('on', !isT);
-
-            // ── Auto-set Particular based on mode ──
-            document.getElementById('particular').value = isT ? 'By Transfer' : 'By Cash';
-            clearFieldError('particular', 'errParticular');
-
-            if (!isT) {
-                sv('trCode', ''); sv('trName', '');
-                document.getElementById('dropTr').classList.remove('on');
-                hideTrDetails();
-                clearTrEntries();
-                showMainPanel();
-            } else {
-                clearPayments();
-            }
+            var isT=document.getElementById('modeTransfer').checked;
+            document.getElementById('trCode').disabled=!isT; document.getElementById('btnTr').disabled=!isT;
+            document.getElementById('lblTransfer').classList.toggle('on',isT); document.getElementById('lblCash').classList.toggle('on',!isT);
+            document.getElementById('particular').value=isT?'By Transfer':'By Cash';
+            clearFieldError('particular','errParticular');
+            if (!isT) { sv('trCode',''); sv('trName',''); document.getElementById('dropTr').classList.remove('on'); hideTrDetails(); clearTrEntries(); showMainPanel(); }
+            else { clearPayments(); }
         }
 
-        /* ═══════════════════════════════════════════════
-           ADD PAYMENT / TRANSFER ENTRY
-        ═══════════════════════════════════════════════ */
         function doAddPayment() {
-            var isT      = document.getElementById('modeTransfer').checked;
-            var payAmt   = parseFloat(document.getElementById('payAmt').value);
-            var maxAmt   = _maxRefundAmt;
-
-            if (isNaN(payAmt) || payAmt <= 0) {
-                showToast('Please enter a valid amount greater than 0.');
-                return;
-            }
-            if (maxAmt > 0 && payAmt > maxAmt + 0.001) {
-                showToast('Refund amount \u20B9' + payAmt.toFixed(2) + ' cannot exceed total share amount \u20B9' + maxAmt.toFixed(2));
-                document.getElementById('payAmt').value = maxAmt.toFixed(2);
-                return;
-            }
-
+            var isT=document.getElementById('modeTransfer').checked;
+            var payAmt=parseFloat(document.getElementById('payAmt').value);
+            var maxAmt=_maxRefundAmt;
+            if (isNaN(payAmt)||payAmt<=0) { showToast('Please enter a valid amount greater than 0.'); return; }
+            if (maxAmt>0 && payAmt>maxAmt+0.001) { showToast('Refund amount \u20B9'+payAmt.toFixed(2)+' cannot exceed total share amount \u20B9'+maxAmt.toFixed(2)); document.getElementById('payAmt').value=maxAmt.toFixed(2); return; }
             if (isT) {
-                var trCode = document.getElementById('trCode').value.trim();
-                var trName = document.getElementById('trName').value.trim();
+                var trCode=document.getElementById('trCode').value.trim();
+                var trName=document.getElementById('trName').value.trim();
                 if (!trCode) { showToast('Please select a Transfer Account Code.'); return; }
-
-                var mainCode = document.getElementById('accountCode').value.trim();
-                if (trCode === mainCode) { showToast('Transfer account cannot be the same as the main account.'); return; }
-
-                for (var i = 0; i < _trEntries.length; i++) {
-                    if (_trEntries[i].code === trCode) { showToast('This transfer account is already added.'); return; }
-                }
-
-                var already = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
-                if (already + payAmt > maxAmt + 0.001) {
-                    showToast('Total transfer amount cannot exceed \u20B9' + maxAmt.toFixed(2));
-                    return;
-                }
-
-                _trEntries.push({ code: trCode, name: trName, amount: payAmt });
-
-                sv('trCode', ''); sv('trName', '');
-                document.getElementById('payAmt').value = '';
+                var mainCode=document.getElementById('accountCode').value.trim();
+                if (trCode===mainCode) { showToast('Transfer account cannot be the same as the main account.'); return; }
+                for (var i=0;i<_trEntries.length;i++) { if(_trEntries[i].code===trCode){showToast('This transfer account is already added.');return;} }
+                var already=_trEntries.reduce(function(s,e){return s+e.amount;},0);
+                if (already+payAmt>maxAmt+0.001) { showToast('Total transfer amount cannot exceed \u20B9'+maxAmt.toFixed(2)); return; }
+                _trEntries.push({code:trCode,name:trName,amount:payAmt});
+                sv('trCode',''); sv('trName','');
+                document.getElementById('payAmt').value='';
                 document.getElementById('dropTr').classList.remove('on');
-                hideTrDetails();
-                hideTrRowDetails();
-                renderTrTable();
-                document.getElementById('acDetails').style.display = 'none';
-                // clear payment error if user has now added an entry
+                hideTrDetails(); hideTrRowDetails(); renderTrTable();
+                document.getElementById('acDetails').style.display='none';
                 document.getElementById('errPayment').classList.remove('show');
-
             } else {
-                if (_payEntries.length > 0) { showToast('Cash entry already added.'); return; }
-                if (Math.abs(payAmt - maxAmt) > 0.001 && maxAmt > 0) {
-                    showToast('Cash refund amount must equal total share amount \u20B9' + maxAmt.toFixed(2));
-                    return;
-                }
-                var particular = document.getElementById('particular').value.trim() || 'By Cash';
-                _payEntries.push({ mode: 'Cash', amount: payAmt, particular: particular });
+                if (_payEntries.length>0) { showToast('Cash entry already added.'); return; }
+                if (Math.abs(payAmt-maxAmt)>0.001 && maxAmt>0) { showToast('Cash refund amount must equal total share amount \u20B9'+maxAmt.toFixed(2)); return; }
+                var particular=document.getElementById('particular').value.trim()||'By Cash';
+                _payEntries.push({mode:'Cash',amount:payAmt,particular:particular});
                 renderPayTable();
-                document.getElementById('acDetails').style.display = 'none';
-                // clear payment error if user has now added an entry
+                document.getElementById('acDetails').style.display='none';
                 document.getElementById('errPayment').classList.remove('show');
             }
         }
 
-        /* ═══════════════════════════════════════════════
-           RENDER CASH TABLE
-        ═══════════════════════════════════════════════ */
         function renderPayTable() {
-            var wrap  = document.getElementById('payTableWrap');
-            var tbody = document.getElementById('payTbody');
-            var total = document.getElementById('payTotal');
-            if (_payEntries.length === 0) {
-                wrap.classList.remove('show');
-                total.textContent = '\u20b90.00';
-                return;
-            }
+            var wrap=document.getElementById('payTableWrap'), tbody=document.getElementById('payTbody'), total=document.getElementById('payTotal');
+            if (_payEntries.length===0) { wrap.classList.remove('show'); total.textContent='\u20b90.00'; return; }
             wrap.classList.add('show');
-            var html = '', sum = 0;
-            for (var i = 0; i < _payEntries.length; i++) {
-                var e = _payEntries[i]; sum += e.amount;
-                html += '<tr>'
-                      + '<td>' + (i + 1) + '</td>'
-                      + '<td>CSCR</td>'
-                      + '<td>\u20b9' + e.amount.toFixed(2) + '</td>'
-                      + '<td>' + xe(e.particular) + '</td>'
-                      + '<td><button class="btn-remove" onclick="removePayment(' + i + ')">\u2715 Remove</button></td>'
-                      + '</tr>';
-            }
-            tbody.innerHTML = html;
-            total.textContent = '\u20b9' + sum.toFixed(2);
+            var html='', sum=0;
+            for (var i=0;i<_payEntries.length;i++) { var e=_payEntries[i]; sum+=e.amount; html+='<tr><td>'+(i+1)+'</td><td>CSCR</td><td>\u20b9'+e.amount.toFixed(2)+'</td><td>'+xe(e.particular)+'</td><td><button class="btn-remove" onclick="removePayment('+i+')">\u2715 Remove</button></td></tr>'; }
+            tbody.innerHTML=html; total.textContent='\u20b9'+sum.toFixed(2);
         }
 
-        /* ═══════════════════════════════════════════════
-           RENDER TRANSFER TABLE
-        ═══════════════════════════════════════════════ */
         function renderTrTable() {
-            var wrap  = document.getElementById('trTableWrap');
-            var tbody = document.getElementById('trTbody');
-            var total = document.getElementById('trTotal');
-            if (_trEntries.length === 0) {
-                wrap.classList.remove('show');
-                total.textContent = '\u20b90.00';
-                hideTrRowDetails();
-                return;
-            }
-            wrap.classList.add('show');
-            tbody.innerHTML = '';
-            var sum = 0;
-            for (var i = 0; i < _trEntries.length; i++) {
-                var e = _trEntries[i]; sum += e.amount;
-                var tr = document.createElement('tr');
-                tr.setAttribute('data-code', e.code);
-
-                var clickCells = [ String(i + 1), 'TRCR', xe(e.code), xe(e.name) ];
-                for (var j = 0; j < clickCells.length; j++) {
-                    var td = document.createElement('td');
-                    td.innerHTML = clickCells[j];
-                    td.style.cursor = 'pointer';
-                    td.addEventListener('click', (function(code, amt) {
-                        return function() { showTrRowDetails(code, amt); };
-                    })(e.code, e.amount));
-                    tr.appendChild(td);
-                }
-
-                var tdAmt = document.createElement('td');
-                tdAmt.textContent = '\u20b9' + e.amount.toFixed(2);
-                tr.appendChild(tdAmt);
-
-                var tdBtn = document.createElement('td');
-                var btn   = document.createElement('button');
-                btn.className   = 'btn-remove';
-                btn.textContent = '\u2715 Remove';
-                btn.addEventListener('click', (function(idx) {
-                    return function() { removeTrEntry(idx); };
-                })(i));
-                tdBtn.appendChild(btn);
-                tr.appendChild(tdBtn);
-
+            var wrap=document.getElementById('trTableWrap'), tbody=document.getElementById('trTbody'), total=document.getElementById('trTotal');
+            if (_trEntries.length===0) { wrap.classList.remove('show'); total.textContent='\u20b90.00'; hideTrRowDetails(); return; }
+            wrap.classList.add('show'); tbody.innerHTML='';
+            var sum=0;
+            for (var i=0;i<_trEntries.length;i++) {
+                var e=_trEntries[i]; sum+=e.amount;
+                var tr=document.createElement('tr'); tr.setAttribute('data-code',e.code);
+                var clickCells=[String(i+1),'TRCR',xe(e.code),xe(e.name)];
+                for (var j=0;j<clickCells.length;j++) { var td=document.createElement('td'); td.innerHTML=clickCells[j]; td.style.cursor='pointer'; td.addEventListener('click',(function(code,amt){return function(){showTrRowDetails(code,amt);};})(e.code,e.amount)); tr.appendChild(td); }
+                var tdAmt=document.createElement('td'); tdAmt.textContent='\u20b9'+e.amount.toFixed(2); tr.appendChild(tdAmt);
+                var tdBtn=document.createElement('td'); var btn=document.createElement('button'); btn.className='btn-remove'; btn.textContent='\u2715 Remove';
+                btn.addEventListener('click',(function(idx){return function(){removeTrEntry(idx);};})(i)); tdBtn.appendChild(btn); tr.appendChild(tdBtn);
                 tbody.appendChild(tr);
             }
-            total.textContent = '\u20b9' + sum.toFixed(2);
+            total.textContent='\u20b9'+sum.toFixed(2);
         }
 
-        /* ═══════════════════════════════════════════════
-           ROW CLICK → show trRowDetails panel
-        ═══════════════════════════════════════════════ */
         function showTrRowDetails(code, rowAmt) {
-            document.getElementById('trDetails').style.display = 'none';
-            document.getElementById('acDetails').style.display = 'none';
-
+            document.getElementById('trDetails').style.display='none';
+            document.getElementById('acDetails').style.display='none';
             showSpin('spinTrRow');
-            ajaxGet(PAGE_URL + '?action=getTr&code=' + encodeURIComponent(code), function(d) {
+            ajaxGet(PAGE_URL+'?action=getTr&code='+encodeURIComponent(code), function(d) {
                 hideSpin('spinTrRow');
-                if (d && d.ok === true) {
-                    var lb = parseFloat(d.lb) || 0;
-                    _trLedgerMap[code] = lb;
-
-                    document.getElementById('trRowAccCode').value  = code;
-                    document.getElementById('trRowAccName').value  = d.n  || '';
-                    document.getElementById('trRowGlCode').value   = d.gc || '';
-                    document.getElementById('trRowGlName').value   = d.gn || '';
-                    document.getElementById('trRowCustId').value   = d.ci || '';
-                    svBal('trRowLedger',    d.lb);
-                    svBal('trRowAvail',     d.ab);
-                    svBal('trRowNewLedger', (lb + rowAmt).toFixed(2));
-
-                    document.getElementById('trRowDetails').style.display = 'block';
+                if (d && d.ok===true) {
+                    var lb=parseFloat(d.lb)||0; _trLedgerMap[code]=lb;
+                    document.getElementById('trRowAccCode').value=code;
+                    document.getElementById('trRowAccName').value=d.n||'';
+                    document.getElementById('trRowGlCode').value=d.gc||'';
+                    document.getElementById('trRowGlName').value=d.gn||'';
+                    document.getElementById('trRowCustId').value=d.ci||'';
+                    svBal('trRowLedger',d.lb); svBal('trRowAvail',d.ab);
+                    svBal('trRowNewLedger',(lb+rowAmt).toFixed(2));
+                    document.getElementById('trRowDetails').style.display='block';
                 }
-            }, function() { hideSpin('spinTrRow'); });
+            }, function(){ hideSpin('spinTrRow'); });
         }
 
         function hideTrRowDetails() {
-            document.getElementById('trRowDetails').style.display = 'none';
-            ['trRowAccCode','trRowAccName','trRowGlCode','trRowGlName',
-             'trRowCustId','trRowLedger','trRowAvail','trRowNewLedger'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) { el.value = ''; el.classList.remove('bal-pos','bal-neg'); }
-            });
+            document.getElementById('trRowDetails').style.display='none';
+            ['trRowAccCode','trRowAccName','trRowGlCode','trRowGlName','trRowCustId','trRowLedger','trRowAvail','trRowNewLedger'].forEach(function(id){ var el=document.getElementById(id); if(el){el.value='';el.classList.remove('bal-pos','bal-neg');} });
         }
 
-        /* ═══════════════════════════════════════════════
-           REMOVE ENTRIES
-        ═══════════════════════════════════════════════ */
-        function removeTrEntry(idx) {
-            _trEntries.splice(idx, 1);
-            renderTrTable();
-            hideTrRowDetails();
-            if (_trEntries.length === 0) {
-                document.getElementById('acDetails').style.display = 'block';
-            }
-        }
-        function clearTrEntries() {
-            _trEntries   = [];
-            _trLedgerMap = {};
-            renderTrTable();
-            hideTrRowDetails();
-            hideTrDetails();
-        }
+        function removeTrEntry(idx) { _trEntries.splice(idx,1); renderTrTable(); hideTrRowDetails(); if(_trEntries.length===0) document.getElementById('acDetails').style.display='block'; }
+        function clearTrEntries() { _trEntries=[]; _trLedgerMap={}; renderTrTable(); hideTrRowDetails(); hideTrDetails(); }
+        function removePayment(idx) { _payEntries.splice(idx,1); renderPayTable(); document.getElementById('acDetails').style.display='block'; }
+        function clearPayments() { _payEntries=[]; renderPayTable(); }
 
-        function removePayment(idx) {
-            _payEntries.splice(idx, 1);
-            renderPayTable();
-            document.getElementById('acDetails').style.display = 'block';
-        }
-        function clearPayments() { _payEntries = []; renderPayTable(); }
-
-        /* ═══════════════════════════════════════════════
-           SAVE
-        ═══════════════════════════════════════════════ */
         function doSave() {
             clearAllErrors();
-
-            var acCode     = document.getElementById('accountCode').value.trim();
-            var meetDate   = document.getElementById('meetDate').value.trim();
-            var particular = document.getElementById('particular').value.trim();
-            var isT        = document.getElementById('modeTransfer').checked;
-            var maxAmt     = _maxRefundAmt;
-            var hasError   = false;
-
-            if (!acCode) {
-                setFieldError('accountCode', 'errAccountCode');
-                hasError = true;
-            }
-            if (!meetDate) {
-                setFieldError('meetDate', 'errMeetDate');
-                hasError = true;
-            }
-            if (!particular) {
-                setFieldError('particular', 'errParticular');
-                hasError = true;
-            }
-
-            if (isT) {
-                var t = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
-                if (_trEntries.length === 0 || (maxAmt > 0 && Math.abs(t - maxAmt) >= 0.001)) {
-                    document.getElementById('errPayment').classList.add('show');
-                    hasError = true;
-                }
-            } else {
-                var p = _payEntries.reduce(function(s, e) { return s + e.amount; }, 0);
-                if (_payEntries.length === 0 || (maxAmt > 0 && Math.abs(p - maxAmt) >= 0.001)) {
-                    document.getElementById('errPayment').classList.add('show');
-                    hasError = true;
-                }
-            }
-
+            var acCode=document.getElementById('accountCode').value.trim();
+            var meetDate=document.getElementById('meetDate').value.trim();
+            var particular=document.getElementById('particular').value.trim();
+            var isT=document.getElementById('modeTransfer').checked;
+            var maxAmt=_maxRefundAmt, hasError=false;
+            if (!acCode) { setFieldError('accountCode','errAccountCode'); hasError=true; }
+            if (!meetDate) { setFieldError('meetDate','errMeetDate'); hasError=true; }
+            if (!particular) { setFieldError('particular','errParticular'); hasError=true; }
+            if (isT) { var t=_trEntries.reduce(function(s,e){return s+e.amount;},0); if(_trEntries.length===0||(maxAmt>0&&Math.abs(t-maxAmt)>=0.001)){document.getElementById('errPayment').classList.add('show');hasError=true;} }
+            else { var p=_payEntries.reduce(function(s,e){return s+e.amount;},0); if(_payEntries.length===0||(maxAmt>0&&Math.abs(p-maxAmt)>=0.001)){document.getElementById('errPayment').classList.add('show');hasError=true;} }
             if (hasError) return;
-
-            if (!particular) particular = isT ? 'By Transfer' : 'By Cash';
-
-            var trCodes = '[]';
-            if (isT && _trEntries.length > 0) {
-                var arr = [];
-                for (var i = 0; i < _trEntries.length; i++) {
-                    arr.push('{"code":"' + xq(_trEntries[i].code) + '","amount":' + _trEntries[i].amount + '}');
-                }
-                trCodes = '[' + arr.join(',') + ']';
-            }
-
-            var body = 'accountCode=' + encodeURIComponent(acCode)
-                     + '&meetDate='   + encodeURIComponent(meetDate)
-                     + '&noShares='   + encodeURIComponent(_maxShares)
-                     + '&mode='       + encodeURIComponent(isT ? 'Transfer' : 'Cash')
-                     + '&trCodes='    + encodeURIComponent(trCodes)
-                     + '&particular=' + encodeURIComponent(particular);
-
-            var btnSave = document.querySelector('.btn-primary');
-            btnSave.disabled    = true;
-            btnSave.textContent = 'Saving\u2026';
-
-            ajaxPost(PAGE_URL + '?action=save', body, function(d) {
-                btnSave.disabled    = false;
-                btnSave.textContent = 'Save';
-                if (d && d.ok === true) {
-                    document.getElementById('sc-scrollNo').textContent = d.scrollNo || '\u2014';
-                    document.getElementById('successOverlay').classList.add('open');
-                } else {
-                    showToast((d && d.error) ? d.error : 'Save failed.');
-                }
-            }, function() {
-                btnSave.disabled    = false;
-                btnSave.textContent = 'Save';
-                showToast('Network error. Please try again.');
-            });
+            if (!particular) particular=isT?'By Transfer':'By Cash';
+            var trCodes='[]';
+            if (isT && _trEntries.length>0) { var arr=[]; for(var i=0;i<_trEntries.length;i++) arr.push('{"code":"'+xq(_trEntries[i].code)+'","amount":'+_trEntries[i].amount+'}'); trCodes='['+arr.join(',')+']'; }
+            var body='accountCode='+encodeURIComponent(acCode)+'&meetDate='+encodeURIComponent(meetDate)+'&noShares='+encodeURIComponent(_maxShares)+'&mode='+encodeURIComponent(isT?'Transfer':'Cash')+'&trCodes='+encodeURIComponent(trCodes)+'&particular='+encodeURIComponent(particular);
+            var btnSave=document.querySelector('.btn-primary'); btnSave.disabled=true; btnSave.textContent='Saving…'; btnSave.style.background='#a0a0c8'; btnSave.style.cursor='default';
+            ajaxPost(PAGE_URL+'?action=save', body, function(d) {
+            	btnSave.disabled=false; btnSave.textContent='Save'; btnSave.style.background=''; btnSave.style.cursor='';
+                if (d && d.ok===true) { document.getElementById('sc-scrollNo').textContent=d.scrollNo||'\u2014'; document.getElementById('successOverlay').classList.add('open'); }
+                else { showToast((d&&d.error)?d.error:'Save failed.'); }
+            }, function(){ btnSave.disabled=false; btnSave.textContent='Save'; btnSave.style.background=''; btnSave.style.cursor=''; showToast('Network error. Please try again.'); });
         }
 
-        /* ═══════════════════════════════════════════════
-           SUCCESS POPUP
-        ═══════════════════════════════════════════════ */
-        function closeSuccess() {
-            document.getElementById('successOverlay').classList.remove('open');
-            clearForm();
-        }
-
-        /* ═══════════════════════════════════════════════
-           CLEAR / CANCEL
-        ═══════════════════════════════════════════════ */
-        function doCancel()        { document.getElementById('clearOverlay').classList.add('open'); }
+        function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); clearForm(); }
+        function doCancel() { document.getElementById('clearOverlay').classList.add('open'); }
         function closeClearPopup() { document.getElementById('clearOverlay').classList.remove('open'); }
-        function confirmClear()    { closeClearPopup(); clearForm(); }
+        function confirmClear() { closeClearPopup(); clearForm(); }
 
         function clearForm() {
-            clearAcDetails();
-            clearAllErrors();
-            ['accountCode','trCode','trName','payAmt','meetDate'].forEach(function(id) {
-                var el = document.getElementById(id); if (el) el.value = '';
-            });
-            document.getElementById('particular').value = 'By Cash';
+            clearAcDetails(); clearAllErrors();
+            ['accountCode','trCode','trName','payAmt','meetDate'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+            document.getElementById('particular').value='By Cash';
             document.getElementById('dropMain').classList.remove('on');
             document.getElementById('dropTr').classList.remove('on');
-            document.getElementById('modeCash').checked = true;
-            onModeChange();
-            _prev = ''; _ledgerBal = 0; _maxRefundAmt = 0; _maxShares = 0;
+            document.getElementById('modeCash').checked=true;
+            onModeChange(); _prev=''; _ledgerBal=0; _maxRefundAmt=0; _maxShares=0;
         }
 
         function clearAcDetails() {
-            document.getElementById('acDetails').style.display = 'none';
-            hideTrDetails();
-            hideTrRowDetails();
-            _ledgerBal = 0; _maxRefundAmt = 0; _maxShares = 0;
-            sv('accountName', '');
-            ['glCode','glName','custId'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) { el.value = ''; el.classList.remove('bal-pos','bal-neg'); }
-            });
-            clearShareFields();
-            clearTrEntries();
-            clearPayments();
+            document.getElementById('acDetails').style.display='none';
+            hideTrDetails(); hideTrRowDetails();
+            _ledgerBal=0; _maxRefundAmt=0; _maxShares=0; sv('accountName','');
+            ['glCode','glName','custId'].forEach(function(id){ var el=document.getElementById(id); if(el){el.value='';el.classList.remove('bal-pos','bal-neg');} });
+            clearShareFields(); clearTrEntries(); clearPayments();
         }
-
         function clearTrDetails() { hideTrDetails(); }
-
         function clearShareFields() {
             sv('totalNoShares','0'); sv('totalFaceValue','0.00'); sv('totalAmount','0.00');
             sv('certNo',''); sv('memNo',''); sv('formNo','');
-            var payEl = document.getElementById('payAmt');
-            if (payEl) { payEl.value = ''; payEl.removeAttribute('max'); }
-            _maxRefundAmt = 0; _maxShares = 0;
+            var payEl=document.getElementById('payAmt'); if(payEl){payEl.value='';payEl.removeAttribute('max');}
+            _maxRefundAmt=0; _maxShares=0;
         }
 
-        /* ═══════════════════════════════════════════════
-           LOOKUP MODAL
-        ═══════════════════════════════════════════════ */
-        var _lkTarget = 'main', _lkTimer = null;
+        var _lkTarget='main', _lkTimer=null;
 
         function openLookup(target) {
-            _lkTarget = target;
-            document.getElementById('lkSearchInput').value = '';
-            document.getElementById('lkTbody').innerHTML   = '<tr><td colspan="2" class="lk-msg">Loading&#8230;</td></tr>';
-            document.getElementById('lkStatus').textContent = 'Click a row to select.';
-            document.getElementById('lkBadge').textContent  = (target === 'tr') ? 'SAVINGS / CURRENT' : 'SHARES A/C';
+            _lkTarget=target;
+            document.getElementById('lkSearchInput').value='';
+            document.getElementById('lkTbody').innerHTML='<tr><td colspan="3" class="lk-msg">Loading&#8230;</td></tr>';
+            document.getElementById('lkStatus').textContent='Click a row to select.';
+            document.getElementById('lkBadge').textContent=(target==='tr')?'SAVINGS / CURRENT':'SHARES A/C';
             document.getElementById('lkOverlay').classList.add('open');
-            setTimeout(function() { document.getElementById('lkSearchInput').focus(); }, 80);
+            setTimeout(function(){ document.getElementById('lkSearchInput').focus(); },80);
             lkLoad('');
         }
-        function lkClose()        { document.getElementById('lkOverlay').classList.remove('open'); }
-        function lkOnInput(val)   { clearTimeout(_lkTimer); _lkTimer = setTimeout(function() { lkLoad(val.trim()); }, 300); }
+        function lkClose() { document.getElementById('lkOverlay').classList.remove('open'); }
+        function lkOnInput(val) { clearTimeout(_lkTimer); _lkTimer=setTimeout(function(){ lkLoad(val.trim()); },300); }
 
         function lkLoad(term) {
-            var tbody = document.getElementById('lkTbody');
-            tbody.innerHTML = '<tr><td colspan="2" class="lk-msg">Searching&#8230;</td></tr>';
-            var act = (_lkTarget === 'tr') ? 'searchTr' : 'search';
-            ajaxGet(PAGE_URL + '?action=' + act + '&term=' + encodeURIComponent(term), function(d) {
-                if (d.error) { tbody.innerHTML = '<tr><td colspan="2" class="lk-err">' + xe(d.error) + '</td></tr>'; return; }
-                var list = d.accounts || [];
-                if (!list.length) { tbody.innerHTML = '<tr><td colspan="2" class="lk-msg">No accounts found.</td></tr>'; return; }
-                tbody.innerHTML = '';
-                for (var i = 0; i < list.length; i++) {
-                    var c = list[i].code || '', n = list[i].name || '';
-                    var tr = document.createElement('tr');
-                    var td1 = document.createElement('td'); td1.innerHTML = lkHl(c, term);
-                    var td2 = document.createElement('td'); td2.innerHTML = lkHl(n, term);
-                    tr.appendChild(td1); tr.appendChild(td2);
-                    tr.addEventListener('click', (function(code, name) {
-                        return function() { lkPick(code, name); };
-                    })(c, n));
+            var tbody=document.getElementById('lkTbody');
+            tbody.innerHTML='<tr><td colspan="3" class="lk-msg">Searching&#8230;</td></tr>';
+            var act=(_lkTarget==='tr')?'searchTr':'search';
+            ajaxGet(PAGE_URL+'?action='+act+'&term='+encodeURIComponent(term), function(d) {
+                if (d.error) { tbody.innerHTML='<tr><td colspan="3" class="lk-err">'+xe(d.error)+'</td></tr>'; return; }
+                var list=d.accounts||[];
+                if (!list.length) { tbody.innerHTML='<tr><td colspan="3" class="lk-msg">No accounts found.</td></tr>'; return; }
+                tbody.innerHTML='';
+                for (var i=0;i<list.length;i++) {
+                    var c=list[i].code||'', n=list[i].name||'', p=list[i].product||'';
+                    var tr=document.createElement('tr');
+                    var td1=document.createElement('td'); td1.innerHTML=lkHl(c,term);
+                    var td2=document.createElement('td'); td2.innerHTML=lkHl(n,term);
+                    var td3=document.createElement('td'); td3.textContent=p;
+                    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+                    tr.addEventListener('click',(function(code,name){return function(){lkPick(code,name);};})(c,n));
                     tbody.appendChild(tr);
                 }
-                document.getElementById('lkStatus').textContent = list.length + ' result(s). Click a row to select.';
-            }, function() { tbody.innerHTML = '<tr><td colspan="2" class="lk-err">Network error.</td></tr>'; });
+                document.getElementById('lkStatus').textContent=list.length+' result(s). Click a row to select.';
+            }, function(){ tbody.innerHTML='<tr><td colspan="3" class="lk-err">Network error.</td></tr>'; });
         }
 
         function lkPick(code, name) {
             lkClose();
-            if (_lkTarget === 'tr') {
-                document.getElementById('trCode').value = code;
-                sv('trName', name);
-                fetchTrDetails(code);
-            } else {
-                document.getElementById('accountCode').value = code;
-                sv('accountName', name);
-                _prev = code;
-                clearFieldError('accountCode', 'errAccountCode');
-                fetchAc(code);
-            }
+            if (_lkTarget==='tr') { document.getElementById('trCode').value=code; sv('trName',name); fetchTrDetails(code); }
+            else { document.getElementById('accountCode').value=code; sv('accountName',name); _prev=code; clearFieldError('accountCode','errAccountCode'); fetchAc(code); }
         }
 
         function lkHl(text, search) {
             if (!search) return xe(text);
-            var idx = text.toLowerCase().indexOf(search.toLowerCase());
-            if (idx === -1) return xe(text);
-            return xe(text.substring(0, idx))
-                 + '<span class="lk-hl">' + xe(text.substring(idx, idx + search.length)) + '</span>'
-                 + xe(text.substring(idx + search.length));
+            var idx=text.toLowerCase().indexOf(search.toLowerCase());
+            if (idx===-1) return xe(text);
+            return xe(text.substring(0,idx))+'<span class="lk-hl">'+xe(text.substring(idx,idx+search.length))+'</span>'+xe(text.substring(idx+search.length));
         }
 
-        /* ═══════════════════════════════════════════════
-           UTILITY
-        ═══════════════════════════════════════════════ */
-        function sv(id, val)    { var el = document.getElementById(id); if (el) el.value = val || ''; }
-        function showSpin(id)   { var el = document.getElementById(id); if (el) el.style.display = 'inline-block'; }
-        function hideSpin(id)   { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
-
-        function svBal(id, val) {
-            var el = document.getElementById(id); if (!el) return;
-            var n  = parseFloat(val);
-            el.value = isNaN(n) ? (val || '') : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        function sv(id,val) { var el=document.getElementById(id); if(el) el.value=val||''; }
+        function showSpin(id) { var el=document.getElementById(id); if(el) el.style.display='inline-block'; }
+        function hideSpin(id) { var el=document.getElementById(id); if(el) el.style.display='none'; }
+        function svBal(id,val) {
+            var el=document.getElementById(id); if(!el) return;
+            var n=parseFloat(val);
+            el.value=isNaN(n)?(val||''):n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
             el.classList.remove('bal-pos','bal-neg');
-            if (!isNaN(n)) el.classList.add(n >= 0 ? 'bal-pos' : 'bal-neg');
+            if(!isNaN(n)) el.classList.add(n>=0?'bal-pos':'bal-neg');
         }
-
-        function fmtAmt(val) {
-            var n = parseFloat(val);
-            return isNaN(n) ? '0.00' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function ajaxGet(url, onSuccess, onError) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState !== 4) return;
-                if (xhr.status !== 200) { if (onError) onError(); return; }
-                var d;
-                try { var raw = xhr.responseText; var si = raw.indexOf('{'); if (si > 0) raw = raw.substring(si); d = JSON.parse(raw.trim()); }
-                catch(e) { if (onError) onError(); return; }
-                onSuccess(d);
-            };
+        function fmtAmt(val) { var n=parseFloat(val); return isNaN(n)?'0.00':n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+        function ajaxGet(url,onSuccess,onError) {
+            var xhr=new XMLHttpRequest(); xhr.open('GET',url,true);
+            xhr.onreadystatechange=function(){ if(xhr.readyState!==4) return; if(xhr.status!==200){if(onError)onError();return;} var d; try{var raw=xhr.responseText;var si=raw.indexOf('{');if(si>0)raw=raw.substring(si);d=JSON.parse(raw.trim());}catch(e){if(onError)onError();return;} onSuccess(d); };
             xhr.send();
         }
-
-        function ajaxPost(url, body, onSuccess, onError) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState !== 4) return;
-                if (xhr.status !== 200) { if (onError) onError(); return; }
-                var d;
-                try { var raw = xhr.responseText; var si = raw.indexOf('{'); if (si > 0) raw = raw.substring(si); d = JSON.parse(raw.trim()); }
-                catch(e) { if (onError) onError(); return; }
-                onSuccess(d);
-            };
+        function ajaxPost(url,body,onSuccess,onError) {
+            var xhr=new XMLHttpRequest(); xhr.open('POST',url,true); xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+            xhr.onreadystatechange=function(){ if(xhr.readyState!==4) return; if(xhr.status!==200){if(onError)onError();return;} var d; try{var raw=xhr.responseText;var si=raw.indexOf('{');if(si>0)raw=raw.substring(si);d=JSON.parse(raw.trim());}catch(e){if(onError)onError();return;} onSuccess(d); };
             xhr.send(body);
         }
+        function xe(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function xq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
-        function xe(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-        function xq(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-
-        /* ═══════════════════════════════════════════════
-           INIT
-        ═══════════════════════════════════════════════ */
         document.addEventListener('DOMContentLoaded', function() {
-            // Set default particular on load
-            document.getElementById('particular').value = 'By Cash';
-
+            document.getElementById('particular').value='By Cash';
             document.addEventListener('click', function(e) {
-                if (!e.target.closest || !e.target.closest('.sw')) {
+                if (!e.target.closest||!e.target.closest('.sw')) {
                     document.getElementById('dropMain').classList.remove('on');
                     document.getElementById('dropTr').classList.remove('on');
                 }
             });
-            document.addEventListener('keydown', function(e) { if (e.key === 'Escape') lkClose(); });
+            document.addEventListener('keydown', function(e){ if(e.key==='Escape') lkClose(); });
+            /* Re-position dropTr if window is resized while it is open */
+            window.addEventListener('resize', function() {
+                var drop = document.getElementById('dropTr');
+                if (drop.classList.contains('on')) positionDropTr();
+            });
         });
     </script>
 </body>

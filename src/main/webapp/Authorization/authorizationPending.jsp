@@ -76,11 +76,8 @@
             loadCard('pending_txn_cash', 'pending-txn-cash-value', 'auth'),
             loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
             loadCard('pending_shares', 'pending-shares-value', 'auth')
-            
         ]);
-    }
-
-    
+    } 
     async function loadCard(cardId, elementId, cardType) {
         try {
             const response = await fetch('../getCardValueUnified.jsp?type=' + cardType + '&id=' + cardId);

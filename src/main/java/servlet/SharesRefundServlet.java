@@ -106,13 +106,15 @@ public class SharesRefundServlet extends HttpServlet {
         String likeVal = term.isEmpty() ? "%" : "%" + term;
         int    maxRows = term.isEmpty() ? 50 : 30;
 
+        // CHANGED: joined HEADOFFICE.PRODUCT to fetch product name dynamically
         String sql =
-            "SELECT ACCOUNT_CODE, NAME " +
-            "FROM ACCOUNT.ACCOUNT " +
-            "WHERE ACCOUNT_CODE LIKE ? " +
-            "  AND SUBSTR(ACCOUNT_CODE, 5, 3) = ? " +
+            "SELECT A.ACCOUNT_CODE, A.NAME, P.DESCRIPTION AS PRODUCT_NAME " +
+            "FROM ACCOUNT.ACCOUNT A " +
+            "LEFT JOIN HEADOFFICE.PRODUCT P ON SUBSTR(A.ACCOUNT_CODE, 5, 3) = P.PRODUCT_CODE " +
+            "WHERE A.ACCOUNT_CODE LIKE ? " +
+            "  AND SUBSTR(A.ACCOUNT_CODE, 5, 3) = ? " +
             "  AND ROWNUM <= " + maxRows + " " +
-            "ORDER BY ACCOUNT_CODE";
+            "ORDER BY A.ACCOUNT_CODE";
 
         Connection con = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
@@ -127,9 +129,11 @@ public class SharesRefundServlet extends HttpServlet {
             while (rs.next()) {
                 String code = clean(rs.getString("ACCOUNT_CODE"));
                 String name = jsonSafe(rs.getString("NAME"));
+                String prod = jsonSafe(rs.getString("PRODUCT_NAME")); // CHANGED: fetch product name
                 if (!first) sb.append(",");
                 sb.append("{\"code\":\"").append(code)
-                  .append("\",\"name\":\"").append(name).append("\"}");
+                  .append("\",\"name\":\"").append(name)
+                  .append("\",\"product\":\"").append(prod).append("\"}"); // CHANGED: include product in JSON
                 first = false;
             }
             sb.append("]}");
@@ -380,7 +384,6 @@ public class SharesRefundServlet extends HttpServlet {
             }
 
             // ── Update ALL active certificate rows for this account ──
-            // Sets TR_STATUS='W' and TR_USERID on every STATUS='A' row, not just the latest
             ps = con.prepareStatement(
                 "UPDATE SHARES.CERTIFICATE_MASTER " +
                 "SET TR_STATUS = 'W', TR_USERID = ? " +
@@ -399,8 +402,6 @@ public class SharesRefundServlet extends HttpServlet {
             BigDecimal mainLedgerBal = getLedgerBalance(con, mainAccCode);
 
             // ── Determine FORACCOUNT_CODE for the shares account row ──
-            // For Transfer: use the transfer account with the HIGHEST amount
-            // For Cash: use mainAccCode itself
             String forAccCodeSharesRow = mainAccCode;
             if (isTransfer && !trList.isEmpty()) {
                 String[]   highestPayer = trList.get(0);
@@ -416,7 +417,6 @@ public class SharesRefundServlet extends HttpServlet {
             }
 
             // ── Insert shares account row (SUBSCROLL = 1) ──
-            // Shares account is DEBITED for refund
             String     sharesRowTrnInd = isTransfer ? "TRDR" : "CSDR";
             BigDecimal sharesNewBal    = mainLedgerBal.subtract(totalAmt);
             BigDecimal mainGlBal       = getGlBalance(con, branchCode, mainGlCode);
@@ -430,7 +430,6 @@ public class SharesRefundServlet extends HttpServlet {
                 userId, particular);
 
             // ── Insert transfer account rows (SUBSCROLL = 2, 3, ...) ──
-            // Transfer accounts are CREDITED (receive the refund money)
             if (isTransfer) {
                 for (String[] tr : trList) {
                     String     recvCode      = tr[0];
