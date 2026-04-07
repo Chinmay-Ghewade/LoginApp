@@ -74,7 +74,9 @@
             loadCard('pending_masters', 'pending-masters-value', 'auth'),
             loadCard('pending_users', 'pending-users-value', 'auth'),
             loadCard('pending_txn_cash', 'pending-txn-cash-value', 'auth'),
-            loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth')
+            loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
+            loadCard('pending_shares', 'pending-shares-value', 'auth')
+            
         ]);
     }
 
