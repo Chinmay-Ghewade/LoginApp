@@ -177,12 +177,12 @@
 			<textField>
 				<reportElement x="82" y="59" width="472" height="18" uuid="89bc0bf9-5cf0-464e-b6d3-394b4b2d1ecc"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[ $F{NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="82" y="78" width="473" height="20" uuid="dca362a6-0cf4-4c50-8cd9-a8f87aec6a95"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[ $F{ADDRESS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ADDRESS}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="122" y="98" width="116" height="20" uuid="eb4b91fd-01f9-4d39-8e3c-c94bafbd9104"/>
