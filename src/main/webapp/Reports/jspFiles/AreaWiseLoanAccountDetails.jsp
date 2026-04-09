@@ -176,10 +176,28 @@ if ("download".equals(action)) {
 
     }catch(Exception e){
 
-        out.println("<h3 style='color:red'>Error Generating Report</h3>");
-        e.printStackTrace(new PrintWriter(out));
+        e.printStackTrace();
 
+        Throwable cause = e;
 
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("AreaWiseLoanAccountDetails.jsp");
+        return;
+   
     } finally {
 
         if (conn != null) {
@@ -240,6 +258,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">
 AREA WISE LOAN ACCOUNT DETAILS

@@ -153,10 +153,30 @@ if("download".equals(action)){
             outStream.close();
             return;
         }
-
     }catch(Exception e){
-        out.println("<h3 style='color:red'>Error generating report</h3>");
-        e.printStackTrace(new java.io.PrintWriter(out));
+
+        e.printStackTrace();
+
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("LoanReturnRegisterReport.jsp");
+        return;
+  
     }finally{
         if(conn!=null) try{conn.close();}catch(Exception ex){}
     }
@@ -214,6 +234,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">Loan Return Register Report</h1>
 

@@ -151,11 +151,30 @@ if ("download".equals(action)) {
 
         return;
 
-    } catch(Exception e){
+    }catch(Exception e){
 
-        out.println("<h3 style='color:red'>Error: "+e.getMessage()+"</h3>");
-        e.printStackTrace(new java.io.PrintWriter(out));
+        e.printStackTrace();
+
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("Loan_Deposit_Interest_Rate_BWB.jsp");
         return;
+    
 
     } finally {
         if(conn!=null) conn.close();
@@ -214,6 +233,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">
 LOAN / DEPOSIT INTEREST RATE

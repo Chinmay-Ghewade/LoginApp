@@ -80,9 +80,30 @@ if("validate".equals(action)){
         conn.commit();
 
         out.println("<script>alert('Validated Successfully');</script>");
-
     }catch(Exception e){
-        e.printStackTrace(new PrintWriter(out));
+
+        e.printStackTrace();
+
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("ProductDisplay.jsp");
+        return;
+    
     }finally{
         if(conn!=null) conn.close();
     }
@@ -172,7 +193,29 @@ if("download".equals(action)){
         }
 
     }catch(Exception e){
-        e.printStackTrace(new PrintWriter(out));
+
+        e.printStackTrace();
+
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("ProductDisplay.jsp");
+        return;
+
     }finally{
         if(conn!=null) conn.close();
     }
@@ -236,6 +279,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">
 PRODUCT DISPLAY

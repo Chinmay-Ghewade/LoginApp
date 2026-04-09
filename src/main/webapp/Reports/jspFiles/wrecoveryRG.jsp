@@ -131,14 +131,23 @@ if("calculate".equals(action)){
         conn.commit();
 
         out.println("<script>alert('Calculation Completed Successfully');</script>");
-
     }catch(Exception e){
 
-        if(conn!=null) conn.rollback();
+        try{
+            if(conn!=null) conn.rollback();
+        }catch(Exception ex){}
 
-        out.println("<h3 style='color:red'>Calculation Error</h3>");
-        e.printStackTrace(new PrintWriter(out));
+        e.printStackTrace(); // log only
 
+        session.setAttribute(
+            "errorMessage",
+            "Error generating report : " + e.getMessage()
+        );
+
+        response.sendRedirect("wrecoveryRG.jsp"); // same page
+
+        return;
+        
     }finally{
 
         if(stmt!=null) try{stmt.close();}catch(Exception ex){}
@@ -281,10 +290,23 @@ if("download".equals(action)){
 
             os.close();
         }
-
     }catch(Exception e){
-        if(conn!=null) conn.rollback();
-        e.printStackTrace(new PrintWriter(out));
+
+        try{
+            if(conn!=null) conn.rollback();
+        }catch(Exception ex){}
+
+        e.printStackTrace(); // log only
+
+        session.setAttribute(
+            "errorMessage",
+            "Error generating report : " + e.getMessage()
+        );
+
+        response.sendRedirect("wrecoveryRG.jsp");
+
+        return;
+    
     }finally{
         if(stmt!=null) try{stmt.close();}catch(Exception ex){}
         if(conn!=null) try{conn.close();}catch(Exception ex){}
@@ -348,6 +370,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">
 WEEKLY RECOVERY STATEMENT

@@ -208,15 +208,26 @@ if ("download".equals(action)) {
 
     }
     catch(Exception e){
+        e.printStackTrace();  // already there
 
-        response.reset();
-        response.setContentType("text/html");
+        Throwable cause = e;
 
-        out.println("<h2 style='color:red'>Error Generating Report</h2>");
-        out.println("<pre>");
-        e.printStackTrace(new PrintWriter(out));
-        out.println("</pre>");
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
 
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("AccountCategoryWiseReport.jsp");
         return;
     }
     finally{
@@ -283,6 +294,21 @@ var contextPath = "<%=request.getContextPath()%>";
 
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">
 ACCOUNT CATEGORY WISE REPORT

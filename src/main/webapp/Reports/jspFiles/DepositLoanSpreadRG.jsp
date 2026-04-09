@@ -229,14 +229,29 @@ else if ("xls".equalsIgnoreCase(reporttype)) {
     return;
 }
 
-    } catch (Exception e) {
+    }catch (Exception e) {
 
-        response.setContentType("text/html");
+        e.printStackTrace();
 
-        out.println("<h3 style='color:red;text-align:center'>Error Generating Report</h3>");
-        out.println("<pre>");
-        e.printStackTrace(new java.io.PrintWriter(out));
-        out.println("</pre>");
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("DepositLoanSpreadRG.jsp");
+        return;
 
     } finally {
         if (conn != null) try { conn.close(); } catch (Exception ex) {}
@@ -306,6 +321,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <body>
 
 <div class="report-container">
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <h1 class="report-title">DEPOSIT LOAN SPREAD REPORT</h1>
 
