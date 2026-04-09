@@ -35,7 +35,7 @@ window.setAreaData = function(code, name) {
     document.getElementById("subAreaName").value = '';
     
     closeAreaLookup();
-    showToast('✅ Area selected successfully!');
+    
 };
 
 //==================== SUB AREA LOOKUP ====================
@@ -78,7 +78,7 @@ window.setSubAreaData = function(code, name) {
     document.getElementById("subAreaName").value = name;
     
     closeSubAreaLookup();
-    showToast('✅ Sub Area selected successfully!');
+    
 };
 
 // ==================== LOAN FIELD AUTO-FILL FUNCTIONALITY ====================
@@ -187,7 +187,7 @@ window.setInstallmentData = function(id, desc) {
     document.getElementById("installmentType").value = desc;
     
     closeInstallmentLookup();
-    showToast('✅ Installment Type selected successfully!');
+    
 };
 
 //==================== SOCIAL SECTOR LOOKUP ====================
@@ -227,7 +227,7 @@ window.setSocialSectorData = function(id, desc) {
     document.getElementById("socialSubSectorDesc").value = '';
     
     closeSocialSectorLookup();
-    showToast('✅ Social Sector selected successfully!');
+    
 };
 
 //==================== SOCIAL SUBSECTOR LOOKUP ====================
@@ -270,7 +270,7 @@ window.setSocialSubSectorData = function(id, desc) {
     document.getElementById("socialSubSectorDesc").value = desc;
     
     closeSocialSubSectorLookup();
-    showToast('✅ Social SubSector selected successfully!');
+    
 };
 
 // ==================== END LOAN FIELD AUTO-FILL FUNCTIONALITY ====================
