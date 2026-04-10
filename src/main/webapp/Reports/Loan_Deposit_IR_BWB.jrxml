@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Loan_Deposit_IR_BWB" language="groovy" pageWidth="5040" pageHeight="5040" orientation="Landscape" columnWidth="5000" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="bc58d5fa-d085-4107-b541-96c177f2ed53">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="1747"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="agent_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="account_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="agent_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select t.intrate, t.branch_1 as HEADOFFICE,branch_2 BHEDASGAON
+,branch_3 KAPASHI, branch_4 KOKARUD ,
+ branch_5 SHAHUWADI,branch_6 MALKAPUR,branch_7 SARUD, branch_8
+BAMBAWADE,branch_9 KOLHAPUR,branch_10 ARALE,
+ branch_11 VERLE , branch_12 SONDOLI,branch_14 PORLE,branch_15
+BAZAR_BHOGAON,branch_16 KARANJFEN,
+ branch_21 SHENDGEWADI,branch_22 KOTOLI, branch_23 MUMBAI ,
+NVL(T.BRANCH_1,0) + NVL(t.branch_2,0) + NVL(t.branch_3,0) +
+NVL(t.branch_4,0) + NVL(t.branch_5,0)
+ + NVL(t.branch_6,0) + NVL(t.branch_7,0) + NVL(t.branch_8,0) +
+NVL(t.branch_9,0) + NVL(t.branch_10,0) + NVL(t.branch_11,0) +
+NVL(t.branch_12,0) + NVL(t.branch_13,0)
+ + NVL(t.branch_14,0) + NVL(t.branch_15,0)  + NVL(t.branch_16,0) +
+NVL(t.branch_17,0) + NVL(t.branch_18,0)  + NVL(t.branch_19,0) +
+NVL(t.branch_20,0) + NVL(t.branch_21,0)
+ + NVL(t.branch_22,0) + NVL(t.branch_23,0)
+   TOTAL   from bankdata.ratewise_loan t order by t.intrate]]>
+	</queryString>
+	<field name="INTRATE" class="java.math.BigDecimal"/>
+	<field name="HEADOFFICE" class="java.math.BigDecimal"/>
+	<field name="BHEDASGAON" class="java.math.BigDecimal"/>
+	<field name="KAPASHI" class="java.math.BigDecimal"/>
+	<field name="KOKARUD" class="java.math.BigDecimal"/>
+	<field name="SHAHUWADI" class="java.math.BigDecimal"/>
+	<field name="MALKAPUR" class="java.math.BigDecimal"/>
+	<field name="SARUD" class="java.math.BigDecimal"/>
+	<field name="BAMBAWADE" class="java.math.BigDecimal"/>
+	<field name="KOLHAPUR" class="java.math.BigDecimal"/>
+	<field name="ARALE" class="java.math.BigDecimal"/>
+	<field name="VERLE" class="java.math.BigDecimal"/>
+	<field name="SONDOLI" class="java.math.BigDecimal"/>
+	<field name="PORLE" class="java.math.BigDecimal"/>
+	<field name="BAZAR_BHOGAON" class="java.math.BigDecimal"/>
+	<field name="KARANJFEN" class="java.math.BigDecimal"/>
+	<field name="SHENDGEWADI" class="java.math.BigDecimal"/>
+	<field name="KOTOLI" class="java.math.BigDecimal"/>
+	<field name="MUMBAI" class="java.math.BigDecimal"/>
+	<field name="TOTAL" class="java.math.BigDecimal"/>
+	<variable name="headoffice" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{HEADOFFICE}]]></variableExpression>
+	</variable>
+	<variable name="bhedasgaon" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BHEDASGAON}]]></variableExpression>
+	</variable>
+	<variable name="kapashi" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{KAPASHI}]]></variableExpression>
+	</variable>
+	<variable name="kokarud" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{KOKARUD}]]></variableExpression>
+	</variable>
+	<variable name="shahuwadi" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SHAHUWADI}]]></variableExpression>
+	</variable>
+	<variable name="malkapur" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MALKAPUR}]]></variableExpression>
+	</variable>
+	<variable name="sarud" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SARUD}]]></variableExpression>
+	</variable>
+	<variable name="bambawade" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BAMBAWADE}]]></variableExpression>
+	</variable>
+	<variable name="kolhapur" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{KOLHAPUR}]]></variableExpression>
+	</variable>
+	<variable name="arale" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{ARALE}]]></variableExpression>
+	</variable>
+	<variable name="verle" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{VERLE}]]></variableExpression>
+	</variable>
+	<variable name="sondoli" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SONDOLI}]]></variableExpression>
+	</variable>
+	<variable name="porle" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PORLE}]]></variableExpression>
+	</variable>
+	<variable name="bazar_bhog" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BAZAR_BHOGAON}]]></variableExpression>
+	</variable>
+	<variable name="karanjfen" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{KARANJFEN}]]></variableExpression>
+	</variable>
+	<variable name="shendgewadi" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SHENDGEWADI}]]></variableExpression>
+	</variable>
+	<variable name="kotoli" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{KOTOLI}]]></variableExpression>
+	</variable>
+	<variable name="mumbai" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MUMBAI}]]></variableExpression>
+	</variable>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="98" splitType="Stretch">
+			<staticText>
+				<reportElement x="1870" y="50" width="731" height="21" uuid="e8b82f69-c9e7-4d1f-849e-347db6dcd037"/>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[LOAN-DEPOSIT INTEREST RATE - BRANCH WISE  BALANCE   AS ON :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="2524" y="50" width="233" height="21" uuid="e5522173-4b2d-47b0-b660-5cd25efb22c5"/>
+				<textElement verticalAlignment="Middle">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="2" y="97" width="4786" height="1" uuid="e5dd3b22-5d97-40d7-afe0-53026314fcc2"/>
+			</line>
+			<textField>
+				<reportElement x="2131" y="71" width="230" height="26" uuid="dbff24ba-a6a0-43b8-8d75-52dd4d49f980"/>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{agent_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1854" y="23" width="670" height="27" uuid="7298c475-13a3-4df6-adad-b5198679833e"/>
+				<textElement textAlignment="Center">
+					<font size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{agent_id}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="43" splitType="Stretch">
+			<staticText>
+				<reportElement x="65" y="1" width="247" height="29" uuid="1bb87563-3553-4265-9298-b6863a8665b4"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INTRATE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="624" y="1" width="246" height="29" uuid="8e0c926b-8733-4bff-8cf2-7f8ab7ce64c8"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BHEDASGAON]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="907" y="1" width="231" height="29" uuid="563b3588-40d6-4b2b-ba66-134e0bc40070"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KAPASHI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1169" y="1" width="224" height="29" uuid="6e3cea5c-9baf-4739-a2ff-69ba69f08b8e"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KOKARUD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1431" y="1" width="214" height="29" uuid="a32d51a4-0224-465f-b4c3-5e8a36085f97"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SHAHUWADI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1678" y="1" width="206" height="29" uuid="a3b24a26-d4f5-4251-8968-04360531d573"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MALKAPUR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1906" y="1" width="209" height="29" uuid="f7b5172e-3ec0-4007-99f8-40c0165863f3"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SARUD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2133" y="1" width="228" height="29" uuid="c1c3db6f-78fc-479a-9e8a-e74b1ae29f80"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BAMBAWADE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2390" y="1" width="198" height="29" uuid="f2c4d1fb-a07a-4739-ac58-5138851ea962"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KOLHAPUR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2612" y="1" width="177" height="29" uuid="ef40b29a-4c66-4446-8232-a602ac7786a3"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ARALE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2807" y="1" width="200" height="29" uuid="4fe30bd8-6523-4aa0-a710-e7c62381c086"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VERLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3031" y="1" width="213" height="29" uuid="240f1a44-851f-4814-9028-92813ae6cc2d"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SONDOLI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3277" y="1" width="173" height="29" uuid="d492c103-48a9-4bef-884b-4f1293682afb"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PORLE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3467" y="1" width="275" height="29" uuid="c7262ad4-bac6-481e-a18c-d0c11730841d"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[BAZAR_BHOGAON]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3760" y="1" width="198" height="29" uuid="7e7442ae-ac63-4fee-a891-4b2a112aa21c"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KARANJFEN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="3979" y="1" width="229" height="29" uuid="30d13333-342c-4793-b19e-45dff487193e"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SHENDGEWADI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4229" y="1" width="161" height="29" uuid="54bfb094-ea69-4022-9c04-a0680cbbb5a5"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KOTOLI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4411" y="1" width="169" height="29" uuid="be467b7a-d970-43c5-82bb-c403f6f42de1"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MUMBAI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="4606" y="1" width="166" height="29" uuid="5e23364c-3655-4221-80e6-6c5b446fdb62"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="344" y="0" width="237" height="30" uuid="324a67a4-8874-4a99-9e6c-0e19edf9c172"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[HEADOFFICE]]></text>
+			</staticText>
+			<line>
+				<reportElement x="2" y="41" width="4786" height="1" uuid="31352894-a4fc-4c5e-a3a4-33f0dfd8eed2"/>
+			</line>
+			<line>
+				<reportElement x="2798" y="-2" width="1" height="44" uuid="36fd7388-a7d7-4228-a88a-f8cc21eb22a5"/>
+			</line>
+			<line>
+				<reportElement x="4214" y="-2" width="1" height="44" uuid="fd237d9f-e63b-4246-959b-e10583b3efcd"/>
+			</line>
+			<line>
+				<reportElement x="4399" y="-2" width="1" height="44" uuid="8616ca47-f789-4ffd-96ff-233e882ce013"/>
+			</line>
+			<line>
+				<reportElement x="3459" y="-1" width="1" height="44" uuid="89fd61c8-0c05-4276-8c3c-83007003f410"/>
+			</line>
+			<line>
+				<reportElement x="1406" y="-1" width="1" height="44" uuid="8461f9ea-214a-4d15-9b49-ad1e43d5efae"/>
+			</line>
+			<line>
+				<reportElement x="1656" y="-1" width="1" height="44" uuid="e7bbf8ee-d2b3-4f5c-a633-1787b6822cda"/>
+			</line>
+			<line>
+				<reportElement x="2600" y="-1" width="1" height="44" uuid="431ef793-b552-48e1-a965-3ff4bf2e33df"/>
+			</line>
+			<line>
+				<reportElement x="1893" y="-1" width="1" height="44" uuid="ef201c1c-6dc4-4e17-b1a7-9c6088b5202d"/>
+			</line>
+			<line>
+				<reportElement x="3969" y="-2" width="1" height="44" uuid="d98ba9cc-8787-4345-9d23-34cd86209e94"/>
+			</line>
+			<line>
+				<reportElement x="3750" y="-1" width="1" height="44" uuid="5292d8db-c870-43a1-b483-11bc3d82a275"/>
+			</line>
+			<line>
+				<reportElement x="3259" y="-1" width="1" height="44" uuid="089ec23c-5518-4bcd-98e2-fc98f7e0ad9a"/>
+			</line>
+			<line>
+				<reportElement x="3019" y="-1" width="1" height="44" uuid="8a7192b9-6362-43aa-93fe-1550421421e5"/>
+			</line>
+			<line>
+				<reportElement x="331" y="-1" width="1" height="44" uuid="ecb7cf86-8c38-48a5-ab31-3ceea90c9d58"/>
+			</line>
+			<line>
+				<reportElement x="1152" y="-1" width="1" height="44" uuid="13a940d5-b118-4d45-abc3-ac276676f826"/>
+			</line>
+			<line>
+				<reportElement x="598" y="-1" width="1" height="44" uuid="521c8755-b6e0-4367-b162-4ade491022c6"/>
+			</line>
+			<line>
+				<reportElement x="884" y="-1" width="1" height="44" uuid="a9853610-7adf-4817-80c4-c78cfdb33fb6"/>
+			</line>
+			<line>
+				<reportElement x="4594" y="-1" width="1" height="44" uuid="e30e9c95-9797-47dd-9327-6e68c671c41e"/>
+			</line>
+			<line>
+				<reportElement x="4787" y="-2" width="1" height="44" uuid="1eba8530-0d2d-4fed-889a-536c28626156"/>
+			</line>
+			<line>
+				<reportElement x="5" y="-1" width="1" height="44" uuid="a18ddab8-15e5-4b69-b633-1dc45354bf83"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="43" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement x="65" y="-1" width="247" height="33" uuid="89130564-cbfd-498d-aa97-804d1731bcca"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INTRATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="624" y="-1" width="246" height="33" uuid="92deb3c7-cb18-427e-8530-e9c166010518"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BHEDASGAON}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="907" y="-1" width="231" height="33" uuid="7e860b7a-604c-4ea7-b05c-9a3859219b76"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KAPASHI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1169" y="-1" width="224" height="33" uuid="9802f881-697b-459b-853e-658230cebb8f"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KOKARUD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1431" y="-1" width="215" height="33" uuid="2bb919a6-bb92-4883-b002-881ec28e8c44"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHAHUWADI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1678" y="-1" width="206" height="33" uuid="ab140cea-5bf8-4891-8fda-582e6bf30704"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MALKAPUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1906" y="-1" width="209" height="33" uuid="259f5ae7-acf9-4830-8752-d9bd5e3bd868"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SARUD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="2133" y="-1" width="228" height="33" uuid="69e8ee0b-6967-4a0b-887a-aca6bf24b274"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAMBAWADE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="2390" y="-1" width="198" height="33" uuid="10b5063c-74f0-4892-a83a-1312fa117dfe"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KOLHAPUR}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="2612" y="-1" width="177" height="33" uuid="a6b27e08-089d-4a0d-87ea-c0b011c457a1"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ARALE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="2807" y="-1" width="200" height="33" uuid="0ecee542-454c-4770-8f82-7d53d55e7fc4"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VERLE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3031" y="-1" width="213" height="33" uuid="0a37de84-100f-4fe8-9d7e-853546ecd9b2"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SONDOLI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3277" y="-1" width="173" height="33" uuid="f7215c01-e409-4e1f-83fc-c089d7e3eaf0"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PORLE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3467" y="-1" width="275" height="33" uuid="50ee33fc-524e-4113-8e24-1bcbd74934ab"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAZAR_BHOGAON}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3760" y="-1" width="198" height="33" uuid="3959bc22-5454-4ac2-b045-ab862141a5f2"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KARANJFEN}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3979" y="-1" width="229" height="33" uuid="d64be85b-3975-41f7-ab20-a43cae42d2b5"/>
+				<textElement textAlignment="Right">
+					<font size="22" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHENDGEWADI}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="4222" y="-1" width="169" height="33" uuid="3a253d1c-df0b-4e65-b569-d2bd304b9038"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KOTOLI}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="344" y="0" width="237" height="32" uuid="b60c8931-d68c-47f7-8e71-c27897df1547"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HEADOFFICE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="4399" y="-1" width="1" height="44" uuid="dcf7ed42-d829-4c6b-af0d-b43dec06adcd"/>
+			</line>
+			<line>
+				<reportElement x="3459" y="-2" width="1" height="44" uuid="7153a197-5a25-4e79-9d54-4b6931bb6955"/>
+			</line>
+			<line>
+				<reportElement x="3750" y="-1" width="1" height="44" uuid="c46df22b-d10f-443f-b6c4-bcfa63742455"/>
+			</line>
+			<line>
+				<reportElement x="3969" y="-2" width="1" height="44" uuid="67d289ae-b226-4d22-895b-3bda3f41345d"/>
+			</line>
+			<line>
+				<reportElement x="4214" y="-1" width="1" height="44" uuid="f4ebc34a-8b45-4e5f-a3cc-836ad9cc0be7"/>
+			</line>
+			<line>
+				<reportElement x="3259" y="-1" width="1" height="44" uuid="f43a1959-87c9-4d42-84c0-f6e40f9e8428"/>
+			</line>
+			<line>
+				<reportElement x="2600" y="-1" width="1" height="44" uuid="ceb23bd2-2e76-406b-a4ba-11b87919fd74"/>
+			</line>
+			<line>
+				<reportElement x="2798" y="-2" width="1" height="44" uuid="4e375b8b-f19d-46de-9f68-7d93f36959f1"/>
+			</line>
+			<line>
+				<reportElement x="3019" y="-1" width="1" height="44" uuid="53ea3b2a-cba5-4980-9bf9-8f3d03b8e272"/>
+			</line>
+			<line>
+				<reportElement x="1893" y="-1" width="1" height="44" uuid="753f3a79-d00f-48ba-9fb9-47378971f75a"/>
+			</line>
+			<line>
+				<reportElement x="1406" y="-1" width="1" height="44" uuid="477e1459-3e3f-4aa4-874c-692645c0879f"/>
+			</line>
+			<line>
+				<reportElement x="1656" y="-1" width="1" height="44" uuid="8812fe3f-2ba9-4047-b7dd-078ecfbdb0d6"/>
+			</line>
+			<line>
+				<reportElement x="331" y="-1" width="1" height="44" uuid="d6ae7705-a335-430c-a8db-8eb37db55c67"/>
+			</line>
+			<line>
+				<reportElement x="1152" y="-1" width="1" height="44" uuid="6b48126c-4302-44e0-8b69-85590e3b0fc4"/>
+			</line>
+			<line>
+				<reportElement x="598" y="-1" width="1" height="44" uuid="51dacf52-65f2-4e4f-883e-825d34e4c4ee"/>
+			</line>
+			<line>
+				<reportElement x="884" y="-1" width="1" height="44" uuid="5669ade9-1bfc-4c0b-9013-acc0e8cca0a2"/>
+			</line>
+			<line>
+				<reportElement x="2123" y="-1" width="1" height="44" uuid="2f635c5f-0851-4b8d-8723-a0c6c17ed168"/>
+			</line>
+			<line>
+				<reportElement x="2375" y="-1" width="1" height="44" uuid="974e54fe-3401-4a4d-8641-12f99290a89f"/>
+			</line>
+			<line>
+				<reportElement x="2123" y="-44" width="1" height="44" uuid="b14b01b0-d4ca-4b31-97cd-694da0e3786b"/>
+			</line>
+			<line>
+				<reportElement x="2375" y="-44" width="1" height="44" uuid="657377f0-9da3-4d7c-986f-050ee9be3444"/>
+			</line>
+			<line>
+				<reportElement x="5" y="-1" width="1" height="44" uuid="87929978-bea9-4a67-9b4f-b07fce897397"/>
+			</line>
+			<textField pattern="#,##0.00">
+				<reportElement x="4606" y="0" width="166" height="33" uuid="76fdd36b-8c50-4bb4-a847-0616fe6be5a9"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="4411" y="2" width="174" height="40" uuid="fccb2dd5-31c8-43e9-beee-e6628c73a79c"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MUMBAI}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="4594" y="-1" width="1" height="44" uuid="1845c97d-fd44-4884-a2f9-c306c120d691"/>
+			</line>
+			<line>
+				<reportElement x="4787" y="-2" width="1" height="44" uuid="664a1e81-aefc-41e0-9b4a-7639c449fc0f"/>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="44">
+			<textField pattern="#,##0.00">
+				<reportElement x="3467" y="4" width="275" height="35" uuid="0b7dae7c-e563-4f28-aff5-5d27643e68fc"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{bazar_bhog}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="4606" y="7" width="166" height="36" uuid="83b54f2e-d83d-4ac1-b8e3-8fc5a96576a5"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1168" y="4" width="225" height="35" uuid="2177d32b-9c28-4453-af76-f3f3b042cdbf"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{kokarud}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="518" y="2" width="69" height="1" uuid="d9cc383b-3ea3-4a13-bc48-1007a367ffc9"/>
+				<textFieldExpression><![CDATA[$V{sarud}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3760" y="4" width="198" height="35" uuid="8d10624a-e1e8-41a4-8284-0471cbe81a0e"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{karanjfen}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="4411" y="7" width="169" height="35" uuid="ea89b26f-64d0-42fd-be5a-9f3ffa0909be"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{mumbai}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="1678" y="4" width="207" height="35" uuid="56bd1ead-7fae-43c2-a0b3-7c297435b594"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{malkapur}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3979" y="9" width="229" height="35" uuid="74f68826-3962-42b9-a729-b72e5bfd04b1"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{shendgewadi}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="3277" y="4" width="173" height="35" uuid="832001d7-d418-4310-85aa-60099ff02b8c"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{porle}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="4222" y="9" width="169" height="35" uuid="23c14200-5367-4335-865d-fda737af14b9"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{kotoli}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="3750" y="0" width="1" height="44" uuid="6fd64e3c-d58e-4f95-84d5-0c15286e2859"/>
+			</line>
+			<line>
+				<reportElement x="5" y="42" width="4783" height="1" uuid="e575f0f8-3682-4ac1-8ad9-704e6a735689"/>
+			</line>
+			<line>
+				<reportElement x="5" y="4" width="4782" height="1" uuid="28d1050d-4204-4e2a-a776-fd03870e14e7"/>
+			</line>
+			<staticText>
+				<reportElement x="65" y="2" width="247" height="37" uuid="c087a6e5-9945-4296-b52f-1792c78a381c"/>
+				<textElement textAlignment="Right">
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="3031" y="1" width="213" height="38" uuid="c6ee2f1c-d7c9-4270-9d5f-46b21fced4d8"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sondoli}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2807" y="4" width="200" height="35" uuid="5ecdfd9d-e07f-4641-9dc8-59fbd31a7b45"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{verle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2612" y="4" width="177" height="35" uuid="4664e4b4-7209-4936-9880-d9349f29dba4"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{arale}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2390" y="4" width="198" height="35" uuid="bff6cdf2-feac-465b-a93f-181ba55f53f1"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{kolhapur}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="2133" y="4" width="228" height="35" uuid="faefb207-8484-4a2f-8e2c-25e5a90d3c39"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{bambawade}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1906" y="3" width="209" height="36" uuid="f6f5c818-ce08-4f94-937f-82e7ea1f578f"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sarud}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1431" y="3" width="215" height="36" uuid="02b73184-a6f6-4db3-9c55-bf840de1621f"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{shahuwadi}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="907" y="4" width="231" height="35" uuid="a907c3e6-7477-4e0c-9a39-45ef20836e9b"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{kapashi}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="624" y="4" width="247" height="35" uuid="30736d6f-670b-4f8a-a6a8-63f0da5512bc"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{bhedasgaon}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="344" y="4" width="237" height="35" uuid="2a4af061-5caf-49be-b6dd-e21e78bf50d0"/>
+				<textElement textAlignment="Right">
+					<font size="22"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{headoffice}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="3969" y="0" width="1" height="44" uuid="716b97ae-481a-4ed2-99d6-07fc3b972e49"/>
+			</line>
+			<line>
+				<reportElement x="3459" y="0" width="1" height="44" uuid="d08c2cf0-606f-4745-98eb-461ad412b636"/>
+			</line>
+			<line>
+				<reportElement x="3259" y="0" width="1" height="44" uuid="8de29271-96d6-486c-8e54-c436b7ba8a70"/>
+			</line>
+			<line>
+				<reportElement x="4214" y="0" width="1" height="44" uuid="47f7d047-80d8-46a1-91b9-4dbb8185cd99"/>
+			</line>
+			<line>
+				<reportElement x="3019" y="0" width="1" height="44" uuid="c1dba643-3a67-4bce-a17a-f7003d2fd5ff"/>
+			</line>
+			<line>
+				<reportElement x="2798" y="-1" width="1" height="44" uuid="f335ae3d-ca85-42a2-88aa-6c4a8c037332"/>
+			</line>
+			<line>
+				<reportElement x="2600" y="0" width="1" height="44" uuid="efb8f2ad-acde-46fe-af69-bdac664b023f"/>
+			</line>
+			<line>
+				<reportElement x="4399" y="0" width="1" height="44" uuid="5ba757ff-fe7a-484d-a4de-67f11344281f"/>
+			</line>
+			<line>
+				<reportElement x="4594" y="0" width="1" height="44" uuid="ec6f9aa6-175b-42d1-bf91-c16f2a614e7e"/>
+			</line>
+			<line>
+				<reportElement x="1893" y="0" width="1" height="44" uuid="abfc5408-da8d-49a3-9301-50f7f2001ba6"/>
+			</line>
+			<line>
+				<reportElement x="1406" y="0" width="1" height="44" uuid="a4441b80-9528-4157-8875-50727c97217c"/>
+			</line>
+			<line>
+				<reportElement x="1656" y="0" width="1" height="44" uuid="43c47d49-f6f5-4938-9b80-030b8b4c0682"/>
+			</line>
+			<line>
+				<reportElement x="1152" y="0" width="1" height="44" uuid="09b46880-6887-4722-8549-e1beff3d33dc"/>
+			</line>
+			<line>
+				<reportElement x="884" y="0" width="1" height="44" uuid="c123ea29-8a8c-4f2b-aaf5-ea39832cc391"/>
+			</line>
+			<line>
+				<reportElement x="598" y="0" width="1" height="44" uuid="403b4fef-245b-4b5e-9c8b-da2b15bca48e"/>
+			</line>
+			<line>
+				<reportElement x="331" y="0" width="1" height="44" uuid="b600d6d4-6a76-41da-a428-a53c547afd0e"/>
+			</line>
+			<line>
+				<reportElement x="2123" y="0" width="1" height="44" uuid="1e7ec23e-0ed6-429a-b26b-7d437ff04919"/>
+			</line>
+			<line>
+				<reportElement x="2375" y="0" width="1" height="44" uuid="3fd4e198-c48d-4d11-85d1-39468467dd5b"/>
+			</line>
+			<line>
+				<reportElement x="5" y="-1" width="1" height="44" uuid="43162e32-df83-4104-ad3c-b71cab04b3cf"/>
+			</line>
+			<line>
+				<reportElement x="4787" y="0" width="1" height="44" uuid="4c02ce74-0385-43b2-83b1-37a5c66200e8"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

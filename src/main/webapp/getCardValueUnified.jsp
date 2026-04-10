@@ -209,7 +209,8 @@
                 } else if ("pending_shares".equals(cardId)) {
                     ps = conn.prepareStatement(
                         "SELECT COUNT(*) FROM SHARES.CERTIFICATE_MASTER " +
-                        "WHERE BR_CODE = ? AND STATUS = 'E'"
+                        "WHERE STATUS = 'E' " +
+                        "AND NVL(BR_CODE, 'NULL') = NVL(?, 'NULL')"
                     );
                     ps.setString(1, branchCode);
                     rs = ps.executeQuery();

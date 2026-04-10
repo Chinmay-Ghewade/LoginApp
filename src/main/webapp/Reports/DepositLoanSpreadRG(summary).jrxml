@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DepositLoanSpreadRG(summary)" language="groovy" pageWidth="569" pageHeight="842" columnWidth="529" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="282160c9-1c98-4324-81f6-1d30e8614050">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT
+    D_BRANCH_CODE,
+    DECODE(TRIM(D_SEQ_NO), '1001', '', '9999', '', TRIM(D_SEQ_NO)) AS D_SEQ_NO,
+    D_DESCRIPTION,
+    D_REP_CHAR,
+    D_BALANCE,
+    L_BRANCH_CODE,
+    DECODE(TRIM(L_SEQ_NO), '1001', '', TRIM(L_SEQ_NO)) AS L_SEQ_NO,
+    L_DESCRIPTION,
+    L_REP_CHAR,
+    L_BALANCE
+FROM
+    (
+        SELECT
+            BRANCH_CODE AS D_BRANCH_CODE,
+            SEQ_NO AS D_SEQ_NO,
+            DESCRIPTION AS D_DESCRIPTION,
+            REP_CHAR AS D_REP_CHAR,
+            BALANCE AS D_BALANCE
+        FROM
+            BANKDATA.FP_TD_TL_AVG
+        WHERE
+            REP_CHAR = 'D'
+            AND SEQ_NO = 1001
+
+        UNION
+
+        SELECT
+            BRANCH_CODE AS D_BRANCH_CODE,
+            SEQ_NO AS D_SEQ_NO,
+            DESCRIPTION AS D_DESCRIPTION,
+            REP_CHAR AS D_REP_CHAR,
+            BALANCE AS D_BALANCE
+        FROM
+            BANKDATA.FP_TD_TL_AVG
+        WHERE
+            REP_CHAR = 'Z'
+            AND SEQ_NO = 9999
+    ),
+    (
+        SELECT
+            BRANCH_CODE AS L_BRANCH_CODE,
+            SEQ_NO AS L_SEQ_NO,
+            DESCRIPTION AS L_DESCRIPTION,
+            REP_CHAR AS L_REP_CHAR,
+            BALANCE AS L_BALANCE
+        FROM
+            BANKDATA.FP_TD_TL_AVG
+        WHERE
+            REP_CHAR = 'L'
+            AND SEQ_NO = 1001
+    )
+ORDER BY
+    D_REP_CHAR]]>
+	</queryString>
+	<field name="D_BRANCH_CODE" class="java.lang.String"/>
+	<field name="D_SEQ_NO" class="java.lang.String"/>
+	<field name="D_DESCRIPTION" class="java.lang.String"/>
+	<field name="D_REP_CHAR" class="java.lang.String"/>
+	<field name="D_BALANCE" class="java.math.BigDecimal"/>
+	<field name="L_BRANCH_CODE" class="java.lang.String"/>
+	<field name="L_SEQ_NO" class="java.lang.String"/>
+	<field name="L_DESCRIPTION" class="java.lang.String"/>
+	<field name="L_REP_CHAR" class="java.lang.String"/>
+	<field name="L_BALANCE" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="46" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="44" width="527" height="1" uuid="5df5b4f7-35df-4151-b57b-ae06f4d3f96e"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-1" width="527" height="1" uuid="7de3c81a-835b-42f5-aaf2-0a53149f851e"/>
+			</line>
+			<line>
+				<reportElement x="526" y="-1" width="1" height="45" uuid="df49e6e0-d00c-435a-8bdd-4410919fecc5"/>
+			</line>
+			<line>
+				<reportElement x="272" y="0" width="1" height="44" uuid="49ff44f0-d845-4e27-bd17-62128dd75ec1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-1" width="1" height="46" uuid="a1690df0-c425-43e4-ba3e-22f234ae3743"/>
+			</line>
+			<line>
+				<reportElement x="1" y="23" width="525" height="1" uuid="63589e4a-9f79-4546-8709-4e26064798ae"/>
+			</line>
+			<line>
+				<reportElement x="413" y="24" width="1" height="20" uuid="ba3799d8-350a-4e87-84a0-5f371b3d2622"/>
+			</line>
+			<line>
+				<reportElement x="122" y="24" width="1" height="20" uuid="96a22bb9-df3b-411d-87d2-a77c84c1996a"/>
+			</line>
+			<staticText>
+				<reportElement x="272" y="0" width="254" height="23" uuid="a6a11e84-5589-4c1c-b84c-5c0062454576"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[LOAN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="414" y="24" width="112" height="20" uuid="48357832-27d3-404f-be1f-ec7eaae1aaee"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[BALANCE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="274" y="24" width="139" height="20" uuid="6838697d-dbd6-4bfd-8252-d0d63d51aca9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPTION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="123" y="24" width="149" height="20" uuid="994e01f8-03a9-4ee7-b777-1880b3b0daaf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[BALANCE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="0" width="276" height="23" uuid="253903c8-250d-4ee3-86a5-6aebad5cc3d0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEPOSIT
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="24" width="121" height="20" uuid="ad0e4c91-c854-4ab3-ba78-ed892efe9a4f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPTION]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField pattern=" #,##0.00">
+				<reportElement x="411" y="0" width="105" height="17" uuid="ba11abbb-6d34-4afb-8380-a7f444d9822f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{L_BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="281" y="0" width="135" height="17" uuid="f6904ce1-e326-4f50-b9ea-79b9ed5a2d0a"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{L_DESCRIPTION}]]></textFieldExpression>
+			</textField>
+			<textField pattern=" #,##0.00">
+				<reportElement x="130" y="-1" width="134" height="18" uuid="0dbfa14e-56ec-4a77-a773-b6cd167b3df0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{D_BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="7" y="0" width="107" height="17" uuid="876cec32-8c39-4d55-8d20-63c32be3d17a"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{D_DESCRIPTION}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="272" y="-22" width="1" height="39" uuid="35356f14-2f96-4c5e-a306-55afa5525039"/>
+			</line>
+			<line>
+				<reportElement x="122" y="-9" width="1" height="26" uuid="32a15f06-3da5-47ec-88f6-ef0f0a9d1a4b"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-9" width="1" height="26" uuid="65cc2cf1-9deb-41a1-9ad3-4501013b7215"/>
+			</line>
+			<line>
+				<reportElement x="413" y="-9" width="1" height="26" uuid="98ba3cff-107e-478d-b07d-18e72e00032e"/>
+			</line>
+			<line>
+				<reportElement x="526" y="-9" width="1" height="26" uuid="d5b8525f-48f0-481e-8ba0-c9f4c116b9c7"/>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="-3" width="526" height="1" uuid="3c437d0b-21d7-42aa-bde8-99f6886c2301"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

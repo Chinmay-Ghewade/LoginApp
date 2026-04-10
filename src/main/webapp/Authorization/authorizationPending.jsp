@@ -21,37 +21,37 @@
     <div class="dashboard-container">
         <div class="cards-wrapper">
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingCustomers.jsp', 'Authorization  > Customer List')">
-                <h3>Authorization Pending Customers</h3>
+                <h3>Customers</h3>
                 <p class="loading" id="pending-customers-value">Loading...</p>
             </div>
             
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingApplications.jsp', 'Authorization > Application List')">
-                <h3>Authorization Pending Application</h3>
+                <h3>Application</h3>
                 <p class="loading" id="pending-applications-value">Loading...</p>
             </div>
             
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingMasters.jsp', 'Authorization > Pending Masters')">
-                <h3>Authorization Pending Masters</h3>
+                <h3>Masters</h3>
                 <p class="loading" id="pending-masters-value">Loading...</p>
             </div>
             
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingUsers.jsp', 'Authorization > Pending Users')">
-                <h3>Authorization Pending Users</h3>
+                <h3>Users</h3>
                 <p class="loading" id="pending-users-value">Loading...</p>
             </div>
             
         <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingTransactionCash.jsp', 'Authorization > Pending Transaction (Cash)')">
-                <h3>Authorization Pending Transaction (Cash)</h3>
+                <h3>Transaction (Cash)</h3>
                 <p class="loading" id="pending-txn-cash-value">Loading...</p>
             </div>
             
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingTransactionTransfer.jsp', 'Authorization > Pending Transaction (Transfer)')">
-                <h3>Authorization Pending Transaction (Transfer)</h3>
+                <h3>Transaction (Transfer)</h3>
                 <p class="loading" id="pending-txn-transfer-value">Loading...</p>
             </div>
             
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingShares.jsp', 'Authorization > Pending Shares')">
-                <h3>Authorization Pending Shares </h3>
+                <h3>Shares </h3>
                 <p class="loading" id="pending-shares-value">Loading...</p>
             </div>
         </div>  <%-- this closing div was already there --%>
@@ -74,11 +74,10 @@
             loadCard('pending_masters', 'pending-masters-value', 'auth'),
             loadCard('pending_users', 'pending-users-value', 'auth'),
             loadCard('pending_txn_cash', 'pending-txn-cash-value', 'auth'),
-            loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth')
+            loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
+            loadCard('pending_shares', 'pending-shares-value', 'auth')
         ]);
-    }
-
-    
+    } 
     async function loadCard(cardId, elementId, cardType) {
         try {
             const response = await fetch('../getCardValueUnified.jsp?type=' + cardType + '&id=' + cardId);

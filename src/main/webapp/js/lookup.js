@@ -108,6 +108,25 @@ function selectAccount(code, name) {
 }
 
 // ===============================
+// 🔹 SELECT AREA
+// ===============================
+
+function selectArea(code, name) {
+
+    if (activeInput) {
+        activeInput.value = code;
+    } else {
+        let field = document.getElementById("area_code");
+        if (field) field.value = code;
+    }
+
+    let nameField = document.getElementById("areaName");
+    if (nameField) nameField.value = name;
+
+    closeLookup();
+}
+
+// ===============================
 // 🔥 NEW: LOAD GL BY ACCOUNT TYPE
 // ===============================
 function loadGL(accountType) {
@@ -259,6 +278,32 @@ function initGLAutoFetch() {
             .catch(err => console.error("GL Fetch Error:", err));
     });
 }
+
+// ===============================
+// 🔹 AUTO FETCH AREA NAME
+// ===============================
+
+function initAreaAutoFetch() {
+
+    let field = document.getElementById("area_code");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code) return;
+
+        fetch(contextPath + "/CommonLookupServlet?type=area&action=getName&code=" + encodeURIComponent(code))
+            .then(res => res.text())
+            .then(name => {
+                let desc = document.getElementById("areaName");
+                if (desc) desc.value = name || "Not Found";
+            });
+    });
+}
+
 // ===============================
 // 🔹 AUTO INIT
 // ===============================
@@ -266,6 +311,8 @@ window.addEventListener("DOMContentLoaded", function () {
     initBranchAutoFetch();
     initProductAutoFetch();
     loadBranchNameOnPageLoad();
-	initAccountAutoFetch();   // ✅ ADD THIS
+	initAccountAutoFetch();   
 	initGLAutoFetch(); 
+	initAreaAutoFetch();   // ✅ ADD THIS
+
 });

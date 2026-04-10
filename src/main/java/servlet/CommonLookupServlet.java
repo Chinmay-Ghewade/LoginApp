@@ -101,8 +101,10 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT NAME FROM GLOBALCONFIG.BANK WHERE BANK_CODE=?";
                 } else if ("product".equalsIgnoreCase(type)) {
                     query = "SELECT DESCRIPTION FROM HEADOFFICE.PRODUCT WHERE PRODUCT_CODE=?";
-                }    else if ("gl".equalsIgnoreCase(type)) {
-                    query = "SELECT DESCRIPTION FROM HEADOFFICE.GLACCOUNT WHERE GLACCOUNT_CODE=?";
+                } else if ("gl".equalsIgnoreCase(type)) {
+                    query = "SELECT DESCRIPTION FROM HEADOFFICE.GLACCOUNT WHERE GLACCOUNT_CODE=?";   
+                } else if ("area".equalsIgnoreCase(type)) {
+                	query = "SELECT AREA_DESCRIPTION FROM BRANCH.BRANCHAREA WHERE AREA_CODE=?";
                 } else {
                     out.print("");
                     return;
@@ -139,6 +141,8 @@ public class CommonLookupServlet extends HttpServlet {
                 listAccountType(conn, out);	
             } else if ("glByAccountType".equalsIgnoreCase(type)) {
                 listGLByAccountType(conn, out, request);
+            } else if ("area".equalsIgnoreCase(type)) {
+                listArea(conn, out);  
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -452,4 +456,39 @@ public class CommonLookupServlet extends HttpServlet {
 	    ps.close();
 	}
  
+ private void listArea(Connection conn, PrintWriter out) throws Exception {
+
+	 String sql = "SELECT AREA_CODE, AREA_DESCRIPTION FROM BRANCH.BRANCHAREA ORDER BY AREA_CODE";
+	 
+	    PreparedStatement ps = conn.prepareStatement(sql);
+	    ResultSet rs = ps.executeQuery();
+
+	    printTableHeader(out, "Select Area", "Area Code", "Name", false);
+
+	    while (rs.next()) {
+
+	        String code = rs.getString(1);   // safer
+	        String name = rs.getString(2);   // safer
+
+	        if (code == null) code = "";
+	        if (name == null) name = "";
+
+	        code = code.replace("'", "\\'");
+	        name = name.replace("'", "\\'");
+
+	        out.println("<tr class='lookup-row' onclick=\"selectArea('" 
+	        	    + code.replace("'", "") + "','" 
+	        	    + name.replace("'", "") + "')\">");
+
+	        out.println("<td>" + code + "</td>");
+	        out.println("<td>" + name + "</td>");
+	        out.println("</tr>");
+	    }
+
+	    printTableFooter(out);
+
+	    rs.close();
+	    ps.close();
+	}
 }
+

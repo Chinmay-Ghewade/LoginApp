@@ -1366,7 +1366,7 @@
 	      Land & Building <span class="lb-serial">1</span>
 	    </div>
 	
-	    <div class="lb-grid">
+	    <div class="form-grid">
 	      <div>
 	  <label>Security Type Code</label>
 	  <select name="securityTypeCode[]" required>
@@ -1559,7 +1559,7 @@
 	      Gold/Silver <span class="goldsilver-serial">1</span>
 	    </div>
 	
-	    <div class="goldsilver-grid">
+	    <div class="form-grid">
 	      <div>
 	        <label>Security Type Code</label>
 	        <select name="gsSecurityType[]" required>

@@ -102,7 +102,8 @@
                 <legend>Transaction Details</legend>
 
                 <!-- All Radio Button Groups in One Line -->
-                <div class="radio-row">
+                <div style="display:flex; align-items:center; justify-content:flex-start; gap:30px;">
+				<div class="radio-row">
                     <!-- Transaction Type -->
                     <div class="radio-group-inline">
                         <div class="label">Transaction Type:</div>
@@ -137,7 +138,7 @@
                         </div>
                     </div>
 
-                
+                </div>
 							
 			<!-- TRANSFER SPECIFIC FIELDS (Hidden by default) -->
 			<div id="transferFieldsSection" class="transfer-fields-section">
@@ -163,7 +164,7 @@
 			        </div>
 			        
 			        <!-- Tallied Message -->
-			        <div id="talliedMessage" style="display: none; color: green; font-weight: bold; font-size: 16px; margin-left: 20px;">
+			        <div id="talliedMessage" style="display: none; color: green; font-weight: bold; font-size: 15px;">
 			            ✓ Transaction tallied
 			        </div>
 			    </div>

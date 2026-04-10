@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProductDisplay" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c9ff11e8-cdef-44d4-84e2-d3a951e1ebd5">
+	<property name="ireport.zoom" value="1.9487171000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="account_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ROWNUM AS SR_NO,
+       PRODUCT_DATE,
+       NORMAL_PRODUCT,
+       PENAL_PRODUCT,
+       OVERDUE_PRODUCT
+FROM temp.dailyproducts
+WHERE ACCOUNT_CODE = $P{account_code}]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="PRODUCT_DATE" class="java.sql.Timestamp"/>
+	<field name="NORMAL_PRODUCT" class="java.math.BigDecimal"/>
+	<field name="PENAL_PRODUCT" class="java.math.BigDecimal"/>
+	<field name="OVERDUE_PRODUCT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="51" splitType="Stretch">
+			<subreport>
+				<reportElement x="1" y="0" width="463" height="51" uuid="54bedd24-bdfc-481f-821d-4f209f8ccbaf"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="36" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="77390f54-2a88-4944-a008-e1c845a8e488"/>
+			</line>
+			<line>
+				<reportElement x="0" y="33" width="555" height="1" uuid="b8b502df-9a22-46f4-9652-8bf7860d0aec"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="33" uuid="61788fe2-a7c9-4acf-b2a2-04cd727d61de"/>
+			</line>
+			<line>
+				<reportElement x="44" y="1" width="1" height="33" uuid="afe8e640-b119-4eda-8b69-1c681a79a94c"/>
+			</line>
+			<line>
+				<reportElement x="167" y="1" width="1" height="33" uuid="70eeecef-89e1-4c1d-a62a-b2df3ba1a253"/>
+			</line>
+			<line>
+				<reportElement x="298" y="1" width="1" height="33" uuid="b5108d19-8ad3-4007-910b-cc42ebfe5c8c"/>
+			</line>
+			<line>
+				<reportElement x="436" y="1" width="1" height="33" uuid="c2273597-bd46-4574-99e2-d36a8b9e5aed"/>
+			</line>
+			<line>
+				<reportElement x="555" y="1" width="1" height="33" uuid="58cdb791-c474-45d8-92c4-279ffc881b3d"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="44" height="32" uuid="aad0d8d3-a449-4133-9e39-8ebf037de7b2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[SR.NO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="46" y="1" width="121" height="32" uuid="77d5afae-bf39-49e3-b487-3dfd3cce7308"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[PRODUCT CODE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="168" y="1" width="130" height="32" uuid="c148e0e3-d923-4125-87a4-83cfdb730666"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ NORMAL PRODUCT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="299" y="1" width="138" height="32" uuid="ff7627d7-15d1-46f2-ab0e-9a530193bf73"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[PENAL PRODUCT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="437" y="1" width="118" height="32" uuid="cadfe7d1-e62a-44e7-8db6-5dc82ab8f9a1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[OVERDUE PRODUCT]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="0" width="43" height="20" uuid="dca46776-1030-4a84-bd11-d9a4aa98c308"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SR_NO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="50" y="0" width="112" height="19" uuid="f5e60c92-496a-478e-888d-5820fc4db98a"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PRODUCT_DATE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="172" y="0" width="119" height="20" uuid="75309d89-9130-494e-8e68-2ca56bf85ea9"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NORMAL_PRODUCT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="305" y="0" width="124" height="20" uuid="c6112acf-37fc-4f42-80b3-8f3d3e3f7b8b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PENAL_PRODUCT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="447" y="0" width="101" height="20" uuid="0902d303-5d96-4cbc-8170-d8f1d00e25a0"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OVERDUE_PRODUCT}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-17" width="1" height="35" uuid="ddbc01ea-b3ef-43a0-bb01-6203bb72d94a"/>
+			</line>
+			<line>
+				<reportElement x="44" y="-15" width="1" height="35" uuid="878682ec-8050-4eae-b6b3-0651a11d4f82"/>
+			</line>
+			<line>
+				<reportElement x="167" y="-8" width="1" height="27" uuid="84663f99-09e1-4a32-ba60-3d154b20e40d"/>
+			</line>
+			<line>
+				<reportElement x="298" y="-8" width="1" height="27" uuid="08e9813c-ef74-46e6-8626-46541a4a2bd2"/>
+			</line>
+			<line>
+				<reportElement x="436" y="-8" width="1" height="27" uuid="049ea663-3101-49ce-95b9-ca745307493c"/>
+			</line>
+			<line>
+				<reportElement x="555" y="-8" width="1" height="27" uuid="9d298ee0-5bb4-40a2-831b-bfe93552e709"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="435" y="10" width="80" height="20" uuid="d529965b-3ba7-44d5-b051-7207218c0c62"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="515" y="10" width="40" height="20" uuid="b0877bab-9958-4771-b3d4-7325aac7cac4"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="62" y="10" width="100" height="20" uuid="15568cb4-ca53-42b8-b8c5-b2608a9303fe"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="10" width="60" height="20" uuid="e8606ae8-6a15-4ba5-b65f-d81f6230e88e"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-1" width="555" height="1" uuid="8ef316d2-74c4-4fda-b2de-a49301f22b89"/>
+			</line>
+		</band>
+	</pageFooter>
+</jasperReport>

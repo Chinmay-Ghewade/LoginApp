@@ -50,7 +50,7 @@
             border: 2px solid #BBADED;
             border-radius: 12px;
             padding: 20px;
-            width :103% ;
+            width :104% ;
            margin: 0 0 0 -40px
         }
 
@@ -119,20 +119,21 @@
         .radio-row {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 17px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         .radio-group-inline {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-group-inline .label {
-            margin-bottom: 0;
-            margin-right: 10px;
-        }
+		    display: flex;
+		    flex-direction: column;
+		    align-items: flex-start;
+		}
+		
+		.radio-group-inline .label {
+		    margin-bottom: 12px;
+		    margin-right: 0px;
+		}
 
         .radio-buttons {
             display: flex;
@@ -710,43 +711,53 @@
 	    font-weight: 600;
 	    cursor: pointer;
 	}
-	.op-type-inline {
-    display: inline-flex;        /* 👈 forces single row */
-    align-items: center;         /* vertical center */
-    gap: 12px;                   /* space between label & dropdown */
-    white-space: nowrap;         /* 👈 NO wrapping */
-    font-size: 14px;
-	}
 	
-	.op-type-inline label {
-	    font-weight:bold;
-	}
 	
-	.op-type-inline select {
-	    min-width: 100px;
-	}
-	
-	.totals-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    white-space: nowrap;
-	}
-	
-	.total-label {
-	    font-weight: bold;
-	    font-size: 14px;
-	    color: #3D316F;
-	}
-	
-	.totals-row input[type="text"] {
-	    width: 95px;
-	    text-align: right;
-	    font-weight: bold;
-	    background-color: #eef2ff;
-	    border: 2px solid #C8B7F6;
-	    border-radius: 6px;
-	}
+		.op-type-inline {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: flex-start;
+		    white-space: normal;
+		    font-size: 13px;
+		}
+		
+		.op-type-inline label {
+		    font-weight: bold;
+		    color: #8066E8;
+		    font-size: 11px;
+		    letter-spacing: 0.5px;
+		    margin: 0;
+		    margin-bottom: 8px;
+		}
+		
+		.op-type-inline select {
+		    min-width: 100px;
+		    padding: 8px 10px;
+		    font-weight: bold;
+		}
+		
+		.totals-row {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    gap: 4px;
+		}
+		
+		.total-label {
+		    font-weight: bold;
+		    font-size: 11px;
+		    color: #8066E8;
+		    letter-spacing: 0.5px;
+		    text-align: center;
+		}
+		
+		.totals-row input[type="text"] {
+		    width: 80px !important;
+		    text-align: center;
+		    font-weight: bold;
+		    padding: 6px;
+		    font-size: 16px;
+		}
 	
 /* Loan fields compact table - FIXED WIDTH NO SCROLL */
 .loan-fields-section {
@@ -869,17 +880,26 @@
 	/* Transfer-specific fields section */
 	.transfer-fields-section {
 	    display: none;
-	    padding: 15px;
+	    padding: 12px 12px;
 	    background-color: #f0e6ff;
 	    border: 2px solid #C8B7F6;
 	    border-radius: 8px;
-	    margin: 20px auto 0; /* Added auto margins for horizontal centering */
-	    max-width: 900px; /* Optional: set max-width to control section width */
+	    width: auto;
+	    flex-shrink: 0;
 	}
 	
 	.transfer-fields-section.active {
-	    display: block;
-	    margin:auto; /* Maintain centering when active */
+	    display: flex;
+	    align-items: center;
+	}
+	
+	.transfer-field-group {
+	    display: flex;
+	    align-items: center;
+	    gap: 11px;
+	    flex-wrap: nowrap;
+	    justify-content: flex-end;
+	    white-space: nowrap;
 	}
 	
 	.transfer-fields-section .section-title {
@@ -891,14 +911,7 @@
 	    border-bottom: 2px solid #8066E8;
 	}
 	
-	.transfer-field-group {
-	    display: flex;
-	    align-items: center;
-	    gap: 20px;
-	    flex-wrap: wrap;
-	    justify-content: center; /* Centers the items within the flex container */
-	}
-	
+
 	/* Base select */
 	#opType {
 	    font-weight: bold;

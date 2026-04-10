@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CDRatio" language="groovy" pageWidth="570" pageHeight="792" columnWidth="530" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="847ebdaa-c8aa-46dd-9ba6-55af8c8162a7">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select SEQ_NO,DESCRIPTION,SUM(BALANCE) balance
+from bankdata.fp_cd_ratio  where SEQ_NO IN (51,52,05,06,99)
+AND date_as_on = $P{as_on_date}
+GROUP BY SEQ_NO,DESCRIPTION
+order by SEQ_NO]]>
+	</queryString>
+	<field name="SEQ_NO" class="java.lang.String"/>
+	<field name="DESCRIPTION" class="java.lang.String"/>
+	<field name="BALANCE" class="java.math.BigDecimal"/>
+	<title>
+		<band height="64" splitType="Stretch">
+			<subreport>
+				<reportElement x="-1" y="0" width="435" height="64" uuid="2377b5af-cdaa-4371-90a5-87cdba996bc8"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="32">
+			<staticText>
+				<reportElement x="1" y="5" width="303" height="26" uuid="2907c225-9f9a-432d-9074-99a87cf28422"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPTION]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="529" height="1" uuid="0b5123df-7585-4d13-88c5-474bb137088b"/>
+			</line>
+			<line>
+				<reportElement x="1" y="31" width="528" height="1" uuid="3843aa03-7979-4ec0-b7c2-ba4ab6fefe2d"/>
+			</line>
+			<line>
+				<reportElement x="529" y="1" width="1" height="30" uuid="d534ad2b-4e9c-42cd-b262-531168292b36"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="2" width="1" height="30" uuid="0304591b-0d0c-448a-9c09-3ae623c474ae"/>
+			</line>
+			<line>
+				<reportElement x="304" y="2" width="1" height="30" uuid="9cad9a28-34ee-4bf6-bb3e-1841412e3fbc"/>
+			</line>
+			<staticText>
+				<reportElement x="305" y="2" width="224" height="30" uuid="a3ab5d57-f201-409d-b21e-790e853c8152"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[BALANCE]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="39" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement x="305" y="0" width="224" height="33" uuid="f24aeb96-cb6c-456d-9e05-c5423035c414"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="-1" width="303" height="34" uuid="37b2e613-352f-4d4f-9354-3edcf7cfc093"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIPTION}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="529" y="-6" width="1" height="39" uuid="88df5428-d50d-4d68-887c-ae8b750eb141"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="-6" width="1" height="39" uuid="12a030bc-ae19-47e0-884f-ad1c272b8f8a"/>
+			</line>
+			<line>
+				<reportElement x="304" y="-6" width="1" height="39" uuid="ebea07bf-b948-4484-b2fd-7bad3cffb2ae"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="134">
+			<line>
+				<reportElement x="0" y="-6" width="529" height="1" uuid="377f01a5-0792-46d8-a8ac-bfe30fd48109"/>
+			</line>
+			<staticText>
+				<reportElement x="18" y="54" width="76" height="20" uuid="32555994-e98c-4707-aa62-6a845f6062bf"/>
+				<textElement textAlignment="Right">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[CD Ratio =]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="205" y="69" width="76" height="20" uuid="cc379677-541a-46b4-bc1b-216ba36ee37c"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="12" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Deposite]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="103" y="34" width="289" height="21" uuid="db3fbaff-384a-4f65-93d4-7a83f27cf4d2"/>
+				<textElement textAlignment="Left">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[ 	Loans - (Funds Available For Loan)  X 100                                                                                                                                    ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="103" y="60" width="301" height="1" uuid="2b85ca19-1c08-4c4a-b938-be729d98f850"/>
+			</line>
+			<staticText>
+				<reportElement x="27" y="111" width="388" height="20" uuid="5486c369-9cbf-4fc6-9946-d358cebfc19c"/>
+				<textElement textAlignment="Left">
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Funds Available For Loan = Funds A - Funds B .]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

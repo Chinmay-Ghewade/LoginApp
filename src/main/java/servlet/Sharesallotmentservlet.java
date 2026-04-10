@@ -107,12 +107,13 @@ public class Sharesallotmentservlet extends HttpServlet {
         int maxRows = term.isEmpty() ? 50 : 30;
 
         String sql =
-            "SELECT ACCOUNT_CODE, NAME " +
-            "FROM ACCOUNT.ACCOUNT " +
-            "WHERE ACCOUNT_CODE LIKE ? " +
-            "  AND SUBSTR(ACCOUNT_CODE, 5, 3) = ? " +
+            "SELECT A.ACCOUNT_CODE, A.NAME, P.DESCRIPTION AS PRODUCT_NAME " +
+            "FROM ACCOUNT.ACCOUNT A " +
+            "LEFT JOIN HEADOFFICE.PRODUCT P ON SUBSTR(A.ACCOUNT_CODE, 5, 3) = P.PRODUCT_CODE " +
+            "WHERE A.ACCOUNT_CODE LIKE ? " +
+            "  AND SUBSTR(A.ACCOUNT_CODE, 5, 3) = ? " +
             "  AND ROWNUM <= " + maxRows + " " +
-            "ORDER BY ACCOUNT_CODE";
+            "ORDER BY A.ACCOUNT_CODE";
 
         Connection con = null; PreparedStatement ps = null; ResultSet rs = null;
         try {
@@ -127,9 +128,11 @@ public class Sharesallotmentservlet extends HttpServlet {
             while (rs.next()) {
                 String code = clean(rs.getString("ACCOUNT_CODE"));
                 String name = jsonSafe(rs.getString("NAME"));
+                String prod = jsonSafe(rs.getString("PRODUCT_NAME")); // ← added
                 if (!first) sb.append(",");
                 sb.append("{\"code\":\"").append(code)
-                  .append("\",\"name\":\"").append(name).append("\"}");
+                  .append("\",\"name\":\"").append(name)
+                  .append("\",\"product\":\"").append(prod).append("\"}"); // ← added
                 first = false;
             }
             sb.append("]}");
