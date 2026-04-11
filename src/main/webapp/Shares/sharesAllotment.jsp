@@ -24,21 +24,23 @@
 
         .modules-row {
             display: grid;
-            grid-template-columns: 22% 40% 38%;
+            grid-template-columns: 22% 38% 40%;
             grid-template-rows: auto auto;
             align-items: start;
+            background-image: linear-gradient(to bottom, #dcdcf0, #dcdcf0), linear-gradient(to bottom, #dcdcf0, #dcdcf0);
+            background-size: 1px 100%, 1px 100%;
+            background-position: 22% 0, 60% 0;
+            background-repeat: no-repeat, no-repeat;
         }
         .module { display: contents; }
         .mod-block {
             padding: 8px 16px 16px;
             display: flex; flex-direction: column; gap: 10px;
-            border-right: 1px solid #dcdcf0;
         }
-        .module:last-of-type .mod-block { border-right: none; }
         .mod-title { font-size: .76rem; font-weight: 800; color: #1a1a6e; letter-spacing: .05em; text-transform: uppercase; padding-bottom: 7px; border-bottom: 1.5px solid #dcdcf0; }
 
-        .fg-row  { display: grid; grid-template-columns: 1fr 1fr;     gap: 8px; align-items: end; }
-        .fg-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: end; }
+        .fg-row  { display: grid; grid-template-columns: 1fr 1fr;     gap: 8px; align-items: start; }
+        .fg-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: start; }
         .fg { display: flex; flex-direction: column; gap: 4px; width: 100%; }
         .fg > label { font-size: .78rem; font-weight: 600; color: #1a1a6e; }
 
@@ -52,8 +54,28 @@
         input::placeholder { color: #a0a0c8; font-size: .82rem; }
 
         input.field-error { border-color: #cc2222 !important; box-shadow: 0 0 0 2px rgba(200,30,30,.18) !important; }
-        .field-error-msg { color: #cc2222; font-size: .70rem; margin-top: 2px; display: none; }
-        .field-error-msg.show { display: block; }
+
+        .field-error-msg {
+            display: block;
+            visibility: hidden;
+            color: #cc2222;
+            font-size: .82rem;
+            font-weight: 700;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .field-error-msg.show { visibility: visible; }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            15%      { transform: translateX(-6px); }
+            30%      { transform: translateX(6px); }
+            45%      { transform: translateX(-5px); }
+            60%      { transform: translateX(5px); }
+            75%      { transform: translateX(-3px); }
+            90%      { transform: translateX(3px); }
+        }
+        .shake { animation: shake .45s ease; }
 
         .hint-xs { color: #8080b0; font-size: .70rem; margin-top: 1px; }
         .ib { display: flex; gap: 5px; align-items: center; width: 100%; }
@@ -61,7 +83,6 @@
         .sw { position: relative; flex: 1; min-width: 0; }
         .sw input { width: 100%; }
 
-        /* ── SEARCH DROPDOWN ── */
         .sdrop {
             position: absolute; top: calc(100% + 4px); left: 0;
             width: 620px;
@@ -87,11 +108,18 @@
         .btn-dot { height: 34px; min-width: 38px; padding: 0 8px; background: #1a1a5e; color: #fff; border: none; border-radius: 6px; font-size: .88rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background .12s; }
         .btn-dot:hover { background: #252588; }
         .btn-dot:disabled { background: #a0a0c8; cursor: default; }
-        .btn-add { height: 34px; padding: 0 16px; background: #1a1a5e; color: #fff; border: none; border-radius: 6px; font-size: .84rem; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .12s; }
-        .btn-add:hover { background: #252588; }
+
+        .btn-add {
+            height: 34px; padding: 0 16px; background: #1a1a5e; color: #fff;
+            border: none; border-radius: 6px; font-size: .84rem; font-weight: 700;
+            font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            transition: background .12s, opacity .12s;
+        }
+        .btn-add:hover:not(:disabled) { background: #252588; }
+        .btn-add:disabled { background: #a0a0c8; cursor: not-allowed; opacity: 0.7; }
 
         .rg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .rg label { display: flex; align-items: center; gap: 7px; padding: 0 16px; height: 34px; border: 1.5px solid #c0c0e0; border-radius: 6px; font-size: .84rem; font-weight: 500; color: #1a1a6e; cursor: pointer; background: #fff; user-select: none; transition: border-color .15s, background .15s; }
+        .rg label { display: flex; align-items: center; gap: 7px; padding: 0 18px; height: 34px; border: 1.5px solid #c0c0e0; border-radius: 6px; font-size: .84rem; font-weight: 500; color: #1a1a6e; cursor: pointer; background: #fff; user-select: none; transition: border-color .15s, background .15s; }
         .rg label.on { border-color: #1a1a5e; background: #ebebff; font-weight: 700; }
         .rg input[type=radio] { width: 15px; height: 15px; accent-color: #1a1a5e; cursor: pointer; }
 
@@ -133,9 +161,22 @@
         .amt-red { color: #cc2222 !important; font-weight: 700 !important; }
 
         .act-bar { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
-        .btn-primary { height: 40px; padding: 0 48px; background: #1a1a5e; color: #fff; border: none; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
-        .btn-primary:hover { background: #12126e; }
-        .btn-primary:disabled { background: #b0b0d0; cursor: default; }
+
+        .btn-primary {
+            height: 40px; padding: 0 48px;
+            background: #1a1a5e; color: #fff;
+            border: none; border-radius: 8px;
+            font-size: .9rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: background .15s, opacity .15s;
+        }
+        .btn-primary:hover:not(:disabled) { background: #12126e; }
+        .btn-primary:disabled {
+            background: #b0b0c8;
+            color: #e8e8f0;
+            cursor: not-allowed;
+            opacity: 0.72;
+        }
+
         .btn-danger { height: 40px; padding: 0 28px; background: #fff; color: #cc2222; border: 1.5px solid #cc2222; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
         .btn-danger:hover { background: #fff5f5; }
 
@@ -152,7 +193,6 @@
         .btn-ok-grey { background: #909090 !important; }
         .btn-ok-grey:hover { background: #707070 !important; }
 
-        /* ── LOOKUP MODAL ── */
         .lk-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,60,.5); z-index: 9999; align-items: flex-start; justify-content: center; padding-top: 60px; }
         .lk-overlay.open { display: flex; }
         .lk-modal { background: #fff; border-radius: 8px; box-shadow: 0 8px 40px rgba(30,30,100,.25); width: 900px; max-width: 96vw; max-height: 82vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -173,8 +213,8 @@
         .lk-table tbody tr { border-bottom: 1.5px solid #ededf8; cursor: pointer; background: #fff; transition: background .1s; border-left: 4px solid #3535a0; }
         .lk-table tbody tr:hover { background: #f0f0ff; }
         .lk-table tbody td { padding: 13px 18px; font-size: .90rem; color: #222222; font-weight: 400; vertical-align: middle; border-right: none; }
-		.lk-table tbody td:nth-child(1) { white-space: nowrap; }
-		.lk-table tbody td:nth-child(3) { white-space: nowrap; }
+        .lk-table tbody td:nth-child(1) { white-space: nowrap; }
+        .lk-table tbody td:nth-child(3) { white-space: nowrap; }
         .lk-msg { text-align: center; padding: 28px; color: #9898c0; font-style: italic; font-size: .88rem; }
         .lk-err { text-align: center; padding: 16px; color: #b03030; font-size: .85rem; }
         .lk-hl  { background: #ffe000; border-radius: 2px; padding: 1px 3px; font-weight: 700; color: #1a1a6e; }
@@ -210,6 +250,7 @@
                                 <input type="text" id="accountCode" placeholder="Type last 3+ digits…" autocomplete="off"
                                        oninput="onAcInput(this.value)"
                                        onfocus="switchPanel('main')"
+                                       onblur="onAcBlur()"
                                        onkeydown="if(event.key==='Enter'){event.preventDefault();triggerFetch();}"/>
                                 <div class="sdrop" id="dropMain"></div>
                             </div>
@@ -228,9 +269,48 @@
                 </div>
             </div>
 
-            <!-- ══ MODULE 2: Payment Details ══ -->
+            <!-- ══ MODULE 2: Transaction Details ══ -->
             <div class="module">
                 <div class="mod-block" style="grid-column:2; grid-row:1;">
+                    <div class="mod-title">Transaction Details</div>
+                    <div class="fg-row3">
+                        <div class="fg">
+                            <label>No. of Shares</label>
+                            <input type="number" id="noShares" placeholder="Min. 1" min="1" step="1"
+                                   oninput="calcAmt(); clearFieldError('noShares','errNoShares');"
+                                   onblur="onSharesBlur()"/>
+                            <span class="field-error-msg" id="errNoShares">Required (min. 1)</span>
+                        </div>
+                        <div class="fg">
+                            <label>Face Value</label>
+                            <input type="number" id="faceVal" value="100" readonly/>
+                        </div>
+                        <div class="fg">
+                            <label>Amount</label>
+                            <input type="text" id="txnAmt" value="0.00" readonly class="amt-red"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="mod-block" style="grid-column:2; grid-row:2;">
+                    <div class="fg-row">
+                        <div class="fg">
+                            <label>Meeting Date</label>
+                            <input type="date" id="meetDate"
+                                   oninput="clearFieldError('meetDate','errMeetDate');"
+                                   onblur="onMeetDateBlur()"/>
+                            <span class="field-error-msg" id="errMeetDate">Meeting date is required</span>
+                        </div>
+                        <div class="fg">
+                            <label>Particular</label>
+                            <input type="text" id="particular" value="By Cash"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ MODULE 3: Payment Details ══ -->
+            <div class="module">
+                <div class="mod-block" style="grid-column:3; grid-row:1;">
                     <div class="mod-title">Payment Details</div>
                     <div class="fg-row">
                         <div class="fg">
@@ -250,13 +330,14 @@
                             <label>Amount</label>
                             <div class="ib">
                                 <input type="number" id="payAmt" placeholder="0.00" min="0"/>
-                                <button class="btn-add" type="button" onclick="doAddPayment()">Add</button>
+                                <button class="btn-add" id="btnAdd" type="button" onclick="doAddPayment()" disabled>Add</button>
                             </div>
-                            <span class="field-error-msg" id="errPayment">Please add a payment entry again</span>
+                              <span class="hint-xs">Click on add for payment entry</span>
+                            <span class="field-error-msg" id="errPayment">Please add a payment entry</span>
                         </div>
                     </div>
                 </div>
-                <div class="mod-block" style="grid-column:2; grid-row:2;">
+                <div class="mod-block" style="grid-column:3; grid-row:2;">
                     <div class="fg-row">
                         <div class="fg">
                             <label>Transfer A/c. Code</label>
@@ -275,43 +356,6 @@
                         <div class="fg">
                             <label>Transfer A/c. Name</label>
                             <input type="text" id="trName" readonly placeholder="—"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ══ MODULE 3: Transaction Details ══ -->
-            <div class="module">
-                <div class="mod-block" style="grid-column:3; grid-row:1; border-right:none;">
-                    <div class="mod-title">Transaction Details</div>
-                    <div class="fg-row3">
-                        <div class="fg">
-                            <label>No. of Shares</label>
-                            <input type="number" id="noShares" placeholder="Min. 1" min="1" step="1"
-                                   oninput="calcAmt(); clearFieldError('noShares','errNoShares');"/>
-                            <span class="field-error-msg" id="errNoShares">Required (min. 1)</span>
-                        </div>
-                        <div class="fg">
-                            <label>Face Value</label>
-                            <input type="number" id="faceVal" value="100" readonly/>
-                        </div>
-                        <div class="fg">
-                            <label>Amount</label>
-                            <input type="text" id="txnAmt" value="0.00" readonly class="amt-red"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="mod-block" style="grid-column:3; grid-row:2; border-right:none;">
-                    <div class="fg-row">
-                        <div class="fg">
-                            <label>Meeting Date</label>
-                            <input type="date" id="meetDate"
-                                   oninput="clearFieldError('meetDate','errMeetDate');"/>
-                            <span class="field-error-msg" id="errMeetDate">Meeting date is required</span>
-                        </div>
-                        <div class="fg">
-                            <label>Particular</label>
-                            <input type="text" id="particular" value="By Cash"/>
                         </div>
                     </div>
                 </div>
@@ -416,7 +460,7 @@
     </div><!-- /.box -->
 
     <div class="act-bar">
-        <button class="btn-primary" id="btnSave" type="button" onclick="doSave()">Save</button>
+        <button class="btn-primary" id="btnSave" type="button" onclick="doSave()" disabled>Save</button>
         <button class="btn-danger" type="button" onclick="doCancel()">Clear</button>
     </div>
 
@@ -499,6 +543,64 @@
         var _payEntries  = [];
         var _trEntries   = [];
         var _trLedgerMap = {};
+
+        /* ── Shake helper ── */
+        function shakeEl(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('shake');
+            void el.offsetWidth;
+            el.classList.add('shake');
+            el.addEventListener('animationend', function() { el.classList.remove('shake'); }, { once: true });
+        }
+
+        /* ── Button state manager ── */
+        function refreshButtonStates() {
+            var txnAmt  = parseFloat(document.getElementById('txnAmt').value) || 0;
+            var isT     = document.getElementById('modeTransfer').checked;
+
+            var paidTotal = 0;
+            if (isT) {
+                paidTotal = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
+            } else {
+                paidTotal = _payEntries.reduce(function(s, e) { return s + e.amount; }, 0);
+            }
+
+            var isMatched = txnAmt > 0 && Math.abs(paidTotal - txnAmt) < 0.001;
+            var canAdd    = txnAmt > 0 && !isMatched;
+
+            var btnAdd  = document.getElementById('btnAdd');
+            var btnSave = document.getElementById('btnSave');
+
+            if (btnAdd)  btnAdd.disabled  = !canAdd;
+            if (btnSave) btnSave.disabled = !isMatched;
+
+            if (isMatched) {
+                var pm = document.getElementById('errPayment');
+                if (pm) pm.classList.remove('show');
+            }
+        }
+
+        /* ── Blur handlers ── */
+        function onAcBlur() {
+            setTimeout(function() {
+                var val = document.getElementById('accountCode').value.trim();
+                if (!val) setFieldError('accountCode', 'errAccountCode');
+                else      clearFieldError('accountCode', 'errAccountCode');
+            }, 200);
+        }
+
+        function onSharesBlur() {
+            var val = parseInt(document.getElementById('noShares').value) || 0;
+            if (val < 1) setFieldError('noShares', 'errNoShares');
+            else         clearFieldError('noShares', 'errNoShares');
+        }
+
+        function onMeetDateBlur() {
+            var val = document.getElementById('meetDate').value.trim();
+            if (!val) setFieldError('meetDate', 'errMeetDate');
+            else      clearFieldError('meetDate', 'errMeetDate');
+        }
 
         function showToast(msg, duration) {
             duration = duration || 3500;
@@ -713,6 +815,7 @@
             }
             var pm = document.getElementById('errPayment');
             if (pm) pm.classList.remove('show');
+            refreshButtonStates();
         }
 
         function calcAmt() {
@@ -727,6 +830,7 @@
             clearPayments();
             clearTrEntries();
             hideTrPayDetails();
+            refreshButtonStates();
         }
 
         function calcNewLedgerBal() {
@@ -740,18 +844,58 @@
             var payAmt     = parseFloat(document.getElementById('payAmt').value);
             var txnAmt     = parseFloat(document.getElementById('txnAmt').value) || 0;
             var noShares   = parseInt(document.getElementById('noShares').value) || 0;
-            if (noShares < 1 || txnAmt <= 0 || isNaN(payAmt) || payAmt <= 0) return;
+
+            /* ── Guard: amount must be a positive number ── */
+            if (isNaN(payAmt) || payAmt <= 0) {
+                showToast('Please enter a valid amount greater than 0.');
+                return;
+            }
+
+            /* ── Guard: shares / txnAmt must be set first ── */
+            if (noShares < 1 || txnAmt <= 0) {
+                showToast('Please enter the number of shares first.');
+                return;
+            }
+
+            /* ── Guard: payment amount cannot exceed transaction amount ── */
+            if (payAmt > txnAmt + 0.001) {
+                showToast('Amount \u20B9' + payAmt.toFixed(2) + ' cannot exceed transaction amount \u20B9' + txnAmt.toFixed(2) + '.');
+                document.getElementById('payAmt').value = txnAmt.toFixed(2);
+                return;
+            }
+
             if (isTransfer) {
                 var trCode = document.getElementById('trCode').value.trim();
                 var trName = document.getElementById('trName').value.trim();
-                if (!trCode) return;
-                var mainCode = document.getElementById('accountCode').value.trim();
-                if (trCode === mainCode) return;
-                for (var i = 0; i < _trEntries.length; i++) {
-                    if (_trEntries[i].code === trCode) return;
+
+                /* ── Guard: transfer account must be selected ── */
+                if (!trCode) {
+                    showToast('Please select a Transfer Account Code.');
+                    return;
                 }
+
+                /* ── Guard: transfer account cannot be same as main account ── */
+                var mainCode = document.getElementById('accountCode').value.trim();
+                if (trCode === mainCode) {
+                    showToast('Transfer account cannot be the same as the main account.');
+                    return;
+                }
+
+                /* ── Guard: same transfer account cannot be added twice ── */
+                for (var i = 0; i < _trEntries.length; i++) {
+                    if (_trEntries[i].code === trCode) {
+                        showToast('This transfer account is already added.');
+                        return;
+                    }
+                }
+
+                /* ── Guard: cumulative transfer cannot exceed txnAmt ── */
                 var already = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
-                if (already + payAmt > txnAmt + 0.001) { showToast('Please enter sufficient amount'); return; }
+                if (already + payAmt > txnAmt + 0.001) {
+                    showToast('Total transfer amount cannot exceed \u20B9' + txnAmt.toFixed(2) + '.');
+                    return;
+                }
+
                 _trEntries.push({ code: trCode, name: trName, amount: payAmt });
                 sv('trCode', ''); sv('trName', '');
                 document.getElementById('payAmt').value = '';
@@ -759,16 +903,28 @@
                 hideTrPayDetails(); hideTrDetails(); renderTrTable();
                 document.getElementById('acDetails').style.display = 'none';
                 document.getElementById('errPayment').classList.remove('show');
+
             } else {
+                /* ── Guard: only one cash entry allowed ── */
+                if (_payEntries.length > 0) {
+                    showToast('Cash entry already added.');
+                    return;
+                }
+
+                /* ── Guard: cash amount must exactly equal txnAmt ── */
+                if (Math.abs(payAmt - txnAmt) > 0.001) {
+                    showToast('Cash amount must equal transaction amount \u20B9' + txnAmt.toFixed(2) + '.');
+                    return;
+                }
+
                 var particular = document.getElementById('particular').value.trim() || 'By Cash';
-                if (_payEntries.length > 0) return;
-                if (payAmt > txnAmt) { showToast('Please enter sufficient amount'); return; }
-                if (payAmt < txnAmt) return;
                 _payEntries.push({ mode: 'Cash', amount: payAmt, particular: particular });
                 renderPayTable();
                 document.getElementById('acDetails').style.display = 'none';
                 document.getElementById('errPayment').classList.remove('show');
             }
+
+            refreshButtonStates();
         }
 
         function renderTrTable() {
@@ -837,34 +993,63 @@
         function hideTrDetails() { document.getElementById('trDetails').classList.remove('show'); }
 
         function removeTrEntry(idx) {
-            _trEntries.splice(idx, 1); renderTrTable(); hideTrDetails();
+            _trEntries.splice(idx, 1);
+            renderTrTable();
+            hideTrDetails();
             if (_trEntries.length === 0) document.getElementById('acDetails').style.display = 'block';
+            refreshButtonStates();
         }
         function clearTrEntries() { _trEntries = []; _trLedgerMap = {}; renderTrTable(); hideTrDetails(); hideTrPayDetails(); }
-        function removePayment(idx) { _payEntries.splice(idx, 1); renderPayTable(); document.getElementById('acDetails').style.display = 'block'; }
+
+        function removePayment(idx) {
+            _payEntries.splice(idx, 1);
+            renderPayTable();
+            document.getElementById('acDetails').style.display = 'block';
+            refreshButtonStates();
+        }
         function clearPayments() { _payEntries = []; renderPayTable(); }
 
         function doSave() {
-            clearAllErrors();
-            var accountCode = document.getElementById('accountCode').value.trim();
-            var meetDate    = document.getElementById('meetDate').value.trim();
-            var noShares    = document.getElementById('noShares').value.trim();
-            var txnAmt      = parseFloat(document.getElementById('txnAmt').value) || 0;
-            var isT         = document.getElementById('modeTransfer').checked;
-            var particular  = document.getElementById('particular').value.trim();
-            if (!particular) particular = isT ? 'By Transfer' : 'By Cash';
+            var txnAmt = parseFloat(document.getElementById('txnAmt').value) || 0;
+            var isT    = document.getElementById('modeTransfer').checked;
+            var paidTotal = isT
+                ? _trEntries.reduce(function(s,e){return s+e.amount;},0)
+                : _payEntries.reduce(function(s,e){return s+e.amount;},0);
+            if (txnAmt <= 0 || Math.abs(paidTotal - txnAmt) >= 0.001) return;
+
             var hasError = false;
-            if (!accountCode)                         { setFieldError('accountCode','errAccountCode'); hasError = true; }
-            if (!noShares || parseInt(noShares) < 1)  { setFieldError('noShares','errNoShares');       hasError = true; }
-            if (!meetDate)                            { setFieldError('meetDate','errMeetDate');        hasError = true; }
-            if (isT) {
-                var t = _trEntries.reduce(function(s,e){return s+e.amount;},0);
-                if (_trEntries.length===0 || Math.abs(t-txnAmt)>=0.001) { document.getElementById('errPayment').classList.add('show'); hasError=true; }
+
+            var accountCode = document.getElementById('accountCode').value.trim();
+            if (!accountCode) {
+                setFieldError('accountCode', 'errAccountCode');
+                shakeEl('accountCode');
+                hasError = true;
             } else {
-                var p = _payEntries.reduce(function(s,e){return s+e.amount;},0);
-                if (_payEntries.length===0 || Math.abs(p-txnAmt)>=0.001) { document.getElementById('errPayment').classList.add('show'); hasError=true; }
+                clearFieldError('accountCode', 'errAccountCode');
             }
+
+            var noShares = parseInt(document.getElementById('noShares').value) || 0;
+            if (noShares < 1) {
+                setFieldError('noShares', 'errNoShares');
+                shakeEl('noShares');
+                hasError = true;
+            } else {
+                clearFieldError('noShares', 'errNoShares');
+            }
+
+            var meetDate = document.getElementById('meetDate').value.trim();
+            if (!meetDate) {
+                setFieldError('meetDate', 'errMeetDate');
+                shakeEl('meetDate');
+                hasError = true;
+            } else {
+                clearFieldError('meetDate', 'errMeetDate');
+            }
+
             if (hasError) return;
+
+            var particular = document.getElementById('particular').value.trim();
+            if (!particular) particular = isT ? 'By Transfer' : 'By Cash';
 
             var btnSave = document.getElementById('btnSave');
             btnSave.disabled = true; btnSave.textContent = 'Saving\u2026';
@@ -884,14 +1069,20 @@
                      + '&particular=' + encodeURIComponent(particular);
 
             ajaxPost(PAGE_URL + '?action=save', body, function(d) {
-                btnSave.textContent = 'Save'; btnSave.disabled = false;
+                btnSave.textContent = 'Save';
                 if (d && d.ok === true) {
                     document.getElementById('sc-certNo').textContent   = d.certNo   || '\u2014';
                     document.getElementById('sc-shares').textContent   = noShares;
                     document.getElementById('sc-scrollNo').textContent = d.scrollNo || '\u2014';
                     document.getElementById('successOverlay').classList.add('open');
-                } else { showError('Error', (d && d.error) ? d.error : 'Save failed.'); }
-            }, function() { btnSave.textContent='Save'; btnSave.disabled=false; showError('Network Error','Could not connect. Please try again.'); });
+                } else {
+                    btnSave.disabled = false;
+                    showError('Error', (d && d.error) ? d.error : 'Save failed.');
+                }
+            }, function() {
+                btnSave.disabled = false; btnSave.textContent = 'Save';
+                showError('Network Error','Could not connect. Please try again.');
+            });
         }
 
         function closeSuccess()    { document.getElementById('successOverlay').classList.remove('open'); clearForm(); }
@@ -910,6 +1101,7 @@
             document.getElementById('modeCash').checked = true;
             hideTrPayDetails(); onModeChange();
             _prev=''; _ledgerBal=0;
+            refreshButtonStates();
         }
         function clearAcDetails() {
             document.getElementById('acDetails').style.display = 'none';
@@ -1036,6 +1228,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('payAmt').readOnly = true;
+            refreshButtonStates();
             document.addEventListener('click', function(e) {
                 if (!e.target.closest || !e.target.closest('.sw')) {
                     document.getElementById('dropMain').classList.remove('on');

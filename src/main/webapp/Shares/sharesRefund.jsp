@@ -43,14 +43,33 @@
         input::placeholder { color: #a0a0c8; font-size: .82rem; }
 
         input.field-error { border-color: #cc2222 !important; box-shadow: 0 0 0 2px rgba(200,30,30,.18) !important; }
-        .field-error-msg { color: #cc2222; font-size: .70rem; margin-top: 2px; display: none; }
-        .field-error-msg.show { display: block; }
+
+        .field-error-msg {
+            display: block;
+            visibility: hidden;
+            color: #cc2222;
+            font-size: .82rem;
+            font-weight: 700;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .field-error-msg.show { visibility: visible; }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            15%      { transform: translateX(-6px); }
+            30%      { transform: translateX(6px); }
+            45%      { transform: translateX(-5px); }
+            60%      { transform: translateX(5px); }
+            75%      { transform: translateX(-3px); }
+            90%      { transform: translateX(3px); }
+        }
+        .shake { animation: shake .45s ease; }
 
         .hint-xs { color: #8080b0; font-size: .70rem; margin-top: 1px; }
         .ib { display: flex; gap: 5px; align-items: center; width: 100%; }
         .ib input { flex: 1; min-width: 0; }
 
-        /* ── Search Wrapper & Dropdown ── */
         .sw { position: relative; flex: 1; min-width: 0; }
         .sw input { width: 100%; }
         .sdrop {
@@ -87,8 +106,17 @@
         .btn-dot { height: 32px; min-width: 36px; padding: 0 8px; background: #3535a0; color: #fff; border: none; border-radius: 6px; font-size: .88rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background .12s; }
         .btn-dot:hover { background: #252588; }
         .btn-dot:disabled { background: #a0a0c8; cursor: default; }
-        .btn-add { height: 32px; padding: 0 16px; background: #3535a0; color: #fff; border: none; border-radius: 6px; font-size: .82rem; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .12s; }
-        .btn-add:hover { background: #252588; }
+
+        /* ── Add button: active vs disabled states ── */
+        .btn-add {
+            height: 32px; padding: 0 16px; background: #3535a0; color: #fff;
+            border: none; border-radius: 6px; font-size: .82rem; font-weight: 700;
+            font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            transition: background .12s, opacity .12s;
+        }
+        .btn-add:hover:not(:disabled) { background: #252588; }
+        .btn-add:disabled { background: #a0a0c8; cursor: not-allowed; opacity: 0.7; }
+
         .rg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .rg label { display: flex; align-items: center; gap: 9px; padding: 0 25px; height: 32px; border: 1.5px solid #c0c0e0; border-radius: 6px; font-size: .84rem; font-weight: 500; color: #1a1a6e; cursor: pointer; background: #fff; user-select: none; transition: border-color .15s, background .15s; }
         .rg label.on { border-color: #3535a0; background: #ebebff; font-weight: 700; }
@@ -129,9 +157,23 @@
         .amt-red { color: #b03030 !important; font-weight: 700 !important; }
 
         .act-bar { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
-        .btn-primary { height: 40px; padding: 0 48px; background: #1a1a6e; color: #fff; border: none; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
-        .btn-primary:hover { background: #12126e; }
-        .btn-primary:disabled { background: #a0a0c8; cursor: default; }
+
+        /* ── Save button: two visual states ── */
+        .btn-primary {
+            height: 40px; padding: 0 48px;
+            background: #1a1a6e; color: #fff;
+            border: none; border-radius: 8px;
+            font-size: .9rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: background .15s, opacity .15s;
+        }
+        .btn-primary:hover:not(:disabled) { background: #12126e; }
+        .btn-primary:disabled {
+            background: #b0b0c8;
+            color: #e8e8f0;
+            cursor: not-allowed;
+            opacity: 0.72;
+        }
+
         .btn-danger { height: 40px; padding: 0 28px; background: #fff; color: #cc2222; border: 1.5px solid #cc2222; border-radius: 8px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .12s; }
         .btn-danger:hover { background: #fff5f5; }
 
@@ -219,20 +261,22 @@
                 </div>
             </div>
             <div class="cell">
-                <div class="cell-inner">
+                <div class="cell-inner" style="align-items:flex-start;">
                     <div class="fg">
                         <label>Mode of Payment</label>
                         <div class="rg">
                             <label id="lblTransfer"><input type="radio" name="mop" value="Transfer" id="modeTransfer" onchange="onModeChange()"/>Transfer</label>
                             <label id="lblCash" class="on"><input type="radio" name="mop" value="Cash" id="modeCash" onchange="onModeChange()" checked/>Cash</label>
                         </div>
+                        <span class="field-error-msg" style="visibility:hidden;">&#8203;</span>
                     </div>
                     <div class="fg">
                         <label>Amount</label>
-                        <div class="ib">
+                        <div class="ib" id="payAmtWrap">
                             <input type="number" id="payAmt" placeholder="0.00" min="0" step="0.01"/>
-                            <button class="btn-add" type="button" onclick="doAddPayment()">Add</button>
+                            <button class="btn-add" id="btnAdd" type="button" onclick="doAddPayment()" disabled>Add</button>
                         </div>
+                        <span class="hint-xs">Click on add for payment entry</span>
                         <span class="field-error-msg" id="errPayment">Please add a payment entry</span>
                     </div>
                 </div>
@@ -247,7 +291,8 @@
                 <div class="cell-inner">
                     <div class="fg">
                         <label>Particular</label>
-                        <input type="text" id="particular" placeholder="Enter particular"/>
+                        <input type="text" id="particular" placeholder="Enter particular"
+                               oninput="clearFieldError('particular','errParticular');"/>
                         <span class="field-error-msg" id="errParticular">Particular is required</span>
                     </div>
                      <div class="fg">
@@ -257,7 +302,6 @@
                     </div>
                 </div>
             </div>
-            <!-- id="trCell" added so JS can measure the cell's right edge -->
             <div class="cell" id="trCell">
                 <div class="cell-inner" style="align-items:flex-end;">
                     <div class="fg" style="flex:1;min-width:0;">
@@ -347,7 +391,7 @@
     </div>
 
     <div class="act-bar">
-        <button class="btn-primary" type="button" onclick="doSave()">Save</button>
+        <button class="btn-primary" id="btnSave" type="button" onclick="doSave()" disabled>Save</button>
         <button class="btn-danger"  type="button" onclick="doCancel()">Clear</button>
     </div>
 
@@ -404,24 +448,56 @@
         var _maxRefundAmt = 0, _maxShares = 0;
         var _payEntries = [], _trEntries = [], _trLedgerMap = {};
 
+        /* ── Shake helper ── */
+        function shakeEl(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('shake');
+            void el.offsetWidth;
+            el.classList.add('shake');
+            el.addEventListener('animationend', function() { el.classList.remove('shake'); }, { once: true });
+        }
+
+        /* ── Button state manager (mirrors sharesAllotment) ── */
+        function refreshButtonStates() {
+            var maxAmt = _maxRefundAmt;
+            var isT    = document.getElementById('modeTransfer').checked;
+
+            var paidTotal = 0;
+            if (isT) {
+                paidTotal = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
+            } else {
+                paidTotal = _payEntries.reduce(function(s, e) { return s + e.amount; }, 0);
+            }
+
+            var isMatched = maxAmt > 0 && Math.abs(paidTotal - maxAmt) < 0.001;
+            var canAdd    = maxAmt > 0 && !isMatched;
+
+            var btnAdd  = document.getElementById('btnAdd');
+            var btnSave = document.getElementById('btnSave');
+
+            if (btnAdd)  btnAdd.disabled  = !canAdd;
+            if (btnSave) btnSave.disabled = !isMatched;
+
+            // Clear payment error hint once matched
+            if (isMatched) {
+                var pm = document.getElementById('errPayment');
+                if (pm) pm.classList.remove('show');
+            }
+        }
+
         /*
          * positionDropTr — dynamically aligns #dropTr's RIGHT edge to the
-         * RIGHT edge of #trCell (the Transaction Details cell), so the
-         * dropdown never overflows the page regardless of screen width.
+         * RIGHT edge of #trCell, so the dropdown never overflows the page.
          */
         function positionDropTr() {
             var drop     = document.getElementById('dropTr');
             var sw       = document.getElementById('trCode').closest('.sw');
             var cell     = document.getElementById('trCell');
-            var dropW    = 620; /* must match width in .sdrop CSS */
-
+            var dropW    = 620;
             var swLeft    = sw.getBoundingClientRect().left;
             var cellRight = cell.getBoundingClientRect().right;
-
-            /* How far left from the .sw origin the drop must start so its
-               right edge lines up with the cell's right edge */
             var leftOffset = cellRight - swLeft - dropW;
-
             drop.style.left  = leftOffset + 'px';
             drop.style.right = 'auto';
         }
@@ -436,11 +512,22 @@
             setTimeout(function() { if (t.parentNode) t.remove(); }, duration);
         }
 
-        function setFieldError(inputId, msgId) { var el=document.getElementById(inputId); var mg=document.getElementById(msgId); if(el) el.classList.add('field-error'); if(mg) mg.classList.add('show'); }
-        function clearFieldError(inputId, msgId) { var el=document.getElementById(inputId); var mg=document.getElementById(msgId); if(el) el.classList.remove('field-error'); if(mg) mg.classList.remove('show'); }
+        function setFieldError(inputId, msgId) {
+            var el = document.getElementById(inputId);
+            var mg = document.getElementById(msgId);
+            if (el) el.classList.add('field-error');
+            if (mg) mg.classList.add('show');
+        }
+        function clearFieldError(inputId, msgId) {
+            var el = document.getElementById(inputId);
+            var mg = document.getElementById(msgId);
+            if (el) el.classList.remove('field-error');
+            if (mg) mg.classList.remove('show');
+        }
         function clearAllErrors() {
             [['accountCode','errAccountCode'],['meetDate','errMeetDate'],['particular','errParticular']].forEach(function(p){ clearFieldError(p[0],p[1]); });
-            var pm=document.getElementById('errPayment'); if(pm) pm.classList.remove('show');
+            var pm = document.getElementById('errPayment');
+            if (pm) pm.classList.remove('show');
         }
 
         function showMainPanel() {
@@ -463,10 +550,7 @@
             clearTimeout(_timer);
             var drop = document.getElementById(dropId);
             if (!val) { drop.classList.remove('on'); return; }
-
-            /* Position #dropTr dynamically before it becomes visible */
             if (dropId === 'dropTr') positionDropTr();
-
             if (val.length < SEARCH_MIN) { drop.innerHTML='<div class="sr-hint">Type at least '+SEARCH_MIN+' digits\u2026</div>'; drop.classList.add('on'); return; }
             drop.innerHTML = '<div class="sr-hint">Searching\u2026</div>';
             drop.classList.add('on');
@@ -564,6 +648,7 @@
                     _maxRefundAmt=parseFloat(d.ta)||0; _maxShares=parseInt(d.ts,10)||0;
                     var payEl=document.getElementById('payAmt');
                     if (payEl && _maxRefundAmt>0) { payEl.value=_maxRefundAmt.toFixed(2); payEl.max=_maxRefundAmt; }
+                    refreshButtonStates(); // ← unlock Add once shares are loaded
                 } else { clearShareFields(); }
             }, function(){ hideSpin('spinMain'); clearShareFields(); });
         }
@@ -576,6 +661,7 @@
             clearFieldError('particular','errParticular');
             if (!isT) { sv('trCode',''); sv('trName',''); document.getElementById('dropTr').classList.remove('on'); hideTrDetails(); clearTrEntries(); showMainPanel(); }
             else { clearPayments(); }
+            refreshButtonStates(); // ← re-evaluate after mode switch
         }
 
         function doAddPayment() {
@@ -609,6 +695,7 @@
                 document.getElementById('acDetails').style.display='none';
                 document.getElementById('errPayment').classList.remove('show');
             }
+            refreshButtonStates(); // ← update Add/Save after every successful entry
         }
 
         function renderPayTable() {
@@ -663,34 +750,91 @@
             ['trRowAccCode','trRowAccName','trRowGlCode','trRowGlName','trRowCustId','trRowLedger','trRowAvail','trRowNewLedger'].forEach(function(id){ var el=document.getElementById(id); if(el){el.value='';el.classList.remove('bal-pos','bal-neg');} });
         }
 
-        function removeTrEntry(idx) { _trEntries.splice(idx,1); renderTrTable(); hideTrRowDetails(); if(_trEntries.length===0) document.getElementById('acDetails').style.display='block'; }
+        function removeTrEntry(idx) {
+            _trEntries.splice(idx,1); renderTrTable(); hideTrRowDetails();
+            if(_trEntries.length===0) document.getElementById('acDetails').style.display='block';
+            refreshButtonStates(); // ← re-evaluate after removal
+        }
         function clearTrEntries() { _trEntries=[]; _trLedgerMap={}; renderTrTable(); hideTrRowDetails(); hideTrDetails(); }
-        function removePayment(idx) { _payEntries.splice(idx,1); renderPayTable(); document.getElementById('acDetails').style.display='block'; }
+        function removePayment(idx) {
+            _payEntries.splice(idx,1); renderPayTable();
+            document.getElementById('acDetails').style.display='block';
+            refreshButtonStates(); // ← re-evaluate after removal
+        }
         function clearPayments() { _payEntries=[]; renderPayTable(); }
 
         function doSave() {
             clearAllErrors();
-            var acCode=document.getElementById('accountCode').value.trim();
-            var meetDate=document.getElementById('meetDate').value.trim();
-            var particular=document.getElementById('particular').value.trim();
-            var isT=document.getElementById('modeTransfer').checked;
-            var maxAmt=_maxRefundAmt, hasError=false;
-            if (!acCode) { setFieldError('accountCode','errAccountCode'); hasError=true; }
-            if (!meetDate) { setFieldError('meetDate','errMeetDate'); hasError=true; }
-            if (!particular) { setFieldError('particular','errParticular'); hasError=true; }
-            if (isT) { var t=_trEntries.reduce(function(s,e){return s+e.amount;},0); if(_trEntries.length===0||(maxAmt>0&&Math.abs(t-maxAmt)>=0.001)){document.getElementById('errPayment').classList.add('show');hasError=true;} }
-            else { var p=_payEntries.reduce(function(s,e){return s+e.amount;},0); if(_payEntries.length===0||(maxAmt>0&&Math.abs(p-maxAmt)>=0.001)){document.getElementById('errPayment').classList.add('show');hasError=true;} }
+            var acCode     = document.getElementById('accountCode').value.trim();
+            var meetDate   = document.getElementById('meetDate').value.trim();
+            var particular = document.getElementById('particular').value.trim();
+            var isT        = document.getElementById('modeTransfer').checked;
+            var maxAmt     = _maxRefundAmt;
+            var hasError   = false;
+
+            if (!acCode) {
+                setFieldError('accountCode', 'errAccountCode');
+                shakeEl('accountCode');
+                hasError = true;
+            }
+            if (!meetDate) {
+                setFieldError('meetDate', 'errMeetDate');
+                shakeEl('meetDate');
+                hasError = true;
+            }
+            if (!particular) {
+                setFieldError('particular', 'errParticular');
+                shakeEl('particular');
+                hasError = true;
+            }
+            if (isT) {
+                var t = _trEntries.reduce(function(s,e){return s+e.amount;},0);
+                if (_trEntries.length===0 || (maxAmt>0 && Math.abs(t-maxAmt)>=0.001)) {
+                    document.getElementById('errPayment').classList.add('show');
+                    shakeEl('payAmtWrap');
+                    hasError = true;
+                }
+            } else {
+                var p = _payEntries.reduce(function(s,e){return s+e.amount;},0);
+                if (_payEntries.length===0 || (maxAmt>0 && Math.abs(p-maxAmt)>=0.001)) {
+                    document.getElementById('errPayment').classList.add('show');
+                    shakeEl('payAmtWrap');
+                    hasError = true;
+                }
+            }
             if (hasError) return;
-            if (!particular) particular=isT?'By Transfer':'By Cash';
-            var trCodes='[]';
-            if (isT && _trEntries.length>0) { var arr=[]; for(var i=0;i<_trEntries.length;i++) arr.push('{"code":"'+xq(_trEntries[i].code)+'","amount":'+_trEntries[i].amount+'}'); trCodes='['+arr.join(',')+']'; }
-            var body='accountCode='+encodeURIComponent(acCode)+'&meetDate='+encodeURIComponent(meetDate)+'&noShares='+encodeURIComponent(_maxShares)+'&mode='+encodeURIComponent(isT?'Transfer':'Cash')+'&trCodes='+encodeURIComponent(trCodes)+'&particular='+encodeURIComponent(particular);
-            var btnSave=document.querySelector('.btn-primary'); btnSave.disabled=true; btnSave.textContent='Saving…'; btnSave.style.background='#a0a0c8'; btnSave.style.cursor='default';
+
+            if (!particular) particular = isT ? 'By Transfer' : 'By Cash';
+            var trCodes = '[]';
+            if (isT && _trEntries.length>0) {
+                var arr = [];
+                for (var i=0; i<_trEntries.length; i++)
+                    arr.push('{"code":"'+xq(_trEntries[i].code)+'","amount":'+_trEntries[i].amount+'}');
+                trCodes = '['+arr.join(',')+']';
+            }
+            var body = 'accountCode='+encodeURIComponent(acCode)
+                     + '&meetDate='  +encodeURIComponent(meetDate)
+                     + '&noShares='  +encodeURIComponent(_maxShares)
+                     + '&mode='      +encodeURIComponent(isT?'Transfer':'Cash')
+                     + '&trCodes='   +encodeURIComponent(trCodes)
+                     + '&particular='+encodeURIComponent(particular);
+
+            var btnSave = document.getElementById('btnSave');
+            btnSave.disabled=true; btnSave.textContent='Saving\u2026';
+
             ajaxPost(PAGE_URL+'?action=save', body, function(d) {
-            	btnSave.disabled=false; btnSave.textContent='Save'; btnSave.style.background=''; btnSave.style.cursor='';
-                if (d && d.ok===true) { document.getElementById('sc-scrollNo').textContent=d.scrollNo||'\u2014'; document.getElementById('successOverlay').classList.add('open'); }
-                else { showToast((d&&d.error)?d.error:'Save failed.'); }
-            }, function(){ btnSave.disabled=false; btnSave.textContent='Save'; btnSave.style.background=''; btnSave.style.cursor=''; showToast('Network error. Please try again.'); });
+                btnSave.textContent='Save';
+                if (d && d.ok===true) {
+                    document.getElementById('sc-scrollNo').textContent = d.scrollNo || '\u2014';
+                    document.getElementById('successOverlay').classList.add('open');
+                } else {
+                    btnSave.disabled=false;
+                    showToast((d&&d.error)?d.error:'Save failed.');
+                }
+            }, function(){
+                btnSave.disabled=false; btnSave.textContent='Save';
+                showToast('Network error. Please try again.');
+            });
         }
 
         function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); clearForm(); }
@@ -706,6 +850,7 @@
             document.getElementById('dropTr').classList.remove('on');
             document.getElementById('modeCash').checked=true;
             onModeChange(); _prev=''; _ledgerBal=0; _maxRefundAmt=0; _maxShares=0;
+            refreshButtonStates();
         }
 
         function clearAcDetails() {
@@ -714,13 +859,17 @@
             _ledgerBal=0; _maxRefundAmt=0; _maxShares=0; sv('accountName','');
             ['glCode','glName','custId'].forEach(function(id){ var el=document.getElementById(id); if(el){el.value='';el.classList.remove('bal-pos','bal-neg');} });
             clearShareFields(); clearTrEntries(); clearPayments();
+            refreshButtonStates(); // ← reset buttons when account is cleared
         }
+
         function clearTrDetails() { hideTrDetails(); }
+
         function clearShareFields() {
             sv('totalNoShares','0'); sv('totalFaceValue','0.00'); sv('totalAmount','0.00');
             sv('certNo',''); sv('memNo',''); sv('formNo','');
             var payEl=document.getElementById('payAmt'); if(payEl){payEl.value='';payEl.removeAttribute('max');}
             _maxRefundAmt=0; _maxShares=0;
+            refreshButtonStates(); // ← reset buttons when shares are cleared
         }
 
         var _lkTarget='main', _lkTimer=null;
@@ -800,6 +949,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('particular').value='By Cash';
+            refreshButtonStates(); // ← correct initial state on page load
             document.addEventListener('click', function(e) {
                 if (!e.target.closest||!e.target.closest('.sw')) {
                     document.getElementById('dropMain').classList.remove('on');
@@ -807,7 +957,6 @@
                 }
             });
             document.addEventListener('keydown', function(e){ if(e.key==='Escape') lkClose(); });
-            /* Re-position dropTr if window is resized while it is open */
             window.addEventListener('resize', function() {
                 var drop = document.getElementById('dropTr');
                 if (drop.classList.contains('on')) positionDropTr();

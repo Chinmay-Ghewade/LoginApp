@@ -228,14 +228,6 @@
 <!-- Title -->
 <div class="page-title">Dividend Calculation</div>
 
-<!-- Meta bar -->
-<div class="meta-bar">
-  <span>BANK CODE : <b><%= bankCode %></b></span>
-  <span>BRANCH CODE : <b><%= branchCode %></b></span>
-  <span>USER : <b><%= user %></b></span>
-  <span>DATE : <b><%= today %></b></span>
-</div>
-
 <!-- ════════════ REPORT DETAILS ════════════ -->
 <div class="section-card">
   <span class="card-title">Report Details</span>
