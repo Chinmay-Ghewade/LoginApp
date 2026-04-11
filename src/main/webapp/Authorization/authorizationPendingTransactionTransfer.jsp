@@ -54,6 +54,24 @@
     font-weight: bold;
     padding: 0 15px;
 }
+
+.view-details-btn {
+    background: #2b0d73;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s;
+}
+
+.view-details-btn:hover {
+    background: #1a0847;
+}
 </style>
 
 <script>
@@ -78,7 +96,6 @@ function searchTable() {
                    t.accountName.toLowerCase().indexOf(filter) > -1 ||
                    t.glAccountName.toLowerCase().indexOf(filter) > -1 ||
                    t.forAccountCode.toLowerCase().indexOf(filter) > -1 ||
-                   t.userId.toLowerCase().indexOf(filter) > -1 ||
                    t.particular.toLowerCase().indexOf(filter) > -1;
         });
     }
@@ -114,8 +131,8 @@ function displayTransactions(transactions, page) {
             "<td>" + t.glAccountName + "</td>" +
             "<td>" + t.forAccountCode + "</td>" +
             "<td style='text-align:right;'>" + t.amount + "</td>" +
-            "<td>" + t.userId + "</td>" +
-            "<td>" + t.particular + "</td>";
+            "<td>" + t.particular + "</td>" +
+            "<td><button class='view-details-btn' onclick=\"viewTransaction('" + t.scrollNumber + "', '" + t.subscrollNumber + "', 'TRANSFER'); return false;\">View Details</button></td>";
     }
 
     updatePaginationControls(transactions.length, page);
@@ -138,7 +155,6 @@ function previousPage() {
                t.accountName.toLowerCase().indexOf(filter) > -1 ||
                t.glAccountName.toLowerCase().indexOf(filter) > -1 ||
                t.forAccountCode.toLowerCase().indexOf(filter) > -1 ||
-               t.userId.toLowerCase().indexOf(filter) > -1 ||
                t.particular.toLowerCase().indexOf(filter) > -1;
     }) : allTransactions;
 
@@ -154,12 +170,22 @@ function nextPage() {
                t.accountName.toLowerCase().indexOf(filter) > -1 ||
                t.glAccountName.toLowerCase().indexOf(filter) > -1 ||
                t.forAccountCode.toLowerCase().indexOf(filter) > -1 ||
-               t.userId.toLowerCase().indexOf(filter) > -1 ||
                t.particular.toLowerCase().indexOf(filter) > -1;
     }) : allTransactions;
 
     var totalPages = Math.ceil(transactions.length / recordsPerPage);
     if (currentPage < totalPages) displayTransactions(transactions, currentPage + 1);
+}
+
+function viewTransaction(scrollNumber, subscrollNumber, type) {
+    if (window.parent && window.parent.updateParentBreadcrumb) {
+        window.parent.updateParentBreadcrumb(
+            window.buildBreadcrumbPath('authorizationPendingTransactionTransfer.jsp')
+        );
+    }
+    // Navigate to transaction details page
+    window.location.href = 'viewTransactionDetailsTransfer.jsp?scrollNumber=' + encodeURIComponent(scrollNumber) + 
+                          '&subscrollNumber=' + encodeURIComponent(subscrollNumber) + '&type=' + type;
 }
 
 window.onload = function() {
@@ -182,7 +208,7 @@ window.onload = function() {
 
 <div class="search-container">
     <input type="text" id="searchInput" onkeyup="searchTable()"
-           placeholder="🔍 Search by Scroll No, Subscroll No, Account Code, Name, GL Name, User ID, Particular">
+           placeholder="🔍 Search by Scroll No, Subscroll No, Account Code, Name, GL Name, Particular">
 </div>
 
 <div class="table-container">
@@ -191,14 +217,14 @@ window.onload = function() {
     <tr>
         <th>SR NO</th>
         <th>SCROLL NO</th>
-        <th>SUBSCROLL NO</th>
+        <th>SUB SC NO</th>
         <th>ACCOUNT CODE</th>
         <th>ACCOUNT NAME</th>
         <th>GL ACCOUNT NAME</th>
         <th>FOR ACCOUNT CODE</th>
         <th>AMOUNT</th>
-        <th>USER ID</th>
         <th>PARTICULAR</th>
+        <th>ACTION</th>
     </tr>
 </thead>
 <tbody>
@@ -216,7 +242,6 @@ try (Connection conn = DBConnection.getConnection()) {
         "  Fn_Get_Account_name(FN_GET_AC_GL(d.ACCOUNT_CODE)) AS GL_ACCOUNT_NAME, " +
         "  NVL(d.FORACCOUNT_CODE, '') AS FORACCOUNT_CODE, " +
         "  d.AMOUNT, " +
-        "  d.USER_ID, " +
         "  NVL(d.PARTICULAR, '') AS PARTICULAR " +
         "FROM TRANSACTION.DAILYSCROLL d " +
         "WHERE d.BRANCH_CODE = ? " +
@@ -247,7 +272,6 @@ try (Connection conn = DBConnection.getConnection()) {
         String glAccountName   = rs.getString("GL_ACCOUNT_NAME")  != null ? rs.getString("GL_ACCOUNT_NAME")  : "";
         String forAccountCode  = rs.getString("FORACCOUNT_CODE")  != null ? rs.getString("FORACCOUNT_CODE")  : "";
         String amount          = rs.getString("AMOUNT")           != null ? rs.getString("AMOUNT")           : "0.00";
-        String userId          = rs.getString("USER_ID")          != null ? rs.getString("USER_ID")          : "";
         String particular      = rs.getString("PARTICULAR")       != null ? rs.getString("PARTICULAR")       : "";
 
         // Sanitize for JS
@@ -264,7 +288,6 @@ try (Connection conn = DBConnection.getConnection()) {
         out.println("  glAccountName: '"   + safeGlAccountName  + "',");
         out.println("  forAccountCode: '"  + forAccountCode  + "',");
         out.println("  amount: '"          + amount          + "',");
-        out.println("  userId: '"          + userId          + "',");
         out.println("  particular: '"      + safeParticular  + "'");
         out.println("});");
         out.println("</script>");
@@ -279,8 +302,8 @@ try (Connection conn = DBConnection.getConnection()) {
             out.println("<td>" + (glAccountName.equals(".") ? "" : glAccountName) + "</td>");
             out.println("<td>" + forAccountCode + "</td>");
             out.println("<td style='text-align:right;'>" + amount + "</td>");
-            out.println("<td>" + userId + "</td>");
             out.println("<td>" + particular + "</td>");
+            out.println("<td><button class='view-details-btn' onclick=\"viewTransaction('" + scrollNumber + "', '" + subscrollNumber + "', 'TRANSFER'); return false;\">View Details</button></td>");
             out.println("</tr>");
             displayCount++;
             srNo++;
