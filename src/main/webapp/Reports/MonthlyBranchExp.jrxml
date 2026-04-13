@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="MonthlyBranchExp" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d47764fa-a2e3-4a26-b735-d7724f31220f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select * FROM bankdata.vwtempexpensessummery where  (first_months<>0 OR second_months<>0 )]]>
+	</queryString>
+	<field name="GLACCOUNT_CODE" class="java.lang.String"/>
+	<field name="AC_NAME" class="java.lang.String"/>
+	<field name="FIRST_MONTHS" class="java.math.BigDecimal"/>
+	<field name="SECOND_MONTHS" class="java.math.BigDecimal"/>
+	<field name="EXTRA_AMT" class="java.math.BigDecimal"/>
+	<field name="MONTHS_NAME1" class="java.lang.String"/>
+	<field name="MONTHS_NAME2" class="java.lang.String"/>
+	<variable name="sum_amt" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{EXTRA_AMT}]]></variableExpression>
+	</variable>
+	<variable name="sum_amt2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SECOND_MONTHS}]]></variableExpression>
+	</variable>
+	<variable name="sum_amt3" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{FIRST_MONTHS}]]></variableExpression>
+	</variable>
+	<title>
+		<band height="42">
+			<subreport>
+				<reportElement x="0" y="0" width="802" height="37" uuid="7ef97237-67b6-4857-b357-e1bd2015661f"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="35" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="9" width="255" height="20" uuid="17ecf5fb-f7a4-41df-bb93-56bacd0a2952"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="303" y="9" width="42" height="20" uuid="5b8e47dd-e6a5-4384-8b12-20dfca21afa4"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Exp. of  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="442" y="9" width="53" height="20" uuid="b41bbf47-eae9-49dd-95e0-e6b9509c45e5"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Exp. of  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="576" y="9" width="93" height="20" uuid="95015b50-d33a-4f48-975e-113288cab490"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Extra Expenses]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="696" y="9" width="93" height="20" uuid="bf044611-26b4-4a8d-a146-81b2d02cb9cb"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Remark]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="32" width="802" height="1" uuid="0137a8e0-30b3-423f-a634-94532e8c7f07"/>
+			</line>
+			<textField>
+				<reportElement x="352" y="9" width="52" height="20" uuid="7fe8ae2a-c5f1-4732-95c3-fecfdee12cc2"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTHS_NAME1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="502" y="9" width="74" height="20" uuid="d9ddd204-4212-4605-9ac5-cb5f30d216d5"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTHS_NAME2}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="1" width="802" height="1" uuid="050e9353-0620-4463-8439-5a78ad29741e"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="2" width="255" height="20" uuid="2857d0b4-6b9a-490c-a1b5-53c74880d5a5"/>
+				<textFieldExpression><![CDATA[$F{AC_NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="295" y="2" width="109" height="20" uuid="eba6f512-5835-45cf-afa0-f347e3eb3a73"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{FIRST_MONTHS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="437" y="2" width="121" height="20" uuid="e1bc2bce-0895-4cb1-bd45-4fdf1eca5e13"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{SECOND_MONTHS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="576" y="2" width="93" height="20" uuid="3e675d37-683b-4636-ae3d-353ff486cf51"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{EXTRA_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="21">
+			<textField>
+				<reportElement x="680" y="1" width="80" height="20" uuid="df48fc33-f303-4b10-9ef5-91f3e612ce3c"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="760" y="1" width="40" height="20" uuid="8f4cc937-e3a5-4e03-92e4-26b7a1ffac3f"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="54" y="1" width="100" height="20" uuid="81935cfe-4178-45d2-9e4e-4fbc0c54dbef"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="1" width="54" height="20" uuid="e0d6efca-895c-4627-ac93-36359a162d4e"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="79">
+			<line>
+				<reportElement x="1" y="2" width="802" height="1" uuid="28f5767b-fa48-4860-a5fd-dfc84e61d9e9"/>
+			</line>
+			<textField pattern="#,##0.00">
+				<reportElement x="576" y="5" width="93" height="20" uuid="a5b1ebd6-3260-4b67-8b2f-4cac631c147c"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{sum_amt}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="28" width="802" height="1" uuid="72ea8543-70bc-4fda-aac8-f645cf33fa02"/>
+			</line>
+			<staticText>
+				<reportElement x="117" y="5" width="100" height="20" uuid="f6f1dfba-14da-4414-8989-273cd657fa59"/>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="437" y="5" width="121" height="20" uuid="202944cd-a570-46ee-bf6d-4dc88050e103"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{sum_amt2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="295" y="5" width="109" height="20" uuid="40128d58-470b-49ec-a990-e7695fc019a1"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$V{sum_amt3}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="67" y="29" width="662" height="50" uuid="b9cfbaf0-0b27-4f0b-ba31-8125f8a02d82"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "clerk_manager.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

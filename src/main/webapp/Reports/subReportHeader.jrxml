@@ -24,43 +24,36 @@ and b.branch_code=$P{branch_code}]]>
 	<detail>
 		<band height="73" splitType="Stretch">
 			<textField>
-				<reportElement x="140" y="0" width="322" height="21" uuid="53acf8c5-3b5f-4813-8162-3400a583d836"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<reportElement x="0" y="0" width="555" height="21" uuid="53acf8c5-3b5f-4813-8162-3400a583d836"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BANK_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="198" y="19" width="220" height="20" uuid="d0f23ccf-9bcc-4e96-aa4d-f2d33652fadd"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<reportElement x="0" y="19" width="555" height="20" uuid="d0f23ccf-9bcc-4e96-aa4d-f2d33652fadd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="140" y="22" width="100" height="20" uuid="c14a151a-bf4e-4fcf-802a-2b9c4623ebfd"/>
-				<textElement>
-					<font size="11" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Branch : ]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="141" y="40" width="100" height="20" uuid="074c4a38-5c12-471f-8820-b066fe4700e1"/>
-				<textElement>
+				<reportElement x="0" y="42" width="197" height="20" uuid="074c4a38-5c12-471f-8820-b066fe4700e1"/>
+				<textElement textAlignment="Right">
 					<font size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Report Date :]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="231" y="37" width="160" height="20" uuid="50b59074-5d6b-4c87-a4c9-8fa0e5205430"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<reportElement x="197" y="42" width="95" height="20" uuid="50b59074-5d6b-4c87-a4c9-8fa0e5205430"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="140" y="53" width="252" height="20" uuid="c2b8bfc8-8e36-4a25-b2fc-604bbc00d365"/>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<reportElement x="282" y="42" width="273" height="21" uuid="c2b8bfc8-8e36-4a25-b2fc-604bbc00d365"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="11" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{report_title}]]></textFieldExpression>

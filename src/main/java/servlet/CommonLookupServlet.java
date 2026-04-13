@@ -105,6 +105,8 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT DESCRIPTION FROM HEADOFFICE.GLACCOUNT WHERE GLACCOUNT_CODE=?";   
                 } else if ("area".equalsIgnoreCase(type)) {
                 	query = "SELECT AREA_DESCRIPTION FROM BRANCH.BRANCHAREA WHERE AREA_CODE=?";
+                } else if ("installment".equalsIgnoreCase(type)) {
+                    query = "SELECT DISCRIPTION FROM HEADOFFICE.INSTALLMENTTYPE WHERE INSTALLMENTTYPE_ID=?";
                 } else {
                     out.print("");
                     return;
@@ -143,6 +145,8 @@ public class CommonLookupServlet extends HttpServlet {
                 listGLByAccountType(conn, out, request);
             } else if ("area".equalsIgnoreCase(type)) {
                 listArea(conn, out);  
+            } else if ("installment".equalsIgnoreCase(type)) {
+                    listInstallment(conn, out);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -490,5 +494,41 @@ public class CommonLookupServlet extends HttpServlet {
 	    rs.close();
 	    ps.close();
 	}
+
+//===============================
+ // 🔹 listInstallment
+ // ===============================
+
+private void listInstallment(Connection conn, PrintWriter out) throws Exception {
+
+	String sql = "SELECT INSTALLMENTTYPE_ID, DISCRIPTION FROM HEADOFFICE.INSTALLMENTTYPE ORDER BY INSTALLMENTTYPE_ID";
+	
+    PreparedStatement ps = conn.prepareStatement(sql);
+    ResultSet rs = ps.executeQuery();
+
+    printTableHeader(out, "Select Installment", "Code", "Description", false);
+
+    while (rs.next()) {
+
+    	String code = rs.getString("INSTALLMENTTYPE_ID");
+    	String name = rs.getString("DISCRIPTION");
+    	
+        code = code == null ? "" : code.replace("'", "\\'");
+        name = name == null ? "" : name.replace("'", "\\'");
+
+        out.println("<tr class='lookup-row' onclick=\"selectInstallment('"
+                + code + "','" + name + "')\">");
+
+        out.println("<td>" + code + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("</tr>");
+    }
+
+    printTableFooter(out);
+
+    rs.close();
+    ps.close();
+}
+
 }
 

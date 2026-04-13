@@ -127,6 +127,26 @@ function selectArea(code, name) {
 }
 
 // ===============================
+// 🔹 SELECT INSTALLMENT
+// ===============================
+
+function selectInstallment(code, name) {
+
+    // 🔥 FORCE SET (ignore activeInput issue completely)
+    let codeField = document.getElementById("installment_code");
+    if (codeField) {
+        codeField.value = code;
+    }
+
+    let nameField = document.getElementById("installmentName");
+    if (nameField) {
+        nameField.value = name;
+    }
+
+    closeLookup();
+}
+
+// ===============================
 // 🔥 NEW: LOAD GL BY ACCOUNT TYPE
 // ===============================
 function loadGL(accountType) {
@@ -303,7 +323,30 @@ function initAreaAutoFetch() {
             });
     });
 }
+// ===============================
+// 🔹 AUTO FETCH INSTALLMENT
+// ===============================
 
+function initInstallmentAutoFetch() {
+
+    let field = document.getElementById("installment_code");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code) return;
+
+        fetch(contextPath + "/CommonLookupServlet?type=installment&action=getName&code=" + encodeURIComponent(code))
+            .then(res => res.text())
+            .then(name => {
+                let desc = document.getElementById("installmentName");
+                if (desc) desc.value = name || "Not Found";
+            });
+    });
+}
 // ===============================
 // 🔹 AUTO INIT
 // ===============================
@@ -313,6 +356,7 @@ window.addEventListener("DOMContentLoaded", function () {
     loadBranchNameOnPageLoad();
 	initAccountAutoFetch();   
 	initGLAutoFetch(); 
-	initAreaAutoFetch();   // ✅ ADD THIS
+	initAreaAutoFetch();
+	initInstallmentAutoFetch();   // ✅ ADD THIS
 
 });
