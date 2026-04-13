@@ -241,7 +241,7 @@ try (Connection conn = DBConnection.getConnection()) {
         "  AND d.TRANSACTIONSTATUS = 'E' " +
         "  AND d.TRANSACTIONINDICATOR_CODE LIKE 'CS%' " +
         (workingDate != null ? "  AND TRUNC(d.SCROLL_DATE) = TRUNC(?) " : "") +
-        "ORDER BY d.SCROLL_NUMBER"
+        "ORDER BY d.SCROLL_NUMBER DESC"
     );
 
     ps.setString(1, branchCode);
