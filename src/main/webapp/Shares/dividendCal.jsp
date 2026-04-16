@@ -155,6 +155,26 @@
     border-color: #1a1464;
   }
 
+  /* ── PDF button — distinct red-accent style ── */
+  .btn-pdf {
+    height: 36px;
+    padding: 0 18px;
+    background: #fff;
+    color: #b52020;
+    border: 1.5px solid #b52020;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.12s;
+  }
+  .btn-pdf:hover { background: #fff0f0; }
+  .btn-pdf svg  { flex-shrink: 0; }
+
   .btn-cancel {
     height: 36px;
     padding: 0 20px;
@@ -393,7 +413,19 @@
   <button class="btn-action"         type="button" onclick="showReport('sbXls')">SB Report XLS</button>
   <button class="btn-action"         type="button" onclick="showReport('payable')">Payable Report</button>
   <button class="btn-action"         type="button" onclick="showReport('payableXls')">Payable Report XLS</button>
-  <button class="btn-cancel"         type="button" onclick="cancelForm()">Cancel</button>
+
+  <!-- ── NEW: Report PDF button — opens PDF in new browser tab ── -->
+  <button class="btn-pdf" type="button" onclick="openReportPDF()">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="1" width="9" height="12" rx="1" stroke="#b52020" stroke-width="1.3"/>
+      <path d="M11 1l3 3v9a1 1 0 01-1 1H5" stroke="#b52020" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M11 1v3h3" stroke="#b52020" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5 8h5M5 10.5h3" stroke="#b52020" stroke-width="1" stroke-linecap="round"/>
+    </svg>
+    Report PDF
+  </button>
+
+  <button class="btn-cancel" type="button" onclick="cancelForm()">Cancel</button>
 </div>
 
 <!-- Action Buttons Row 2 -->
@@ -621,6 +653,30 @@
       '<td style="text-align:right">&#8377; ' + parseFloat(data.total).toFixed(2) + '</td>' +
       '<td colspan="3"></td>' +
       '</tr>';
+  }
+
+  // ══════════════════════════════════════════
+  // NEW: Open PDF report in a new browser tab
+  // Builds a GET URL with all params and calls window.open()
+  // The servlet streams application/pdf with Content-Disposition: inline
+  // so the browser renders it directly instead of downloading
+  // ══════════════════════════════════════════
+  function openReportPDF() {
+    if (!validateForm()) return;
+    setMessage('Generating PDF... it will open in a new tab.', false);
+
+    var params = [
+      'action=reportPDF',
+      'productCode=' + encodeURIComponent(document.getElementById('productCode').value),
+      'memberType='  + encodeURIComponent(document.getElementById('memberType').value),
+      'yearBegin='   + encodeURIComponent(document.getElementById('yearBegin').value),
+      'yearEnd='     + encodeURIComponent(document.getElementById('yearEnd').value),
+      'divBalDate='  + encodeURIComponent(document.getElementById('divBalDate').value),
+      'percentage='  + encodeURIComponent(document.getElementById('percentage').value)
+    ].join('&');
+
+    // window.open triggers a GET; session cookie is sent automatically by browser
+    window.open(PAGE_URL + '?' + params, '_blank');
   }
 
   // ── Posting Payable ──
