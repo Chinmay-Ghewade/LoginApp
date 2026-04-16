@@ -251,31 +251,30 @@
 
 <!-- ================= AUTHORIZE / REJECT BUTTONS ================= -->
 <div style="text-align:center; margin-top:30px;">
-    <form id="authorizeForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
-        <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
-        <input type="hidden" name="type" value="CASH">
-        <input type="hidden" name="status" value="A">
-        <button type="button" onclick="showAuthorizeConfirmation(event)"
-            style="padding:10px 22px; background:linear-gradient(45deg, #28a745, #34ce57); color:white;
-                   border:none; border-radius:6px; cursor:pointer;
-                   font-size:16px; font-weight:bold;">
-            ✔ Authorize
-        </button>
-    </form>
+<form id="authorizeForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
+    <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
+    <input type="hidden" name="type" value="CASH">
+    <input type="hidden" name="status" value="A">
+    <button type="button" onclick="showAuthorizeConfirmation(event)"
+        style="padding:10px 22px; background:linear-gradient(45deg, #28a745, #34ce57); color:white;
+               border:none; border-radius:6px; cursor:pointer;
+               font-size:16px; font-weight:bold;">
+        ✔ Authorize
+    </button>
+</form>
 
-    &nbsp;&nbsp;&nbsp;
-
-    <form id="rejectForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
-        <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
-        <input type="hidden" name="type" value="CASH">
-        <input type="hidden" name="status" value="R">
-        <button type="button" onclick="showRejectConfirmation(event)"
-            style="padding:10px 22px; background:linear-gradient(45deg, #dc3545, #e74c3c); color:white;
-                   border:none; border-radius:6px; cursor:pointer;
-                   font-size:16px; font-weight:bold;">
-            ✘ Reject
-        </button>
-    </form>
+<!-- REJECT FORM -->
+<form id="rejectForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
+    <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
+    <input type="hidden" name="type" value="CASH">
+    <input type="hidden" name="status" value="R">
+    <button type="button" onclick="showRejectConfirmation(event)"
+        style="padding:10px 22px; background:linear-gradient(45deg, #dc3545, #e74c3c); color:white;
+               border:none; border-radius:6px; cursor:pointer;
+               font-size:16px; font-weight:bold;">
+        ✘ Reject
+    </button>
+</form>
 </div>
 
 <!-- ================= AUTHORIZE MODAL ================= -->
