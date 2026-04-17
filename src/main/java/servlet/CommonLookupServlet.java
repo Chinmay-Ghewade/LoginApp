@@ -378,19 +378,30 @@ public class CommonLookupServlet extends HttpServlet {
 	    PreparedStatement ps = conn.prepareStatement(sql);
 	    ResultSet rs = ps.executeQuery();
 
-	    out.println("<table>");
+	    // ✅ USE COMMON HEADER
+	    printTableHeader(out, "Select Account Type", "Account Type", "Name", false);
 
 	    while (rs.next()) {
+
 	        String type = rs.getString("ACCOUNT_TYPE");
 	        String name = rs.getString("NAME");
 
-	        out.println("<tr onclick=\"loadGL('" + type + "')\">");
+	        if (type == null) type = "";
+	        if (name == null) name = "";
+
+	        type = type.replace("'", "\\'");
+	        name = name.replace("'", "\\'");
+
+	        out.println("<tr class='lookup-row' " +
+	        	    "onclick=\"selectAccountType('" + type + "','" + name + "')\">");
+	        
 	        out.println("<td>" + type + "</td>");
 	        out.println("<td>" + name + "</td>");
 	        out.println("</tr>");
 	    }
 
-	    out.println("</table>");
+	    // ✅ USE COMMON FOOTER
+	    printTableFooter(out);
 
 	    rs.close();
 	    ps.close();

@@ -146,16 +146,40 @@ function selectInstallment(code, name) {
     closeLookup();
 }
 
+////////////////////////////////////////////
+
+function selectAccountType(code, name) {
+
+    if (activeInput) {
+        activeInput.value = code;
+    }
+
+    // optional display
+    let nameField = document.getElementById("accountTypeName");
+    if (nameField) nameField.value = name;
+
+    
+}
+
+function handleAccountType(type, name) {
+    selectAccountType(type, name);
+}
+
 // ===============================
 // 🔥 NEW: LOAD GL BY ACCOUNT TYPE
 // ===============================
 function loadGL(accountType) {
 
-    let url = contextPath + "/CommonLookupServlet?type=glByAccountType&accountType=" + encodeURIComponent(accountType);
+    let url = window.location.origin + contextPath +
+        "/CommonLookupServlet?type=glByAccountType&accountType=" +
+        encodeURIComponent(accountType);
+
+    console.log("URL:", url); // DEBUG
 
     fetch(url)
         .then(res => res.text())
         .then(html => {
+            console.log("GL HTML:", html); // DEBUG
             document.getElementById("lookupTable").innerHTML = html;
         })
         .catch(err => console.error("GL Load Error:", err));

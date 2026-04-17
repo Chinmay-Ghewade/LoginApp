@@ -106,7 +106,7 @@ ORDER BY PRODUCT, A.ACCOUNT_CODE]]>
 	<title>
 		<band height="42" splitType="Stretch">
 			<subreport>
-				<reportElement x="18" y="0" width="497" height="42" uuid="1705cb83-fd4b-4b12-8bb5-1c1121e561ee"/>
+				<reportElement x="0" y="0" width="497" height="42" uuid="1705cb83-fd4b-4b12-8bb5-1c1121e561ee"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>

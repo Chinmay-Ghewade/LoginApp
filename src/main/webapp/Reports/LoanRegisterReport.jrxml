@@ -50,7 +50,11 @@ WHERE
     AND P.PURPOSE_ID = L.PURPOSE_ID
     AND SUBSTR(A.ACCOUNT_CODE, 0, 4) = $P{branch_code}
     AND A.DATEACCOUNTOPEN BETWEEN  $P{as_on_date} AND $P{to_date}
-    AND HP.PRODUCT_CODE = $P{product_code}
+AND (
+    $P{product_code} IS NULL
+    OR $P{product_code} = ''
+    OR HP.PRODUCT_CODE = $P{product_code}
+)
 ORDER BY
     A.ACCOUNT_CODE]]>
 	</queryString>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LoanRegisterReport(close)" language="groovy" pageWidth="967" pageHeight="595" orientation="Landscape" columnWidth="927" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0e56c636-5d1e-40f0-8f74-6444808ff76b">
-	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="branch_code" class="java.lang.String">
@@ -50,7 +50,11 @@ WHERE
     AND P.PURPOSE_ID = L.PURPOSE_ID
     AND SUBSTR(A.ACCOUNT_CODE, 0, 4) = $P{branch_code}
     AND A.DATEACCOUNTCLOSE BETWEEN  $P{as_on_date} AND $P{to_date}
-    AND HP.PRODUCT_CODE = $P{product_code}
+AND (
+    $P{product_code} IS NULL
+    OR $P{product_code} = ''
+    OR HP.PRODUCT_CODE = $P{product_code}
+)
 ORDER BY
     A.ACCOUNT_CODE]]>
 	</queryString>
@@ -249,7 +253,7 @@ ORDER BY
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{INT_RATE}]]></textFieldExpression>
 			</textField>
-			<textField pattern=" #,##0.00">
+			<textField pattern="">
 				<reportElement x="758" y="0" width="82" height="20" uuid="e2d981bd-ba7e-4e39-ba4f-d6a61810b8d3"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font isStrikeThrough="false"/>

@@ -7,6 +7,25 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <%
+
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
+
 String action = request.getParameter("action");
 
 String sessionBranchCode = (String) session.getAttribute("branchCode");
@@ -14,6 +33,7 @@ String isSupportUser = (String) session.getAttribute("isSupportUser");
 
 if(sessionBranchCode == null) sessionBranchCode="";
 if(isSupportUser == null) isSupportUser="N";
+
 
 /* ================= GENERATE ================= */
 
@@ -100,26 +120,25 @@ if("generate".equals(action)){
             condition += " AND B.ACCOUNT_TYPE='"+accountType+"' ";
         }
 
-        if("Y".equalsIgnoreCase(nominee)){
-            condition += " AND A.ACCOUNT_CODE = AN.ACCOUNT_CODE(+)";
-        }
-
+       
         String dateField =
         "OPEN".equalsIgnoreCase(reportAction) ?
         "A.DATEACCOUNTOPEN" :
         "A.DATEACCOUNTCLOSE";
 
         String sql =
-        "SELECT A.ACCOUNT_CODE, INITCAP(A.NAME) NAME, " +
-        "TO_CHAR(A.DATEACCOUNTOPEN,'DD-MON-YY') OPEN_D, " +
-        "TO_CHAR(A.DATEACCOUNTCLOSE,'DD-MON-YY') CLOSE_D, " +
-        "C.LEDGERBALANCE BAL, B.DESCRIPTION " +
-        ("Y".equalsIgnoreCase(nominee) ?
-        ", INITCAP(AN.NAME) NOMINEE_NAME " : "") +
-        "FROM ACCOUNT.ACCOUNT A, HEADOFFICE.PRODUCT B, BALANCE.ACCOUNT C " +
-        ("Y".equalsIgnoreCase(nominee) ? ", ACCOUNT.ACCOUNTNOMINEE AN " : "") +
-        "WHERE SUBSTR(A.ACCOUNT_CODE,5,3)=B.PRODUCT_CODE " +
-        "AND A.ACCOUNT_CODE=C.ACCOUNT_CODE " +
+        		"SELECT A.ACCOUNT_CODE, INITCAP(A.NAME) NAME, " +
+        		"TO_CHAR(A.DATEACCOUNTOPEN,'DD-MON-YY') OPEN_D, " +
+        		"TO_CHAR(A.DATEACCOUNTCLOSE,'DD-MON-YY') CLOSE_D, " +
+        		"C.LEDGERBALANCE BAL, B.DESCRIPTION, " +
+        		"SUBSTR(A.ACCOUNT_CODE,5,3) AS PRODUCT, " +
+        		"'1' AS P, " +
+        		"NVL(INITCAP(AN.NAME),'') AS NOMINEE_NAME " +   // ✅ ALWAYS PRESENT
+        		"FROM ACCOUNT.ACCOUNT A " +
+        		"LEFT JOIN ACCOUNT.ACCOUNTNOMINEE AN ON A.ACCOUNT_CODE = AN.ACCOUNT_CODE " +
+        		", HEADOFFICE.PRODUCT B, BALANCE.ACCOUNT C " +
+        		"WHERE SUBSTR(A.ACCOUNT_CODE,5,3)=B.PRODUCT_CODE " +
+        		"AND A.ACCOUNT_CODE=C.ACCOUNT_CODE " +
         "AND SUBSTR(A.ACCOUNT_CODE,1,4)='"+branchCode+"' " +
         "AND "+dateField+" BETWEEN '"+fromDateDB+"' AND '"+toDateDB+"' " +
         "AND B.PRODUCT_CODE BETWEEN '"+fromProduct+"' AND '"+toProduct+"' " +
@@ -140,9 +159,9 @@ if("generate".equals(action)){
         String jasperFile;
 
         if("OPEN".equalsIgnoreCase(reportAction)){
-            jasperFile="AccountOpenBetweenDates.jasper";
+            jasperFile="AccountOpenSBCA.jasper";
         }else{
-            jasperFile="AccountCloseBetweenDates.jasper";
+            jasperFile="AccountCloseSBCA.jasper";
         }
 
         String jasperPath =
@@ -158,6 +177,15 @@ if("generate".equals(action)){
         params.put("branch_code",branchCode);
         params.put("report_title","ACCOUNT OPEN CLOSE BETWEEN DATES");
 
+        String asOnDate = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
+                .format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate))
+                .toUpperCase();
+
+        params.put("as_on_date", asOnDate);   // ✅ FIX
+
+        params.put("SUBREPORT_DIR",
+                application.getRealPath("/Reports/"));
+
         params.put(JRParameter.REPORT_CONNECTION,conn);
 
         JRResultSetDataSource jrds =
@@ -166,9 +194,15 @@ if("generate".equals(action)){
         JasperPrint jp =
         JasperFillManager.fillReport(jr,params,jrds);
 
-        if(jp.getPages().isEmpty()){
-            session.setAttribute("errorMessage","No Records Found!");
-            response.sendRedirect("AccountOpenClose2dateRG.jsp");
+        if (jp.getPages().isEmpty()) {
+
+            response.reset();
+            response.setContentType("text/html");
+
+            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println("No Records Found!");
+            out.println("</h2>");
+
             return;
         }
 
@@ -381,7 +415,7 @@ ACCOUNT OPEN AND CLOSE BETWEEN DATES
 
 <button type="button"
         class="icon-btn"
-        onclick="openLookup('accounttype')">...</button>
+        onclick="openLookup('accountType')">...</button>
 </div>
 </div>
 
@@ -429,6 +463,7 @@ ACCOUNT OPEN AND CLOSE BETWEEN DATES
 <input type="date"
        name="from_date"
        class="input-field"
+       value="<%= sessionDate %>"
        required>
 </div>
 
@@ -503,12 +538,6 @@ A/C Open In Date
         class="download-button"
         onclick="setAction('CLOSE')">
 A/C Close In Date
-</button>
-
-<button type="button"
-        class="download-button"
-        onclick="window.location.reload()">
-Cancel
 </button>
 
 </div>
