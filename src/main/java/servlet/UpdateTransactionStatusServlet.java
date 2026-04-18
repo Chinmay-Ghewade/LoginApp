@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import db.DBConnection;
+//import GlobalFunctions.Transaction;
 
 @WebServlet("/Authorization/UpdateTransactionStatusServlet")
 public class UpdateTransactionStatusServlet extends HttpServlet {
@@ -45,7 +46,7 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
 
         try {
             conn = DBConnection.getConnection();
-            conn.setAutoCommit(false); // All 4 updates are atomic — rollback if any fails
+            conn.setAutoCommit(false); // All updates are atomic — rollback if any fails
 
             // Get working date from session, if available
             Date workingDate;
@@ -56,9 +57,108 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
                 workingDate = new java.sql.Date(System.currentTimeMillis());
             }
 
-            // ----------------------------------------------------------------
-            // STEP 1: Update DAILYSCROLL status (Authorize or Reject)
-            // ----------------------------------------------------------------
+            // ================================================================
+            // STEP 1: Fetch ALL transaction details from DAILYSCROLL
+            //         (needed for STEP 1.5 - History Record Creation)
+            // ================================================================
+            String selectQuery =
+            	    "SELECT TRANSACTIONINDICATOR_CODE, " +
+            	    "       AMOUNT, " +
+            	    "       ACCOUNT_CODE, " +
+            	    "       FN_GET_AC_GL(ACCOUNT_CODE) AS GLACCOUNT_CODE, " +
+            	    "       SUBSCROLL_NUMBER, " +
+            	    "       FORACCOUNT_CODE, " +
+            	    "       CHEQUE_TYPE, " +
+            	    "       CHEQUESERIES, " +
+            	    "       CHEQUENUMBER, " +
+            	    "       CHEQUEDATE, " +
+            	    "       PARTICULAR, " +
+            	    "       IS_PASSBOOK_PRINTED, " +
+            	    "       SCROLL_DATE " +  
+            	    "FROM TRANSACTION.DAILYSCROLL " +
+            	    "WHERE SCROLL_NUMBER = ? " +
+            	    "  AND BRANCH_CODE   = ?";
+
+            ps = conn.prepareStatement(selectQuery);
+            ps.setString(1, scrollNumber);
+            ps.setString(2, branchCode);
+            ResultSet rs = ps.executeQuery();
+
+            if (!rs.next()) {
+                conn.rollback();
+                response.sendRedirect("authorizationPendingTransactionCash.jsp?error=Transaction%20not%20found");
+                return;
+            }
+
+            // Fetch all transaction details
+            String txnCode                = rs.getString("TRANSACTIONINDICATOR_CODE");
+            double amount                 = rs.getDouble("AMOUNT");
+            String accountCode            = rs.getString("ACCOUNT_CODE");
+            String glAccountCode          = rs.getString("GLACCOUNT_CODE");
+            long subScrollNumber          = rs.getLong("SUBSCROLL_NUMBER");
+            String forAccountCode         = rs.getString("FORACCOUNT_CODE") != null ? rs.getString("FORACCOUNT_CODE") : "";
+            String chequeType             = rs.getString("CHEQUE_TYPE") != null ? rs.getString("CHEQUE_TYPE") : "";
+            String chequeSeries           = rs.getString("CHEQUESERIES") != null ? rs.getString("CHEQUESERIES") : "";
+            long chequeNumber             = rs.getLong("CHEQUENUMBER");
+            Date chequeDate 			  = rs.getDate("CHEQUEDATE");
+            String particular             = rs.getString("PARTICULAR") != null ? rs.getString("PARTICULAR") : "";
+            String isPassbookPrinted      = rs.getString("IS_PASSBOOK_PRINTED") != null ? rs.getString("IS_PASSBOOK_PRINTED") : "N";
+            Date  scrollDate              = rs.getDate("SCROLL_DATE");
+
+            rs.close();
+            ps.close();
+            ps = null;
+
+            // ================================================================
+            // STEP 1.5: INSERT INTO HISTORY.DAILYSCROLL BEFORE STATUS UPDATE
+            //           This creates an audit trail of the transaction
+            // ================================================================
+            try {
+            	String historyInsertResult = insertDailyScrollHistory(
+            		    conn,
+            		    branchCode,
+            		    scrollDate,
+            		    Long.parseLong(scrollNumber),
+            		    subScrollNumber,
+            		    accountCode,
+            		    glAccountCode,
+            		    forAccountCode,
+            		    txnCode,
+            		    amount,
+            		    amount,
+            		    amount,
+            		    chequeType,
+            		    chequeSeries,
+            		    chequeNumber,
+            		    chequeDate,
+            		    particular,
+            		    userId,
+            		    isPassbookPrinted,
+            		    status,
+            		    userId,
+            		    0,
+            		    branchCode,
+            		    0
+            		);
+
+                if (!historyInsertResult.isEmpty()) {
+                    conn.rollback();
+                    response.sendRedirect("authorizationPendingTransactionCash.jsp?error="
+                            + java.net.URLEncoder.encode("History Record Error: " + historyInsertResult, "UTF-8"));
+                    return;
+                }
+            } catch (Exception historyException) {
+                conn.rollback();
+                historyException.printStackTrace();
+                response.sendRedirect("authorizationPendingTransactionCash.jsp?error="
+                        + java.net.URLEncoder.encode("Failed to create history record: " + historyException.getMessage(), "UTF-8"));
+                return;
+            }
+
+            // ================================================================
+            // STEP 2: Update TRANSACTION.DAILYSCROLL status
+            //         (Authorize or Reject)
+            // ================================================================
             String updateQuery =
                 "UPDATE TRANSACTION.DAILYSCROLL SET " +
                 "  TRANSACTIONSTATUS = ?, " +
@@ -81,48 +181,19 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
 
             if (rowsUpdated == 0) {
                 conn.rollback();
-                response.sendRedirect("authorizationPendingTransactionCash.jsp?error=No%20transaction%20found");
+                response.sendRedirect("authorizationPendingTransactionCash.jsp?error=No%20transaction%20found%20for%20update");
                 return;
             }
 
-            // ----------------------------------------------------------------
-            // Steps 2-4 only run on Authorize ("A"). Reject just updates status.
-            // ----------------------------------------------------------------
+            // ================================================================
+            // Steps 3-5 only run on Authorize ("A"). Reject just updates status.
+            // ================================================================
             if ("A".equals(status)) {
 
-                // Fetch all details needed for the 3 balance updates in one query
-                String selectQuery =
-                    "SELECT TRANSACTIONINDICATOR_CODE, " +
-                    "       AMOUNT, " +
-                    "       ACCOUNT_CODE, " +
-                    "       FN_GET_AC_GL(ACCOUNT_CODE) AS GLACCOUNT_CODE " +
-                    "FROM TRANSACTION.DAILYSCROLL " +
-                    "WHERE SCROLL_NUMBER = ? " +
-                    "  AND BRANCH_CODE   = ?";
-
-                ps = conn.prepareStatement(selectQuery);
-                ps.setString(1, scrollNumber);
-                ps.setString(2, branchCode);
-                ResultSet rs = ps.executeQuery();
-
-                if (!rs.next()) {
-                    conn.rollback();
-                    response.sendRedirect("authorizationPendingTransactionCash.jsp?error=Transaction%20detail%20not%20found%20for%20balance%20update");
-                    return;
-                }
-
-                String txnCode       = rs.getString("TRANSACTIONINDICATOR_CODE");
-                double amount        = rs.getDouble("AMOUNT");
-                String accountCode   = rs.getString("ACCOUNT_CODE");
-                String glAccountCode = rs.getString("GLACCOUNT_CODE");
-
-                rs.close();
-                ps.close();
-                ps = null;
-
-                // ------------------------------------------------------------
-                // STEP 2: Update BALANCE.ACCOUNT (Ledger + Available balance)
-                // ------------------------------------------------------------
+                // ============================================================
+                // STEP 3: Update BALANCE.ACCOUNT 
+                //         (Ledger + Available balance)
+                // ============================================================
                 String balanceUpdateQuery;
                 if ("CSDR".equals(txnCode)) {
                     // Debit → subtract from both balances
@@ -148,15 +219,17 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
                 ps.close();
                 ps = null;
 
-                // ------------------------------------------------------------
-                // STEP 3: Update BALANCE.BRANCHGL (Branch GL current balance)
-                // ------------------------------------------------------------
+                // ============================================================
+                // STEP 4: Update BALANCE.BRANCHGL 
+                //         (Branch GL current balance)
+                // ============================================================
                 updateBranchGLAccountBalance(conn, branchCode, txnCode,
                                              workingDate.toString(), glAccountCode, amount);
 
-                // ------------------------------------------------------------
-                // STEP 4: Update BALANCE.BRANCHGLHISTORY (CS cash codes only)
-                // ------------------------------------------------------------
+                // ============================================================
+                // STEP 5: Update BALANCE.BRANCHGLHISTORY 
+                //         (CS cash codes only)
+                // ============================================================
                 updateBranchGLAccountBalanceHistory(conn, branchCode, txnCode,
                                                     workingDate.toString(), glAccountCode, amount);
             }
@@ -187,11 +260,122 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // STEP 3 helper: Update BALANCE.BRANCHGL current balance
+    // =========================================================================
+    // INSERT HISTORY.DAILYSCROLL RECORD
+    // Creates an audit trail before any status change
+    // On error: throws exception which triggers rollback
+    // =========================================================================
+    private String insertDailyScrollHistory(
+            Connection connection,
+            String branchCode,
+            Date  scrollDate,
+            long scrollNumber,
+            long subScrollNumber,
+            String accountCode,
+            String glAccountCode,
+            String forAccountCode,
+            String txnIndicatorCode,
+            double amount,
+            double accountBalance,
+            double glAccountBalance,
+            String chequeType,
+            String chequeSeries,
+            long chequeNumber,
+            Date  chequeDate,
+            String particular,
+            String userId,
+            String isPassbookPrinted,
+            String txnStatus,
+            String officerId,
+            long cashHandlingNumber,
+            String glBranchCode,
+            int reconCode)
+            throws SQLException {
+
+        String returnValue = "";
+        PreparedStatement ps = null;
+
+        try {
+            // SQL column list for HISTORY.DAILYSCROLL
+            String columnList =
+                "BRANCH_CODE, " +
+                "SCROLL_DATE, " +
+                "SCROLL_NUMBER, " +
+                "SUBSCROLL_NUMBER, " +
+                "ACCOUNT_CODE, " +
+                "GLACCOUNT_CODE, " +
+                "FORACCOUNT_CODE, " +
+                "TRANSACTIONINDICATOR_CODE, " +
+                "AMOUNT, " +
+                "ACCOUNTBALANCE, " +
+                "GLACCOUNTBALANCE, " +
+                "CHEQUE_TYPE, " +
+                "CHEQUESERIES, " +
+                "CHEQUENUMBER, " +
+                "CHEQUEDATE, " +
+                "PARTICULAR, " +
+                "USER_ID, " +
+                "IS_PASSBOOK_PRINTED, " +
+                "TRANSACTIONSTATUS, " +
+                "OFFICER_ID, " +
+                "CASHHANDLING_NUMBER, " +
+                "GLBRANCH_CODE ";
+
+            String sqlInsert =
+            	    "INSERT INTO HISTORY.DAILYSCROLL (" + columnList + ") " +
+            	    		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            ps = connection.prepareStatement(sqlInsert);
+
+            // Bind parameters
+            int paramIndex = 1;
+            ps.setString(paramIndex++, branchCode);
+            ps.setDate(paramIndex++, scrollDate);
+            ps.setLong(paramIndex++, scrollNumber);
+            ps.setLong(paramIndex++, subScrollNumber);
+            ps.setString(paramIndex++, accountCode);
+            ps.setString(paramIndex++, glAccountCode);
+            ps.setString(paramIndex++, forAccountCode);
+            ps.setString(paramIndex++, txnIndicatorCode);
+            ps.setDouble(paramIndex++, amount);
+            ps.setDouble(paramIndex++, accountBalance);
+            ps.setDouble(paramIndex++, glAccountBalance);
+            ps.setString(paramIndex++, chequeType);
+            ps.setString(paramIndex++, chequeSeries);
+            ps.setLong(paramIndex++, chequeNumber);
+
+            if (chequeDate != null) {
+                ps.setDate(paramIndex++, chequeDate);
+            } else {
+                ps.setNull(paramIndex++, Types.DATE);
+            }
+
+            ps.setString(paramIndex++, particular);
+            ps.setString(paramIndex++, userId);
+            ps.setString(paramIndex++, isPassbookPrinted);
+            ps.setString(paramIndex++, txnStatus);
+            ps.setString(paramIndex++, officerId);
+            ps.setLong(paramIndex++, cashHandlingNumber);
+            ps.setString(paramIndex++, glBranchCode);
+
+            ps.executeUpdate();
+
+        } catch (SQLException sqlException) {
+            // Do NOT call rollback here - let caller handle it
+            returnValue = "Error in insertDailyScrollHistory: " + sqlException.getMessage();
+            sqlException.printStackTrace();
+            throw sqlException;
+        } finally {
+            try { if (ps != null) ps.close(); } catch (SQLException ignore) {}
+        }
+
+        return returnValue;
+    }
+
+    // =========================================================================
+    // STEP 4 helper: Update BALANCE.BRANCHGL current balance
     // "CSDR" → DR → subtract from balance
     // "CSCR" → CR → add to balance
-    // -------------------------------------------------------------------------
+    // =========================================================================
     private double updateBranchGLAccountBalance(
             Connection connection,
             String branchCode,
@@ -243,11 +427,11 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
         return currentBalance;
     }
 
-    // -------------------------------------------------------------------------
-    // STEP 4 helper: Update BALANCE.BRANCHGLHISTORY
+    // =========================================================================
+    // STEP 5 helper: Update BALANCE.BRANCHGLHISTORY
     // CSDR → increments DEBITCASH column
     // CSCR → increments CREDITCASH column
-    // -------------------------------------------------------------------------
+    // =========================================================================
     private void updateBranchGLAccountBalanceHistory(
             Connection connection,
             String branchCode,
