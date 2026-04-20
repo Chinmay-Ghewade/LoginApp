@@ -189,6 +189,39 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
             // Steps 3-6 only run on Authorize ("A"). Reject just updates status.
             // ================================================================
             if ("A".equals(status)) {
+            	
+            	// ============================================================
+                // STEP 2.5: Re-validate transaction server-side before authorize
+                // ============================================================
+                CallableStatement csValidate = null;
+                try {
+                    java.text.SimpleDateFormat sdfV = new java.text.SimpleDateFormat("dd/MM/yyyy");
+                    String wdStr = sdfV.format(workingDate);
+
+                    csValidate = conn.prepareCall(
+                        "{? = call Fn_Get_Valid_Transaction(?, TO_DATE(?, 'DD/MM/YYYY'), ?, ?)}");
+                    csValidate.registerOutParameter(1, java.sql.Types.CHAR);
+                    csValidate.setString(2, accountCode);
+                    csValidate.setString(3, wdStr);
+                    csValidate.setString(4, txnCode);
+                    csValidate.setDouble(5, amount);
+                    csValidate.execute();
+
+                    String validResult = csValidate.getString(1);
+                    if (validResult != null && validResult.trim().length() > 0
+                            && validResult.charAt(0) == 'Y') {
+                        String errMsg = validResult.length() > 1
+                                ? validResult.substring(1).trim()
+                                : "Transaction validation failed";
+                        conn.rollback();
+                        response.sendRedirect("viewTransactionDetailsCash.jsp?scrollNumber="
+                                + scrollNumber + "&validationError="
+                                + java.net.URLEncoder.encode(errMsg, "UTF-8"));
+                        return;
+                    }
+                } finally {
+                    try { if (csValidate != null) csValidate.close(); } catch (Exception ignore) {}
+                }
 
                 // ============================================================
                 // STEP 3: Update BALANCE.ACCOUNT
@@ -452,10 +485,9 @@ public class UpdateTransactionStatusServlet extends HttpServlet {
             // ------------------------------------------------------------------
             // 6a. Generate next TXN_NUMBER within this same transaction.
             //     We increment LASTTXN_NUMBER in HEADOFFICE.BRANCHPARAMETER
-            //     (branch-wise numbering — consistent with Transaction.java
-            //      getNextTXNNumber when IS_TXN_SCROLL_BANK_WIDE = 'N').
+            //      getNextTXNNumber when IS_TXN_SCROLL_BANK_WIDE = 'N'). if IS_TXN_SCROLL_BANK_WIDE = 'N' then it generate max TXN_NUMBER of TRANSACTION.DAILYTXN 
             //     If your bank uses bank-wide numbering, switch the UPDATE to
-            //     GLOBALCONFIG.UNIVERSALPARAMETER as in Transaction.java.
+            //     GLOBALCONFIG.UNIVERSALPARAMETER .
             // ------------------------------------------------------------------
             long txnNumber = getNextTxnNumber(connection, branchCode);
 

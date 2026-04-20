@@ -9,7 +9,15 @@
     }
     String branchCode = (String) sess.getAttribute("branchCode");
 %>
-
+<%
+    // Add this below existing session/branchCode extraction
+    String workingDateStr = "";
+    Object wdObj = sess.getAttribute("workingDate");
+    if (wdObj instanceof java.util.Date) {
+        java.text.SimpleDateFormat sdfWd = new java.text.SimpleDateFormat("dd/MM/yyyy");
+        workingDateStr = sdfWd.format((java.util.Date) wdObj);
+    }
+%>
 <%! 
     String getStringSafe(ResultSet r, String col) throws SQLException {
         String v = r.getString(col);
@@ -110,7 +118,52 @@
 
     function showAuthorizeConfirmation(event) {
         event.preventDefault();
-        document.getElementById('authorizeModal').style.display = 'block';
+
+        // Show a loading state on the button
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Validating...';
+
+        const params = new URLSearchParams({
+            accountCode:           VALIDATE_ACCOUNT_CODE,
+            workingDate:           VALIDATE_WORKING_DATE,
+            transactionIndicator:  VALIDATE_TXN_INDICATOR,
+            transactionAmount:     VALIDATE_AMOUNT
+        });
+
+        fetch('../Transactions/ValidateTransaction.jsp?' + params.toString())
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '&#10004; Authorize';
+
+                if (data.error) {
+                    showValidationError('Validation Error: ' + data.error);
+                    return;
+                }
+
+                if (data.success === false) {
+                    // Validation failed — show error popup, DO NOT open authorize modal
+                    showValidationError(data.message || 'Transaction validation failed.');
+                } else {
+                    // Validation passed — show authorize confirmation modal
+                    document.getElementById('authorizeModal').style.display = 'block';
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '&#10004; Authorize';
+                showValidationError('Network error during validation: ' + err.message);
+            });
+    }
+
+    function showValidationError(message) {
+        document.getElementById('validationErrorMsg').textContent = message;
+        document.getElementById('validationErrorModal').style.display = 'block';
+    }
+
+    function closeValidationErrorModal() {
+        document.getElementById('validationErrorModal').style.display = 'none';
     }
 
     function showRejectConfirmation(event) {
@@ -135,22 +188,28 @@
     }
 
     window.onclick = function(event) {
-        const authorizeModal = document.getElementById('authorizeModal');
-        const rejectModal = document.getElementById('rejectModal');
-        if (event.target === authorizeModal) {
-            closeAuthorizeModal();
-        }
-        if (event.target === rejectModal) {
-            closeRejectModal();
-        }
+        const authorizeModal       = document.getElementById('authorizeModal');
+        const rejectModal          = document.getElementById('rejectModal');
+        const validationErrorModal = document.getElementById('validationErrorModal'); 
+
+        if (event.target === authorizeModal)       closeAuthorizeModal();
+        if (event.target === rejectModal)          closeRejectModal();
+        if (event.target === validationErrorModal) closeValidationErrorModal(); 
     }
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeAuthorizeModal();
             closeRejectModal();
+            closeValidationErrorModal(); 
         }
     });
+    
+	 // Transaction data for validation
+    const VALIDATE_ACCOUNT_CODE   = "<%= getStringSafe(rsTransaction, "ACCOUNT_CODE") %>";
+    const VALIDATE_TXN_INDICATOR  = "<%= getStringSafe(rsTransaction, "TRANSACTIONINDICATOR_CODE") %>";
+    const VALIDATE_AMOUNT         = "<%= getStringSafe(rsTransaction, "AMOUNT") %>";
+    const VALIDATE_WORKING_DATE   = "<%= workingDateStr %>";
   </script>
 </head>
 <body>
@@ -297,6 +356,18 @@
         <div class="confirmation-modal-buttons">
             <button class="confirmation-btn confirmation-btn-cancel" onclick="closeRejectModal()">Cancel</button>
             <button class="confirmation-btn confirmation-btn-reject" onclick="confirmReject()">Yes, Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= VALIDATION ERROR MODAL ================= -->
+<div id="validationErrorModal" class="confirmation-modal">
+    <div class="confirmation-modal-content">
+        <h2 style="color:#dc3545;">&#9888; Validation Failed</h2>
+        <p id="validationErrorMsg" style="color:#333; font-size:15px;"></p>
+        <div class="confirmation-modal-buttons">
+            <button class="confirmation-btn confirmation-btn-cancel"
+                    onclick="closeValidationErrorModal()">Close</button>
         </div>
     </div>
 </div>
