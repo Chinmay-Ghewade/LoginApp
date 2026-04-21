@@ -2750,7 +2750,7 @@ function displayVoucherTable(rows) {
     let html = '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">';
     
     // Table header
-    html += '<thead style="background-color: #373279; color: white;">';
+    html += '<thead style="background-color: #373279; color: white; font-size: 12px;">';
     html += '<tr>';
     html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd; width: 5%;">SR NO</th>';
     html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd; width: 10%;">SCROLL NO</th>';
@@ -2770,7 +2770,7 @@ function displayVoucherTable(rows) {
         const bgColor = index % 2 === 0 ? '#f9f9f9' : '#ffffff';
         const amount = parseFloat(row.amount) || 0;
         
-        html += '<tr style="background-color: ' + bgColor + ';">';
+        html += '<tr style="background-color: ' + bgColor + '; font-size: 14px;">';
         html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.srNo + '</td>';
         html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.scrollNumber + '</td>';
         html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.subscrollNumber + '</td>';

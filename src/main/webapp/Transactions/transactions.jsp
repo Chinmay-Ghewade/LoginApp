@@ -482,8 +482,8 @@
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         margin: 20px auto;
     ">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #333;">Transaction Voucher</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="margin: 0; color: #333; font-size: 20px;">Transaction Voucher</h2>
             <button onclick="closeVoucherModal()" style="
                 background: #e74c3c;
                 color: white;

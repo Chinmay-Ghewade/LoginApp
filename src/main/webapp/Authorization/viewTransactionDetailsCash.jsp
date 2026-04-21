@@ -230,6 +230,99 @@
     const VALIDATE_TXN_INDICATOR  = "<%= getStringSafe(rsTransaction, "TRANSACTIONINDICATOR_CODE") %>";
     const VALIDATE_AMOUNT         = "<%= getStringSafe(rsTransaction, "AMOUNT") %>";
     const VALIDATE_WORKING_DATE   = "<%= workingDateStr %>";
+    
+    
+    
+    function showTransactionVoucher() {
+        // ✅ Get scroll number from URL parameter (passed from authorizationPendingTransactionCash.jsp)
+        const urlParams = new URLSearchParams(window.location.search);
+        const voucherScrollNumber = urlParams.get('scrollNumber');
+        
+        if (!voucherScrollNumber) {
+            alert('Scroll number not found in URL');
+            return;
+        }
+        
+        // Get working date from session
+        const sessionWorkingDate = '<%= sess.getAttribute("workingDate") != null ? 
+            new java.text.SimpleDateFormat("dd/MM/yyyy").format((java.util.Date)sess.getAttribute("workingDate")) : 
+            new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date()) %>';
+        
+        // Fetch and display voucher
+        fetchVoucherData(voucherScrollNumber, sessionWorkingDate);
+        document.getElementById('voucherModal').style.display = 'flex';
+    }
+
+    function closeVoucherModal() {
+        document.getElementById('voucherModal').style.display = 'none';
+    }
+
+    function fetchVoucherData(scrollNumber, workingDate) {
+        const tableContainer = document.getElementById('voucherTableContainer');
+        tableContainer.innerHTML = '<p style="text-align: center; color: #8066E8;">Loading voucher data...</p>';
+        
+        const params = new URLSearchParams({
+            scrollNumber: scrollNumber,
+            workingDate: workingDate
+        });
+        
+        fetch('../Transactions/GetDailyScrollData.jsp?' + params.toString())
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    tableContainer.innerHTML = '<p style="color: #e74c3c; text-align: center;">Error: ' + data.error + '</p>';
+                    return;
+                }
+                
+                if (data.rows && data.rows.length > 0) {
+                    displayVoucherTable(data.rows);
+                } else {
+                    tableContainer.innerHTML = '<p style="color: #7f8c8d; text-align: center;">No voucher records found</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching voucher data:', error);
+                tableContainer.innerHTML = '<p style="color: #e74c3c; text-align: center;">Failed to load voucher data</p>';
+            });
+    }
+
+    function displayVoucherTable(rows) {
+        let html = '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">';
+        
+        html += '<thead style="background-color: #373279; color: white; font-size: 12px;">';
+        html += '<tr>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">SR NO</th>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">SCROLL NO</th>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">SUB SR</th>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">ACCOUNT CODE</th>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">FOR ACCOUNT CODE</th>';
+        html += '<th style="padding: 12px; text-align: center; border: 1px solid #ddd;">TRANSACTION INDICATOR</th>';
+        html += '<th style="padding: 12px; text-align: right; border: 1px solid #ddd;">AMOUNT</th>';
+        html += '<th style="padding: 12px; text-align: left; border: 1px solid #ddd;">PARTICULAR</th>';
+        html += '</tr>';
+        html += '</thead>';
+        
+        html += '<tbody>';
+        rows.forEach(function(row, index) {
+            const bgColor = index % 2 === 0 ? '#f9f9f9' : '#ffffff';
+            const amount = parseFloat(row.amount) || 0;
+            
+            html += '<tr style="background-color: ' + bgColor + '; font-size: 14px;">';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.srNo + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.scrollNumber + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + row.subscrollNumber + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">' + row.accountCode + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">' + (row.forAccountCode || '-') + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: center;">' + (row.transactionIndicator || '-') + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd; text-align: right; font-weight: bold;">₹ ' + amount.toFixed(2) + '</td>';
+            html += '<td style="padding: 10px; border: 1px solid #ddd;">' + (row.particular || '-') + '</td>';
+            html += '</tr>';
+        });
+        html += '</tbody>';
+        html += '</table>';
+        
+        document.getElementById('voucherTableContainer').innerHTML = html;
+    }
   </script>
 </head>
 <body>
@@ -325,6 +418,13 @@
                    font-size:16px; font-weight:bold;">
             ← Back to List
         </button>
+        
+        <button type="button" onclick="showTransactionVoucher()" 
+    style="background-color: #373279; color: white; padding: 12px 25px; 
+    border: none; border-radius: 6px; font-size: 14px; font-weight: bold; 
+    cursor: pointer; margin: 10px;">
+    Voucher
+</button>
     </div>
 </form>
 
@@ -403,6 +503,49 @@
         <div class="confirmation-modal-buttons">
             <button class="confirmation-btn confirmation-btn-cancel"
                     onclick="closeBalanceErrorModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Voucher Modal -->
+<div id="voucherModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    overflow: auto;
+">
+    <div style="
+        background: white;
+        width: 90%;
+        max-width: 1200px;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        margin: 20px auto;
+    ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="margin: 0; color: #333; font-size: 20px;">Transaction Voucher</h2>
+            <button onclick="closeVoucherModal()" style="
+                background: #e74c3c;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+            ">Close</button>
+        </div>
+        
+        <div id="voucherTableContainer" style="overflow-x: auto;">
+            <!-- Table will be loaded here -->
         </div>
     </div>
 </div>
