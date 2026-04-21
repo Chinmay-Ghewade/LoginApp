@@ -436,7 +436,7 @@
 
 <!-- ================= AUTHORIZE / REJECT BUTTONS ================= -->
 <div style="text-align:center; margin-top:30px;">
-<form id="authorizeForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
+<form id="authorizeForm"  method="post" style="display:inline;">
     <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
     <input type="hidden" name="subscrollNumber" value="<%= getStringSafe(rsTransaction, "SUBSCROLL_NUMBER") %>">
     <input type="hidden" name="type" value="TRANSFER">
@@ -450,7 +450,7 @@
 </form>
 
 <!-- REJECT FORM -->
-<form id="rejectForm" action="UpdateTransactionStatusServlet" method="post" style="display:inline;">
+<form id="rejectForm" method="post" style="display:inline;">
     <input type="hidden" name="scrollNumber" value="<%= getStringSafe(rsTransaction, "SCROLL_NUMBER") %>">
     <input type="hidden" name="subscrollNumber" value="<%= getStringSafe(rsTransaction, "SUBSCROLL_NUMBER") %>">
     <input type="hidden" name="type" value="TRANSFER">
