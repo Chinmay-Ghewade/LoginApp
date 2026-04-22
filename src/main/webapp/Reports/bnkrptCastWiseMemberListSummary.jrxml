@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bnkrptCastWiseMemberListSummary" language="groovy" pageWidth="612" pageHeight="792" columnWidth="572" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2cd361f5-db38-4c93-ab1c-a7d2bc71da67">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\apache-tomcat-8.5.99\\webapps\\ENTERPROJECT\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select ROWNUM SRNO,caste_code,MALE_MEMBERS,FEMALE_MEMBERS,OTHER_MEMBERS,TOTAL_MEMBERS
+FROM ( select
+MEMBER.CASTE_CODE CASTE_CODE,
+SUM(MEMBER.MALE_MEMBERS) MALE_MEMBERS,
+SUM(MEMBER.FEMALE_MEMBERS) FEMALE_MEMBERS,
+SUM(MEMBER.OTHER_MEMBERS) OTHER_MEMBERS,
+SUM(MEMBER.TOTAL_MEMBERS) TOTAL_MEMBERS
+ from bankdata.castwisememberlist MEMBER
+ where MEMBER.branch_code=$P{branch_code}
+ GROUP BY member.caste_code
+ order by member.caste_code)]]>
+	</queryString>
+	<field name="SRNO" class="java.math.BigDecimal"/>
+	<field name="CASTE_CODE" class="java.lang.String"/>
+	<field name="MALE_MEMBERS" class="java.math.BigDecimal"/>
+	<field name="FEMALE_MEMBERS" class="java.math.BigDecimal"/>
+	<field name="OTHER_MEMBERS" class="java.math.BigDecimal"/>
+	<field name="TOTAL_MEMBERS" class="java.math.BigDecimal"/>
+	<variable name="total_male" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{MALE_MEMBERS}]]></variableExpression>
+	</variable>
+	<variable name="total_female" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{FEMALE_MEMBERS}]]></variableExpression>
+	</variable>
+	<variable name="total_other" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OTHER_MEMBERS}]]></variableExpression>
+	</variable>
+	<variable name="total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_MEMBERS}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="42" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="572" height="38" uuid="6247d35b-c136-4678-8812-563ae1a11161"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="1" width="29" height="22" uuid="ee8ca423-0846-4119-b767-199150dc3dea"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[SrNo.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="31" y="1" width="247" height="22" uuid="ae515def-c6c7-4976-b8a4-09831e3fc7a6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cast Wise Classification]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="279" y="1" width="69" height="22" uuid="584f85d8-b701-45c6-b046-85136ee17d4a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Male]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="349" y="1" width="81" height="22" uuid="9160bac1-98c2-479d-ab4c-44126096a049"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Female]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="431" y="1" width="70" height="21" uuid="e9f26991-3fe1-4223-ab1e-4889be5aead9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Other]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="502" y="1" width="69" height="22" uuid="0803bd5c-f3c2-4d1c-b9d2-11e0d3b26156"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="23" width="572" height="1" uuid="3c9cfff3-9e3c-48ef-a889-f27adefd7254"/>
+			</line>
+			<line>
+				<reportElement x="0" y="0" width="572" height="1" uuid="f4938327-05a9-4a6b-8ef1-f89f5953fde1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="22" uuid="35ba1d41-f868-454a-a5a8-7691e032966b"/>
+			</line>
+			<line>
+				<reportElement x="30" y="1" width="1" height="22" uuid="b833fbdb-b736-4956-828b-ed8bf53142be"/>
+			</line>
+			<line>
+				<reportElement x="278" y="1" width="1" height="22" uuid="e40d6926-c459-4afd-aad9-56d9743aaaa4"/>
+			</line>
+			<line>
+				<reportElement x="348" y="1" width="1" height="22" uuid="5fa3ffee-af8f-4831-b182-07949fab0add"/>
+			</line>
+			<line>
+				<reportElement x="430" y="1" width="1" height="22" uuid="02e4ede1-894e-495a-b412-e364adc65dd0"/>
+			</line>
+			<line>
+				<reportElement x="501" y="1" width="1" height="22" uuid="bed44ad1-af10-4aa9-baa6-73af8e633265"/>
+			</line>
+			<line>
+				<reportElement x="571" y="1" width="1" height="22" uuid="2005fe84-41be-4704-a1eb-2456f83a18a3"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<textField>
+				<reportElement x="31" y="0" width="247" height="18" uuid="74488867-7666-47e6-94ed-a337d04bc9d9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASTE_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="275" y="0" width="69" height="18" uuid="2cec2395-e548-4c52-b010-0e2c6a859735"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MALE_MEMBERS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="345" y="0" width="81" height="18" uuid="5d29f00e-2ddd-422a-a27f-f465a8fa973c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FEMALE_MEMBERS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="427" y="0" width="70" height="18" uuid="e76ee227-4b38-4be3-af84-4c4f68014e7e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OTHER_MEMBERS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="497" y="0" width="71" height="18" uuid="c602cc9f-93d1-4d1e-bfd8-f5b2d734ba2d"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL_MEMBERS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="30" height="18" uuid="e1ad7b76-3889-495b-848f-d3ea35742266"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SRNO}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="30" y="-13" width="1" height="31" uuid="6f3ab890-c01c-4ece-ace5-0720b0d10afa"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-13" width="1" height="31" uuid="abe5ded7-41f5-48a8-a47f-e3e166bc74cf"/>
+			</line>
+			<line>
+				<reportElement x="278" y="-13" width="1" height="31" uuid="48d38525-856b-4b21-b270-312f14176537"/>
+			</line>
+			<line>
+				<reportElement x="348" y="-13" width="1" height="31" uuid="1cfd8057-b07d-49f9-a84f-32689053e7f6"/>
+			</line>
+			<line>
+				<reportElement x="430" y="-13" width="1" height="31" uuid="c2af46f0-cc5b-491b-a97f-3d9063a06e70"/>
+			</line>
+			<line>
+				<reportElement x="501" y="-13" width="1" height="31" uuid="0d07b4ae-1a72-4d4e-af22-6de5c0fad661"/>
+			</line>
+			<line>
+				<reportElement x="571" y="-13" width="1" height="31" uuid="43ed3672-3cf3-4199-b8ef-5071f72db77f"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="18" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="52" height="18" uuid="f760abf0-abe9-4cfe-95a8-0a9d45e4d0be"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="52" y="0" width="115" height="18" uuid="a1ea87e8-ca83-4dff-ab51-c6aa66c60b7a"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="0" width="52" height="18" uuid="dc40af90-a2d8-4fab-83e3-5159b5c0b24d"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="529" y="0" width="43" height="18" uuid="c85b3c8f-63a9-40d0-a5c8-b6b00869904f"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="240" y="1" width="35" height="19" uuid="a79e147b-61e6-4fd5-aceb-7848ae151b46"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="278" y="1" width="70" height="19" uuid="5dbdf252-ad60-4e7a-8a3e-42973d5994c4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_male}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="349" y="1" width="82" height="19" uuid="7af23334-74b0-4616-bc58-67db5a6606a4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_female}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="431" y="1" width="71" height="19" uuid="d4e73b2d-d9d9-4244-96f7-efedb5cfb123"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_other}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="0" width="570" height="1" uuid="57c5fc11-8676-4ea5-9651-0213240bde2e"/>
+			</line>
+			<textField>
+				<reportElement x="502" y="1" width="70" height="19" uuid="e21ec3b8-1def-4dfa-a463-c247bc633201"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="24" width="572" height="1" uuid="43f4740c-0360-4150-b181-1612d2024a76"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

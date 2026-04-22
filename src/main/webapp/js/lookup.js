@@ -146,24 +146,6 @@ function selectInstallment(code, name) {
     closeLookup();
 }
 
-////////////////////////////////////////////
-
-function selectAccountType(code, name) {
-
-    if (activeInput) {
-        activeInput.value = code;
-    }
-
-    // optional display
-    let nameField = document.getElementById("accountTypeName");
-    if (nameField) nameField.value = name;
-
-    
-}
-
-function handleAccountType(type, name) {
-    selectAccountType(type, name);
-}
 
 // ===============================
 // 🔥 NEW: LOAD GL BY ACCOUNT TYPE
@@ -199,6 +181,34 @@ function selectGL(glCode, desc) {
     closeLookup();
 }
 
+// ===============================
+// 🔥 ACCOUNT TYPE
+// ===============================
+
+function selectAccountType(code, name) {
+
+    let field = document.getElementById("account_type");
+    if (field) field.value = code;
+
+    let nameField = document.getElementById("accountTypeName");
+    if (nameField) nameField.value = name;
+
+    closeLookup();
+}
+// ===============================
+// 🔥 CUSTOMER
+// ===============================
+
+function selectCustomer(id, name) {
+
+    let field = document.getElementById("customer_id");
+    if (field) field.value = id;
+
+    let nameField = document.getElementById("customerName");
+    if (nameField) nameField.value = name;
+
+    closeLookup();
+}
 // ===============================
 // 🔹 AUTO FETCH BRANCH NAME
 // ===============================
@@ -371,6 +381,32 @@ function initInstallmentAutoFetch() {
             });
     });
 }
+
+// ===============================
+// 🔹 AUTO FETCH CUSTOMER NAME
+// ===============================
+
+
+function initCustomerAutoFetch() {
+
+    let field = document.getElementById("customer_id");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code) return;
+
+        fetch(contextPath + "/CommonLookupServlet?type=customer&action=getName&code=" + encodeURIComponent(code))
+            .then(res => res.text())
+            .then(name => {
+                let desc = document.getElementById("customerName");
+                if (desc) desc.value = name || "Not Found";
+            });
+    });
+}
 // ===============================
 // 🔹 AUTO INIT
 // ===============================
@@ -381,6 +417,7 @@ window.addEventListener("DOMContentLoaded", function () {
 	initAccountAutoFetch();   
 	initGLAutoFetch(); 
 	initAreaAutoFetch();
-	initInstallmentAutoFetch();   // ✅ ADD THIS
+	initInstallmentAutoFetch();   
+	initCustomerAutoFetch();// ✅ ADD THIS
 
 });

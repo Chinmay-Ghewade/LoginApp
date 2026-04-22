@@ -166,7 +166,7 @@ ORDER BY FORACCOUNT_CODE,TXN_DATE]]>
 	<title>
 		<band height="39" splitType="Stretch">
 			<subreport>
-				<reportElement x="1" y="0" width="555" height="39" uuid="6a2749e9-4d24-4d54-8304-c7c702560942"/>
+				<reportElement x="91" y="0" width="412" height="39" uuid="db407fe3-0e79-4a8f-9897-1123f0c74eb9"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>

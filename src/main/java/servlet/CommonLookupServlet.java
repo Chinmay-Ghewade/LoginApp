@@ -107,6 +107,10 @@ public class CommonLookupServlet extends HttpServlet {
                 	query = "SELECT AREA_DESCRIPTION FROM BRANCH.BRANCHAREA WHERE AREA_CODE=?";
                 } else if ("installment".equalsIgnoreCase(type)) {
                     query = "SELECT DISCRIPTION FROM HEADOFFICE.INSTALLMENTTYPE WHERE INSTALLMENTTYPE_ID=?";
+                } else if ("accountType".equalsIgnoreCase(type)) {
+                    query = "SELECT NAME FROM HEADOFFICE.ACCOUNTTYPE WHERE ACCOUNT_TYPE=?";
+                } else if ("customer".equalsIgnoreCase(type)) {
+                    query = "SELECT NAME FROM CUSTOMER.CUSTOMER WHERE CUSTOMER_ID=?";
                 } else {
                     out.print("");
                     return;
@@ -139,14 +143,16 @@ public class CommonLookupServlet extends HttpServlet {
                 listBank(conn, out);
             } else if ("product".equalsIgnoreCase(type)) {
             	listProduct(conn, out, request);
-            } else if ("accountType".equalsIgnoreCase(type)) {
-                listAccountType(conn, out);	
             } else if ("glByAccountType".equalsIgnoreCase(type)) {
                 listGLByAccountType(conn, out, request);
             } else if ("area".equalsIgnoreCase(type)) {
                 listArea(conn, out);  
             } else if ("installment".equalsIgnoreCase(type)) {
-                    listInstallment(conn, out);
+                listInstallment(conn, out);
+            } else if ("accountType".equalsIgnoreCase(type)) {
+                listAccountType(conn, out);
+            } else if ("customer".equalsIgnoreCase(type)) {
+                listCustomer(conn, out);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -369,43 +375,9 @@ public class CommonLookupServlet extends HttpServlet {
      rs.close();
      ps.close();
  }
- 
- private void listAccountType(Connection conn, PrintWriter out) throws Exception {
-
-	    String sql =
-	        "SELECT ACCOUNT_TYPE, NAME FROM HEADOFFICE.ACCOUNTTYPE ORDER BY ACCOUNT_TYPE";
-
-	    PreparedStatement ps = conn.prepareStatement(sql);
-	    ResultSet rs = ps.executeQuery();
-
-	    // ✅ USE COMMON HEADER
-	    printTableHeader(out, "Select Account Type", "Account Type", "Name", false);
-
-	    while (rs.next()) {
-
-	        String type = rs.getString("ACCOUNT_TYPE");
-	        String name = rs.getString("NAME");
-
-	        if (type == null) type = "";
-	        if (name == null) name = "";
-
-	        type = type.replace("'", "\\'");
-	        name = name.replace("'", "\\'");
-
-	        out.println("<tr class='lookup-row' " +
-	        	    "onclick=\"selectAccountType('" + type + "','" + name + "')\">");
-	        
-	        out.println("<td>" + type + "</td>");
-	        out.println("<td>" + name + "</td>");
-	        out.println("</tr>");
-	    }
-
-	    // ✅ USE COMMON FOOTER
-	    printTableFooter(out);
-
-	    rs.close();
-	    ps.close();
-	}
+//===============================
+ // 🔹 GL ACCOUNT
+ // ===============================
  
  private void listGLByAccountType(Connection conn, PrintWriter out, HttpServletRequest request) throws Exception {
 
@@ -470,6 +442,9 @@ public class CommonLookupServlet extends HttpServlet {
 	    rs.close();
 	    ps.close();
 	}
+//===============================
+ // 🔹 AREA
+ // ===============================
  
  private void listArea(Connection conn, PrintWriter out) throws Exception {
 
@@ -531,6 +506,84 @@ private void listInstallment(Connection conn, PrintWriter out) throws Exception 
                 + code + "','" + name + "')\">");
 
         out.println("<td>" + code + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("</tr>");
+    }
+
+    printTableFooter(out);
+
+    rs.close();
+    ps.close();
+}
+
+//===============================
+// 🔹 ACCOUNT TYPE
+// ===============================
+
+private void listAccountType(Connection conn, PrintWriter out) throws Exception {
+
+	String sql = 
+		    "SELECT ACCOUNT_TYPE, NAME FROM HEADOFFICE.ACCOUNTTYPE ORDER BY ACCOUNT_TYPE";
+	
+    PreparedStatement ps = conn.prepareStatement(sql);
+    ResultSet rs = ps.executeQuery();
+
+    printTableHeader(out, "Select Account Type", "Type", "Description", false);
+
+    while (rs.next()) {
+
+        String code = rs.getString("ACCOUNT_TYPE");
+        String name = rs.getString("NAME");
+
+        if (code == null) code = "";
+        if (name == null) name = "";
+
+        code = code.replace("'", "\\'");
+        name = name.replace("'", "\\'");
+
+        out.println("<tr class='lookup-row' onclick=\"selectAccountType('"
+                + code + "','" + name + "')\">");
+
+        out.println("<td>" + code + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("</tr>");
+    }
+
+    printTableFooter(out);
+
+    rs.close();
+    ps.close();
+}
+//===============================
+//🔹 CUSTOMER
+//===============================
+
+
+private void listCustomer(Connection conn, PrintWriter out) throws Exception {
+
+    String sql =
+        "SELECT CUSTOMER_ID, NAME FROM CUSTOMER.CUSTOMER ORDER BY CUSTOMER_ID";
+
+    PreparedStatement ps = conn.prepareStatement(sql);
+    ResultSet rs = ps.executeQuery();
+
+    printTableHeader(out, "Select Customer", "Customer ID", "Name", false);
+
+    while (rs.next()) {
+
+        String id = rs.getString("CUSTOMER_ID");
+        String name = rs.getString("NAME");
+
+        if (id == null) id = "";
+        if (name == null) name = "";
+
+        id = id.replace("'", "\\'");
+        name = name.replace("'", "\\'");
+
+        out.println("<tr class='lookup-row' onclick=\"selectCustomer('"
+                + id + "','" + name + "')\">");
+
+        out.println("<td>" + id + "</td>");
         out.println("<td>" + name + "</td>");
         out.println("</tr>");
     }
