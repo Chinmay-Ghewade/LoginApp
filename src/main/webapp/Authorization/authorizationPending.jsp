@@ -54,6 +54,11 @@
                 <h3>Shares </h3>
                 <p class="loading" id="pending-shares-value">Loading...</p>
             </div>
+            
+             <div class="card" onclick="openInParentFrame('Authorization/authorizationSharesMode.jsp', 'Authorization > Shares Mode')">
+                <h3>Shares (Cash & Transfer) </h3>
+                <p class="loading" id="pending-shares-value">Loading...</p>
+            </div>
         </div>  <%-- this closing div was already there --%>
     </div>
     
