@@ -15,53 +15,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authorization Pending</title>
     <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
-	<link rel="stylesheet" href="../css/cardView.css">
+    <link rel="stylesheet" href="../css/cardView.css">
 </head>
 <body>
     <div class="dashboard-container">
         <div class="cards-wrapper">
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingCustomers.jsp', 'Authorization  > Customer List')">
                 <h3>Customers</h3>
                 <p class="loading" id="pending-customers-value">Loading...</p>
             </div>
-            
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingApplications.jsp', 'Authorization > Application List')">
                 <h3>Application</h3>
                 <p class="loading" id="pending-applications-value">Loading...</p>
             </div>
-            
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingMasters.jsp', 'Authorization > Pending Masters')">
                 <h3>Masters</h3>
                 <p class="loading" id="pending-masters-value">Loading...</p>
             </div>
-            
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingUsers.jsp', 'Authorization > Pending Users')">
                 <h3>Users</h3>
                 <p class="loading" id="pending-users-value">Loading...</p>
             </div>
-            
-        <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingTransactionCash.jsp', 'Authorization > Pending Transaction (Cash)')">
+
+            <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingTransactionCash.jsp', 'Authorization > Pending Transaction (Cash)')">
                 <h3>Transaction (Cash)</h3>
                 <p class="loading" id="pending-txn-cash-value">Loading...</p>
             </div>
-            
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingTransactionTransfer.jsp', 'Authorization > Pending Transaction (Transfer)')">
                 <h3>Transaction (Transfer)</h3>
                 <p class="loading" id="pending-txn-transfer-value">Loading...</p>
             </div>
-            
+
             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingShares.jsp', 'Authorization > Pending Shares')">
-                <h3>Shares </h3>
+                <h3>Shares</h3>
                 <p class="loading" id="pending-shares-value">Loading...</p>
             </div>
-            
-             <div class="card" onclick="openInParentFrame('Authorization/authorizationSharesMode.jsp', 'Authorization > Shares Mode')">
-                <h3>Shares (Cash & Transfer) </h3>
-                <p class="loading" id="pending-shares-value">Loading...</p>
+
+            <!-- ✅ FIXED: unique id="pending-shares-mode-value" (was duplicate "pending-shares-value") -->
+            <div class="card" onclick="openInParentFrame('Authorization/authorizationSharesMode.jsp', 'Authorization > Shares Mode')">
+                <h3>Shares (Cash &amp; Transfer)</h3>
+                <p class="loading" id="pending-shares-mode-value">Loading...</p>
             </div>
-        </div>  <%-- this closing div was already there --%>
+
+        </div>
     </div>
-    
+
     <script>
     window.onload = function() {
         if (window.parent && window.parent.updateParentBreadcrumb) {
@@ -71,23 +74,25 @@
         }
         loadCardValues();
     };
-    
+
     async function loadCardValues() {
         await Promise.all([
-            loadCard('pending_customers', 'pending-customers-value', 'auth'),
+            loadCard('pending_customers',    'pending-customers-value',    'auth'),
             loadCard('pending_applications', 'pending-applications-value', 'auth'),
-            loadCard('pending_masters', 'pending-masters-value', 'auth'),
-            loadCard('pending_users', 'pending-users-value', 'auth'),
-            loadCard('pending_txn_cash', 'pending-txn-cash-value', 'auth'),
+            loadCard('pending_masters',      'pending-masters-value',      'auth'),
+            loadCard('pending_users',        'pending-users-value',        'auth'),
+            loadCard('pending_txn_cash',     'pending-txn-cash-value',     'auth'),
             loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
-            loadCard('pending_shares', 'pending-shares-value', 'auth')
+            loadCard('pending_shares',       'pending-shares-value',       'auth'),
+            loadCard('pending_shares_modes', 'pending-shares-mode-value',  'auth')  // ✅ FIXED: matches the id above
         ]);
-    }  
+    }
+
     async function loadCard(cardId, elementId, cardType) {
         try {
             const response = await fetch('../getCardValueUnified.jsp?type=' + cardType + '&id=' + cardId);
             const data = await response.json();
-            
+
             const valueElement = document.getElementById(elementId);
             if (valueElement) {
                 if (data.error) {
@@ -118,6 +123,6 @@
             }
         }
     }
-</script>
+    </script>
 </body>
 </html>
