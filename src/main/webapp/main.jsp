@@ -517,6 +517,24 @@
             <span class="tooltip-label">Shares</span>
         </li>
         
+        <!-- locker -->
+        <li data-page="Lockers/locker.jsp">
+            <a href="#" onclick="loadPage('Lockers/locker.jsp', 'Locker', this); return false;">
+                <img src="images/right-arrow.png" width="18" height="18" alt="">
+                <span class="menu-label">Locker</span>
+            </a>
+            <span class="tooltip-label">Locker</span>
+        </li>
+        
+        <!-- Casher -->
+        <li data-page="Cashers/casher.jsp">
+            <a href="#" onclick="loadPage('Cashers/casher.jsp', 'Casher', this); return false;">
+                <img src="images/right-arrow.png" width="18" height="18" alt="">
+                <span class="menu-label">Casher</span>
+            </a>
+            <span class="tooltip-label">Casher</span>
+        </li>
+        
     </ul>
 
     <div class="logout">
