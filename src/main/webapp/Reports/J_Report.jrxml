@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="J_Report" language="groovy" pageWidth="683" pageHeight="842" columnWidth="643" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e7700d2a-59e1-46f3-8f17-28766df2ab70">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="member_type" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+    TO_NUMBER(SUBSTR(ACCOUNT_CODE, 8, 14)) AS SHARES_NO,
+    NAME,
+    FN_GET_MEMBER_ADDRESS(
+        SUBSTR(ACCOUNT_CODE, 1, 4),
+        'A',
+        SUBSTR(ACCOUNT_CODE, 8, 14)
+    ) AS ADDRESS,
+    TO_CHAR(DATEACCOUNTOPEN, 'DD/MM/YYYY') AS OPEN_D,
+    TO_CHAR(DATEACCOUNTCLOSE, 'DD/MM/YYYY') AS CLOSE_D
+FROM
+    ACCOUNT.ACCOUNT
+WHERE
+    SUBSTR(ACCOUNT_CODE, 1, 4) = $P{branch_code}
+    AND SUBSTR(ACCOUNT_CODE, 5, 3) = (
+        SELECT
+            MEMBER_PRODUCT
+        FROM
+            SHARES.MEMBERTYPE_MASTER
+        WHERE
+            MEMBER_TYPECODE = $P{member_type}
+    )
+ORDER BY
+    ACCOUNT_CODE]]>
+	</queryString>
+	<field name="SHARES_NO" class="java.math.BigDecimal"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRESS" class="java.lang.String"/>
+	<field name="OPEN_D" class="java.lang.String"/>
+	<field name="CLOSE_D" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="45" splitType="Stretch">
+			<subreport>
+				<reportElement x="56" y="0" width="532" height="45" uuid="39098d8c-fb7e-4850-8c5c-0d8698675230"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="38" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="642" height="1" uuid="cd45b62f-d28c-4bb2-af4d-ad96a4b52d6c"/>
+			</line>
+			<line>
+				<reportElement x="0" y="37" width="642" height="1" uuid="408c3f9b-8572-4d47-8504-8fd63745d517"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="37" uuid="62305812-84ae-455a-8743-515e9eb8f800"/>
+			</line>
+			<line>
+				<reportElement x="69" y="1" width="1" height="37" uuid="750b01fc-aed7-4f8c-9d94-b979aac972c7"/>
+			</line>
+			<line>
+				<reportElement x="307" y="1" width="1" height="37" uuid="3b723a40-2cfd-4861-9c87-617de54104ca"/>
+			</line>
+			<line>
+				<reportElement x="491" y="1" width="1" height="37" uuid="e71a72f2-f063-4d8b-adad-3afa6e7ddff3"/>
+			</line>
+			<line>
+				<reportElement x="568" y="1" width="1" height="37" uuid="baa09536-8663-4406-afa0-d074565ed88d"/>
+			</line>
+			<line>
+				<reportElement x="642" y="1" width="1" height="37" uuid="13b88e72-4d43-4faa-8053-27432af0bc6f"/>
+			</line>
+			<staticText>
+				<reportElement x="7" y="2" width="55" height="36" uuid="c453907f-dbf0-4996-9f65-b590463cdbb1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="1" width="237" height="36" uuid="14e64947-2ec6-4e42-963a-c652c769b399"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="1" width="183" height="36" uuid="2c9608ef-6f43-45a2-8e6a-7b52be27cf4d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Address]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="493" y="1" width="76" height="36" uuid="4c662c52-b02b-4040-9256-959ce5daf872"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Open Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="569" y="1" width="73" height="36" uuid="a3573a53-b524-44f2-855c-78af74114824"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Close Date]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="0" width="68" height="15" uuid="31b33502-0f16-4443-82d3-c8df4d356a33"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SHARES_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="73" y="0" width="237" height="15" uuid="6f90d217-5b8d-4450-8572-798deb7c086b"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="316" y="0" width="175" height="15" uuid="79cc7f8d-4cd0-4652-a2ff-44769388bec6"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="492" y="0" width="76" height="15" uuid="8bcf6d28-9c59-4aa0-bfd7-8c175f326fe9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OPEN_D}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="569" y="0" width="74" height="15" uuid="33972c67-2d42-4862-ad2c-1e6bcec55a9c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CLOSE_D}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="491" y="-17" width="1" height="32" uuid="9b74f8cd-c66e-4bac-9e47-34b7416baa6d"/>
+			</line>
+			<line>
+				<reportElement x="568" y="-17" width="1" height="32" uuid="33ff0a14-e3bc-47d4-9dc4-a3af5689afee"/>
+			</line>
+			<line>
+				<reportElement x="642" y="-17" width="1" height="32" uuid="ce49ec03-9578-4130-b4e3-58d70bc4767e"/>
+			</line>
+			<line>
+				<reportElement x="307" y="-17" width="1" height="32" uuid="de512b6c-1d52-4aa0-80a7-dd8da3f8823b"/>
+			</line>
+			<line>
+				<reportElement x="69" y="-18" width="1" height="33" uuid="57a2d126-9221-4304-ae0f-2e613d7709fd"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-17" width="1" height="32" uuid="6beb5c00-79fb-42ba-9b2a-4c391665a298"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="26" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="9" width="55" height="17" uuid="669826b5-dc28-4687-b75b-0daf9e3b04e4"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="56" y="9" width="128" height="17" uuid="d8d1a65e-d920-4fd9-9d85-f804d88ab665"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="551" y="9" width="53" height="17" uuid="d5b350b2-ce40-4972-864c-777a2a0f109e"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="604" y="9" width="38" height="17" uuid="257efaaa-a867-481a-93eb-b4fb8accd7b7"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="0" width="642" height="1" uuid="e5f79cc0-f951-4e11-94bd-c3b2ab04d1d5"/>
+			</line>
+		</band>
+	</pageFooter>
+</jasperReport>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ConsolTBGoa (Closing)" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6aaf7658-79aa-4ee5-9a00-bbb328d42113">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 'Others' AS OTHERS,
+       INITCAP(LEFTDES) AS LEFTDESCRIPTION,
+       ABS(LEFT_AMT) AS LEFT_AMOUNT,
+       INITCAP(RIGHTDES) AS RIGHTSDESCRITION,
+       ABS(RIGHT_AMT) AS RIGHT_AMOUNT
+FROM TEMP.MTEMP_TBGOAFOOTER]]>
+	</queryString>
+	<field name="OTHERS" class="java.lang.String"/>
+	<field name="LEFTDESCRIPTION" class="java.lang.String"/>
+	<field name="LEFT_AMOUNT" class="java.math.BigDecimal"/>
+	<field name="RIGHTSDESCRITION" class="java.lang.String"/>
+	<field name="RIGHT_AMOUNT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="48" splitType="Stretch">
+			<subreport>
+				<reportElement x="29" y="0" width="491" height="48" uuid="92220527-c636-4545-8e9b-6664b07920d3"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="40" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="1b97d447-f13c-40a0-ae14-4c6b8ac6afff"/>
+			</line>
+			<line>
+				<reportElement x="0" y="38" width="555" height="1" uuid="31add91d-cf8d-4b40-81f2-96354c6c0978"/>
+			</line>
+			<line>
+				<reportElement x="554" y="1" width="1" height="37" uuid="98ce9c31-50b8-497e-8a45-24685b6a73de"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="37" uuid="28790eef-bde2-44e6-98ec-47e1b6d62fca"/>
+			</line>
+			<line>
+				<reportElement x="184" y="1" width="1" height="37" uuid="18d98186-8645-4b4d-982a-14ed27579bc2"/>
+			</line>
+			<line>
+				<reportElement x="263" y="1" width="1" height="37" uuid="e3e05513-c413-4431-84bf-2e996319a1ea"/>
+			</line>
+			<line>
+				<reportElement x="460" y="1" width="1" height="37" uuid="d8799f70-3959-43cf-9a05-74507b1e95da"/>
+			</line>
+			<staticText>
+				<reportElement x="1" y="1" width="183" height="37" uuid="b11c3b2b-81ec-4f69-ba28-4253c356494a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Right Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="185" y="1" width="78" height="37" uuid="cc268369-5fcf-49d0-b19a-3908c3ad309f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Right Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="264" y="1" width="196" height="37" uuid="5aa42c83-cb83-4df4-861b-4fef0366c4a9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Left Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="461" y="1" width="93" height="37" uuid="c3c6127d-42a3-4baf-a836-66faa56dab78"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Left Amount ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="9" y="0" width="172" height="16" uuid="a7c290b3-0a30-458b-968f-66c951ed8ff9"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{RIGHTSDESCRITION}]]></textFieldExpression>
+			</textField>
+			<textField pattern=" #,##0.00">
+				<reportElement x="187" y="0" width="67" height="16" uuid="4dbb6330-bc0b-43ea-9884-22803bc2d1c6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{RIGHT_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="273" y="0" width="184" height="16" uuid="3ad9fe3a-e24e-49f2-80d2-38ef48c47963"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{LEFTDESCRIPTION}]]></textFieldExpression>
+			</textField>
+			<textField pattern=" #,##0.00">
+				<reportElement x="460" y="0" width="84" height="16" uuid="a298136c-684a-4404-a3aa-1e07c35c4f60"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{LEFT_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-11" width="1" height="29" uuid="c92f1bc0-7614-465c-95b7-b595f583c121"/>
+			</line>
+			<line>
+				<reportElement x="184" y="-15" width="1" height="30" uuid="c2c281d2-ba34-41bc-9427-509bd4b81e29"/>
+			</line>
+			<line>
+				<reportElement x="263" y="-13" width="1" height="30" uuid="86ee6dce-ae7f-4b92-94be-755005bb1dfb"/>
+			</line>
+			<line>
+				<reportElement x="460" y="-15" width="1" height="30" uuid="f0185427-a79c-460e-89de-2dc86b1720df"/>
+			</line>
+			<line>
+				<reportElement x="554" y="-14" width="1" height="30" uuid="28890b4b-a625-4609-8769-fb2d4b5b5c3a"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="8" width="48" height="17" uuid="5ba52bae-376a-446a-b844-11ce04e00ff8"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="49" y="8" width="132" height="17" uuid="436eb9fd-1b2b-4888-839a-75e743ddf16f"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="461" y="8" width="59" height="17" uuid="14d4ccfd-4eae-41ae-b1ea-417620a24cdd"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="521" y="8" width="34" height="17" uuid="3553b44c-70a8-4817-8249-bfd94d03f65f"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" uuid="4ed2a53a-6091-4966-8844-1d5ef27cb690"/>
+			</line>
+		</band>
+	</pageFooter>
+</jasperReport>

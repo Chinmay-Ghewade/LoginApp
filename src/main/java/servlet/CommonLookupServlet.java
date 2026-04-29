@@ -111,6 +111,10 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT NAME FROM HEADOFFICE.ACCOUNTTYPE WHERE ACCOUNT_TYPE=?";
                 } else if ("customer".equalsIgnoreCase(type)) {
                     query = "SELECT NAME FROM CUSTOMER.CUSTOMER WHERE CUSTOMER_ID=?";
+                } else if ("city".equalsIgnoreCase(type)) {
+                    query = "SELECT NAME FROM GLOBALCONFIG.CITY WHERE CITY_CODE=?";    
+                } else if ("memberType".equalsIgnoreCase(type)) {
+                    query = "SELECT DISCREPTION FROM SHARES.MEMBERTYPE_MASTER WHERE MEMBER_TYPECODE=?";
                 } else {
                     out.print("");
                     return;
@@ -153,6 +157,10 @@ public class CommonLookupServlet extends HttpServlet {
                 listAccountType(conn, out);
             } else if ("customer".equalsIgnoreCase(type)) {
                 listCustomer(conn, out);
+            } else if ("city".equalsIgnoreCase(type)) {
+                listCity(conn, out);
+            } else if ("memberType".equalsIgnoreCase(type)) {
+                listMemberType(conn, out);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -558,7 +566,6 @@ private void listAccountType(Connection conn, PrintWriter out) throws Exception 
 //🔹 CUSTOMER
 //===============================
 
-
 private void listCustomer(Connection conn, PrintWriter out) throws Exception {
 
     String sql =
@@ -592,6 +599,80 @@ private void listCustomer(Connection conn, PrintWriter out) throws Exception {
 
     rs.close();
     ps.close();
+}
+//===============================
+//🔹 CITY
+//===============================
+private void listCity(Connection conn, PrintWriter out) throws Exception {
+
+    String sql =
+        "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY CITY_CODE";
+
+    PreparedStatement ps = conn.prepareStatement(sql);
+    ResultSet rs = ps.executeQuery();
+
+    printTableHeader(out, "Select City", "City Code", "City Name", false);
+
+    while (rs.next()) {
+
+        String code = rs.getString("CITY_CODE");
+        String name = rs.getString("NAME");
+
+        if (code == null) code = "";
+        if (name == null) name = "";
+
+        code = code.replace("'", "\\'");
+        name = name.replace("'", "\\'");
+
+        out.println("<tr class='lookup-row' onclick=\"selectCity('"
+                + code + "','" + name + "')\">");
+
+        out.println("<td>" + code + "</td>");
+        out.println("<td>" + name + "</td>");
+        out.println("</tr>");
+    }
+
+    printTableFooter(out);
+
+    rs.close();
+    ps.close();
+}
+//===============================
+//🔹 MEMBER TYPE
+//===============================
+private void listMemberType(Connection conn, PrintWriter out) throws Exception {
+
+ String sql = 
+     "SELECT MEMBER_TYPECODE, DISCREPTION FROM SHARES.MEMBERTYPE_MASTER ORDER BY MEMBER_TYPECODE";
+
+ PreparedStatement ps = conn.prepareStatement(sql);
+ ResultSet rs = ps.executeQuery();
+
+ printTableHeader(out, "Select Member Type", "Code", "Description", false);
+
+ while (rs.next()) {
+
+     String code = rs.getString("MEMBER_TYPECODE");
+     String name = rs.getString("DISCREPTION");
+
+     if (code == null) code = "";
+     if (name == null) name = "";
+
+     code = code.replace("'", "\\'");
+     name = name.replace("'", "\\'");
+
+     out.println("<tr class='lookup-row' onclick=\"selectMemberType('"
+             + code + "','" + name + "')\">");
+
+     out.println("<td>" + code + "</td>");
+     out.println("<td>" + name + "</td>");
+     out.println("</tr>");
+ }
+
+ printTableFooter(out);
+
+ rs.close();
+ ps.close();
 }
 
 }

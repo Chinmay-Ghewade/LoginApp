@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LoanClassificationReport(Sanction Amt Wise)" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="13c7e276-fb4e-475b-b81e-c5314c37b8db">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+    FROMSANCTION || ' To ' || TOSANCTION AS SANCTIONAMOUNT,
+    COUNT(ACCOUNT_CODE) AS NOOFACCOUNTS,
+    SUM(SANCTIONAMOUNT) AS BALANCE
+FROM
+    TEMP.LOANCLASS,
+    TEMP.SANCTIONWISELOAN
+WHERE
+    BRANCH_CODE = $P{branch_code}
+    AND ABS(SANCTIONAMOUNT) BETWEEN FROMSANCTION AND TOSANCTION
+GROUP BY
+    FROMSANCTION, TOSANCTION
+ORDER BY
+    FROMSANCTION, TOSANCTION]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="59" splitType="Stretch">
+			<subreport>
+				<reportElement x="59" y="0" width="438" height="59" uuid="aea291cc-4e53-4e73-a129-9c3855f7ca02"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="42" splitType="Stretch">
+			<line>
+				<reportElement x="1" y="1" width="555" height="1" uuid="ac312aef-7d79-49ac-b3aa-78bcfa803ef1"/>
+			</line>
+			<line>
+				<reportElement x="1" y="40" width="555" height="1" uuid="11bf80f5-8162-4df3-b1bc-89cd71ae3d08"/>
+			</line>
+			<line>
+				<reportElement x="1" y="2" width="1" height="38" uuid="6f82ef33-6620-4be4-b3c7-8daec77f640a"/>
+			</line>
+			<line>
+				<reportElement x="133" y="1" width="1" height="38" uuid="530212cd-5006-418f-9468-4adda426d7fa"/>
+			</line>
+			<line>
+				<reportElement x="339" y="2" width="1" height="39" uuid="00476419-1589-4c33-afd6-96687bb30f45"/>
+			</line>
+			<line>
+				<reportElement x="555" y="1" width="1" height="39" uuid="68a25199-46ea-43c7-bd3f-b0f51037b394"/>
+			</line>
+			<staticText>
+				<reportElement x="2" y="2" width="131" height="38" uuid="c50e9d5d-12e9-4a9c-a273-9beb547e1a65"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sanction Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="133" y="2" width="207" height="37" uuid="de74cd7e-de16-463d-bb8c-a1b65ed61886"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No. Of Accounts]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="339" y="2" width="216" height="37" uuid="e109f953-b500-4e5f-a7f3-150d5009d91d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outstanding Balance]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="53" splitType="Stretch"/>
+	</detail>
+	<pageFooter>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="11" width="86" height="20" uuid="81eba83f-6828-4e21-855f-5a9362fbffbf"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="87" y="11" width="119" height="20" uuid="b5b84407-fc7c-4ffc-8d1c-d799e01d5fb0"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="431" y="11" width="80" height="20" uuid="083cf88e-769a-46b8-ad2b-a2e050bcb21a"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="513" y="11" width="42" height="20" uuid="9a8bcc6d-7801-404f-9e42-077a9dca7891"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="2" width="555" height="1" uuid="fc491d62-0e4d-490b-ad5b-4bd099ef4267"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="2" y="0" width="100" height="20" uuid="79063172-8ee2-4118-97ab-17277803a377"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>
