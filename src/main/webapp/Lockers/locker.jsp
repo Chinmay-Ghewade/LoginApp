@@ -81,6 +81,10 @@ window.onload = function () {
     if (window.parent && window.parent.updateParentBreadcrumb) {
         window.parent.updateParentBreadcrumb('Lockers');
     }
+    
+    if (window.parent && window.parent.pushNavigationHistory) {
+        window.parent.pushNavigationHistory('Lockers', 'Lockers/locker.jsp');
+    }
 };
 
 function openPage(page) {
@@ -94,6 +98,11 @@ function openPage(page) {
         }
         if (window.parent.updateParentBreadcrumb) {
             window.parent.updateParentBreadcrumb('Lockers > ' + config.label);
+        }
+        // Push both Lockers and the sub-page into history
+        if (window.parent.pushNavigationHistory) {
+            window.parent.pushNavigationHistory('Lockers', 'Lockers/locker.jsp');
+            window.parent.pushNavigationHistory(config.label, config.url);
         }
     }
 }

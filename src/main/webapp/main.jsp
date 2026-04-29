@@ -1226,12 +1226,31 @@ function navigateToBreadcrumbByIndex(index) {
         }
     }
     
-    console.warn('No navigation history found for:', targetPath);
+    cconsole.warn('No navigation history found for:', targetPath);
+ // Fallback: try to match by label in PAGE_EXCEPTIONS
+    if (typeof PAGE_EXCEPTIONS !== 'undefined') {
+        for (var url in PAGE_EXCEPTIONS) {
+            if (PAGE_EXCEPTIONS[url] === targetPath.split(' > ').pop()) {
+                document.getElementById("contentFrame").src = url;
+                updateBreadcrumb(targetPath);
+                sessionStorage.setItem('currentPage', url);
+                addToNavigationStack(url, targetPath);
+                return;
+            }
+        }
+    }
 }
 
 window.updateParentBreadcrumb = function(path, currentPage) {
     if (currentPage) {
         addToNavigationStack(currentPage, path);
+    } else {
+        // Auto-derive page from current iframe src
+        var iframe = document.getElementById('contentFrame');
+        if (iframe && iframe.src) {
+            var src = iframe.src.replace(window.location.origin + '/', '').split('?')[0];
+            addToNavigationStack(src, path);
+        }
     }
     sessionStorage.setItem('currentBreadcrumb', path);
     updateBreadcrumb(path);
