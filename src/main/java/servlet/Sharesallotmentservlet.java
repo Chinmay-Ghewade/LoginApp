@@ -128,11 +128,11 @@ public class Sharesallotmentservlet extends HttpServlet {
             while (rs.next()) {
                 String code = clean(rs.getString("ACCOUNT_CODE"));
                 String name = jsonSafe(rs.getString("NAME"));
-                String prod = jsonSafe(rs.getString("PRODUCT_NAME")); // ← added
+                String prod = jsonSafe(rs.getString("PRODUCT_NAME"));
                 if (!first) sb.append(",");
                 sb.append("{\"code\":\"").append(code)
                   .append("\",\"name\":\"").append(name)
-                  .append("\",\"product\":\"").append(prod).append("\"}"); // ← added
+                  .append("\",\"product\":\"").append(prod).append("\"}");
                 first = false;
             }
             sb.append("]}");
@@ -350,16 +350,16 @@ public class Sharesallotmentservlet extends HttpServlet {
                 "VALUES ('A', ?, ?, ?, ?, 100, ?, ?, ?, ?, ?, 'N', ?, ?, ?, 'E')");
             ps.setLong      (1,  mainMemberNo);
             ps.setLong      (2,  certNo);
-            ps.setDate      (3,  workingDate);       // ISSUE_DATE   = working date
-            ps.setDate      (4,  issueDate);         // MEETING_DATE = meeting date from form
+            ps.setDate      (3,  workingDate);
+            ps.setDate      (4,  issueDate);
             ps.setInt       (5,  noShares);
             ps.setLong      (6,  fromNo);
             ps.setLong      (7,  toNo);
             ps.setBigDecimal(8,  totalAmt);
-            ps.setString    (9,  mainAccCode);       // ACCOUNT_NUMBER
-            ps.setString    (10, userId);            // USER_ID     ← from session
-            ps.setString    (11, customerId);        // CUSTOMER_ID ← from DB
-            ps.setString    (12, branchCode);   
+            ps.setString    (9,  mainAccCode);
+            ps.setString    (10, userId);
+            ps.setString    (11, customerId);
+            ps.setString    (12, branchCode);
             ps.executeUpdate(); ps.close();
 
             // ── Get next scroll number ──
@@ -447,7 +447,7 @@ public class Sharesallotmentservlet extends HttpServlet {
             "   TRANIDENTIFICATION_ID, AUTHORISE_DATE, CASHHANDLING_NUMBER, " +
             "   GLBRANCH_CODE, CREATED_DATE, MODIFIED_DATE, RECON_CODE) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'N', 'E', " +
-            "        0, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NULL)");
+            "        ?, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NULL)");
 
         ps.setString    (1,  branchCode);
         ps.setDate      (2,  scrollDate);
@@ -463,6 +463,10 @@ public class Sharesallotmentservlet extends HttpServlet {
         ps.setBigDecimal(11, glBalance);
         ps.setString    (12, particular);
         ps.setString    (13, userId);
+        // ── CHANGED: store 88 if either ACCOUNT_CODE or FORACCOUNT_CODE contains "901", else 0 ──
+        boolean isSharesRow = (accountCode    != null && accountCode.contains("901"))
+                           || (forAccountCode != null && forAccountCode.contains("901"));
+        ps.setInt       (14, isSharesRow ? 88 : 0);
         ps.executeUpdate();
         ps.close();
     }

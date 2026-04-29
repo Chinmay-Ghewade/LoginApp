@@ -484,7 +484,7 @@ public class SharesRefundServlet extends HttpServlet {
             "   TRANIDENTIFICATION_ID, AUTHORISE_DATE, CASHHANDLING_NUMBER, " +
             "   GLBRANCH_CODE, CREATED_DATE, MODIFIED_DATE, RECON_CODE) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'N', 'E', " +
-            "        0, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NULL)");
+            "        ?, NULL, NULL, NULL, SYSTIMESTAMP, SYSTIMESTAMP, NULL)");
         try {
             ps.setString    (1,  branchCode);
             ps.setDate      (2,  scrollDate);
@@ -500,6 +500,10 @@ public class SharesRefundServlet extends HttpServlet {
             ps.setBigDecimal(11, glBalance);
             ps.setString    (12, particular);
             ps.setString    (13, userId);
+            // ── CHANGED: store 88 if either ACCOUNT_CODE or FORACCOUNT_CODE contains "901", else 0 ──
+            boolean isSharesRow = (accountCode    != null && accountCode.contains("901"))
+                               || (forAccountCode != null && forAccountCode.contains("901"));
+            ps.setInt       (14, isSharesRow ? 88 : 0);
             ps.executeUpdate();
         } finally {
             try { ps.close(); } catch (Exception ex) { /* ignore */ }
