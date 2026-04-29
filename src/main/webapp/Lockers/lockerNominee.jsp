@@ -71,11 +71,6 @@
       display: flex;
     }
 
-    /* Declaration spans all grid columns */
-    .declaration-full {
-      grid-column: 1 / -1;
-    }
-
     /* Each nominee block is visually separated like its own sub-fieldset */
     .nominee-block {
       border: 1px solid #c9c5e8;
@@ -93,6 +88,62 @@
       gap: 10px;
       justify-content: center;
       margin-top: 4px;
+    }
+
+    /* Equal 3-column grid — overrides addCustomer.css for nominee fields only */
+    .nominee-block .personal-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 12px !important;
+      align-items: end !important;
+      width: 100% !important;
+    }
+
+    /* Every cell stacks label + field */
+    .nominee-block .personal-grid > div {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    /* ALL inputs AND selects same width — overrides addCustomer.css */
+    .nominee-block .personal-grid input,
+    .nominee-block .personal-grid select {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
+    /* zipError must not affect cell height / grid alignment */
+    .nominee-block .personal-grid .zip-input + small.zipError {
+      position: absolute !important;
+      font-size: 11px !important;
+      color: red !important;
+      margin-top: 2px !important;
+    }
+    .nominee-block .personal-grid div:has(.zip-input) {
+      position: relative !important;
+    }
+
+    /* Declaration cell — spans all 3 cols, checkbox+text centered */
+    .nominee-block .personal-grid .declaration-cell {
+      grid-column: 1 / -1 !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding-top: 6px !important;
+    }
+    .nominee-block .personal-grid .declaration-cell label {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
     }
   </style>
 </head>
@@ -113,13 +164,8 @@
       </div>
 
       <div>
-        <label>Nomination Date</label>
-        <input type="date" name="nominationDate" id="nominationDate" required>
-      </div>
-
-      <div>
-        <label>Remarks</label>
-        <input type="text" name="remarks" id="remarks" maxlength="200">
+        <label>Locker Type</label>
+        <input type="text" name="lockerType" id="lockerType" required>
       </div>
 
     </div>
@@ -220,12 +266,6 @@
         </div>
 
         <div>
-          <label>Mobile Number</label>
-          <input type="text" name="nomineeMobile[]"
-                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
-        </div>
-
-        <div>
           <label>Address 1</label>
           <input type="text" name="nomineeAddress1[]" required>
         </div>
@@ -238,62 +278,6 @@
         <div>
           <label>Address 3</label>
           <input type="text" name="nomineeAddress3[]">
-        </div>
-
-        <div>
-          <label>Country</label>
-          <select name="nomineeCountry[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psCountry = null;
-              ResultSet rsCountry = null;
-              try (Connection connC = DBConnection.getConnection()) {
-                psCountry = connC.prepareStatement(
-                  "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME");
-                rsCountry = psCountry.executeQuery();
-                while (rsCountry.next()) {
-                  String cc = rsCountry.getString("COUNTRY_CODE");
-                  String cn = rsCountry.getString("NAME");
-            %>
-                  <option value="<%= cc %>"><%= cn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading countries</option>");
-              } finally {
-                if (rsCountry != null) rsCountry.close();
-                if (psCountry != null) psCountry.close();
-              }
-            %>
-          </select>
-        </div>
-
-        <div>
-          <label>State</label>
-          <select name="nomineeState[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psState = null;
-              ResultSet rsState = null;
-              try (Connection connSt = DBConnection.getConnection()) {
-                psState = connSt.prepareStatement(
-                  "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME");
-                rsState = psState.executeQuery();
-                while (rsState.next()) {
-                  String sc = rsState.getString("STATE_CODE");
-                  String sn = rsState.getString("NAME");
-            %>
-                  <option value="<%= sc %>"><%= sn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading states</option>");
-              } finally {
-                if (rsState != null) rsState.close();
-                if (psState != null) psState.close();
-              }
-            %>
-          </select>
         </div>
 
         <div>
@@ -322,6 +306,70 @@
               }
             %>
           </select>
+        </div>
+        
+        <div>
+          <label>State</label>
+          <select name="nomineeState[]" required>
+            <option value="">-- Select --</option>
+            <%
+              PreparedStatement psState = null;
+              ResultSet rsState = null;
+              try (Connection connSt = DBConnection.getConnection()) {
+                psState = connSt.prepareStatement(
+                  "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME");
+                rsState = psState.executeQuery();
+                while (rsState.next()) {
+                  String sc = rsState.getString("STATE_CODE");
+                  String sn = rsState.getString("NAME");
+            %>
+                  <option value="<%= sc %>"><%= sn %></option>
+            <%
+                }
+              } catch (Exception e) {
+                out.println("<option disabled>Error loading states</option>");
+              } finally {
+                if (rsState != null) rsState.close();
+                if (psState != null) psState.close();
+              }
+            %>
+          </select>
+        </div>
+        
+         <div>
+          <label>Country</label>
+          <select name="nomineeCountry[]" required>
+            <option value="">-- Select --</option>
+            <%
+              PreparedStatement psCountry = null;
+              ResultSet rsCountry = null;
+              try (Connection connC = DBConnection.getConnection()) {
+                psCountry = connC.prepareStatement(
+                  "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME");
+                rsCountry = psCountry.executeQuery();
+                while (rsCountry.next()) {
+                  String cc = rsCountry.getString("COUNTRY_CODE");
+                  String cn = rsCountry.getString("NAME");
+            %>
+                  <option value="<%= cc %>"><%= cn %></option>
+            <%
+                }
+              } catch (Exception e) {
+                out.println("<option disabled>Error loading countries</option>");
+              } finally {
+                if (rsCountry != null) rsCountry.close();
+                if (psCountry != null) psCountry.close();
+              }
+            %>
+          </select>
+        </div>
+        
+        
+        
+         <div>
+          <label>Mobile Number</label>
+          <input type="text" name="nomineeMobile[]"
+                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
         </div>
 
         <div>
@@ -359,17 +407,17 @@
           </select>
         </div>
 
-      </div>
+        <!-- Declaration: last cell in the grid, aligned bottom-right -->
+        <div class="declaration-cell">
+          <label>
+            <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
+            I confirm the nominee details are correct
+          </label>
+        </div>
 
-      <!-- Declaration outside the grid, pinned to right -->
-      <div style="display:flex; justify-content:flex-end; margin-top:10px;">
-        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-          <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
-          I confirm the nominee details are correct
-        </label>
-      </div>
+      </div><!-- /.personal-grid -->
 
-    </div>
+    </div><!-- /.nominee-block -->
   </fieldset>
 
 
@@ -378,7 +426,7 @@
   <!-- ════════════════════════════════════════════════════════════════ -->
   <div class="form-buttons">
     <button type="reset">Reset</button>
-    <button type="submit">Save Nominee</button>
+    <button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save Nominee</button>
   </div>
 
 </form>

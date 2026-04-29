@@ -14,7 +14,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Locker Nominee Management</title>
+  <title>Locker Joint Holder</title>
   <link rel="stylesheet" href="../css/addCustomer.css">
   <link rel="stylesheet" href="../css/tabs-navigation.css">
   <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
@@ -41,8 +41,6 @@
       to   { opacity: 1;   transform: scale(1.1); }
     }
     .dd-spinner.done { display: none; }
-
-    /* ── LAYOUT FIXES ONLY — no color/font changes ── */
 
     /* Nominee header: title left, remove button right */
     .nominee-header {
@@ -71,12 +69,7 @@
       display: flex;
     }
 
-    /* Declaration spans all grid columns */
-    .declaration-full {
-      grid-column: 1 / -1;
-    }
-
-    /* Each nominee block is visually separated like its own sub-fieldset */
+    /* Each joint holder block */
     .nominee-block {
       border: 1px solid #c9c5e8;
       border-radius: 6px;
@@ -94,11 +87,56 @@
       justify-content: center;
       margin-top: 4px;
     }
+
+    /* Equal 3-column grid — overrides addCustomer.css for joint holder fields only */
+    .nominee-block .personal-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 12px !important;
+      align-items: end !important;
+      width: 100% !important;
+    }
+
+    /* Every cell stacks label + field */
+    .nominee-block .personal-grid > div {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+
+    /* ALL inputs AND selects same width */
+    .nominee-block .personal-grid input,
+    .nominee-block .personal-grid select {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
+    /* Declaration cell — spans all 3 cols, checkbox+text centered */
+    .nominee-block .personal-grid .declaration-cell {
+      grid-column: 1 / -1 !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding-top: 6px !important;
+    }
+    .nominee-block .personal-grid .declaration-cell label {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+    }
   </style>
 </head>
 <body>
 
-<form action="LockerNomineeServlet" method="post" onsubmit="return validateForm()">
+<form action="LockerJointHolderServlet" method="post" onsubmit="return validateForm()">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER INFORMATION -->
@@ -108,18 +146,22 @@
     <div class="form-grid">
 
       <div>
+        <label>Locker Type</label>
+        <input type="text" name="lockerType" id="lockerType" required>
+      </div>
+
+      <div>
         <label>Locker Number</label>
         <input type="text" name="lockerNumber" id="lockerNumber" required>
       </div>
 
-      <div>
-        <label>Nomination Date</label>
-        <input type="date" name="nominationDate" id="nominationDate" required>
-      </div>
-
-      <div>
-        <label>Remarks</label>
-        <input type="text" name="remarks" id="remarks" maxlength="200">
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label>Customer ID</label>
+        <div style="display:flex; flex-direction:row; align-items:stretch; gap:0;">
+          <input type="text" id="customerID" name="customerID" onclick="openCustomerLookup(this)" readonly style="flex:1; min-width:0; box-sizing:border-box;">
+          <button type="button" onclick="openCustomerLookup(this)" title="Search Customer"
+            style="background:#f0f0f0;border:1px solid #ccc;border-left:none;border-radius:0 4px 4px 0;padding:0 10px;cursor:pointer;flex-shrink:0;">🔍</button>
+        </div>
       </div>
 
     </div>
@@ -127,11 +169,11 @@
 
 
   <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 2: NOMINEE -->
+  <!-- FIELDSET 2: JOINT HOLDER -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
-      Nominee
+      Joint Holder
       <button type="button" onclick="addNominee()"
         style="border:none;background:#373279;color:white;padding:2px 10px;
         border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
@@ -145,28 +187,9 @@
       <div class="nominee-header">
         <div class="nominee-title"
              style="font-weight:bold; font-size:15px; color:#373279;">
-          Nominee <span class="nominee-serial">1</span>
+          Joint Holder <span class="nominee-serial">1</span>
         </div>
         <button type="button" class="nominee-remove" onclick="removeNominee(this)">✖</button>
-      </div>
-
-      <!-- Customer ID row: radio + CID field side by side -->
-      <div class="nominee-cid-row">
-        <div>
-          <label>Has Customer ID ?</label>
-          <div style="flex-direction: row;" class="radio-group">
-            <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="yes" onchange="toggleNomineeCustomerID(this)"> Yes</label>
-            <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="no"  onchange="toggleNomineeCustomerID(this)" checked> No</label>
-          </div>
-        </div>
-
-        <div class="nomineeCustomerIDContainer" style="display:none;">
-          <label>Customer ID</label>
-          <div class="input-icon-box">
-            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openNomineeCustomerLookup(this)" readonly>
-            <button type="button" class="inside-icon-btn" onclick="openNomineeCustomerLookup(this)" title="Search Customer">🔍</button>
-          </div>
-        </div>
       </div>
 
       <div class="personal-grid">
@@ -199,7 +222,7 @@
         </div>
 
         <div>
-          <label>Nominee Name</label>
+          <label>Name</label>
           <input type="text" name="nomineeName[]" required
                  oninput="this.value = this.value
                    .replace(/[^A-Za-z ]/g, '')
@@ -210,19 +233,10 @@
         </div>
 
         <div>
-          <label>Gender</label>
-          <select name="nomineeGender[]" required>
-            <option value="">-- Select Gender --</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Mobile Number</label>
-          <input type="text" name="nomineeMobile[]"
-                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+          <label>Zip</label>
+          <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
+                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" required>
+          <small class="zipError"></small>
         </div>
 
         <div>
@@ -241,28 +255,28 @@
         </div>
 
         <div>
-          <label>Country</label>
-          <select name="nomineeCountry[]" required>
+          <label>City</label>
+          <select name="nomineeCity[]" required>
             <option value="">-- Select --</option>
             <%
-              PreparedStatement psCountry = null;
-              ResultSet rsCountry = null;
-              try (Connection connC = DBConnection.getConnection()) {
-                psCountry = connC.prepareStatement(
-                  "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME");
-                rsCountry = psCountry.executeQuery();
-                while (rsCountry.next()) {
-                  String cc = rsCountry.getString("COUNTRY_CODE");
-                  String cn = rsCountry.getString("NAME");
+              PreparedStatement psCity = null;
+              ResultSet rsCity = null;
+              try (Connection connCt = DBConnection.getConnection()) {
+                psCity = connCt.prepareStatement(
+                  "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)");
+                rsCity = psCity.executeQuery();
+                while (rsCity.next()) {
+                  String cyc = rsCity.getString("CITY_CODE");
+                  String cyn = rsCity.getString("NAME");
             %>
-                  <option value="<%= cc %>"><%= cn %></option>
+                  <option value="<%= cyc %>"><%= cyn %></option>
             <%
                 }
               } catch (Exception e) {
-                out.println("<option disabled>Error loading countries</option>");
+                out.println("<option disabled>Error loading cities</option>");
               } finally {
-                if (rsCountry != null) rsCountry.close();
-                if (psCountry != null) psCountry.close();
+                if (rsCity != null) rsCity.close();
+                if (psCity != null) psCity.close();
               }
             %>
           </select>
@@ -297,41 +311,6 @@
         </div>
 
         <div>
-          <label>City</label>
-          <select name="nomineeCity[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psCity = null;
-              ResultSet rsCity = null;
-              try (Connection connCt = DBConnection.getConnection()) {
-                psCity = connCt.prepareStatement(
-                  "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)");
-                rsCity = psCity.executeQuery();
-                while (rsCity.next()) {
-                  String cyc = rsCity.getString("CITY_CODE");
-                  String cyn = rsCity.getString("NAME");
-            %>
-                  <option value="<%= cyc %>"><%= cyn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading cities</option>");
-              } finally {
-                if (rsCity != null) rsCity.close();
-                if (psCity != null) psCity.close();
-              }
-            %>
-          </select>
-        </div>
-
-        <div>
-          <label>Zip</label>
-          <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
-                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" required>
-          <small class="zipError"></small>
-        </div>
-
-        <div>
           <label>Relation with Nominee</label>
           <select name="nomineeRelation[]" required>
             <option value="">-- Select --</option>
@@ -359,17 +338,17 @@
           </select>
         </div>
 
-      </div>
+        <!-- Declaration: last cell (col 3), checkbox+text pinned to bottom-right -->
+        <div class="declaration-cell">
+          <label>
+            <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
+            I confirm the joint holder details are correct
+          </label>
+        </div>
 
-      <!-- Declaration outside the grid, pinned to right -->
-      <div style="display:flex; justify-content:flex-end; margin-top:10px;">
-        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
-          <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
-          I confirm the nominee details are correct
-        </label>
-      </div>
+      </div><!-- /.personal-grid -->
 
-    </div>
+    </div><!-- /.nominee-block -->
   </fieldset>
 
 
@@ -377,8 +356,8 @@
   <!-- BUTTON SECTION -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <div class="form-buttons">
-    <button type="reset">Reset</button>
-    <button type="submit">Save Nominee</button>
+    <button type="reset" style="background:#dc3545;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Cancel</button>
+    <button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save</button>
   </div>
 
 </form>
@@ -386,7 +365,7 @@
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
-// ── Nominee serial renumbering ──────────────────────────────────────
+// ── Joint holder serial renumbering ────────────────────────────────
 function renumberNominees() {
   document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
     var serial = card.querySelector('.nominee-serial');
@@ -399,7 +378,7 @@ function renumberNominees() {
   });
 }
 
-// ── Add nominee card (clones the first card) ────────────────────────
+// ── Add joint holder card (clones the first card) ───────────────────
 function addNominee() {
   var fieldset  = document.getElementById('nomineeFieldset');
   var firstCard = fieldset.querySelector('.nominee-block');
@@ -422,11 +401,11 @@ function addNominee() {
   renumberNominees();
 }
 
-// ── Remove nominee card ─────────────────────────────────────────────
+// ── Remove joint holder card ────────────────────────────────────────
 function removeNominee(btn) {
   var blocks = document.querySelectorAll('.nominee-block');
   if (blocks.length <= 1) {
-    alert('At least one nominee is required.');
+    alert('At least one joint holder is required.');
     return;
   }
   btn.closest('.nominee-block').remove();
@@ -444,6 +423,11 @@ function toggleNomineeCustomerID(radio) {
   if (input && radio.value !== 'yes') input.value = '';
 }
 
+// ── Customer lookup (Locker Information fieldset) ───────────────────
+function openCustomerLookup(triggerEl) {
+  // TODO: open modal and on select → document.getElementById('customerID').value = selectedId
+}
+
 // ── Nominee customer lookup ─────────────────────────────────────────
 function openNomineeCustomerLookup(triggerEl) {
   var card  = triggerEl.closest('.nominee-block');
@@ -454,21 +438,6 @@ function openNomineeCustomerLookup(triggerEl) {
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
   var valid = true;
-
-  var shareInputs = document.querySelectorAll('input[name="nomineePercentageShare[]"]');
-  var totalShare  = 0;
-  shareInputs.forEach(function(inp) {
-    var val = parseFloat(inp.value);
-    if (isNaN(val) || val < 0 || val > 100) {
-      alert('Each Percentage Share must be between 0 and 100.');
-      valid = false;
-    }
-    totalShare += (isNaN(val) ? 0 : val);
-  });
-  if (valid && Math.round(totalShare) !== 100) {
-    alert('Total Percentage Share across all nominees must equal 100. Current total: ' + totalShare.toFixed(2));
-    valid = false;
-  }
 
   if (valid) {
     document.querySelectorAll('.zip-input').forEach(function(inp) {
@@ -487,7 +456,7 @@ function validateForm() {
       if (!cb.checked) unchecked = true;
     });
     if (unchecked) {
-      alert('Please accept the declaration for all nominees.');
+      alert('Please accept the declaration for all joint holders.');
       valid = false;
     }
   }
@@ -498,7 +467,7 @@ function validateForm() {
 window.onload = function() {
   if (window.parent && window.parent.updateParentBreadcrumb) {
     window.parent.updateParentBreadcrumb(
-      window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerNominee.jsp') : 'Locker Nominee'
+      window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp') : 'Locker Joint Holder'
     );
   }
 };
