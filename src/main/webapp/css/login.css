@@ -126,7 +126,7 @@ html, body {
     padding: 7px 20px;
     text-align: center;
     width: 100%;
-    max-width: 260px;
+    max-width: 280px;
 }
 
 .product-badge-top {
@@ -146,14 +146,14 @@ html, body {
 }
 
 .product-name {
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 700;
     color: #6b7a90;
     letter-spacing: 0.1px;
 }
 
 .product-version {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 500;
     background: #e8eef8;
     color: #4361d8;
