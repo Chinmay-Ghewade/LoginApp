@@ -83,11 +83,15 @@
 
       <div>
         <label>Locker Number</label>
-        <div style="display:flex; gap:4px;">
-          <button type="button" style="padding:2px 8px;">...</button>
-          <input type="text" name="lockerNumberSearch" id="lockerNumberSearch"
-                 oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();" style="flex:1;">
-        </div>
+        <div style="display:flex; gap:4px; align-items:center;">
+		  <input type="text" name="lockerNumberSearch" id="lockerNumberSearch"
+		         oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();"
+		         style="flex:1; padding:10px; border:2px solid #C8B7F6; border-radius:8px;
+		                background-color:#F4EDFF; font-size:14px;">
+		  <button type="button" class="icon-btn" onclick="openLockerLookup()"
+		          style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+		                 border-radius:8px; font-size:18px; cursor:pointer;">…</button>
+		</div>
       </div>
 
       <div style="display:flex; align-items:flex-end;">
@@ -115,11 +119,15 @@
 
       <div>
         <label>Customer Id</label>
-        <div style="display:flex; gap:4px;">
-          <button type="button" style="padding:2px 8px;">...</button>
-          <input type="text" name="customerIdLookup" id="customerIdLookup"
-                 oninput="this.value = this.value.replace(/[^0-9]/g,'')" style="flex:1;">
-        </div>
+		        <div style="display:flex; gap:4px; align-items:center;">
+		  <input type="text" name="customerIdLookup" id="customerIdLookup"
+		         oninput="this.value = this.value.replace(/[^0-9]/g,'')"
+		         style="flex:1; padding:10px; border:2px solid #C8B7F6; border-radius:8px;
+		                background-color:#F4EDFF; font-size:14px;">
+		  <button type="button" class="icon-btn" onclick="openCustomerLookup()"
+		          style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+		                 border-radius:8px; font-size:18px; cursor:pointer;">…</button>
+		</div>
       </div>
 
       <div>
