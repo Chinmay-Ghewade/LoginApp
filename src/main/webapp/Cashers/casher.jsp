@@ -37,8 +37,8 @@
             <p class="size-1">→</p>
         </div>
 
-        <div class="card" onclick="goTo('combineDenomination.jsp', 'Casher > Cash Combine Denomination')">
-            <h3>Cash Combine Denomination</h3>
+        <div class="card" onclick="goTo('combineDenomination.jsp', 'Casher > Combine Denomination')">
+            <h3>Combine Denomination</h3>
             <p class="size-1">→</p>
         </div>
 
