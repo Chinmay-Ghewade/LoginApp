@@ -280,7 +280,7 @@
 </div>
 
 <script>
-    const DENOMS = [2000, 1000, 500, 100, 50, 20, 10, 5, 2, 1];
+    const DENOMS = [500, 200, 100, 50, 20, 10, 5, 2, 1];
 
     const tbody = document.getElementById('denomBody');
     DENOMS.forEach(function(d) {

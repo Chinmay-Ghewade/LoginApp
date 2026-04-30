@@ -285,7 +285,7 @@
 </div>
 
 <script>
-    const DENOMS = [2000,1000,500,100,50,20,10,5,2,1];
+    const DENOMS = [500,200,100,50,20,10,5,2,1];
 
     function generateReport() {
         const dt   = document.getElementById('reportDate').value;

@@ -252,9 +252,8 @@
                     <th>Date</th>
                     <th>User</th>
                     <th>Type</th>
-                    <th>₹2000</th>
-                    <th>₹1000</th>
                     <th>₹500</th>
+                    <th>₹200</th>
                     <th>₹100</th>
                     <th>₹50</th>
                     <th>₹20</th>
@@ -266,14 +265,13 @@
                 </tr>
             </thead>
             <tbody id="viewBody">
-                <tr><td colspan="14" class="no-data">Click Search to load data.</td></tr>
+                <tr><td colspan="13" class="no-data">Click Search to load data.</td></tr>
             </tbody>
             <tfoot>
                 <tr id="footRow" style="display:none">
                     <td colspan="3"><b>TOTAL</b></td>
-                    <td id="ft2000">0</td>
-                    <td id="ft1000">0</td>
                     <td id="ft500">0</td>
+                    <td id="ft200">0</td>
                     <td id="ft100">0</td>
                     <td id="ft50">0</td>
                     <td id="ft20">0</td>
@@ -296,10 +294,10 @@
 
 <script>
     const DEMO_DATA = [
-        { date:'29-04-2026', user:'<%= userId %>', type:'IN',  d:[5,3,2,10,4,2,5,0,2,8], total:0 },
-        { date:'29-04-2026', user:'<%= userId %>', type:'OUT', d:[2,1,1, 5,2,1,2,0,1,3], total:0 },
+        { date:'29-04-2026', user:'<%= userId %>', type:'IN',  d:[5,3,2,10,4,2,5,0,2], total:0 },
+        { date:'29-04-2026', user:'<%= userId %>', type:'OUT', d:[2,1,1, 5,2,1,2,0,1], total:0 },
     ];
-    const DENOMS = [2000,1000,500,100,50,20,10,5,2,1];
+    const DENOMS = [500,200,100,50,20,10,5,2,1];
     DEMO_DATA.forEach(function(r) {
         r.total = r.d.reduce((s,q,i) => s + q * DENOMS[i], 0);
     });
@@ -307,12 +305,12 @@
     function searchDenom() {
         const tbody = document.getElementById('viewBody');
         if (DEMO_DATA.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="14" class="no-data">No records found.</td></tr>';
+        	tbody.innerHTML = '<tr><td colspan="13" class="no-data">No records found.</td></tr>';
             document.getElementById('footRow').style.display = 'none';
             return;
         }
 
-        const ft = new Array(10).fill(0);
+        const ft = new Array(9).fill(0);
         let ftTotal = 0;
         tbody.innerHTML = DEMO_DATA.map(function(r) {
             const cells = r.d.map((q,i) => { ft[i] += q * DENOMS[i]; return '<td>' + (q * DENOMS[i]).toLocaleString('en-IN') + '</td>'; }).join('');
@@ -320,7 +318,7 @@
             return '<tr><td>' + r.date + '</td><td>' + r.user + '</td><td>' + r.type + '</td>' + cells + '<td>' + r.total.toLocaleString('en-IN') + '</td></tr>';
         }).join('');
 
-        const keys = [2000,1000,500,100,50,20,10,5,2,1];
+        const keys = [500,200,100,50,20,10,5,2,1];
         keys.forEach((k,i) => document.getElementById('ft'+k).textContent = ft[i].toLocaleString('en-IN'));
         document.getElementById('ftTotal').textContent = ftTotal.toLocaleString('en-IN');
         document.getElementById('footRow').style.display = '';
@@ -330,7 +328,7 @@
         document.getElementById('fromDate').value = '';
         document.getElementById('toDate').value   = '';
         document.getElementById('searchUser').value = '';
-        document.getElementById('viewBody').innerHTML = '<tr><td colspan="14" class="no-data">Click Search to load data.</td></tr>';
+        document.getElementById('viewBody').innerHTML = '<tr><td colspan="13" class="no-data">Click Search to load data.</td></tr>';
         document.getElementById('footRow').style.display = 'none';
     }
 
