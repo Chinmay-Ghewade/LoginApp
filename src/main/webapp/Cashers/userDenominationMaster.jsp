@@ -18,7 +18,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Denomination Master</title> <!-- CHANGED HERE -->
+    <title>User Denomination Master</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -262,10 +262,6 @@
             <input type="text" id="totalAmt" readonly placeholder="0">
         </div>
         <div class="summary-item">
-            <label>Change (₹)</label>
-            <input type="text" id="changeAmt" readonly placeholder="0">
-        </div>
-        <div class="summary-item">
             <label>Remaining (₹)</label>
             <input type="text" id="remainingAmt" readonly placeholder="0">
         </div>
@@ -296,18 +292,32 @@
         tbody.appendChild(tr);
     });
 
+    // Change row
+    const changeRow = document.createElement('tr');
+    changeRow.innerHTML =
+        '<td><strong>Change</strong></td>' +
+        '<td><input type="number" min="0" value="0" class="qty-input" data-denom="change" oninput="recalc()"></td>' +
+        '<td class="amt-cell" id="amt-change">0</td>';
+    tbody.appendChild(changeRow);
+
     function recalc() {
         let total = 0;
-        document.querySelectorAll('.qty-input').forEach(function(inp) {
-            const d = parseInt(inp.dataset.denom);
-            const q = parseInt(inp.value) || 0;
+
+        // Normal denomination rows
+        DENOMS.forEach(function(d) {
+            const q = parseInt(document.querySelector('.qty-input[data-denom="' + d + '"]').value) || 0;
             const amt = d * q;
             document.getElementById('amt-' + d).textContent = amt.toLocaleString('en-IN');
             total += amt;
         });
-        document.getElementById('totalAmt').value = total.toLocaleString('en-IN');
-        document.getElementById('denomAmt').value = total.toLocaleString('en-IN');
-        document.getElementById('changeAmt').value = 0;
+
+        // Change row (value entered directly as amount)
+        const changeVal = parseFloat(document.querySelector('.qty-input[data-denom="change"]').value) || 0;
+        document.getElementById('amt-change').textContent = changeVal.toLocaleString('en-IN');
+        total += changeVal;
+
+        document.getElementById('totalAmt').value    = total.toLocaleString('en-IN');
+        document.getElementById('denomAmt').value    = total.toLocaleString('en-IN');
         document.getElementById('remainingAmt').value = 0;
     }
 
@@ -327,6 +337,7 @@
     function cancelCash() {
         document.querySelectorAll('.qty-input').forEach(i => i.value = 0);
         document.getElementById('cashHandlingDate').value = '';
+        document.getElementById('amt-change').textContent = '0';
         recalc();
     }
 

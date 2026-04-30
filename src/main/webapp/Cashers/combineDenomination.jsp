@@ -142,7 +142,7 @@
 
 <div class="page-wrapper">
 
-    <div class="section-label">Add Scroll</div>
+    <div class="section-label">Cash Details</div>
 
     <div class="form-row">
         <div class="field-group">

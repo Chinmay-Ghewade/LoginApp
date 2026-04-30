@@ -55,14 +55,6 @@
             letter-spacing: 0.5px;
         }
 
-        .form-row {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            margin-bottom: 15px;
-        }
-
         .field-group {
             display: flex;
             flex-direction: column;
@@ -90,22 +82,6 @@
             outline: none;
             border-color: #2b0d73;
             background: #fff;
-        }
-
-        .btn-add {
-            padding: 10px 25px;
-            background: #2b0d73;
-            color: #fff;
-            border: none;
-            border-radius: 2px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-add:hover {
-            background: #1f0a52;
         }
 
         .table-container {
@@ -168,29 +144,6 @@
             outline: none;
             border-color: #2b0d73;
             background: #fff;
-        }
-
-        .btn-remove {
-            padding: 6px 14px;
-            background: #d32f2f;
-            color: #fff;
-            border: none;
-            border-radius: 2px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-remove:hover {
-            background: #b71c1c;
-        }
-
-        .empty-msg {
-            text-align: center;
-            color: #999;
-            font-size: 13px;
-            padding: 15px;
         }
 
         .summary-block {
@@ -260,38 +213,16 @@
 
 <div class="page-wrapper">
 
-    <div class="section-label">Add Scroll</div>
-    <div class="form-row">
+    <div class="section-label">Account Details</div>
+    <div class="form-row" style="display:flex; gap:30px; flex-wrap:wrap; align-items:flex-end; margin-bottom:15px;">
         <div class="field-group">
-            <label>Scroll Number</label>
-            <input type="text" id="scrollNo" placeholder="e.g. 00123">
+            <label>Cash Handling Date</label>
+            <input type="date" id="cashHandlingDate">
         </div>
         <div class="field-group">
-            <label>Suffix</label>
-            <input type="text" id="scrollSuffix" placeholder="–" style="width:80px;">
+            <label>Transaction Amount (₹)</label>
+            <input type="number" id="transactionAmount" min="0" placeholder="0.00">
         </div>
-        <div class="field-group">
-            <label>Amount (₹)</label>
-            <input type="number" id="scrollAmt" min="0" placeholder="0.00">
-        </div>
-        <button class="btn-add" onclick="addScroll()">Add</button>
-    </div>
-
-    <div class="section-label">Scroll List</div>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Scroll Number</th>
-                    <th>Amount (₹)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="scrollBody">
-                <tr><td colspan="4" class="empty-msg">No scrolls added yet.</td></tr>
-            </tbody>
-        </table>
     </div>
 
     <div class="section-label">Cash Details</div>
@@ -336,8 +267,6 @@
 
 <script>
     const DENOMS = [2000,1000,500,100,50,20,10,5,2,1];
-    let scrollList = [];
-    let scrollCounter = 0;
 
     const tbody = document.getElementById('denomBody');
     DENOMS.forEach(function(d) {
@@ -351,6 +280,16 @@
         tbody.appendChild(tr);
     });
 
+    // Change row
+    const changeRow = document.createElement('tr');
+    changeRow.innerHTML =
+        '<td><strong>Change</strong></td>' +
+        '<td><input type="number" min="0" value="0" class="rec-inp" data-denom="change" oninput="recalc()"></td>' +
+        '<td class="rec-amt" id="rec-change">0</td>' +
+        '<td><input type="number" min="0" value="0" class="paid-inp" data-denom="change" oninput="recalc()"></td>' +
+        '<td class="paid-amt" id="paid-change">0</td>';
+    tbody.appendChild(changeRow);
+
     function recalc() {
         let rec = 0, paid = 0;
         DENOMS.forEach(function(d) {
@@ -361,58 +300,31 @@
             document.getElementById('paid-' + d).textContent = pa.toLocaleString('en-IN');
             rec += ra; paid += pa;
         });
+
+        // Change row
+        const crq = parseFloat(document.querySelector('.rec-inp[data-denom="change"]').value) || 0;
+        const cpq = parseFloat(document.querySelector('.paid-inp[data-denom="change"]').value) || 0;
+        document.getElementById('rec-change').textContent  = crq.toLocaleString('en-IN');
+        document.getElementById('paid-change').textContent = cpq.toLocaleString('en-IN');
+        rec += crq; paid += cpq;
+
         document.getElementById('totalRec').value  = rec.toLocaleString('en-IN');
         document.getElementById('totalPaid').value = paid.toLocaleString('en-IN');
         document.getElementById('netAmt').value    = (rec - paid).toLocaleString('en-IN');
     }
 
-    function addScroll() {
-        const no  = document.getElementById('scrollNo').value.trim();
-        const sfx = document.getElementById('scrollSuffix').value.trim();
-        const amt = parseFloat(document.getElementById('scrollAmt').value) || 0;
-        if (!no) { alert('Please enter Scroll Number.'); return; }
-        scrollCounter++;
-        scrollList.push({ id: scrollCounter, no: no + (sfx ? '-' + sfx : ''), amt });
-        renderScrollList();
-        document.getElementById('scrollNo').value  = '';
-        document.getElementById('scrollSuffix').value = '';
-        document.getElementById('scrollAmt').value = '';
-    }
-
-    function removeScroll(id) {
-        scrollList = scrollList.filter(s => s.id !== id);
-        renderScrollList();
-    }
-
-    function renderScrollList() {
-        const sb = document.getElementById('scrollBody');
-        if (scrollList.length === 0) {
-            sb.innerHTML = '<tr><td colspan="4" class="empty-msg">No scrolls added yet.</td></tr>';
-            return;
-        }
-        sb.innerHTML = scrollList.map((s, i) =>
-            '<tr>' +
-            '<td>' + (i+1) + '</td>' +
-            '<td>' + s.no + '</td>' +
-            '<td>₹ ' + s.amt.toLocaleString('en-IN') + '</td>' +
-            '<td><button class="btn-remove" onclick="removeScroll(' + s.id + ')">Remove</button></td>' +
-            '</tr>'
-        ).join('');
-    }
-
     function validateCombine() {
-        if (scrollList.length === 0) { alert('Please add at least one scroll.'); return; }
         alert('Cash In / Out validated successfully.');
     }
 
     function saveCombine() {
-        if (scrollList.length === 0) { alert('Please add at least one scroll.'); return; }
         alert('Cash In / Out saved successfully!');
     }
 
     function cancelCombine() {
-        scrollList = []; scrollCounter = 0; renderScrollList();
         document.querySelectorAll('.rec-inp, .paid-inp').forEach(i => i.value = 0);
+        document.getElementById('rec-change').textContent  = '0';
+        document.getElementById('paid-change').textContent = '0';
         recalc();
     }
 
