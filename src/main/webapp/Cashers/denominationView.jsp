@@ -110,7 +110,7 @@
 
         .table-container {
             margin: 15px 0;
-            border-radius: 0px;
+            border-radius: 8px;
             overflow: auto;
             border: 1px solid #999;
         }

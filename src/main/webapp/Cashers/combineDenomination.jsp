@@ -96,8 +96,9 @@
 
         .table-container {
             margin: 15px 0;
-            border: 1px solid #999;
-        }
+		    border: 1px solid #999;
+		    border-radius: 8px;
+		    overflow: hidden;
 
         table {
             width: 100%;
