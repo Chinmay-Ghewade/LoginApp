@@ -310,7 +310,7 @@
 
             <!-- ══ MODULE 3: Payment Details ══ -->
             <div class="module">
-                <div class="mod-block" style="grid-column:3; grid-row:1;">
+                <div class="mod-block" id="paymentModBlock" style="grid-column:3; grid-row:1;">
                     <div class="mod-title">Payment Details</div>
                     <div class="fg-row">
                         <div class="fg">
@@ -337,7 +337,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="mod-block" style="grid-column:3; grid-row:2;">
+                <div class="mod-block" id="trCodeModBlock" style="grid-column:3; grid-row:2;">
                     <div class="fg-row">
                         <div class="fg">
                             <label>Transfer A/c. Code</label>
@@ -581,6 +581,22 @@
             }
         }
 
+        /*
+         * positionDropTr — dynamically aligns #dropTr's RIGHT edge to the
+         * RIGHT edge of #trCodeModBlock, so the dropdown never overflows the page.
+         */
+        function positionDropTr() {
+            var drop      = document.getElementById('dropTr');
+            var sw        = document.getElementById('trCode').closest('.sw');
+            var cell      = document.getElementById('trCodeModBlock');
+            var dropW     = 620;
+            var swLeft    = sw.getBoundingClientRect().left;
+            var cellRight = cell.getBoundingClientRect().right;
+            var leftOffset = cellRight - swLeft - dropW;
+            drop.style.left  = leftOffset + 'px';
+            drop.style.right = 'auto';
+        }
+
         /* ── Blur handlers ── */
         function onAcBlur() {
             setTimeout(function() {
@@ -661,6 +677,7 @@
             clearTimeout(_timer);
             var drop = document.getElementById(dropId);
             if (!val) { drop.classList.remove('on'); return; }
+            if (dropId === 'dropTr') positionDropTr();
             if (val.length < SEARCH_MIN) {
                 drop.innerHTML = '<div class="sr-hint">Type at least ' + SEARCH_MIN + ' digits\u2026</div>';
                 drop.classList.add('on'); return;
@@ -845,19 +862,14 @@
             var txnAmt     = parseFloat(document.getElementById('txnAmt').value) || 0;
             var noShares   = parseInt(document.getElementById('noShares').value) || 0;
 
-            /* ── Guard: amount must be a positive number ── */
             if (isNaN(payAmt) || payAmt <= 0) {
                 showToast('Please enter a valid amount greater than 0.');
                 return;
             }
-
-            /* ── Guard: shares / txnAmt must be set first ── */
             if (noShares < 1 || txnAmt <= 0) {
                 showToast('Please enter the number of shares first.');
                 return;
             }
-
-            /* ── Guard: payment amount cannot exceed transaction amount ── */
             if (payAmt > txnAmt + 0.001) {
                 showToast('Amount \u20B9' + payAmt.toFixed(2) + ' cannot exceed transaction amount \u20B9' + txnAmt.toFixed(2) + '.');
                 document.getElementById('payAmt').value = txnAmt.toFixed(2);
@@ -867,35 +879,14 @@
             if (isTransfer) {
                 var trCode = document.getElementById('trCode').value.trim();
                 var trName = document.getElementById('trName').value.trim();
-
-                /* ── Guard: transfer account must be selected ── */
-                if (!trCode) {
-                    showToast('Please select a Transfer Account Code.');
-                    return;
-                }
-
-                /* ── Guard: transfer account cannot be same as main account ── */
+                if (!trCode) { showToast('Please select a Transfer Account Code.'); return; }
                 var mainCode = document.getElementById('accountCode').value.trim();
-                if (trCode === mainCode) {
-                    showToast('Transfer account cannot be the same as the main account.');
-                    return;
-                }
-
-                /* ── Guard: same transfer account cannot be added twice ── */
+                if (trCode === mainCode) { showToast('Transfer account cannot be the same as the main account.'); return; }
                 for (var i = 0; i < _trEntries.length; i++) {
-                    if (_trEntries[i].code === trCode) {
-                        showToast('This transfer account is already added.');
-                        return;
-                    }
+                    if (_trEntries[i].code === trCode) { showToast('This transfer account is already added.'); return; }
                 }
-
-                /* ── Guard: cumulative transfer cannot exceed txnAmt ── */
                 var already = _trEntries.reduce(function(s, e) { return s + e.amount; }, 0);
-                if (already + payAmt > txnAmt + 0.001) {
-                    showToast('Total transfer amount cannot exceed \u20B9' + txnAmt.toFixed(2) + '.');
-                    return;
-                }
-
+                if (already + payAmt > txnAmt + 0.001) { showToast('Total transfer amount cannot exceed \u20B9' + txnAmt.toFixed(2) + '.'); return; }
                 _trEntries.push({ code: trCode, name: trName, amount: payAmt });
                 sv('trCode', ''); sv('trName', '');
                 document.getElementById('payAmt').value = '';
@@ -903,20 +894,9 @@
                 hideTrPayDetails(); hideTrDetails(); renderTrTable();
                 document.getElementById('acDetails').style.display = 'none';
                 document.getElementById('errPayment').classList.remove('show');
-
             } else {
-                /* ── Guard: only one cash entry allowed ── */
-                if (_payEntries.length > 0) {
-                    showToast('Cash entry already added.');
-                    return;
-                }
-
-                /* ── Guard: cash amount must exactly equal txnAmt ── */
-                if (Math.abs(payAmt - txnAmt) > 0.001) {
-                    showToast('Cash amount must equal transaction amount \u20B9' + txnAmt.toFixed(2) + '.');
-                    return;
-                }
-
+                if (_payEntries.length > 0) { showToast('Cash entry already added.'); return; }
+                if (Math.abs(payAmt - txnAmt) > 0.001) { showToast('Cash amount must equal transaction amount \u20B9' + txnAmt.toFixed(2) + '.'); return; }
                 var particular = document.getElementById('particular').value.trim() || 'By Cash';
                 _payEntries.push({ mode: 'Cash', amount: payAmt, particular: particular });
                 renderPayTable();
@@ -1236,6 +1216,10 @@
                 }
             });
             document.addEventListener('keydown', function(e) { if (e.key === 'Escape') lkClose(); });
+            window.addEventListener('resize', function() {
+                var drop = document.getElementById('dropTr');
+                if (drop.classList.contains('on')) positionDropTr(); 
+            });
         });
     </script>
 </body>

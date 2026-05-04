@@ -93,7 +93,7 @@
     /* Equal 3-column grid — overrides addCustomer.css for nominee fields only */
     .nominee-block .personal-grid {
       display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-columns: repeat(4, 1fr) !important;
       gap: 12px !important;
       align-items: end !important;
       width: 100% !important;
