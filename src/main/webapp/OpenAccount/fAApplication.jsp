@@ -57,6 +57,11 @@
     <div class="form-grid">
       
       <div>
+        <label>Product Code</label>
+        <input type="text" value="<%= productCode %>" readonly style="background-color: #f0f0f0;">
+      </div>
+      
+      <div>
         <label>Customer ID</label>
         <div class="input-icon-box">
           <input type="text" id="customerId" name="customerId" onclick="openCustomerLookup()" readonly required>

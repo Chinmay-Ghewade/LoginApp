@@ -168,6 +168,12 @@
 	    <legend>Application</legend>
 	    <div class="form-grid">
 	      
+	      <!-- ✅ ADD: Display Product Code for verification -->
+	      <div>
+	        <label>Product Code</label>
+	        <input type="text" value="<%= productCode %>" readonly style="background-color: #f0f0f0;">
+	      </div>
+	      
 	      <div>
 	        <label>Customer ID</label>
 	        <div class="input-icon-box">
@@ -210,16 +216,60 @@
 	
 	      <div>
 	        <label>Account Operation Capacity</label>
-	        <select name="accountOperationCapacity" id="dd-accountOpCap" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="accountOperationCapacity" required>
+	          <option value="">-- Select --</option>
+	          <%
+	            PreparedStatement psAccOpCap = null;
+	            ResultSet rsAccOpCap = null;
+	            try (Connection connAccOp = DBConnection.getConnection()) {
+	              String sql = "SELECT ACCOUNTOPERATIONCAPACITY_ID, DESCRIPTION FROM GLOBALCONFIG.ACCOUNTOPERATIONCAPACITY ORDER BY ACCOUNTOPERATIONCAPACITY_ID";
+	              psAccOpCap = connAccOp.prepareStatement(sql);
+	              rsAccOpCap = psAccOpCap.executeQuery();
+	              while (rsAccOpCap.next()) {
+	                String capacityId = rsAccOpCap.getString("ACCOUNTOPERATIONCAPACITY_ID");
+	                String description = rsAccOpCap.getString("DESCRIPTION");
+	          %>
+	                <option value="<%= capacityId %>"><%= description %></option>
+	          <%
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading capacities</option>");
+	            } finally {
+	              if (rsAccOpCap != null) rsAccOpCap.close();
+	              if (psAccOpCap != null) psAccOpCap.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
-		  <label>Min Balance</label>
-		  <select name="minBalanceID" id="dd-minBalance" required> 
-		  <option value="">Loading...</option>
-		  </select>
-		</div>
+	  <label>Min Balance</label>
+	  <select name="minBalanceID" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psMinBal = null;
+	      ResultSet rsMinBal = null;
+	      try (Connection connMinBal = DBConnection.getConnection()) {
+	        String sql = "SELECT MINBALANCE_ID, MINBALANCE FROM HEADOFFICE.ACCOUNTMINBALANCE ORDER BY MINBALANCE_ID";
+	        psMinBal = connMinBal.prepareStatement(sql);
+	        rsMinBal = psMinBal.executeQuery();
+	
+	        while (rsMinBal.next()) {
+	          String id = rsMinBal.getString("MINBALANCE_ID");      // ID to store
+	          String value = rsMinBal.getString("MINBALANCE");      // Value to show
+	    %>
+	          <option value="<%= id %>"><%= value %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Min Balance</option>");
+	      } finally {
+	        if (rsMinBal != null) rsMinBal.close();
+	        if (psMinBal != null) psMinBal.close();
+	      }
+	    %>
+	  </select>
+	</div>
 	<div>
 	  <label>Risk Category</label>
 	  <input type="text" id="riskCategory" name="riskCategory" readonly>
@@ -377,11 +427,35 @@
 	  <input type="text" id="areaName" name="areaName" readonly>
 	</div>
 	    
-	  <div>
+	       <div>
 	  <label>Social Section Id</label>
-      <select name="socialSectionId" id="dd-socialSection" required>
-		<option value="">Loading...</option>	
-	    </select>
+	  <select name="socialSectionId" required>
+	    <option value="">-- Select --</option>
+	
+	    <%
+	      PreparedStatement psSocial = null;
+	      ResultSet rsSocial = null;
+	      try (Connection connSocial = DBConnection.getConnection()) {
+	        String sql = "SELECT SOCIALSECTION_ID, DESCRIPTION FROM GLOBALCONFIG.SOCIALSECTION ORDER BY SOCIALSECTION_ID";
+	        psSocial = connSocial.prepareStatement(sql);
+	        rsSocial = psSocial.executeQuery();
+	
+	        while (rsSocial.next()) {
+	          String id = rsSocial.getString("SOCIALSECTION_ID");   // ID to store
+	          String desc = rsSocial.getString("DESCRIPTION");      // Text to show
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Social Section</option>");
+	      } finally {
+	        if (rsSocial != null) rsSocial.close();
+	        if (psSocial != null) psSocial.close();
+	      }
+	    %>
+	
+	  </select>
 	</div>
 	
 	
@@ -401,9 +475,32 @@
 	</div>
 	    
 	    <div>
-	    <label>LBR Code</label>
-		<select name="lbrCode" id="dd-lbrCode" required>
-	    <option value="">Loading...</option>
+	  <label>LBR Code</label>
+	  <select name="lbrCode" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psMIS = null;
+	      ResultSet rsMIS = null;
+	
+	      try (Connection conMIS = DBConnection.getConnection()) {
+	        String sql = "SELECT MIS_ID, DESCRIPTION FROM HEADOFFICE.MIS ORDER BY DESCRIPTION";
+	        psMIS = conMIS.prepareStatement(sql);
+	        rsMIS = psMIS.executeQuery();
+	
+	        while (rsMIS.next()) {
+	          String id = rsMIS.getString("MIS_ID");
+	          String desc = rsMIS.getString("DESCRIPTION");
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading LBR Code</option>");
+	      } finally {
+	        if (rsMIS != null) rsMIS.close();
+	        if (psMIS != null) psMIS.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
@@ -424,9 +521,32 @@
 	</div>
 	
 	    <div>
-	  	<label>Purpose Id</label>
-		<select name="purposeId" id="dd-purpose" required>
-	    <option value="">Loading...</option>
+	  <label>Purpose Id</label>
+	  <select name="purposeId" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psPurpose = null;
+	      ResultSet rsPurpose = null;
+	      try (Connection connPurpose = DBConnection.getConnection()) {
+	
+	        String sql = "SELECT PURPOSE_ID, DESCRIPTION FROM HEADOFFICE.PURPOSE ORDER BY DESCRIPTION";
+	        psPurpose = connPurpose.prepareStatement(sql);
+	        rsPurpose = psPurpose.executeQuery();
+	
+	        while (rsPurpose.next()) {
+	          String id = rsPurpose.getString("PURPOSE_ID");        // value to store
+	          String desc = rsPurpose.getString("DESCRIPTION");     // text to display
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Purpose</option>");
+	      } finally {
+	        if (rsPurpose != null) rsPurpose.close();
+	        if (psPurpose != null) psPurpose.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
@@ -446,33 +566,127 @@
 	  <input type="text" id="socialSubSectorDesc" name="socialSubSectorDesc" readonly>
 	</div>
 	
-	  <div>
+	    <div>
 	  <label>Classification Id</label>
-	  <select name="classificationId" id="dd-classification" required>
-	    <option value="">Loading...</option>
+	  <select name="classificationId" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psClass = null;
+	      ResultSet rsClass = null;
+	
+	      try (Connection connClass = DBConnection.getConnection()) {
+	
+	        String sql = "SELECT CLASSIFICATION_ID, DESCRIPTION FROM HEADOFFICE.CLASSIFICATION ORDER BY DESCRIPTION";
+	        psClass = connClass.prepareStatement(sql);
+	        rsClass = psClass.executeQuery();
+	
+	        while (rsClass.next()) {
+	          String id = rsClass.getString("CLASSIFICATION_ID");     // value to store
+	          String desc = rsClass.getString("DESCRIPTION");         // visible text
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Classification</option>");
+	      } finally {
+	        if (rsClass != null) rsClass.close();
+	        if (psClass != null) psClass.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
 	    <div>
 	  <label>Mode Of San. Id</label>
-      <select name="modeOfSanId" id="dd-modeOfSanction" required>
-	    <option value="">Loading...</option>
+	  <select name="modeOfSanId" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psMOS = null;
+	      ResultSet rsMOS = null;
+	
+	      try (Connection conMOS = DBConnection.getConnection()) {
+	        String sql = "SELECT MODEOFSANCTION_ID, DESCRIPTION FROM HEADOFFICE.MODEOFSANCTION ORDER BY DESCRIPTION";
+	        psMOS = conMOS.prepareStatement(sql);
+	        rsMOS = psMOS.executeQuery();
+	
+	        while (rsMOS.next()) {
+	          String id = rsMOS.getString("MODEOFSANCTION_ID");
+	          String desc = rsMOS.getString("DESCRIPTION");
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Mode of Sanction</option>");
+	      } finally {
+	        if (rsMOS != null) rsMOS.close();
+	        if (psMOS != null) psMOS.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
 	
-	   <div>
-	   <label>Sanction Authority Id</label>
-       <select name="sanctionAuthorityId" id="dd-sanctionAuthority" required>
-	    <option value="">Loading...</option>
+	    <div>
+	  <label>Sanction Authority Id</label>
+	  <select name="sanctionAuthorityId" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psSA = null;
+	      ResultSet rsSA = null;
+	
+	      try (Connection conSA = DBConnection.getConnection()) {
+	        String sql = "SELECT SANCTIONAUTHORITY_ID, DESCRIPTION FROM HEADOFFICE.SANCTIONAUTHORITY ORDER BY DESCRIPTION";
+	        psSA = conSA.prepareStatement(sql);
+	        rsSA = psSA.executeQuery();
+	
+	        while (rsSA.next()) {
+	          String id = rsSA.getString("SANCTIONAUTHORITY_ID");
+	          String desc = rsSA.getString("DESCRIPTION");
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Sanction Authority</option>");
+	      } finally {
+	        if (rsSA != null) rsSA.close();
+	        if (psSA != null) psSA.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
 	
-	   <div>
-	   <label>Industry Id</label>
-       <select name="industryId" id="dd-industry" required>	    
-       <option value="">Loading...</option>
+	    <div>
+	  <label>Industry Id</label>
+	  <select name="industryId" required>
+	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psInd = null;
+	      ResultSet rsInd = null;
+	
+	      try (Connection conInd = DBConnection.getConnection()) {
+	        String sql = "SELECT INDUSTRY_ID, DESCRIPTION FROM HEADOFFICE.INDUSTRY ORDER BY DESCRIPTION";
+	        psInd = conInd.prepareStatement(sql);
+	        rsInd = psInd.executeQuery();
+	
+	        while (rsInd.next()) {
+	          String id = rsInd.getString("INDUSTRY_ID");
+	          String desc = rsInd.getString("DESCRIPTION");
+	    %>
+	          <option value="<%= id %>"><%= desc %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Industry</option>");
+	      } finally {
+	        if (rsInd != null) rsInd.close();
+	        if (psInd != null) psInd.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
@@ -542,8 +756,30 @@
 	    <div class="personal-grid">
 	      <div>
 	        <label>Salutation Code</label>
-	        <select name="nomineeSalutation[]" id="dd-nomineeSalutation" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="nomineeSalutation[]" required>
+	          <option value="">-- Select --</option>
+	          <%
+	            PreparedStatement psNomineeSal = null;
+	            ResultSet rsNomineeSal = null;
+	            try (Connection connNomineeSal = DBConnection.getConnection()) {
+	              String sql = "SELECT SALUTATION_CODE FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE";
+	              psNomineeSal = connNomineeSal.prepareStatement(sql);
+	              rsNomineeSal = psNomineeSal.executeQuery();
+	              while (rsNomineeSal.next()) {
+	                String salCode = rsNomineeSal.getString("SALUTATION_CODE");
+	          %>
+	                <option value="<%= salCode %>"><%= salCode %></option>
+	          <%
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading Salutation Code</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsNomineeSal != null) rsNomineeSal.close();
+	              if (psNomineeSal != null) psNomineeSal.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
@@ -573,20 +809,88 @@
 	
 	      <div>
 	        <label>Country</label>
-	        <select name="nomineeCountry[]" id="dd-nomineeCountry" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="nomineeCountry[]" required>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psCountryNominee = null;
+	            ResultSet rsCountryNominee = null;
+	            try (Connection connCountryN = DBConnection.getConnection()) {
+	              String sql = "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME";
+	              psCountryNominee = connCountryN.prepareStatement(sql);
+	              rsCountryNominee = psCountryNominee.executeQuery();
+	              while (rsCountryNominee.next()) {
+	                String countryCode = rsCountryNominee.getString("COUNTRY_CODE");
+	                String countryName = rsCountryNominee.getString("NAME");
+	          %>
+	                <option value="<%= countryCode %>"><%= countryName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading countries</option>");
+	            } finally {
+	              if (rsCountryNominee != null) rsCountryNominee.close();
+	              if (psCountryNominee != null) psCountryNominee.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
 	        <label>State</label>
-	        <select name="nomineeState[]" id="dd-nomineeState" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="nomineeState[]" required> 
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psStateNominee = null;
+	            ResultSet rsStateNominee = null;
+	            try (Connection connStateN = DBConnection.getConnection()) {
+	              String sql = "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME";
+	              psStateNominee = connStateN.prepareStatement(sql);
+	              rsStateNominee = psStateNominee.executeQuery();
+	              while (rsStateNominee.next()) {
+	                String stateCode = rsStateNominee.getString("STATE_CODE");
+	                String stateName = rsStateNominee.getString("NAME");
+	          %>
+	                <option value="<%= stateCode %>"><%= stateName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading states</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsStateNominee != null) rsStateNominee.close();
+	              if (psStateNominee != null) psStateNominee.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
 	        <label>City</label>
-	        <select name="nomineeCity[]" id="dd-nomineeCity" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="nomineeCity[]" required>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psCityNominee = null;
+	            ResultSet rsCityNominee = null;
+	            try (Connection connCityN = DBConnection.getConnection()) {
+	              String sql = "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)";
+	              psCityNominee = connCityN.prepareStatement(sql);
+	              rsCityNominee = psCityNominee.executeQuery();
+	              while (rsCityNominee.next()) {
+	                String cityCode = rsCityNominee.getString("CITY_CODE");
+	                String cityName = rsCityNominee.getString("NAME");
+	          %>
+	                <option value="<%= cityCode %>"><%= cityName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading cities</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsCityNominee != null) rsCityNominee.close();
+	              if (psCityNominee != null) psCityNominee.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 		<div>
@@ -597,8 +901,30 @@
 	
 	      <div>
 	        <label>Relation with Guardian</label>
-	        <select name="nomineeRelation[]" id="dd-nomineeRelation" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="nomineeRelation[]" required>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psRelation = null;
+	            ResultSet rsRelation = null;
+	            try (Connection conn9 = DBConnection.getConnection()) {
+	              String sql = "SELECT RELATION_ID, DESCRIPTION FROM GLOBALCONFIG.RELATION ORDER BY RELATION_ID";
+	              psRelation = conn9.prepareStatement(sql);
+	              rsRelation = psRelation.executeQuery();
+	              while (rsRelation.next()) {
+	                String relationId = rsRelation.getString("RELATION_ID");
+	                String description = rsRelation.getString("DESCRIPTION");
+	          %>
+	                <option value="<%= relationId %>"><%= description %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading relation</option>");
+	            } finally {
+	              if (rsRelation != null) rsRelation.close();
+	              if (psRelation != null) psRelation.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	    </div>
 	  </div>
@@ -649,8 +975,30 @@
 	      <!-- ✅ FIXED: Changed from nomineeSalutation[] to coBorrowerSalutation[] -->
 	      <div>
 	        <label>Salutation Code</label>
-	        <select name="coBorrowerSalutation[]" id="dd-coBorrowerSalutation" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="coBorrowerSalutation[]" required>
+	          <option value="">-- Select --</option>
+	          <%
+	              PreparedStatement psCoBorrowerSal = null;
+	              ResultSet rsCoBorrowerSal = null;
+	              try (Connection connCoBorrowerSal = DBConnection.getConnection()) {
+	                  String sql = "SELECT SALUTATION_CODE FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE";
+	                  psCoBorrowerSal = connCoBorrowerSal.prepareStatement(sql);
+	                  rsCoBorrowerSal = psCoBorrowerSal.executeQuery();
+	                  while (rsCoBorrowerSal.next()) {
+	                      String salCode = rsCoBorrowerSal.getString("SALUTATION_CODE");
+	          %>
+	                      <option value="<%= salCode %>"><%= salCode %></option>
+	          <%
+	                  }
+	              } catch (Exception e) {
+	                  out.println("<option disabled>Error loading Salutation Code</option>");
+	                  e.printStackTrace();
+	              } finally {
+	                  if (rsCoBorrowerSal != null) rsCoBorrowerSal.close();
+	                  if (psCoBorrowerSal != null) psCoBorrowerSal.close();
+	              }
+	          %>
+	        </select>
 	      </div>
 	
 	      <!-- ✅ FIXED: Changed from nomineeName[] to coBorrowerName[] -->
@@ -683,24 +1031,87 @@
 	      <div>
 	        <label>Country</label>
 	        <select name="coBorrowerCountry[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <%
+	            PreparedStatement psCountryCoBorrower = null;
+	            ResultSet rsCountryCoBorrower = null;
+	            try (Connection connCountryCB = DBConnection.getConnection()) {
+	                String sql = "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME";
+	                psCountryCoBorrower = connCountryCB.prepareStatement(sql);
+	                rsCountryCoBorrower = psCountryCoBorrower.executeQuery();
+	                while (rsCountryCoBorrower.next()) {
+	                    String code = rsCountryCoBorrower.getString("COUNTRY_CODE");
+	                    String name = rsCountryCoBorrower.getString("NAME");
+	          %>
+	                <option value="<%= code %>"><%= name %></option>
+	          <%
+	                }
+	            } catch (Exception e) {
+	                out.println("<option disabled>Error loading countries</option>");
+	            } finally {
+	                if (rsCountryCoBorrower != null) rsCountryCoBorrower.close();
+	                if (psCountryCoBorrower != null) psCountryCoBorrower.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <!-- ✅ FIXED: Changed from stateCode to coBorrowerState[] -->
 	      <div>
 	        <label>State</label>
 	        <select name="coBorrowerState[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <%
+	            PreparedStatement psStateCoBorrower = null;
+	            ResultSet rsStateCoBorrower = null;
+	            try (Connection connStateCB = DBConnection.getConnection()) {
+	                String sql = "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME";
+	                psStateCoBorrower = connStateCB.prepareStatement(sql);
+	                rsStateCoBorrower = psStateCoBorrower.executeQuery();
+	                while (rsStateCoBorrower.next()) {
+	                    String code = rsStateCoBorrower.getString("STATE_CODE");
+	                    String name = rsStateCoBorrower.getString("NAME");
+	          %>
+	                <option value="<%= code %>"><%= name %></option>
+	          <%
+	                }
+	            } catch (Exception e) {
+	                out.println("<option disabled>Error loading states</option>");
+	            } finally {
+	                if (rsStateCoBorrower != null) rsStateCoBorrower.close();
+	                if (psStateCoBorrower != null) psStateCoBorrower.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <!-- ✅ FIXED: Changed from cityCode to coBorrowerCity[] -->
 	      <div>
 	        <label>City</label>
 	        <select name="coBorrowerCity[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <%
+	            PreparedStatement psCityCoBorrower = null;
+	            ResultSet rsCityCoBorrower = null;
+	            try (Connection connCityCB = DBConnection.getConnection()) {
+	                String sql = "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)";
+	                psCityCoBorrower = connCityCB.prepareStatement(sql);
+	                rsCityCoBorrower = psCityCoBorrower.executeQuery();
+	                while (rsCityCoBorrower.next()) {
+	                    String code = rsCityCoBorrower.getString("CITY_CODE");
+	                    String name = rsCityCoBorrower.getString("NAME");
+	          %>
+	                <option value="<%= code %>"><%= name %></option>
+	          <%
+	                }
+	            } catch (Exception e) {
+	                out.println("<option disabled>Error loading cities</option>");
+	            } finally {
+	                if (rsCityCoBorrower != null) rsCityCoBorrower.close();
+	                if (psCityCoBorrower != null) psCityCoBorrower.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 		<div>
@@ -757,8 +1168,30 @@
 	      <!-- ✅ FIXED: Changed from guarantorsalutation[] to guarantorSalutation[] -->
 	      <div>
 	        <label>Salutation Code</label>
-	        <select name="guarantorSalutation[]" id="dd-guarantorSalutation" required> 
-	        <option value="">Loading...</option></select>
+	        <select name="guarantorSalutation[]" required>
+	          <option value="">-- Select --</option>
+	          <%
+	              PreparedStatement psGuarantorSal = null;
+	              ResultSet rsGuarantorSal = null;
+	              try (Connection connGuarantorSal = DBConnection.getConnection()) {
+	                  String sql = "SELECT SALUTATION_CODE FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE";
+	                  psGuarantorSal = connGuarantorSal.prepareStatement(sql);
+	                  rsGuarantorSal = psGuarantorSal.executeQuery();
+	                  while (rsGuarantorSal.next()) {
+	                      String salCode = rsGuarantorSal.getString("SALUTATION_CODE");
+	          %>
+	                      <option value="<%= salCode %>"><%= salCode %></option>
+	          <%
+	                  }
+	              } catch (Exception e) {
+	                  out.println("<option disabled>Error loading Salutation Code</option>");
+	                  e.printStackTrace();
+	              } finally {
+	                  if (rsGuarantorSal != null) rsGuarantorSal.close();
+	                  if (psGuarantorSal != null) psGuarantorSal.close();
+	              }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
@@ -790,24 +1223,89 @@
 	      <div>
 	        <label>Country</label>
 	        <select name="guarantorCountry[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psCountryGuarantor = null;
+	            ResultSet rsCountryGuarantor = null;
+	            try (Connection connCountryG = DBConnection.getConnection()) {
+	              String sql = "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME";
+	              psCountryGuarantor = connCountryG.prepareStatement(sql);
+	              rsCountryGuarantor = psCountryGuarantor.executeQuery();
+	              while (rsCountryGuarantor.next()) {
+	                String countryCode = rsCountryGuarantor.getString("COUNTRY_CODE");
+	                String countryName = rsCountryGuarantor.getString("NAME");
+	          %>
+	                <option value="<%= countryCode %>"><%= countryName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading countries</option>");
+	            } finally {
+	              if (rsCountryGuarantor != null) rsCountryGuarantor.close();
+	              if (psCountryGuarantor != null) psCountryGuarantor.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <!-- ✅ FIXED: Changed from jointState[] to guarantorState[] -->
 	      <div>
 	        <label>State</label>
 	        <select name="guarantorState[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psStateGuarantor = null;
+	            ResultSet rsStateGuarantor = null;
+	            try (Connection connStateG = DBConnection.getConnection()) {
+	              String sql = "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME";
+	              psStateGuarantor = connStateG.prepareStatement(sql);
+	              rsStateGuarantor = psStateGuarantor.executeQuery();
+	              while (rsStateGuarantor.next()) {
+	                String stateCode = rsStateGuarantor.getString("STATE_CODE");
+	                String stateName = rsStateGuarantor.getString("NAME");
+	          %>
+	                <option value="<%= stateCode %>"><%= stateName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading states</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsStateGuarantor != null) rsStateGuarantor.close();
+	              if (psStateGuarantor != null) psStateGuarantor.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <!-- ✅ FIXED: Changed from jointCity[] to guarantorCity[] -->
 	      <div>
 	        <label>City</label>
 	        <select name="guarantorCity[]" required>
-  			<option value="">Loading...</option>
-			</select>
+	          <option value="">-- Select --</option>
+	          <% 
+	            PreparedStatement psCityGuarantor = null;
+	            ResultSet rsCityGuarantor = null;
+	            try (Connection connCityG = DBConnection.getConnection()) {
+	              String sql = "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)";
+	              psCityGuarantor = connCityG.prepareStatement(sql);
+	              rsCityGuarantor = psCityGuarantor.executeQuery();
+	              while (rsCityGuarantor.next()) {
+	                String cityCode = rsCityGuarantor.getString("CITY_CODE");
+	                String cityName = rsCityGuarantor.getString("NAME");
+	          %>
+	                <option value="<%= cityCode %>"><%= cityName %></option>
+	          <% 
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading cities</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsCityGuarantor != null) rsCityGuarantor.close();
+	              if (psCityGuarantor != null) psCityGuarantor.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 		<div>
@@ -871,8 +1369,30 @@
 	    <div class="form-grid">
 	      <div>
 	  <label>Security Type Code</label>
-	  <select name="securityTypeCode[]" class="js-security-type" required>
+	  <select name="securityTypeCode[]" required>
 	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psSecType = null;
+	      ResultSet rsSecType = null;
+	      try (Connection connSecType = DBConnection.getConnection()) {
+	        String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+	        psSecType = connSecType.prepareStatement(sql);
+	        rsSecType = psSecType.executeQuery();
+	        
+	        while (rsSecType.next()) {
+	          String securityType = rsSecType.getString("SECURITYTYPE_CODE");
+	    %>
+	          <option value="<%= securityType %>"><%= securityType %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Security Types</option>");
+	        e.printStackTrace();
+	      } finally {
+	        if (rsSecType != null) rsSecType.close();
+	        if (psSecType != null) psSecType.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
@@ -950,8 +1470,30 @@
 	
 	      <div>
 	  <label>Security Type Code</label>
-	  <select name="securityTypeCode[]" class="js-security-type" required>
+	  <select name="securityTypeCode[]" required>
 	    <option value="">-- Select --</option>
+	    <%
+	      PreparedStatement psSecType = null;
+	      ResultSet rsSecType = null;
+	      try (Connection connSecType = DBConnection.getConnection()) {
+	        String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+	        psSecType = connSecType.prepareStatement(sql);
+	        rsSecType = psSecType.executeQuery();
+	        
+	        while (rsSecType.next()) {
+	          String securityType = rsSecType.getString("SECURITYTYPE_CODE");
+	    %>
+	          <option value="<%= securityType %>"><%= securityType %></option>
+	    <%
+	        }
+	      } catch (Exception e) {
+	        out.println("<option disabled>Error loading Security Types</option>");
+	        e.printStackTrace();
+	      } finally {
+	        if (rsSecType != null) rsSecType.close();
+	        if (psSecType != null) psSecType.close();
+	      }
+	    %>
 	  </select>
 	</div>
 	
@@ -1020,9 +1562,31 @@
 	    <div class="form-grid">
 	      <div>
 	        <label>Security Type Code</label>
-	        <select name="gsSecurityType[]" class="js-security-type" required>
-  			<option value="">-- Select --</option>
-			</select>
+	        <select name="gsSecurityType[]" required>
+	          <option value="">-- Select Security Type --</option>
+	          <%
+	            PreparedStatement psSecType = null;
+	            ResultSet rsSecType = null;
+	            try (Connection connSecType = DBConnection.getConnection()) {
+	              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+	              psSecType = connSecType.prepareStatement(sql);
+	              rsSecType = psSecType.executeQuery();
+	              
+	              while (rsSecType.next()) {
+	                String securityType = rsSecType.getString("SECURITYTYPE_CODE");
+	          %>
+	                <option value="<%= securityType %>"><%= securityType %></option>
+	          <%
+	              }
+	            } catch (Exception e) {
+	              out.println("<option disabled>Error loading Security Types</option>");
+	              e.printStackTrace();
+	            } finally {
+	              if (rsSecType != null) rsSecType.close();
+	              if (psSecType != null) psSecType.close();
+	            }
+	          %>
+	        </select>
 	      </div>
 	
 	      <div>
@@ -1103,8 +1667,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="sharesHolderSecurityType[]" class="js-security-type" required>
+        <select name="sharesHolderSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1175,8 +1759,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="plantSecurityType[]" class="js-security-type" required>
+        <select name="plantSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1287,8 +1891,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="marketSharesSecurityType[]" class="js-security-type" required>
+        <select name="marketSharesSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1359,8 +1983,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="stockSecurityType[]" class="js-security-type" required>
+        <select name="stockSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1477,16 +2121,57 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="salarySecurityType[]" class="js-security-type" required>
+        <select name="salarySecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
       <div>
         <label>Country Code</label>
         <select name="salaryCountry[]" required>
-          <option value="">Loading...</option>
-		</select>
+          <option value="">-- Select --</option>
+          <% 
+            PreparedStatement psCountrySal = null;
+            ResultSet rsCountrySal = null;
+            try (Connection connCountrySal = DBConnection.getConnection()) {
+              String sql = "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME";
+              psCountrySal = connCountrySal.prepareStatement(sql);
+              rsCountrySal = psCountrySal.executeQuery();
+              while (rsCountrySal.next()) {
+                String code = rsCountrySal.getString("COUNTRY_CODE");
+                String name = rsCountrySal.getString("NAME");
+          %>
+                <option value="<%= code %>"><%= name %></option>
+          <% 
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading countries</option>");
+            } finally {
+              if (rsCountrySal != null) rsCountrySal.close();
+              if (psCountrySal != null) psCountrySal.close();
+            }
+          %>
+        </select>
       </div>
 
       <div>
@@ -1497,8 +2182,29 @@
       <div>
         <label>State Code</label>
         <select name="salaryState[]" required>
-          <option value="">Loading...</option>
-		</select>
+          <option value="">-- Select --</option>
+          <% 
+            PreparedStatement psStateSal = null;
+            ResultSet rsStateSal = null;
+            try (Connection connStateSal = DBConnection.getConnection()) {
+              String sql = "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME";
+              psStateSal = connStateSal.prepareStatement(sql);
+              rsStateSal = psStateSal.executeQuery();
+              while (rsStateSal.next()) {
+                String code = rsStateSal.getString("STATE_CODE");
+                String name = rsStateSal.getString("NAME");
+          %>
+                <option value="<%= code %>"><%= name %></option>
+          <% 
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading states</option>");
+            } finally {
+              if (rsStateSal != null) rsStateSal.close();
+              if (psStateSal != null) psStateSal.close();
+            }
+          %>
+        </select>
       </div>
 
       <div>
@@ -1509,8 +2215,29 @@
       <div>
         <label>City Code</label>
         <select name="salaryCity[]" required>
-          <option value="">Loading...</option>
-		</select>
+          <option value="">-- Select --</option>
+          <% 
+            PreparedStatement psCitySal = null;
+            ResultSet rsCitySal = null;
+            try (Connection connCitySal = DBConnection.getConnection()) {
+              String sql = "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)";
+              psCitySal = connCitySal.prepareStatement(sql);
+              rsCitySal = psCitySal.executeQuery();
+              while (rsCitySal.next()) {
+                String code = rsCitySal.getString("CITY_CODE");
+                String name = rsCitySal.getString("NAME");
+          %>
+                <option value="<%= code %>"><%= name %></option>
+          <% 
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading cities</option>");
+            } finally {
+              if (rsCitySal != null) rsCitySal.close();
+              if (psCitySal != null) psCitySal.close();
+            }
+          %>
+        </select>
       </div>
 
       <div>
@@ -1623,8 +2350,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="officeSecurityType[]" class="js-security-type" required>
+        <select name="officeSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1723,8 +2470,28 @@
     <div class="form-grid">
       <div>
         <label>Security Type Code</label>
-        <select name="insSecurityType[]" class="js-security-type" required>
+        <select name="insSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -1818,8 +2585,28 @@
 
       <div>
         <label>Security Type Code</label>
-        <select name="motorSecurityType[]" class="js-security-type" required>
+        <select name="motorSecurityType[]" required>
           <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
         </select>
       </div>
 
@@ -2017,8 +2804,29 @@
 
       <div>
         <label>City</label>
-        <select name="nonmotorCity[]" class="js-security-type" required>
+        <select name="nonmotorCity[]" required>
           <option value="">-- Select --</option>
+          <% 
+            PreparedStatement psCityNM = null;
+            ResultSet rsCityNM = null;
+            try (Connection connCityNM = DBConnection.getConnection()) {
+              String sql = "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)";
+              psCityNM = connCityNM.prepareStatement(sql);
+              rsCityNM = psCityNM.executeQuery();
+              while (rsCityNM.next()) {
+                String code = rsCityNM.getString("CITY_CODE");
+                String name = rsCityNM.getString("NAME");
+          %>
+                <option value="<%= code %>"><%= name %></option>
+          <% 
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading cities</option>");
+            } finally {
+              if (rsCityNM != null) rsCityNM.close();
+              if (psCityNM != null) psCityNM.close();
+            }
+          %>
         </select>
       </div>
 
@@ -2204,7 +3012,6 @@
 	<script src="js/application.js"></script>
 	<script src="js/savingAcc.js"></script>
 	<script src="js/application-tabs.js"></script>
-	<script src="js/loan-security-type-fill.js"></script>
 	<script>
 	// Validation function
 	function validateForm() {
@@ -3156,84 +3963,6 @@
 	console.log('Show Non-Motor Insurance: <%= showNonMotorInsurance %>');
 	console.log('Show Gov Security: <%= showGovSecurity %>');
 	</script>
-	<script>
-(function loadFormDropdowns() {
-
-    function fillSelect(sel, items, codeLabel) {
-        sel.innerHTML = '<option value="">-- Select --</option>';
-        items.forEach(function(item) {
-            var opt = document.createElement('option');
-            opt.value = item.v;
-            opt.textContent = codeLabel ? item.v + ' — ' + item.l : item.l;
-            sel.appendChild(opt);
-        });
-    }
-
-    function fillAll(data) {
-        var maps = {
-            'dd-accountOpCap'      : { key: 'accountOpCap',      codeLabel: false },
-            'dd-minBalance'        : { key: 'minBalance',         codeLabel: false },
-            'dd-socialSection'     : { key: 'socialSection',      codeLabel: false },
-            'dd-lbrCode'           : { key: 'lbrCode',            codeLabel: false },
-            'dd-purpose'           : { key: 'purpose',            codeLabel: false },
-            'dd-classification'    : { key: 'classification',     codeLabel: false },
-            'dd-modeOfSanction'    : { key: 'modeOfSanction',     codeLabel: false },
-            'dd-sanctionAuthority' : { key: 'sanctionAuthority',  codeLabel: false },
-            'dd-industry'          : { key: 'industry',           codeLabel: false }
-        };
-
-        Object.keys(maps).forEach(function(id) {
-            var sel = document.getElementById(id);
-            if (sel && Array.isArray(data[maps[id].key])) {
-                fillSelect(sel, data[maps[id].key], maps[id].codeLabel);
-            }
-        });
-
-        // Array selects for nominee, guarantor, co-borrower
-        var arrayMaps = [
-            { name: 'nomineeSalutation[]',    key: 'salutation', codeLabel: false },
-            { name: 'coBorrowerSalutation[]', key: 'salutation', codeLabel: false },
-            { name: 'guarantorSalutation[]',  key: 'salutation', codeLabel: false },
-            { name: 'nomineeCountry[]',       key: 'country',    codeLabel: true  },
-            { name: 'nomineeState[]',         key: 'state',      codeLabel: true  },
-            { name: 'nomineeCity[]',          key: 'city',       codeLabel: false },
-            { name: 'nomineeRelation[]',      key: 'relation',   codeLabel: false },
-            { name: 'coBorrowerCountry[]',    key: 'country',    codeLabel: true  },
-            { name: 'coBorrowerState[]',      key: 'state',      codeLabel: true  },
-            { name: 'coBorrowerCity[]',       key: 'city',       codeLabel: false },
-            { name: 'guarantorCountry[]',     key: 'country',    codeLabel: true  },
-            { name: 'guarantorState[]',       key: 'state',      codeLabel: true  },
-            { name: 'guarantorCity[]',        key: 'city',       codeLabel: false }
-        ];
-
-        arrayMaps.forEach(function(cfg) {
-            document.querySelectorAll('select[name="' + cfg.name + '"]').forEach(function(sel) {
-                if (Array.isArray(data[cfg.key])) {
-                    fillSelect(sel, data[cfg.key], cfg.codeLabel);
-                }
-            });
-        });
-
-        window._formDropdownData = data;
-    }
-
-    fetch('<%= request.getContextPath() %>/loaders/OpenAccountFormLoader')
-        .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-        })
-        .then(function(data) {
-            if (data.error) {
-                console.error('Loader error:', data.error);
-                return;
-            }
-            fillAll(data);
-        })
-        .catch(function(err) {
-            console.error('FormDropdownLoader failed:', err);
-        });
-
-})();
-</script>
+	
 	</body>
 	</html>

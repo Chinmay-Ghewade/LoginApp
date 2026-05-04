@@ -176,8 +176,6 @@
             background-color: white;
             border: 2px solid #BBADED;
             border-radius: 12px;
-            justify-content: center;
-            width: 710px;
         }
 
         legend {
@@ -227,24 +225,6 @@
             background-color: #fff;
         }
 
-        /* Reduced widths for code inputs and descriptions */
-        #accountType {
-            width: 90px; /* original 180px - 45px */
-        }
-
-        #productCode {
-            width: 90px; /* original 180px - 45px */
-        }
-
-        #accDescription {
-            width: 140px; /* original 230px - 70px */
-        }
-
-        #prodDescription {
-            width: 140px; /* original 230px - 70px */
-            color: green;
-        }
-
         .icon-btn {
             background-color: #2D2B80;
             color: white;
@@ -267,14 +247,6 @@
                 width: 100%;
             }
 
-            #accountType, #productCode {
-                width: 100%;
-            }
-
-            #accDescription, #prodDescription {
-                width: 100%;
-            }
-
             .input-box {
                 width: 100%;
                 justify-content: space-between;
@@ -288,14 +260,6 @@
             }
 
             input {
-                width: 100%;
-            }
-
-            #accountType, #productCode {
-                width: 100%;
-            }
-
-            #accDescription, #prodDescription {
                 width: 100%;
             }
 
@@ -364,7 +328,6 @@
                     <div>
                         <div class="label">Account Type</div>
                         <div class="input-box">
-                            <button type="button" class="icon-btn" onclick="openLookup('account')">…</button>
                             <input type="text" 
                                    name="accountType" 
                                    id="accountType" 
@@ -372,6 +335,7 @@
                                    maxlength="2"
                                    class="editable"
                                    style="text-transform: uppercase;">
+                            <button type="button" class="icon-btn" onclick="openLookup('account')">…</button>
                         </div>
                     </div>
 
@@ -381,6 +345,7 @@
                                name="accDescription" 
                                id="accDescription" 
                                placeholder="Description" 
+                               style="width: 230px;" 
                                readonly>
                     </div>
 
@@ -388,13 +353,13 @@
                     <div>
                         <div class="label">Product Code</div>
                         <div class="input-box">
-                            <button type="button" class="icon-btn" onclick="openLookup('product', document.getElementById('accountType').value)">…</button>
                             <input type="text" 
                                    name="productCode" 
                                    id="productCode" 
                                    placeholder="Enter code" 
                                    maxlength="3"
                                    class="editable">
+                            <button type="button" class="icon-btn" onclick="openLookup('product', document.getElementById('accountType').value)">…</button>
                         </div>
                     </div>
 
@@ -404,6 +369,7 @@
                                name="prodDescription" 
                                id="prodDescription" 
                                placeholder="Description" 
+                               style="width: 230px;" 
                                readonly>
                     </div>
 
