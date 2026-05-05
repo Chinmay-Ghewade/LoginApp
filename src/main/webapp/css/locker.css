@@ -39,11 +39,12 @@ legend {
   grid-template-columns: repeat(4, 1fr);
   gap: 10px 20px;
 }
-
+ /*
 .form-grid div {
   display: flex;
   flex-direction: column;
 }
+*/
 
 /* ════════════════════════════════════════════════════════════════ */
 /* LABELS & INPUTS */
@@ -62,11 +63,7 @@ input[type="email"],
 input[type="number"],
 select {
   padding: 4px 6px;
-  font-size: 13px;
   width: 95%;
-  box-sizing: border-box;
-  border: 1px solid #c9c5e8;
-  border-radius: 4px;
 }
 
 input[type="text"]:focus,
@@ -78,10 +75,6 @@ select:focus {
   border-color: #373279;
 }
 
-input[readonly] {
-  background-color: #f9f9f9;
-  color: #555;
-}
 
 input:disabled {
   background-color: #f0f0f0;
