@@ -176,12 +176,13 @@
 
                 } else if ("pending_txn_cash".equals(cardId)) {
                     if (workingDate != null) {
-                        ps = conn.prepareStatement(
-                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
-                            "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
-                            "AND TRANSACTIONINDICATOR_CODE LIKE 'CS%' " +
-                            "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
-                        );
+                    	ps = conn.prepareStatement(
+                    		    "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
+                    		    "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
+                    		    "AND TRANSACTIONINDICATOR_CODE LIKE 'CS%' " +
+                    		    "AND TRANIDENTIFICATION_ID != 88 " +
+                    		    "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
+                    		);
                         ps.setString(1, branchCode);
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
@@ -192,12 +193,13 @@
 
                 } else if ("pending_txn_transfer".equals(cardId)) {
                     if (workingDate != null) {
-                        ps = conn.prepareStatement(
-                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
-                            "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
-                            "AND TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
-                            "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
-                        );
+                    	ps = conn.prepareStatement(
+                    		    "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
+                    		    "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
+                    		    "AND TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
+                    		    "AND TRANIDENTIFICATION_ID != 88 " +
+                    		    "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
+                    		);
                         ps.setString(1, branchCode);
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();

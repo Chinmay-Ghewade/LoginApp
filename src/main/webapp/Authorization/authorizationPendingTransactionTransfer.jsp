@@ -245,8 +245,9 @@ try (Connection conn = DBConnection.getConnection()) {
         "  NVL(d.PARTICULAR, '') AS PARTICULAR " +
         "FROM TRANSACTION.DAILYSCROLL d " +
         "WHERE d.BRANCH_CODE = ? " +
-        "  AND d.TRANSACTIONSTATUS = 'E' " +
-        "  AND d.TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
+        		"  AND d.TRANSACTIONSTATUS = 'E' " +
+        		"  AND d.TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
+        		"  AND d.TRANIDENTIFICATION_ID != 88 " +
         (workingDate != null ? "  AND TRUNC(d.SCROLL_DATE) = TRUNC(?) " : "") +
         "ORDER BY d.SCROLL_NUMBER DESC, d.SUBSCROLL_NUMBER DESC "
     );
