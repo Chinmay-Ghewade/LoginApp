@@ -25,6 +25,18 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new java.text.SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
 %>
 
 <%
@@ -51,15 +63,22 @@ if("download".equals(action)){
     String toDate = request.getParameter("to_date");
 
     /* ✅ DATE FIX */
-    SimpleDateFormat in = new SimpleDateFormat("yyyy-MM-dd");
-    SimpleDateFormat outFmt = new SimpleDateFormat("dd/MM/yyyy");
+    SimpleDateFormat in = new SimpleDateFormat("dd/MM/yyyy");
+    SimpleDateFormat outFmt = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
 
-    if(fromDate!=null && !fromDate.isEmpty())
-        fromDate = outFmt.format(in.parse(fromDate));
+    String oracleFromDate = "";
+    String oracleToDate = "";
 
-    if(toDate!=null && !toDate.isEmpty())
-        toDate = outFmt.format(in.parse(toDate));
+    if(fromDate != null && !fromDate.isEmpty()){
+        java.util.Date d1 = in.parse(fromDate);
+        oracleFromDate = outFmt.format(d1).toUpperCase();
+    }
 
+    if(toDate != null && !toDate.isEmpty()){
+        java.util.Date d2 = in.parse(toDate);
+        oracleToDate = outFmt.format(d2).toUpperCase();
+    }
+    
     String reportType = request.getParameter("reporttype");
 
     if(!"Y".equalsIgnoreCase(isSupportUser)){
@@ -86,8 +105,8 @@ if("download".equals(action)){
         params.put("to_product",toProduct);
         params.put("from_amount",fromAmount);
         params.put("to_amount",toAmount);
-        params.put("from_date",fromDate);
-        params.put("to_date",toDate);
+        params.put("from_date",oracleFromDate);
+        params.put("to_date",oracleToDate);
         params.put("user_id",userId);
 
         /* ✅ REPORT TITLE */
@@ -351,19 +370,21 @@ required>
 
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
-<input type="date"
-name="from_date"
-class="input-field"
-value="<%=sessionDate%>"  
-required>
+<input type="text"
+       name="from_date"
+       class="input-field"
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY"
+       required>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
-<input type="date"
-name="to_date"
-class="input-field"
-required>
+<input type="text"
+       name="to_date"
+       class="input-field"
+       placeholder="DD/MM/YYYY"
+       required>
 </div>
 
 </div>

@@ -223,12 +223,12 @@ ORDER BY RATE_INT]]>
 				</textElement>
 				<text><![CDATA[Total:]]></text>
 			</staticText>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement x="348" y="0" width="85" height="20" uuid="6218d33b-8f2d-429b-ae78-8eacd8288931"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$V{Int Rate}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
 				<reportElement x="444" y="0" width="100" height="20" uuid="8121f9f6-1d6e-40c0-8e42-f7d57d59de8a"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$V{Amount}]]></textFieldExpression>

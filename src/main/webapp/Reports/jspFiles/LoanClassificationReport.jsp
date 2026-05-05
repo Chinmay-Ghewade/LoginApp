@@ -2,16 +2,36 @@
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ page buffer="none" %>
 
-<%@ page import="java.sql.*,java.util.*,java.io.*,java.text.*" %>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.io.*" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+
 <%@ page import="net.sf.jasperreports.engine.*" %>
 <%@ page import="net.sf.jasperreports.engine.export.*" %>
 <%@ page import="net.sf.jasperreports.engine.util.JRLoader" %>
-<%@ page import="db.DBConnection" %>
 
+<%@ page import="db.DBConnection" %>
 <%
+Object obj = session.getAttribute("workingDate");
+
+String sessionDate = "";
+
+if (obj != null) {
+    if (obj instanceof java.sql.Date) {
+        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
+    } else {
+        sessionDate = obj.toString();
+    }
+}
+
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
+}
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
-String userId = (String) session.getAttribute("userId");
 
 if (isSupportUser == null) isSupportUser = "N";
 if (sessionBranchCode == null) sessionBranchCode = "";
@@ -20,13 +40,19 @@ if (sessionBranchCode == null) sessionBranchCode = "";
 <%
 String action = request.getParameter("action");
 
-if ("download".equals(action)) {
+/* DEBUG (remove later) */
+// out.println("Action = " + action);
+
+if ("download".equalsIgnoreCase(action)) {
 
     String reporttype = request.getParameter("reporttype");
     String reportName = request.getParameter("report_name");
     String branchCode = request.getParameter("branch_code");
     String asOnDate   = request.getParameter("as_on_date");
 
+    String userId = (String) session.getAttribute("userId");
+
+    /* SESSION FALLBACK */
     if (branchCode == null || branchCode.trim().isEmpty()) {
         branchCode = sessionBranchCode;
     }
@@ -41,97 +67,69 @@ if ("download".equals(action)) {
 
         response.reset();
         response.setBufferSize(1024 * 1024);
+        response.setHeader("Cache-Control","no-store, no-cache, must-revalidate");
+        response.setHeader("Pragma","no-cache");
+        response.setDateHeader("Expires",0);
 
         conn = DBConnection.getConnection();
-        conn.setAutoCommit(false);
-
-        /* ================= INSERT LOGIC ================= */
-
-        String condition = "";
-
-        if("0000".equals(branchCode)){
-            condition = " BETWEEN '" + request.getParameter("from_br") +
-                        "' AND '" + request.getParameter("to_br") + "' ";
-        }else{
-            condition = " = '" + branchCode + "' ";
-        }
-
-        /* DELETE */
-        String sqlDelete =
-        "DELETE FROM TEMP.LOANCLASS WHERE BRANCH_CODE " + condition;
-
-        Statement stmtDel = conn.createStatement();
-        stmtDel.execute(sqlDelete);
-        stmtDel.close();
-
-        /* SELECT (MAIN DATA) */
-        String sqlSelect =
-        "SELECT AA.ACCOUNT_CODE, NVL(AA.NAME,'A') NAME, " +
-        "AL.LIMITAMOUNT, AL.AREA_CODE, AL.SUBAREA_CODE, " +
-        "AL.PERIODOFLOAN, AL.SANCTIONAMOUNT " +
-        "FROM ACCOUNT.ACCOUNT AA, ACCOUNT.ACCOUNTLOAN AL " +
-        "WHERE AA.ACCOUNT_CODE = AL.ACCOUNT_CODE " +
-        "AND SUBSTR(AA.ACCOUNT_CODE,1,4) " + condition;
-
-        PreparedStatement ps = conn.prepareStatement(sqlSelect);
-        ResultSet rs = ps.executeQuery();
-
-        Statement insertStmt = conn.createStatement();
-
-        while(rs.next()){
-
-            String accountCode = rs.getString("ACCOUNT_CODE");
-            String name = rs.getString("NAME");
-            name = name.replace("'", " ");
-
-            double limit = rs.getDouble("LIMITAMOUNT");
-
-            String insertSql =
-            "INSERT INTO TEMP.LOANCLASS (BRANCH_CODE, ACCOUNT_CODE, NAME, LIMITAMOUNT) VALUES (" +
-            "'" + branchCode + "'," +
-            "'" + accountCode + "'," +
-            "'" + name + "'," +
-            limit + ")";
-
-            insertStmt.execute(insertSql);
-        }
-
-        rs.close();
-        ps.close();
-        insertStmt.close();
-
-        conn.commit();
 
         /* ================= JASPER ================= */
 
         String jasperFile = "";
 
-        if("main".equals(reportName)){
-            jasperFile = "LoanClassificationReport.jasper";
+        if("balance".equals(reportName)){
+            jasperFile = "LoanClassificationReport(Balance Wise).jasper";
         }
-        else if("interest".equals(reportName)){
+        else if("intrate".equals(reportName)){
             jasperFile = "LoanClassificationReport (int. rate).jasper";
+        }
+        else if("limit".equals(reportName)){
+            jasperFile = "LoanClassificationReport(limitWise).jasper";
+        }
+        else if("intlist".equals(reportName)){
+            jasperFile = "LoanClassificationReport(LoanIntList).jasper";
         }
         else if("overdue".equals(reportName)){
             jasperFile = "LoanClassificationReport (LoanOverdue).jasper";
         }
+        else if("period".equals(reportName)){
+            jasperFile = "LoanClassificationReport(Period Wise).jasper";
+        }
+        else if("sanction".equals(reportName)){
+            jasperFile = "LoanClassificationReport(Sanction Amt Wise).jasper";
+        }
+        else {
+            // fallback
+            jasperFile = "LoanClassificationReport(Balance Wise).jasper";
+        }
 
-        String jasperPath =
-        application.getRealPath("/Reports/" + jasperFile);
+        /* FILE PATH */
+        String jasperPath = application.getRealPath("/Reports/" + jasperFile);
 
-        JasperReport jr =
-        (JasperReport) JRLoader.loadObject(new File(jasperPath));
+        File file = new File(jasperPath);
 
+        if (!file.exists()) {
+            out.println("<h3 style='color:red'>Jasper File Not Found: " + jasperFile + "</h3>");
+            return;
+        }
+
+        JasperReport jr = (JasperReport) JRLoader.loadObject(file);
+
+        /* PARAMETERS */
         Map<String,Object> param = new HashMap<>();
 
         param.put("branch_code", branchCode);
         param.put("as_on_date", asOnDate);
+        param.put("report_title","LOAN CLASSIFICATION REPORT");
         param.put("user_id", userId);
+        
+        param.put("SUBREPORT_DIR",
+                application.getRealPath("/Reports/"));
 
         param.put(JRParameter.REPORT_CONNECTION, conn);
 
-        JasperPrint jp =
-        JasperFillManager.fillReport(jr, param, conn);
+        /* FILL REPORT */
+        JasperPrint jp = JasperFillManager.fillReport(jr, param, conn);
 
         if (jp.getPages().isEmpty()) {
 
@@ -149,44 +147,72 @@ if ("download".equals(action)) {
 
         if ("pdf".equalsIgnoreCase(reporttype)) {
 
-            response.setContentType("application/pdf");
+    response.reset();
+    response.setContentType("application/pdf");
 
-            response.setHeader("Content-Disposition",
-            "inline; filename=\"LoanClassification.pdf\"");
+    response.setHeader(
+        "Content-Disposition",
+        "inline; filename=\"LoanClassificationReport.pdf\""
+    );
 
-            JasperExportManager.exportReportToPdfStream(
-                jp, response.getOutputStream());
-        }
+    ServletOutputStream outStream = response.getOutputStream();
 
-        else if ("xls".equalsIgnoreCase(reporttype)) {
+    JasperExportManager.exportReportToPdfStream(jp, outStream);
 
-            response.setContentType("application/vnd.ms-excel");
+    outStream.flush();
+    outStream.close();
 
-            JRXlsExporter exporter = new JRXlsExporter();
+    return;
+}
+else if ("xls".equalsIgnoreCase(reporttype)) {
 
-            exporter.setParameter(
-                JRXlsExporterParameter.JASPER_PRINT, jp);
+    response.reset();
+    response.setContentType("application/vnd.ms-excel");
 
-            exporter.setParameter(
-                JRXlsExporterParameter.OUTPUT_STREAM,
-                response.getOutputStream());
+    response.setHeader(
+        "Content-Disposition",
+        "attachment; filename=\"LoanClassificationReport.xls\""
+    );
 
-            exporter.exportReport();
-        }
+    ServletOutputStream outStream = response.getOutputStream();
 
-        return;
+    JRXlsExporter exporter = new JRXlsExporter();
+
+    exporter.setParameter(JRXlsExporterParameter.JASPER_PRINT, jp);
+    exporter.setParameter(JRXlsExporterParameter.OUTPUT_STREAM, outStream);
+
+    exporter.exportReport();
+
+    outStream.flush();
+    outStream.close();
+
+    return;
+}
 
     } catch(Exception e){
 
         e.printStackTrace();
 
-        session.setAttribute("errorMessage",
-            "Error = " + e.getMessage());
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
 
         response.sendRedirect("LoanClassificationReport.jsp");
         return;
-
-    } finally {
+    }  finally {
 
         if(conn!=null){
             try{conn.close();}catch(Exception ex){}
@@ -239,6 +265,14 @@ var contextPath = "<%=request.getContextPath()%>";
     padding:20px;
     border-radius:8px;
 }
+
+.report-options {
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-top:5px;
+}
+
 </style>
 
 </head>
@@ -262,15 +296,16 @@ session.removeAttribute("errorMessage");
 LOAN CLASSIFICATION REPORT
 </h1>
 
+<!-- ✅ FIXED FORM ACTION -->
 <form method="post"
-action="<%=request.getContextPath()%>/Reports/jspFiles/LoanClassificationReport.jsp"
+action="LoanClassificationReport.jsp"
 target="_blank">
 
 <input type="hidden" name="action" value="download"/>
 
 <div class="parameter-section">
 
-<!-- BRANCH -->
+<!-- Branch Code -->
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
 
@@ -280,13 +315,15 @@ name="branch_code"
 id="branch_code"
 class="input-field"
 value="<%= sessionBranchCode %>"
-<%= !"Y".equalsIgnoreCase(isSupportUser.trim()) ? "readonly" : "" %>
+<%= !"Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "") ? "readonly" : "" %>
 required>
 
-<% if ("Y".equalsIgnoreCase(isSupportUser.trim())) { %>
-<button type="button" class="icon-btn"
+<% if ("Y".equalsIgnoreCase(isSupportUser != null ? isSupportUser.trim() : "")) { %>
+<button type="button"
+class="icon-btn"
 onclick="openLookup('branch')">…</button>
 <% } %>
+
 </div>
 </div>
 
@@ -302,27 +339,41 @@ onclick="openLookup('branch')">…</button>
 <input type="date"
 name="as_on_date"
 class="input-field"
+value="<%=sessionDate%>"  
 required>
 </div>
 
 </div>
 
-<!-- REPORT TYPE -->
+<!-- REPORT SELECTION -->
 <div class="parameter-section">
 
 <div class="parameter-group">
 <div class="parameter-label">Report</div>
 
-<select name="report_name" class="input-field">
-<option value="main">Main Report</option>
-<option value="interest">Interest Rate</option>
-<option value="overdue">Loan Overdue</option>
-</select>
+<div class="report-options">
+
+<label><input type="radio" name="report_name" value="balance" checked> Balance Wise</label>
+
+<label><input type="radio" name="report_name" value="intrate"> Interest Rate</label>
+
+<label><input type="radio" name="report_name" value="limit"> Limit Wise</label>
+
+<label><input type="radio" name="report_name" value="intlist"> Loan Int List</label>
+
+<label><input type="radio" name="report_name" value="overdue"> Loan Overdue</label>
+
+<label><input type="radio" name="report_name" value="period"> Period Wise</label>
+
+<label><input type="radio" name="report_name" value="sanction"> Sanction Amt Wise</label>
 
 </div>
 
 </div>
 
+</div>
+
+<!-- FORMAT -->
 <div class="format-section">
 
 <div class="parameter-label">Report Type</div>

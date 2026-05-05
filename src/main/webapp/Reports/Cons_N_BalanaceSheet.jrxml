@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="N_BalanaceSheet" language="groovy" pageWidth="1008" pageHeight="612" orientation="Landscape" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1b205f8a-d264-417b-88d9-43e179fa7b81">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String"/>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 0 as SR_NO, FN_GET_SHARE_AUTCAP_LMT($P{as_on_date}) AS LAST_YEAR_LIAB_INNER_AMT,   TO_NUMBER(0) LAST_YEAR_LIAB_OUTER_AMT, 'AUTHORISED SHARES CAPITAL' AS BOLD,
+'' NORMAL, FN_GET_SHARE_AUTCAP_LMT($P{to_date}) LIAB_INNER_AMT,
+TO_NUMBER(0) AS LIAB_OUTER_AMT,  TO_NUMBER(0) LAST_YEAR_ASSET_INNER_AMT,
+ TO_NUMBER(0) LAST_YEAR_ASSET_OUTER_AMT, '' BOLD1, '' NORMAL1, TO_NUMBER(0) ASSET_INNER_AMT,
+TO_NUMBER(0) ASSET_OUTER_AMT
+FROM DUAL
+
+UNION ALL
+
+SELECT SR_NO, TO_NUMBER(ABS(LAST_YEAR_LIAB_INNER_AMT) ) AS LAST_YEAR_LIAB_INNER_AMT,
+                 ABS(LAST_YEAR_LIAB_OUTER_AMT)AS LAST_YEAR_LIAB_OUTER_AMT,
+                  DECODE(LIAB_BOLD_NORMAL,'B',LIAB_DESC,'') as BOLD  ,
+	DECODE(LIAB_BOLD_NORMAL,'N',LIAB_DESC,'') as NORMAL,
+
+                  TO_NUMBER( ABS(LIAB_INNER_AMT)) AS LIAB_INNER_AMT,
+                   ABS(LIAB_OUTER_AMT) AS LIAB_OUTER_AMT,
+                   TO_NUMBER(ABS(LAST_YEAR_ASSET_INNER_AMT)) AS LAST_YEAR_ASSET_INNER_AMT,
+                   ABS(LAST_YEAR_ASSET_OUTER_AMT)AS LAST_YEAR_ASSET_OUTER_AMT,
+                   DECODE(ASSET_BOLD_NORMAL,'B',ASSET_DESC,'')as BOLD1 ,DECODE(ASSET_BOLD_NORMAL,'N',ASSET_DESC,'') as NORMAL1,
+                   TO_NUMBER(ABS(ASSET_INNER_AMT)) AS ASSET_INNER_AMT,
+                   ABS(ASSET_OUTER_AMT) AS ASSET_OUTER_AMT
+               FROM TEMP.CONS_TEMP_NBS_STRUCTURE
+               ORDER BY SR_NO]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_LIAB_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_LIAB_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="BOLD" class="java.lang.String"/>
+	<field name="NORMAL" class="java.lang.String"/>
+	<field name="LIAB_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="LIAB_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_ASSET_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_ASSET_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="BOLD1" class="java.lang.String"/>
+	<field name="NORMAL1" class="java.lang.String"/>
+	<field name="ASSET_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="ASSET_OUTER_AMT" class="java.math.BigDecimal"/>
+	<variable name="liab_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LIAB_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="asset_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{ASSET_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="last_liab_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LAST_YEAR_LIAB_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="last_asset_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LAST_YEAR_ASSET_OUTER_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[java.math.BigDecimal.ZERO]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="43" splitType="Stretch">
+			<subreport>
+				<reportElement x="196" y="0" width="621" height="42" uuid="6d944a50-f824-46ce-ad33-def438337cbb"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="53" splitType="Stretch">
+			<line>
+				<reportElement x="8" y="1" width="956" height="1" uuid="8d64a86b-75f0-48d4-9b68-277b5ea4e773"/>
+			</line>
+			<staticText>
+				<reportElement x="351" y="3" width="62" height="31" uuid="9d6c88fa-ae1f-4f15-970e-e41e633c175a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="162" y="4" width="184" height="28" uuid="7248a11a-e8a9-4413-a664-e3735fa226e4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="2" width="73" height="31" uuid="5a6238b3-5185-4091-930d-1b88c477c417"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="413" y="3" width="63" height="31" uuid="d9724823-6dd6-43db-b1ad-2623b311e585"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities Outer Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="645" y="4" width="102" height="20" uuid="6432dcf9-6aca-45c6-a062-83bc6c82b56e"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Asset]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="845" y="3" width="68" height="29" uuid="e5ff604f-ac9e-4d23-8946-fef940a8dcca"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="479" y="3" width="76" height="29" uuid="a02f3148-2c6f-491e-be95-397a9445ba92"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Asset Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="906" y="3" width="62" height="30" uuid="1e9e4f92-95aa-4af0-b9a6-09317f3987de"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outer Amt]]></text>
+			</staticText>
+			<line>
+				<reportElement x="7" y="52" width="957" height="1" uuid="924bfedf-2b4d-43d0-bf70-34ca2ec2876c"/>
+			</line>
+			<textField>
+				<reportElement x="352" y="36" width="85" height="16" uuid="35c2575b-5738-4a8e-a6fb-b26bee006b19"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="9" y="36" width="88" height="16" forecolor="#000000" backcolor="#FFFFFF" uuid="35a4aef3-4fad-41a7-8f2d-ae09243cd240"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="413" y="36" width="77" height="16" forecolor="#000000" backcolor="#FFFFFF" uuid="6d4cee9c-ebd2-4e1d-8f95-7e21e649ccc0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="831" y="32" width="75" height="20" uuid="0615ec33-817d-4b35-aab6-0d6cc188fd20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="896" y="33" width="67" height="19" forecolor="#000000" backcolor="#FFFFFF" uuid="95b2ef60-5be2-424c-8df0-005c2a971a5e"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="476" y="35" width="87" height="16" forecolor="#000000" backcolor="#FFFFFF" uuid="b7c57ba8-dcb2-4510-9fab-ff9a9ae2ebbe"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="92" y="36" width="88" height="16" forecolor="#000000" backcolor="#FFFFFF" uuid="aec2af80-fb13-4320-8260-75795cce6858"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="544" y="3" width="68" height="30" uuid="6ff29184-8360-4430-9a2d-4b9dd80b6375"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Asset Outer Amt]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="544" y="36" width="89" height="16" forecolor="#000000" backcolor="#FFFFFF" uuid="69564d3c-c2ea-4845-ba56-475bd0eb4226"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="92" y="4" width="69" height="29" uuid="07b347a7-17be-4a2f-b338-a1c6fb113eb3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities Outer Amt]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="341" y="1" width="76" height="15" uuid="1c6be8d8-1d3d-4793-ac85-023beb2c8c27">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL} != null)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LIAB_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="371" y="0" width="102" height="15" uuid="388adfeb-3230-4655-bf2e-8e72ab8b6ee2">
+					<printWhenExpression><![CDATA[new Boolean($F{LIAB_OUTER_AMT}.doubleValue() != 0)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LIAB_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="162" y="1" width="184" height="14" uuid="b4dd8c8d-90b0-4287-8a15-7d3766f2d6e3"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BOLD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="12" y="2" width="73" height="13" uuid="fed0bdfb-a729-4e17-a62f-2e1c593a2e10">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL}!= null).booleanValue()]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_LIAB_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="##,##,##,##0.00" isBlankWhenNull="true">
+				<reportElement x="56" y="1" width="95" height="15" uuid="6f1a589a-cc22-4a77-a026-6da7079d9256"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LAST_YEAR_LIAB_OUTER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="613" y="0" width="204" height="15" uuid="2bc05a43-b6ad-4b34-98a8-10626564a3de"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BOLD1}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="621" y="0" width="224" height="15" uuid="3f76cb2d-059f-428a-8e0b-a557bcc49240"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NORMAL1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="851" y="1" width="75" height="15" uuid="b051b278-a52a-4bb8-871c-5b2dc6e60ffe">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL1}!=null)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{ASSET_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="867" y="1" width="88" height="15" uuid="71e8451f-55db-4ca7-b15b-d9428d9cbd56">
+					<printWhenExpression><![CDATA[$F{ASSET_OUTER_AMT}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{ASSET_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="472" y="1" width="75" height="15" uuid="6a572300-b255-4578-b85c-12b347ae4867">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL1}!= null).booleanValue()]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_ASSET_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="524" y="1" width="86" height="15" uuid="7cf3c421-2ff1-4951-9db2-559f479b8d78">
+					<printWhenExpression><![CDATA[$F{LAST_YEAR_ASSET_OUTER_AMT}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_ASSET_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="476" y="-53" width="1" height="69" uuid="a310c558-74c2-41ea-b9dc-23afbfb6cc8e"/>
+			</line>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="7" y="0" width="90" height="15" uuid="949722e2-c599-4909-907a-c7113a43252d">
+					<printWhenExpression><![CDATA[$F{SR_NO}==0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_LIAB_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern=" #,##0.00" isBlankWhenNull="false">
+				<reportElement x="371" y="1" width="102" height="15" uuid="dbe5a61a-dd19-4216-80f8-d9364fa66869">
+					<printWhenExpression><![CDATA[$F{SR_NO}==0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LIAB_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="611" y="-53" width="1" height="69" uuid="c80cd323-af15-42d5-86b6-90cf3d68c437"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="158" y="-52" width="1" height="68" uuid="41f92c96-c506-40da-b75a-cbb46e8dd33d"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="350" y="-54" width="1" height="70" uuid="e16a10e3-8179-4297-ad87-af041938eb8a"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="844" y="-53" width="1" height="69" uuid="6c065a21-ae6d-41e1-a56a-500fd2bb0e64"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="964" y="-53" width="1" height="69" uuid="f0ee528b-d8b7-4975-9cd6-bd0abbfc6d5e"/>
+			</line>
+			<line>
+				<reportElement x="7" y="-52" width="1" height="67" uuid="85f3e0d5-dc60-48fa-9f21-a8c06c01213d"/>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="166" y="0" width="184" height="15" uuid="50b66a1a-f735-45af-87db-64b25d4fd285"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NORMAL}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="860" y="5" width="61" height="15" uuid="9d8da71f-d78b-401e-a032-047768623554"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="922" y="5" width="40" height="15" uuid="3287fdf0-dde0-4f6d-bc44-42391d8c88a9"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="8" y="-1" width="956" height="1" uuid="7e5ee2e0-2f99-4abd-864b-2fbcb504caee"/>
+			</line>
+			<textField>
+				<reportElement x="19" y="5" width="56" height="15" uuid="8e8ce547-a1ee-411e-a650-dbb6176b160b"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="75" y="5" width="100" height="15" uuid="e1dae64b-80c1-407a-97ff-c865aa4a7262"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="34" splitType="Stretch">
+			<staticText>
+				<reportElement x="196" y="1" width="57" height="19" uuid="84779745-8a9c-4220-9d4b-08515e9cfc63"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total   : ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="12" y="1" width="142" height="19" uuid="a0f034bd-08a1-40c8-8e90-86116d4cdba8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{last_liab_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="476" y="1" width="131" height="19" uuid="7b8f1ac5-ca42-45f2-9d27-42b011964076"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{last_asset_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="355" y="1" width="119" height="19" uuid="383b6e36-5fc4-41ef-9212-a86919785739"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{liab_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="843" y="1" width="120" height="19" uuid="608c74c1-3a61-462e-95dc-1effed9e328c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{asset_tot})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="647" y="1" width="77" height="19" uuid="577c86c0-64a1-4b3a-b7d6-379c87f1fa64"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total   : ]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="7" y="1" width="956" height="22" uuid="a2acec8a-d503-4027-af3e-5217a6f6574e"/>
+			</rectangle>
+			<line>
+				<reportElement x="157" y="0" width="1" height="23" uuid="df883f01-7616-4765-92db-a569ad683318"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="476" y="0" width="1" height="23" uuid="d8e6e445-534c-4e3a-a5a0-39383e09da1e"/>
+			</line>
+			<line>
+				<reportElement x="612" y="0" width="1" height="23" uuid="b49ed2f5-78d0-4a81-bc38-d0956185a753"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="844" y="1" width="1" height="23" uuid="5143b918-0da4-49f2-a728-98577b71b5e4"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="351" y="0" width="1" height="23" uuid="b5f2cb9d-0ab5-466e-82aa-d083bc879647"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

@@ -112,6 +112,18 @@ if ("download".equals(action)) {
         /* ✅ JASPER EXECUTION */
         JasperPrint jp =
         JasperFillManager.fillReport(jasperReport, params, conn);
+        
+        if (jp.getPages().isEmpty()) {
+
+            response.reset();
+            response.setContentType("text/html");
+
+            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println("No Records Found!");
+            out.println("</h2>");
+
+            return;
+        }
 
         /* ✅ PDF */
         if("pdf".equalsIgnoreCase(reporttype)){

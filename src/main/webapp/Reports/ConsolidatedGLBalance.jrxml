@@ -310,12 +310,12 @@ FROM
 	<pageFooter>
 		<band height="26">
 			<textField>
-				<reportElement x="617" y="9" width="56" height="17" uuid="c4378131-71ea-4570-bfc9-9f24cbc85090"/>
+				<reportElement x="640" y="9" width="56" height="17" uuid="c4378131-71ea-4570-bfc9-9f24cbc85090"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="673" y="9" width="37" height="17" uuid="c732c5fe-b153-4ec9-89e7-151e202e6c44"/>
+				<reportElement x="696" y="9" width="37" height="17" uuid="c732c5fe-b153-4ec9-89e7-151e202e6c44"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -324,7 +324,7 @@ FROM
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="43" y="9" width="89" height="17" uuid="70a8e47e-594d-4498-aacb-7196d4e6d2ad"/>
+				<reportElement x="43" y="9" width="131" height="17" uuid="70a8e47e-594d-4498-aacb-7196d4e6d2ad"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<line>

@@ -106,7 +106,7 @@ FROM (
 	<title>
 		<band height="42" splitType="Stretch">
 			<subreport>
-				<reportElement x="63" y="0" width="402" height="42" uuid="5a10e2fa-60c2-42e0-b24b-8e0b1e160ab4"/>
+				<reportElement x="28" y="0" width="479" height="42" uuid="5a10e2fa-60c2-42e0-b24b-8e0b1e160ab4"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>

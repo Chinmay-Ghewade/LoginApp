@@ -30,6 +30,18 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
 %>
 
 <%
@@ -72,7 +84,7 @@ if("process".equals(action)){
         String oracleDate = "";
 
         if(asOnDate != null && !asOnDate.trim().equals("")){
-            java.util.Date d = new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
+            java.util.Date d = new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
             oracleDate = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
                             .format(d).toUpperCase();
         }
@@ -287,11 +299,12 @@ onclick="openLookup('branch','to_branch')">…</button>
 
 <div class="parameter-group">
 <div class="parameter-label">As On Date</div>
-<input type="date"
-name="as_on_date"
-class="input-field"
-value="<%=sessionDate%>" 
-required>
+<input type="text"
+       name="as_on_date"
+       class="input-field"
+       value="<%= displayDate %>"
+       placeholder="DD/MM/YYYY"
+       required>
 </div>
 
 <div class="parameter-group">

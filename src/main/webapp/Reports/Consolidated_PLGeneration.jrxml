@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Consolidated_PLGeneration" language="groovy" pageWidth="1025" pageHeight="864" orientation="Landscape" columnWidth="985" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1b2ca3d5-666f-4047-b6f1-c08d59d772a2">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT decode(INCOME_BOLD_NORMAL, 'N', trim(INCOME_DESC), '' ) AS INCOME_DESC,
+decode(INCOME_BOLD_NORMAL, 'B', trim(INCOME_DESC), '' ) AS INCOME_BOLD,
+
+decode(INCOME_INNER_AMT, 0, '',  to_char(ABS(INCOME_INNER_AMT), '99,99,99,99,99,999.99')) AS INCOME_INNER_AMT,
+
+decode(INCOME_BOLD_NORMAL, 'B', to_char(ABS(INCOME_OUTER_AMT), '99,99,99,99,99,999.99'), '' ) AS INCOME_AMT_BOLD,
+decode(INCOME_BOLD_NORMAL, 'N', decode(INCOME_OUTER_AMT, 0, '', to_char(ABS(INCOME_OUTER_AMT), '99,99,99,999.99')), '' ) AS INCOME_OUTER_AMT,
+ABS(INCOME_OUTER_AMT) AS INCOME_AMT,
+decode(EXPENSES_BOLD_NORMAL, 'N', trim(EXPENSES_DESC), '' ) AS EXPENSES_DESC,
+decode(EXPENSES_BOLD_NORMAL, 'B', trim(EXPENSES_DESC), '' ) AS EXPENSES_BOLD,
+
+decode(EXPENSES_INNER_AMT, 0, '', to_char(ABS(EXPENSES_INNER_AMT), '99,99,99,99,99,999.99')) AS EXPENSES_INNER_AMT,
+
+decode(EXPENSES_BOLD_NORMAL, 'B', to_char(ABS(EXPENSES_OUTER_AMT), '99,99,99,99,99,999.99'), '' ) AS EXPENSES_AMT_BOLD,
+decode(EXPENSES_BOLD_NORMAL, 'N', decode(EXPENSES_OUTER_AMT, 0, '', to_char(ABS(EXPENSES_OUTER_AMT), '99,99,99,999.99')), '' ) AS EXPENSES_OUTER_AMT,
+ABS(EXPENSES_OUTER_AMT) AS EXPENSES_AMT
+FROM TEMP.CONSOLIDATED_PL
+ORDER BY SR_NO]]>
+	</queryString>
+	<field name="INCOME_DESC" class="java.lang.String"/>
+	<field name="INCOME_BOLD" class="java.lang.String"/>
+	<field name="INCOME_INNER_AMT" class="java.lang.String"/>
+	<field name="INCOME_AMT_BOLD" class="java.lang.String"/>
+	<field name="INCOME_OUTER_AMT" class="java.lang.String"/>
+	<field name="INCOME_AMT" class="java.math.BigDecimal"/>
+	<field name="EXPENSES_DESC" class="java.lang.String"/>
+	<field name="EXPENSES_BOLD" class="java.lang.String"/>
+	<field name="EXPENSES_INNER_AMT" class="java.lang.String"/>
+	<field name="EXPENSES_AMT_BOLD" class="java.lang.String"/>
+	<field name="EXPENSES_OUTER_AMT" class="java.lang.String"/>
+	<field name="EXPENSES_AMT" class="java.math.BigDecimal"/>
+	<variable name="exp_out" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{EXPENSES_AMT}]]></variableExpression>
+	</variable>
+	<variable name="inc_out" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INCOME_AMT}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="48" splitType="Stretch">
+			<subreport>
+				<reportElement x="223" y="0" width="535" height="48" uuid="21e30d62-30e8-4652-8cf6-48c3cd386ed6"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="1" width="209" height="19" uuid="7824bcf8-65f5-4beb-aad3-3b5c02991b2e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="212" y="1" width="138" height="20" uuid="18e2b2ba-c2f1-4e35-89d4-9b33fa41be8e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inner Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="1" width="145" height="20" uuid="2b2bf081-14ff-4d45-a976-3b99cc813c91"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outer Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="498" y="1" width="242" height="20" uuid="f2394355-080e-4712-84f0-24cd240e9d28"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="741" y="1" width="125" height="19" uuid="f1b83e1f-e668-44ba-a549-91adba978d4a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inner Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="865" y="0" width="119" height="20" uuid="9e3ac59b-2955-4ec3-9eed-503128d9882b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outer Amount]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="0" width="985" height="1" uuid="ab0dc5a9-e8f6-4ad9-bf2c-8056ceeb7c15"/>
+			</line>
+			<line>
+				<reportElement x="0" y="21" width="985" height="1" uuid="090d69c3-2e84-4cf1-a3f4-ed503c976cd0"/>
+			</line>
+			<line>
+				<reportElement x="0" y="0" width="1" height="22" uuid="527fef71-a484-4b0a-b4c4-3b3ed72b51fd"/>
+			</line>
+			<line>
+				<reportElement x="210" y="0" width="1" height="22" uuid="308c18d1-aaa9-4c56-a0cc-32e8a88fa16d"/>
+			</line>
+			<line>
+				<reportElement x="350" y="0" width="1" height="22" uuid="96866fec-4cfc-4abf-8e61-66fe4198d8ef"/>
+			</line>
+			<line>
+				<reportElement x="497" y="0" width="1" height="22" uuid="91e302c0-356e-4e44-b56c-52f75462e2df"/>
+			</line>
+			<line>
+				<reportElement x="740" y="0" width="1" height="22" uuid="a0e1c1c1-4420-498b-932c-3178cf88f6ad"/>
+			</line>
+			<line>
+				<reportElement x="866" y="0" width="1" height="22" uuid="56afdf5e-6765-4aad-9b6d-9a013824d8d9"/>
+			</line>
+			<line>
+				<reportElement x="984" y="0" width="1" height="22" uuid="bb600d78-9634-4e62-9733-01c323f90b56"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="208" y="0" width="139" height="13" uuid="8cec5bfc-0e9d-488d-ae0a-c4052ffa4324"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{EXPENSES_INNER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="349" y="0" width="145" height="13" uuid="2d9b0797-42af-491c-a72c-809ff9dfca0a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{EXPENSES_OUTER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="501" y="0" width="242" height="13" uuid="7ed90ccb-e013-4e13-8204-9617ccadbd00"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INCOME_DESC}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="743" y="0" width="118" height="13" uuid="37eb4201-f5ff-474c-972f-9e2ea2d081f3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INCOME_INNER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="883" y="0" width="97" height="13" uuid="fd4921f4-89aa-47c3-a03e-8447ac7d887a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INCOME_OUTER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="501" y="0" width="240" height="13" uuid="8ccda4b5-1b8d-473c-b4f5-bc88c1a7cb37"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INCOME_BOLD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="352" y="0" width="142" height="13" uuid="4b134b83-1076-48a3-adc9-e4d33e437bcf"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EXPENSES_AMT_BOLD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="870" y="0" width="110" height="13" uuid="ea1d2059-1fcf-461a-a7a9-737a90a5353e"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INCOME_AMT_BOLD}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="497" y="-5" width="1" height="19" uuid="7e27c9cf-322a-4d22-a85c-4b8f5c2011f1"/>
+			</line>
+			<line>
+				<reportElement x="740" y="-5" width="1" height="19" uuid="c9b75faa-f84c-43b8-b99a-68aff36b50e7"/>
+			</line>
+			<line>
+				<reportElement x="866" y="-5" width="1" height="19" uuid="69ec7ccc-6312-4bd6-8187-0cc4c72246cb"/>
+			</line>
+			<line>
+				<reportElement x="210" y="-5" width="1" height="19" uuid="f78eb940-68c9-478f-acd3-005c6cad9944"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-5" width="1" height="19" uuid="5dcf2cf6-830a-4d30-ac5b-5659789b7921"/>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="4" y="1" width="206" height="13" uuid="3f94f3e7-43b4-456b-a8fd-baabbeccc9ed"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{EXPENSES_DESC}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="4" y="1" width="204" height="13" uuid="587c662c-21fb-4b42-84a1-942d1a03dfc7"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EXPENSES_BOLD}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="350" y="-5" width="1" height="19" uuid="e4f74bce-6612-4487-87aa-39a7af9c650d"/>
+			</line>
+			<line>
+				<reportElement x="984" y="-3" width="1" height="17" uuid="3560783a-5c56-4c99-b6df-e452aacbe870"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="34" splitType="Stretch">
+			<textField>
+				<reportElement x="883" y="19" width="61" height="15" uuid="4d5b6368-070d-4c08-95c0-6fe784e3cbb9"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="945" y="19" width="40" height="15" uuid="a4011828-cf78-4d13-8198-3824e64a15ed"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEE, d MMM yyyy HH:mm:ss Z">
+				<reportElement x="51" y="19" width="159" height="15" uuid="c412fc3d-8b2f-4ec5-addb-df4bea043b9c"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="4" y="19" width="47" height="15" uuid="cea8c84c-9dc1-4818-81aa-7887ba0a9c5b"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="1" width="985" height="1" uuid="f11077d7-75d6-42ba-afd4-36cfd81dfffe"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="130" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement x="352" y="0" width="146" height="22" uuid="e6340734-d0d0-4f14-a574-db74195af6de"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{exp_out}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="828" y="2" width="152" height="22" uuid="730c2ec9-1d5e-4e03-8805-c8cb87a81e74"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{inc_out}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="252" y="2" width="54" height="20" uuid="e4d27fba-d6d0-4448-8717-0f8427d8a2b7"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL :-]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="384" y="67" width="416" height="56" uuid="e7084cc8-a94f-4c32-bbab-5e469bc18e51"/>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "A4_clerk-manager.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="1" y="1" width="985" height="1" uuid="76c7bfa3-7c20-4170-95e1-3869be69d894"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

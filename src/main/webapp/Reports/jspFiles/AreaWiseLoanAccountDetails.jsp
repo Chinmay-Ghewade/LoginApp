@@ -34,6 +34,19 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new java.text.SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
 %>
 
 <%
@@ -69,7 +82,7 @@ if ("download".equals(action)) {
 
     if (asOnDate != null && !asOnDate.trim().isEmpty()) {
         java.util.Date d =
-            new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
+            new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
 
         oracleDate =
             new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
@@ -359,7 +372,12 @@ class="icon-btn">…</button>
 <!-- DATE -->
 <div class="parameter-group">
 <div class="parameter-label">As On Date</div>
-<input type="date" name="as_on_date" class="input-field"  value="<%=sessionDate%>"  required>
+<input type="text"
+       name="as_on_date"
+       class="input-field"
+       value="<%= displayDate %>"
+       placeholder="DD/MM/YYYY"
+       required>
 </div>
 
 <!-- AMOUNT -->

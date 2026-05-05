@@ -115,6 +115,8 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT NAME FROM GLOBALCONFIG.CITY WHERE CITY_CODE=?";    
                 } else if ("memberType".equalsIgnoreCase(type)) {
                     query = "SELECT DISCREPTION FROM SHARES.MEMBERTYPE_MASTER WHERE MEMBER_TYPECODE=?";
+                } else if ("user".equalsIgnoreCase(type)) {
+                    query = "SELECT NAME FROM ACL.USERREGISTER WHERE USER_ID=?";
                 } else {
                     out.print("");
                     return;
@@ -161,6 +163,8 @@ public class CommonLookupServlet extends HttpServlet {
                 listCity(conn, out);
             } else if ("memberType".equalsIgnoreCase(type)) {
                 listMemberType(conn, out);
+            } else if ("user".equalsIgnoreCase(type)) {
+                listUser(conn, out, request);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -674,6 +678,55 @@ private void listMemberType(Connection conn, PrintWriter out) throws Exception {
  rs.close();
  ps.close();
 }
+//===============================
+//🔹 USER (FROM DAILYTXN)
+//===============================
+private void listUser(Connection conn, PrintWriter out, HttpServletRequest request) throws Exception {
 
+ String branchCode = request.getParameter("branchCode");
+
+ if (branchCode == null || branchCode.trim().isEmpty()) {
+     out.println("<h3 style='color:red;'>Branch required</h3>");
+     return;
+ }
+
+ String sql =
+     "SELECT DISTINCT d.USER_ID, u.NAME " +
+     "FROM TRANSACTION.DAILYTXN d " +
+     "LEFT JOIN ACL.USERREGISTER u ON d.USER_ID = u.USER_ID " +
+     "WHERE d.BRANCH_CODE = ? " +
+     "ORDER BY d.USER_ID";
+
+ PreparedStatement ps = conn.prepareStatement(sql);
+ ps.setString(1, branchCode);
+
+ ResultSet rs = ps.executeQuery();
+
+ printTableHeader(out, "Select User", "User ID", "User Name", false);
+
+ while (rs.next()) {
+
+     String id = rs.getString("USER_ID");
+     String name = rs.getString("NAME");
+
+     if (id == null) id = "";
+     if (name == null) name = "";
+
+     id = id.replace("'", "\\'");
+     name = name.replace("'", "\\'");
+
+     out.println("<tr class='lookup-row' onclick=\"selectUser('"
+             + id + "','" + name + "')\">");
+
+     out.println("<td>" + id + "</td>");
+     out.println("<td>" + name + "</td>");
+     out.println("</tr>");
+ }
+
+ printTableFooter(out);
+
+ rs.close();
+ ps.close();
+}
 }
 

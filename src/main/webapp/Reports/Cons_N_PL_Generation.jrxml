@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="N_BalanaceSheet" language="groovy" pageWidth="1008" pageHeight="612" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6948bbe2-552f-4f20-928d-7e85c7d8f0ae">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="title" class="java.lang.String"/>
+	<parameter name="from_date" class="java.lang.String"/>
+	<parameter name="to_date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+    SR_NO,
+
+    ABS(LAST_EXPENSES_AMOUNT) AS LAST_YEAR_EXPENSES_INNER_AMT,
+    ABS(LAST_EXPENSES_AMOUNT) AS LAST_YEAR_EXPENSES_OUTER_AMT,
+
+    EXPENSES_DESC AS BOLD,
+    '' AS NORMAL,
+
+    ABS(EXPENSES_AMOUNT) AS EXPENSES_INNER_AMT,
+    ABS(EXPENSES_AMOUNT) AS EXPENSES_OUTER_AMT,
+
+    ABS(LAST_INCOME_AMOUNT) AS LAST_YEAR_INCOME_INNER_AMT,
+    ABS(LAST_INCOME_AMOUNT) AS LAST_YEAR_INCOME_OUTER_AMT,
+
+    INCOME_DESC AS BOLD1,
+    '' AS NORMAL1,
+
+    ABS(INCOME_AMOUNT) AS INCOME_INNER_AMT,
+    ABS(INCOME_AMOUNT) AS INCOME_OUTER_AMT
+
+FROM TEMP.CONS_TEMP_NPL_STRUCTURE
+ORDER BY SR_NO]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_EXPENSES_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_EXPENSES_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="BOLD" class="java.lang.String"/>
+	<field name="NORMAL" class="java.lang.String"/>
+	<field name="EXPENSES_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="EXPENSES_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_INCOME_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="LAST_YEAR_INCOME_OUTER_AMT" class="java.math.BigDecimal"/>
+	<field name="BOLD1" class="java.lang.String"/>
+	<field name="NORMAL1" class="java.lang.String"/>
+	<field name="INCOME_INNER_AMT" class="java.math.BigDecimal"/>
+	<field name="INCOME_OUTER_AMT" class="java.math.BigDecimal"/>
+	<variable name="liab_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{EXPENSES_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="asset_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INCOME_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="last_liab_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LAST_YEAR_EXPENSES_OUTER_AMT}]]></variableExpression>
+	</variable>
+	<variable name="last_asset_tot" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LAST_YEAR_INCOME_OUTER_AMT}]]></variableExpression>
+		<initialValueExpression><![CDATA[]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="100" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="968" height="65" uuid="a178f3f6-b16f-4f31-8333-392d0086a43b"/>
+				<textElement textAlignment="Center">
+					<font size="25" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{title}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="714" y="65" width="159" height="35" uuid="e7f8f439-b090-4563-85ab-715d36a771ca"/>
+				<textElement>
+					<font size="20" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="690" y="66" width="49" height="34" uuid="ca2da83d-429b-4af7-a4de-a3bf73cb0cdd"/>
+				<textElement>
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="65" width="532" height="35" uuid="a934e4d8-29fa-45cd-a0a1-0a6fd34a6bf3"/>
+				<textElement>
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Consolidated N Form Profit & Loss From Date]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="537" y="65" width="183" height="35" uuid="8360dcd2-90b7-4f59-888f-11bc039beae9"/>
+				<textElement>
+					<font size="20" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="49" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="1" width="966" height="1" uuid="c31e448f-fcd4-4337-bfe8-787319bed472"/>
+			</line>
+			<staticText>
+				<reportElement x="353" y="2" width="76" height="28" uuid="577cdf62-22a9-45cd-969f-2790650f30a9"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="165" y="2" width="184" height="45" uuid="49150782-32ef-4ab6-b401-0c75d4d5e6f8"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="6" y="2" width="73" height="28" uuid="a7093666-2a93-42cf-9161-4c0eddb0cd5c"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="435" y="2" width="72" height="28" uuid="563b2960-db8f-4ec7-8c02-0d23fcd9c114"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses Outer Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="684" y="2" width="102" height="20" uuid="2f8eaadb-9115-408c-8f65-6aed9e48b5b3"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="806" y="2" width="73" height="28" uuid="371e9da1-35a2-4f47-8cab-dc46689dd8e4"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="511" y="1" width="65" height="29" uuid="7bb5d032-f634-479b-a52f-a228857d46a9"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income Inner Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="887" y="2" width="78" height="27" uuid="a9b8353b-bc9e-4620-8913-f75f71df0c75"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income Outer Amt]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="48" width="966" height="1" uuid="51a24d90-6abe-4869-8be7-9ff40ecc9ec0"/>
+			</line>
+			<textField>
+				<reportElement x="353" y="31" width="76" height="17" uuid="86f5f8f7-e64c-4e4f-9c39-e54422ae6ea9"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="3" y="31" width="88" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="f0592e05-963b-4f34-bee0-0de7eb6e2179"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="435" y="31" width="72" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="a7dbbb01-9909-46e5-b702-f9384921ad6d"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="806" y="31" width="76" height="17" uuid="38808bab-93ee-4fb2-8dac-65b6dd9fa581"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="888" y="31" width="84" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="06514611-c1f4-4dff-a41a-745f4e221bcd"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{to_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="512" y="31" width="100" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="c0392889-20a0-48ab-8081-4de24b904670"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="91" y="31" width="96" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="54f43da9-e83c-499d-8c88-719e7c26e56c"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="91" y="3" width="70" height="28" uuid="c870d736-b6a6-4e7c-a80f-f99b9f593e4c"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Expenses Outer Amt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="594" y="2" width="66" height="30" uuid="455b298d-db53-4482-b8f3-e2f5ca1502c0"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Income Outer Amt]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="false">
+				<reportElement mode="Transparent" x="594" y="32" width="90" height="17" forecolor="#000000" backcolor="#FFFFFF" uuid="1e71b307-9443-4878-a86b-e67e982cf653"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from_date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16" splitType="Stretch">
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="353" y="1" width="76" height="15" uuid="2f8a389d-ccb7-484d-8b79-701a848445b2">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL} != null)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{EXPENSES_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="405" y="0" width="102" height="15" uuid="53a6fc3a-8c91-471c-9e3a-d7a64f07223d">
+					<printWhenExpression><![CDATA[new Boolean($F{EXPENSES_OUTER_AMT}.doubleValue() != 0)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{EXPENSES_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="165" y="1" width="184" height="15" uuid="9984380b-9518-4228-a251-d23788d74ff8"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BOLD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="169" y="1" width="184" height="15" uuid="d9e0dd1f-d77f-4bf5-b643-6629e9eb1a46"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NORMAL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="0" y="2" width="73" height="13" uuid="4f4134da-9d50-450c-8954-6932f9ec295a">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL}!= null).booleanValue()]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_EXPENSES_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="64" y="1" width="95" height="15" uuid="d9b70f68-d18d-44ed-bca6-9d4a76effbfe">
+					<printWhenExpression><![CDATA[$F{LAST_YEAR_EXPENSES_OUTER_AMT}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_EXPENSES_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="667" y="1" width="204" height="15" uuid="7f7b1327-b7c1-46fa-a1e9-c73a5365f506"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BOLD1}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="674" y="1" width="132" height="15" uuid="2617df73-6d52-4ab6-b289-ab3ddd5d162f"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NORMAL1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="820" y="1" width="75" height="15" uuid="85dab06b-cc7a-4717-884f-f94b0438ec58">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL1}!=null)]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{INCOME_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="510" y="1" width="75" height="15" uuid="9e34d0af-8577-4786-9114-766321b5b37e">
+					<printWhenExpression><![CDATA[new Boolean($F{NORMAL1}!= null).booleanValue()]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_INCOME_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="571" y="1" width="86" height="15" uuid="cece5a53-347c-4daa-955e-dd125ac53d5d">
+					<printWhenExpression><![CDATA[$F{LAST_YEAR_INCOME_OUTER_AMT}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_INCOME_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="508" y="-49" width="1" height="65" uuid="206f8426-646e-43fe-a26c-ef298ae54ba4"/>
+			</line>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="-2" y="0" width="82" height="15" uuid="1e9a5403-91a4-443b-95ea-ae20b46c78a7">
+					<printWhenExpression><![CDATA[$F{SR_NO}==0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{LAST_YEAR_EXPENSES_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="405" y="1" width="102" height="15" uuid="a0cb0780-dd9d-42c4-916a-4034837c5fa3">
+					<printWhenExpression><![CDATA[$F{SR_NO}==0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{EXPENSES_INNER_AMT})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="661" y="-49" width="1" height="65" uuid="2eaac5b2-cf28-4270-aa72-e84160eed257"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="161" y="-49" width="1" height="65" uuid="a140c026-487b-492b-aef2-787d5d658bf4"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="351" y="-49" width="1" height="65" uuid="7a8a024a-82e0-4a45-b17f-b0e9f28b6f23"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="803" y="-49" width="1" height="65" uuid="30c6ea78-0b68-4302-97f0-976a6e31e5a1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="966" y="-49" width="1" height="65" uuid="44611fa2-cc4c-41e3-aafd-98cc5adb1c47"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="-48" width="1" height="63" uuid="cd614206-cd21-431c-b859-90c6e2e372af"/>
+			</line>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="872" y="1" width="91" height="14" uuid="36399190-314b-4c69-92f3-53142a7237d7">
+					<printWhenExpression><![CDATA[$F{INCOME_OUTER_AMT}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($F{INCOME_OUTER_AMT})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="447" y="9" width="80" height="15" uuid="42443351-f564-4073-8fb8-c73dc1b62bbf"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="527" y="9" width="40" height="15" uuid="b2c935f7-0494-4c4f-b618-301a6c15366d"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEE, d MMM yyyy HH:mm:ss Z">
+				<reportElement x="2" y="9" width="224" height="15" uuid="bcd484ef-9c15-46ac-a6b5-3d269653d9d3"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-1" width="965" height="1" uuid="7a11b37c-cbb4-41b4-a535-f75f83c947c9"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="199" y="0" width="76" height="20" uuid="6fe2802c-1ffa-4cb8-acaf-e4555c43037f"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total   : ]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="16" y="1" width="141" height="19" uuid="f340c54d-099f-4885-bd56-15a0161a4217"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{last_liab_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="518" y="1" width="139" height="19" uuid="16444a38-2f44-4dc7-a83b-7805cf4a1333"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{last_asset_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="353" y="0" width="152" height="20" uuid="2ce26798-b79e-4f0a-951a-878e4d37e71f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{liab_tot})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="811" y="1" width="148" height="19" uuid="11ad57a1-4213-401d-b463-4c714d265c12"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("##,##,##,##0.00").format($V{asset_tot})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="705" y="0" width="81" height="20" uuid="632b1d92-91a4-4e4f-b116-2a1dea7483c0"/>
+				<textElement verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total   : ]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="968" height="23" uuid="d4006da1-5ad7-43d2-84cf-813ec425b7e8"/>
+			</rectangle>
+			<line>
+				<reportElement x="160" y="0" width="1" height="23" uuid="c49b42b1-37b4-43a8-83f4-d9a2b848ad6b"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="508" y="0" width="1" height="23" uuid="ec3776c2-751e-4646-ab98-a8759fd78260"/>
+			</line>
+			<line>
+				<reportElement x="660" y="0" width="1" height="23" uuid="6ca2bb85-81cf-4a65-9a41-187631164548"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="803" y="1" width="1" height="23" uuid="d39141eb-63a3-4745-8fbe-b6c426e70850"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="351" y="0" width="1" height="23" uuid="5838cc25-137b-4797-87c1-d0499430fe6c"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

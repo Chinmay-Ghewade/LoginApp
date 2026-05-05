@@ -26,6 +26,20 @@ if (sessionDate == null || sessionDate.isEmpty()) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new java.text.SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
+
 String action = request.getParameter("action");
 
 String sessionBranchCode = (String) session.getAttribute("branchCode");
@@ -103,14 +117,14 @@ if("generate".equals(action)){
         /* DATE FORMAT */
 
         String fromDateDB =
-        new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
-        .format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate))
-        .toUpperCase();
+new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
+.format(new SimpleDateFormat("dd/MM/yyyy").parse(fromDate))
+.toUpperCase();
 
-        String toDateDB =
-        new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
-        .format(new SimpleDateFormat("yyyy-MM-dd").parse(toDate))
-        .toUpperCase();
+String toDateDB =
+new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
+.format(new SimpleDateFormat("dd/MM/yyyy").parse(toDate))
+.toUpperCase();
 
         /* ================= SQL ================= */
 
@@ -176,9 +190,12 @@ if("generate".equals(action)){
         params.put("to_date",toDateDB);
         params.put("branch_code",branchCode);
         params.put("report_title","ACCOUNT OPEN CLOSE BETWEEN DATES");
-
+ 
+        String userId = (String) session.getAttribute("userId");
+        params.put("user_id", userId);
+        
         String asOnDate = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
-                .format(new SimpleDateFormat("yyyy-MM-dd").parse(fromDate))
+                .format(new SimpleDateFormat("dd/MM/yyyy").parse(fromDate))
                 .toUpperCase();
 
         params.put("as_on_date", asOnDate);   // ✅ FIX
@@ -460,19 +477,22 @@ ACCOUNT OPEN AND CLOSE BETWEEN DATES
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
 
-<input type="date"
+<input type="text"
        name="from_date"
        class="input-field"
-       value="<%= sessionDate %>"
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY"
        required>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
 
-<input type="date"
+<input type="text"
        name="to_date"
        class="input-field"
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY"
        required>
 </div>
 

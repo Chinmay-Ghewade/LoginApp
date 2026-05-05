@@ -481,7 +481,16 @@ function initMemberTypeAutoFetch() {
             .catch(err => console.error("MemberType Fetch Error:", err));
     });
 }
+function selectUser(id, name) {
 
+    let field = document.getElementById("user_id");
+    if (field) field.value = id;
+
+    let nameField = document.getElementById("userName");
+    if (nameField) nameField.value = name;
+
+    closeLookup();
+}
 // ===============================
 // 🔹 AUTO INIT
 // ===============================

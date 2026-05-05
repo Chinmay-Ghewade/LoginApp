@@ -208,7 +208,7 @@ ORDER BY  PRODUCT, A.ACCOUNT_CODE]]>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
 			</textField>
-			<textField pattern="dd/MM/yyyy">
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="331" y="0" width="78" height="15" uuid="e0ab2b88-dab6-4c0d-b35b-fb6bb23229b0"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{OPEN_D}]]></textFieldExpression>
@@ -218,7 +218,7 @@ ORDER BY  PRODUCT, A.ACCOUNT_CODE]]>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{BAL}]]></textFieldExpression>
 			</textField>
-			<textField pattern="dd/MM/yyyy">
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
 				<reportElement x="486" y="0" width="69" height="15" uuid="39cdf15a-3ab0-42c1-8aad-7f7a49358a67"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{CLOSE_D}]]></textFieldExpression>

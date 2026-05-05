@@ -27,6 +27,20 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new java.text.SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new java.text.SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 String userId = (String) session.getAttribute("userId");
@@ -45,6 +59,17 @@ if ("download".equals(action)) {
     String fromDate   = request.getParameter("from_date");
     String toDate     = request.getParameter("to_date");
 
+    SimpleDateFormat inFmt = new SimpleDateFormat("dd/MM/yyyy");
+    SimpleDateFormat outFmt = new SimpleDateFormat("yyyy-MM-dd");
+
+    if(fromDate != null && !fromDate.isEmpty()){
+        fromDate = outFmt.format(inFmt.parse(fromDate));
+    }
+
+    if(toDate != null && !toDate.isEmpty()){
+        toDate = outFmt.format(inFmt.parse(toDate));
+    }
+    
     if (branchCode == null || branchCode.trim().isEmpty()) {
         branchCode = sessionBranchCode;
     }
@@ -315,15 +340,23 @@ onclick="openLookup('branch')">…</button>
 <!-- From Date -->
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
-<input type="date" name="from_date" class="input-field" value="<%= sessionDate %>"
-required>
+<input type="text"
+       name="from_date"
+       class="input-field"
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY"
+       required>
 </div>
 
 <!-- To Date -->
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
-<input type="date" name="to_date" class="input-field" required>
-</div>
+<input type="text"
+       name="to_date"
+       class="input-field"
+       placeholder="DD/MM/YYYY"
+       required>
+   </div>
 
 </div>
 

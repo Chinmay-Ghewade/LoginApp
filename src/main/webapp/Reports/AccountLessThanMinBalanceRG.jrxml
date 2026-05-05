@@ -86,7 +86,7 @@ ORDER BY SR_NO]]>
 	<title>
 		<band height="44" splitType="Stretch">
 			<subreport>
-				<reportElement x="57" y="0" width="515" height="44" uuid="6e45d7e7-3643-45ea-a4cf-d680f4b2544a"/>
+				<reportElement x="36" y="0" width="515" height="44" uuid="6e45d7e7-3643-45ea-a4cf-d680f4b2544a"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -239,7 +239,7 @@ ORDER BY SR_NO]]>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="45" y="9" width="87" height="16" uuid="81de1c76-9007-4e6c-9ff1-42ffad058388"/>
+				<reportElement x="45" y="9" width="113" height="16" uuid="81de1c76-9007-4e6c-9ff1-42ffad058388"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>

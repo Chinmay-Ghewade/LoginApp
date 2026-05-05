@@ -24,6 +24,9 @@
 	<parameter name="indicatorStr" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT D.TXN_DATE,
        D.ACCOUNT_CODE,
@@ -33,10 +36,12 @@
 FROM transaction.dailytxn D,
      account.account A
 WHERE D.user_id = $P{user_id}
-  AND D.txn_date BETWEEN $P{as_on_date} AND $P{to_date}
-  AND branch_code = $P{branch_code}
-  AND D.account_code = A.account_code
-AND D.TRANSACTIONINDICATOR_CODE IN ($P!{indicatorStr})]]>
+AND D.txn_date BETWEEN
+    TO_DATE($P{from_date}, 'DD-MON-YYYY')
+    AND TO_DATE($P{to_date}, 'DD-MON-YYYY')
+AND D.branch_code = $P{branch_code}
+AND D.account_code = A.account_code
+AND INSTR(',' || $P{indicatorStr} || ',', ',' || D.TRANSACTIONINDICATOR_CODE || ',') > 0]]>
 	</queryString>
 	<field name="TXN_DATE" class="java.sql.Timestamp"/>
 	<field name="ACCOUNT_CODE" class="java.lang.String"/>
@@ -128,7 +133,7 @@ AND D.TRANSACTIONINDICATOR_CODE IN ($P!{indicatorStr})]]>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="15" splitType="Stretch">
+		<band height="16" splitType="Stretch">
 			<textField pattern="dd/MM/yyyy">
 				<reportElement x="1" y="0" width="69" height="15" uuid="9890a05a-cdc4-4084-bc94-3970f7478784"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
@@ -152,7 +157,7 @@ AND D.TRANSACTIONINDICATOR_CODE IN ($P!{indicatorStr})]]>
 				<textFieldExpression><![CDATA[$F{TRANSACTIONINDICATOR_CODE}]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.00">
-				<reportElement x="546" y="0" width="53" height="15" uuid="a09b4c54-1376-47a2-9571-28ee79f0aa4c"/>
+				<reportElement x="542" y="0" width="60" height="15" uuid="a09b4c54-1376-47a2-9571-28ee79f0aa4c"/>
 				<textElement textAlignment="Right" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
 			</textField>
@@ -170,6 +175,9 @@ AND D.TRANSACTIONINDICATOR_CODE IN ($P!{indicatorStr})]]>
 			</line>
 			<line>
 				<reportElement x="541" y="-15" width="1" height="30" uuid="562d1422-ba71-4a86-a1b3-bff60d55e932"/>
+			</line>
+			<line>
+				<reportElement x="608" y="-11" width="1" height="27" uuid="34fe77d7-b8ef-4d07-94a4-2c3fed5ff163"/>
 			</line>
 		</band>
 	</detail>

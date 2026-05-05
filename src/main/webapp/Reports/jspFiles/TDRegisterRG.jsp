@@ -31,6 +31,20 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 
@@ -74,8 +88,8 @@ if ("download".equals(action)) {
 
     if(asOnDate!=null && !asOnDate.trim().equals("")){
 
-        java.util.Date d =
-            new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
+    	java.util.Date d =
+    		    new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
 
         oracleDateStr =
             new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
@@ -211,9 +225,9 @@ if ("download".equals(action)) {
 <html>
 <head>
 
-<title>Term Deposit Register</title>
+<title>Consolidated Balance Sheet</title>
 
-<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css?v=4">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css">
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
 
 <script>
@@ -223,225 +237,213 @@ var contextPath = "<%=request.getContextPath()%>";
 <script src="<%=request.getContextPath()%>/js/lookup.js"></script>
 
 <style>
+.container{
+    width:900px;
+    margin:auto;
+}
 
-.radio-container{
-    margin-top:8px;
+.section{
+    background:#f5f5f5;
+    padding:20px;
+    border-radius:10px;
+}
+
+.label{
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.input{
+    width:100%;
+    padding:8px;
+}
+
+.row{
     display:flex;
-    gap:40px;
+    gap:20px;
+    margin-bottom:15px;
 }
 
-.input-field:disabled{
-    background-color:#e0e0e0;
-    color:#666;
-    cursor:not-allowed;
-}
-
-.input-box { display:flex; gap:10px; }
-
-.icon-btn {
+.btn{
     background:#2D2B80;
     color:white;
+    padding:10px 20px;
     border:none;
-    width:40px;
-    border-radius:8px;
+    border-radius:6px;
     cursor:pointer;
 }
 
-.modal {
-    display:none;
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background:rgba(0,0,0,0.5);
-    justify-content:center;
-    align-items:center;
-}
-
-.modal-content {
-    background:#f5f5f5;
-    width:80%;
-    max-height:85%;
-    padding:20px;
-    border-radius:8px;
+.error-box{
+    color:red;
+    font-weight:bold;
+    text-align:center;
+    margin-top:10px;
 }
 </style>
+
+<script>
+
+function validateForm(){
+    var date = document.getElementById("as_on_date").value;
+
+    if(date == ""){
+        alert("Please enter As On Date");
+        return false;
+    }
+    return true;
+}
+
+/* SET REPORT TYPE */
+function setReport(val){
+    document.getElementById("report_select").value = val;
+    document.getElementById("action").value = "download";
+    document.forms[0].target = "_blank";
+    document.forms[0].submit();
+
+    /* reset */
+    document.forms[0].target = "";
+    document.getElementById("action").value = "";
+}
+
+</script>
 
 </head>
 
 <body>
 
-<div class="report-container">
+<div class="container">
 
-<h1 class="report-title">
-TERM DEPOSIT REGISTER
-</h1>
+<h2 style="text-align:center;">
+CONSOLIDATED BALANCE SHEET
+</h2>
 
 <form method="post"
-      action="<%=request.getContextPath()%>/Reports/jspFiles/TDRegisterRG.jsp"
-      target="_blank"
-      autocomplete="off">
+      action="ConsolidatedBalancesheet.jsp"
+      onsubmit="return validateForm();">
 
-<input type="hidden" name="action" value="download"/>
+<!-- HIDDEN -->
+<input type="hidden" name="action" id="action">
+<input type="hidden" name="report_select" id="report_select" value="BS">
 
-<div class="parameter-section">
+<div class="section">
 
-<!-- Branch Code -->
+<div class="row">
 
-<div class="parameter-group">
-<div class="parameter-label">Branch Code</div>
+<div style="flex:1;">
+<div class="label">Branch Code</div>
 
-<div class="input-box">
-    <input type="text"
-       name="branch_code"
+<input type="text"
        id="branch_code"
-       class="input-field"
-       value="<%= sessionBranchCode %>"
-       <%= !"Y".equalsIgnoreCase(isSupportUser.trim()) ? "readonly" : "" %>
-       required>
-
-   <% if ("Y".equalsIgnoreCase(isSupportUser.trim())) { %>
-<button type="button"
-        class="icon-btn"
-        onclick="openLookup('branch')">…</button>
-<% } %>
-
-</div>
+       name="branch_code"
+       class="input"
+       value="<%=sessionBranchCode%>"
+       readonly>
 </div>
 
-<div class="parameter-group">
-    <div class="parameter-label">Branch Name</div>
-    <input type="text" id="branchName" class="input-field" readonly>
-</div>
-
-
-<!-- Product Code -->
-
-<div class="parameter-group">
-
-<div class="parameter-label">Product Code</div>
-
-<div class="input-box">
-    <input type="text"
-           name="product_code"
-           id="product_code"
-           class="input-field"
-           placeholder="Enter Product Code">
-
-    <button type="button"
-            class="icon-btn"
-             onclick="openLookup('product')">…</button>
-</div>
-
-<div class="radio-container">
-
-<label>
-<input type="radio"
-       name="single_all"
-       value="S"
-       onclick="toggleProduct()"
-       checked>
-Single
-</label>
-
-<label>
-<input type="radio"
-       name="single_all"
-       value="A"
-       onclick="toggleProduct()">
-All
-</label>
-
+<div style="flex:2;">
+<div class="label">Branch Name</div>
+<input type="text"
+       id="branchName"
+       class="input"
+       readonly>
 </div>
 
 </div>
 
+<div class="row">
 
-<!-- As On Date -->
+<div style="flex:1;">
+<div class="label">As On Date</div>
 
-<div class="parameter-group">
-
-<div class="parameter-label">As On Date</div>
-
-<input type="date"
+<input type="text"
+       id="as_on_date"
        name="as_on_date"
-       class="input-field"
-       value="<%=sessionDate%>"  
-       required>
-
+       class="input"
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY">
 </div>
 
-</div>
+<div style="flex:1;">
+<div class="label">Select</div>
 
+<label>
+<input type="radio" name="regularclosing" value="R" checked> Regular
+</label>
 
-<div class="format-section">
+<label>
+<input type="radio" name="regularclosing" value="C"> Closing
+</label>
 
-<div class="parameter-label">Report Type</div>
-
-<div class="format-options">
-
-<div class="format-option">
-<input type="radio"
-       name="reporttype"
-       value="pdf"
-       checked> PDF
-</div>
-
-<div class="format-option">
-<input type="radio"
-       name="reporttype"
-       value="xls"> Excel
 </div>
 
 </div>
 
 </div>
 
+<!-- REPORT TYPE -->
 
-<button type="submit" class="download-button">
-Generate Report
+<div class="section" style="margin-top:10px;">
+
+<div class="label">Report Format</div>
+
+<label>
+<input type="radio" name="reporttype" value="pdf" checked> PDF
+</label>
+
+<label>
+<input type="radio" name="reporttype" value="xls"> Excel
+</label>
+
+</div>
+
+<!-- ERROR -->
+
+<div class="error-box">
+<%= session.getAttribute("errorMessage") != null ? session.getAttribute("errorMessage") : "" %>
+</div>
+
+<br>
+
+<div style="text-align:center; display:flex; gap:10px; justify-content:center;">
+
+<button type="submit" name="action" value="validate" class="btn">
+Validate
 </button>
+
+<button type="submit" name="action" value="generate" class="btn">
+Generate Records
+</button>
+
+<button type="button"
+        onclick="setReport('BS')"
+        class="btn">
+Balance Sheet
+</button>
+
+<button type="button"
+        onclick="setReport('PL')"
+        class="btn">
+P & L
+</button>
+
+<button type="submit" name="action" value="cancel" class="btn">
+Cancel
+</button>
+
+</div>
 
 </form>
 
 </div>
 
+<!-- LOOKUP MODAL -->
+
 <div id="lookupModal" class="modal">
-    <div class="modal-content">
-        <button onclick="closeLookup()" style="float:right;">✖</button>
-        <div id="lookupTable"></div>
-    </div>
+<div class="modal-content">
+<button onclick="closeLookup()" style="float:right;">✖</button>
+<div id="lookupTable"></div>
 </div>
-
-
-<script>
-
-function toggleProduct(){
-
-    var single =
-        document.querySelector('input[name="single_all"][value="S"]').checked;
-
-    var productField =
-        document.querySelector('input[name="product_code"]');
-
-    if(single){
-
-        productField.disabled = false;
-        productField.readOnly = false;
-
-    }else{
-
-        productField.value="";
-        productField.disabled = true;
-        productField.readOnly = true;
-
-    }
-}
-
-window.onload=function(){
-    toggleProduct();
-}
-
-</script>
+</div>
 
 </body>
 </html>

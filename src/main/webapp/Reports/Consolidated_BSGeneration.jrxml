@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Consolidated_BSGeneration" language="groovy" pageWidth="1084" pageHeight="864" orientation="Landscape" columnWidth="1044" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f32c9915-3a51-4ef9-9584-a4ec6d7ebb33">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 0 as SR_NO, 'AUTHORISED SHARES CAPITAL' AS LIAB_BOLD, '' AS LIAB_DESC, TO_NUMBER('') LIAB_INNER_AMT,
+to_char(FN_GET_SHARE_AUTCAP_LMT($P{as_on_date}), '99,99,99,999.99') AS LIAB_AMT_BOLD,  TO_NUMBER('') LIAB_OUTER_AMT,
+TO_NUMBER('')  LIAB_AMT, TO_NUMBER('')  ASSET_BOLD, '' ASSET_DESC, TO_NUMBER('') ASSET_INNER_AMT,
+TO_NUMBER('') ASSET_AMT_BOLD, TO_NUMBER('') ASSET_OUTER_AMT, TO_NUMBER('') ASSET_AMT
+FROM DUAL
+
+UNION ALL
+
+SELECT  sr_no,
+decode(LIAB_BOLD_NORMAL, 'B', LIAB_DESC, '') LIAB_BOLD,
+decode(LIAB_BOLD_NORMAL, 'N', LIAB_DESC, '') LIAB_DESC,
+decode(LIAB_INNER_AMT, 0, '', to_char(ABS(LIAB_INNER_AMT), '99,99,99,99,99,999.99')) AS LIAB_INNER_AMT,
+decode(LIAB_BOLD_NORMAL, 'B',  to_char(ABS(LIAB_OUTER_AMT), '99,99,99,99,99,999.99'), '') LIAB_AMT_BOLD,
+decode(LIAB_BOLD_NORMAL, 'N', decode(LIAB_OUTER_AMT, 0, '', to_char(ABS(LIAB_OUTER_AMT), '99,99,99,999.99')), '') AS LIAB_OUTER_AMT,
+ABS(LIAB_OUTER_AMT) LIAB_AMT,
+decode(ASSET_BOLD_NORMAL, 'B', ASSET_DESC, '') ASSET_BOLD,
+decode(ASSET_BOLD_NORMAL, 'N', ASSET_DESC, '') ASSET_DESC,
+decode(ASSET_INNER_AMT, 0, '',to_char(ABS(ASSET_INNER_AMT), '99,99,99,99,99,999.99')) AS ASSET_INNER_AMT,
+decode(ASSET_BOLD_NORMAL, 'B',  to_char(ABS(ASSET_OUTER_AMT), '99,99,99,99,99,999.99'), '') ASSET_AMT_BOLD,
+decode(ASSET_BOLD_NORMAL, 'N', decode(ASSET_OUTER_AMT, 0, '',to_char(ABS(ASSET_OUTER_AMT), '99,99,99,999.99')), '') AS ASSET_OUTER_AMT,
+ABS(ASSET_OUTER_AMT) ASSET_AMT
+FROM TEMP.CONSOLIDATED_BS
+ORDER BY SR_NO]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="LIAB_BOLD" class="java.lang.String"/>
+	<field name="LIAB_DESC" class="java.lang.String"/>
+	<field name="LIAB_INNER_AMT" class="java.lang.String"/>
+	<field name="LIAB_AMT_BOLD" class="java.lang.String"/>
+	<field name="LIAB_OUTER_AMT" class="java.lang.String"/>
+	<field name="LIAB_AMT" class="java.math.BigDecimal"/>
+	<field name="ASSET_BOLD" class="java.lang.String"/>
+	<field name="ASSET_DESC" class="java.lang.String"/>
+	<field name="ASSET_INNER_AMT" class="java.lang.String"/>
+	<field name="ASSET_AMT_BOLD" class="java.lang.String"/>
+	<field name="ASSET_OUTER_AMT" class="java.lang.String"/>
+	<field name="ASSET_AMT" class="java.math.BigDecimal"/>
+	<variable name="liab_out" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LIAB_AMT}]]></variableExpression>
+	</variable>
+	<variable name="asset_out" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{ASSET_AMT}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="45" splitType="Stretch">
+			<subreport>
+				<reportElement x="226" y="0" width="666" height="45" uuid="8017fd77-0508-4572-8330-52ee80908e3b"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="2" y="1" width="222" height="21" uuid="510d3b41-d3d2-4d6e-974b-402018335d34"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Liabilities]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="225" y="0" width="134" height="22" uuid="5634452d-e39b-4ba7-a869-4c77499294e9"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inner Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="360" y="1" width="163" height="21" uuid="1748a70c-6326-4057-a91f-b38d22ee16b1"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outer Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="524" y="0" width="237" height="23" uuid="a0eeff25-f2ad-48fc-bea2-b515765d9600"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Assests]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="761" y="0" width="139" height="23" uuid="adc731aa-2548-45f3-8d12-fb032a7f05db"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inner Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="901" y="1" width="142" height="21" uuid="e28d004a-5d33-4c75-9df0-6057ef672d40"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Outer Amount]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="0" width="1043" height="1" uuid="2ac99c6e-dc5c-4724-ac94-13620717e062"/>
+			</line>
+			<line>
+				<reportElement x="0" y="23" width="1044" height="1" uuid="02c1e7e7-2d5a-4d37-a1c1-53c67f6205cc"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="19" splitType="Stretch">
+			<line>
+				<reportElement x="900" y="-23" width="1" height="41" uuid="f67c6830-5774-4ee4-b95a-f41b80c31b7a"/>
+			</line>
+			<line>
+				<reportElement x="1043" y="-24" width="1" height="42" uuid="8ea96776-c5d9-4363-b4b0-5eef48a2bda2"/>
+			</line>
+			<line>
+				<reportElement x="760" y="-24" width="1" height="42" uuid="b478b8cc-3acf-4829-97cf-b5b3bd44f528"/>
+			</line>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="14" y="-1" width="203" height="19" uuid="80de75ff-3af9-4511-9f82-cb51b08aa165"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LIAB_DESC}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="222" y="-1" width="134" height="19" uuid="fef26289-20ae-42ac-b6ff-f2eabd33118f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LIAB_INNER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="364" y="-1" width="154" height="18" uuid="51991cc4-c502-4df6-a228-6f6980a5dbdd"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LIAB_OUTER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="527" y="-1" width="232" height="19" uuid="5e59044a-a817-4c4c-b612-2ced3d628cf3"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSET_DESC}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="758" y="-1" width="138" height="19" uuid="1c3ed487-9eb0-4ea5-8f92-4ddf493a9cc6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSET_INNER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="899" y="-1" width="141" height="18" uuid="3c1eb82a-4846-4b1c-99bc-f8c7f5294dc6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSET_OUTER_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="4" y="0" width="222" height="18" uuid="ca352791-e06a-4282-9e6b-f0d2b77f3b73"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LIAB_BOLD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="527" y="0" width="235" height="17" uuid="45c886c7-9800-49ce-a2da-2ed439e0e434"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSET_BOLD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="357" y="0" width="163" height="18" uuid="b30f149b-86db-4238-ba84-1121e1c57284"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LIAB_AMT_BOLD}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
+				<reportElement x="898" y="0" width="141" height="17" uuid="e04cd3ed-201d-4c95-bdc1-f35e63718d99"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+					<paragraph lineSpacing="Single"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ASSET_AMT_BOLD}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-23" width="1" height="41" uuid="defec5c6-0d17-4d31-a67d-7ec467a6e3b4"/>
+			</line>
+			<line>
+				<reportElement x="224" y="-24" width="1" height="42" uuid="f2409a41-52f4-4cf8-a728-653f0fb86b22"/>
+			</line>
+			<line>
+				<reportElement x="359" y="-24" width="1" height="42" uuid="77e81941-2eae-4824-a3ad-00f49286dcdc"/>
+			</line>
+			<line>
+				<reportElement x="523" y="-24" width="1" height="42" uuid="21669fb6-4963-4df3-8487-031746087f5e"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="37" splitType="Stretch">
+			<textField>
+				<reportElement x="901" y="17" width="78" height="20" uuid="264a3992-7ea5-4ed5-844b-5afd950e90a0"/>
+				<textElement textAlignment="Right">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="985" y="17" width="55" height="20" uuid="a7f65d86-e963-4ad1-8d6c-5bc877673e53"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-2" width="1043" height="1" uuid="111f6968-138b-412f-9a50-589ac40c594b"/>
+			</line>
+			<textField>
+				<reportElement x="2" y="17" width="55" height="20" uuid="e3f06640-77df-4c1f-8e14-40a692ea3e9f"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEE, d MMM yyyy HH:mm:ss Z">
+				<reportElement x="59" y="17" width="155" height="20" uuid="3c957e97-9dc2-47af-97c0-4593d147e962"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="214" y="2" width="36" height="21" uuid="f90f43c0-77fe-4466-8629-ec03f6b1bc6b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total :-]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="250" y="2" width="109" height="21" uuid="af06b7ff-0b72-48c4-a59a-8ecf443c3787"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{liab_out}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="364" y="2" width="160" height="21" uuid="07ec6be3-0635-43c5-ab6f-fb67ca60dca3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{asset_out}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="0" width="1044" height="1" uuid="f4566d1b-4cff-44a6-8eb5-00897b4913cf"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>
