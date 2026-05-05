@@ -141,10 +141,30 @@
 
       <div>
         <label>Account Operation Capacity</label>
-        <select name="accountOperationCapacity" id="accountOperationCapacity"
-           class="dd-loading" disabled required>
-     <option value="">Loading...</option>
-   </select>
+        <select name="accountOperationCapacity" required>
+          <option value="">-- Select --</option>
+          <%
+            PreparedStatement psAccOpCap = null;
+            ResultSet rsAccOpCap = null;
+            try (Connection connAccOp = DBConnection.getConnection()) {
+              String sql = "SELECT ACCOUNTOPERATIONCAPACITY_ID, DESCRIPTION FROM GLOBALCONFIG.ACCOUNTOPERATIONCAPACITY ORDER BY ACCOUNTOPERATIONCAPACITY_ID";
+              psAccOpCap = connAccOp.prepareStatement(sql);
+              rsAccOpCap = psAccOpCap.executeQuery();
+              while (rsAccOpCap.next()) {
+                String capacityId = rsAccOpCap.getString("ACCOUNTOPERATIONCAPACITY_ID");
+                String description = rsAccOpCap.getString("DESCRIPTION");
+          %>
+                <option value="<%= capacityId %>"><%= description %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading capacities</option>");
+            } finally {
+              if (rsAccOpCap != null) rsAccOpCap.close();
+              if (psAccOpCap != null) psAccOpCap.close();
+            }
+          %>
+        </select>
       </div>
 
       <div>
