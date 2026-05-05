@@ -384,7 +384,7 @@
                    name="prodDescription" 
                    id="prodDescription" 
                    placeholder="Description" 
-                   style="width: 230px; color: #1a8c4e; font-weight: 700;" 
+                   style="width: 560px; color: #1a8c4e; font-weight: 700;" 
                    readonly>
         </div>
 
