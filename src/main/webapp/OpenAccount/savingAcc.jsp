@@ -478,8 +478,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-      // Get context path set by parent frame
-      var ctx = window.APP_CONTEXT_PATH || '';
+      var ctx = '<%= request.getContextPath() %>';
       loadAccountFormDropdowns(ctx);
   });
 </script>

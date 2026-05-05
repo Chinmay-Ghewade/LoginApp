@@ -66,16 +66,6 @@ select {
   width: 95%;
 }
 
-input[type="text"]:focus,
-input[type="date"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-select:focus {
-  outline: 2px solid #373279;
-  border-color: #373279;
-}
-
-
 input:disabled {
   background-color: #f0f0f0;
   cursor: not-allowed;
