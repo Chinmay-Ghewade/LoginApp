@@ -643,7 +643,7 @@
 	    country:       { id: 'dd-country',       sp: 'sp-country',      codeLabel: true  },
 	    state:         { id: 'dd-state',         sp: 'sp-state',        codeLabel: true  },
 	    city:          { id: 'dd-city',          sp: 'sp-city',         codeLabel: false },
-	    residenceStatus: { id: 'residenceStatus', sp: 'sp-residenceStatus', codeLabel: false }  // ← ADD THIS
+	    residenceStatus: { id: 'residenceStatus', sp: 'sp-residenceStatus', codeLabel: false }
 	};
 
     /* ── Fill one <select> from an array of {v, l} objects ── */
