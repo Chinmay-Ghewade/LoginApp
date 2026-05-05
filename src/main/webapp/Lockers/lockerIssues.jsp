@@ -33,60 +33,53 @@
       to   { opacity: 1;   transform: scale(1.1); }
     }
     .dd-spinner.done { display: none; }
-    
-    
+
     .input-icon-box {
-	  position: relative;
-	  width: 90%;
-	}
-	
-	.input-icon-box input {
-	  width: 100%;
-	  padding-right: 40px;
-	  height: 30px;
-	  cursor: pointer;
-	  box-sizing: border-box;
-	}
-	
-	.input-icon-box .inside-icon-btn {
-	  position: absolute;
-	  right: 5px;
-	  top: 50%;
-	  transform: translateY(-50%);
-	  background: none;
-	  border: none;
-	  font-size: 16px;
-	  cursor: pointer;
-	  color: #373279;
-	}
-	
-	.form-buttons {
-	  display: flex !important;
-	}
-	
-	#checkAvailabilityBtn {
-	  background-color: #373279;
-	  color: white;
-	  border: none;
-	  padding: 10px 25px;
-	  border-radius: 6px;
-	  font-size: 14px;
-	  font-weight: bold;
-	  cursor: pointer;
-	  transition: background-color 0.3s ease, transform 0.2s ease;
-	}
-	
-	#checkAvailabilityBtn:hover {
-	  background-color: #2b0d73;
-	  transform: scale(1.05);
-	}
-	
-	#checkAvailabilityBtn:active {
-	  transform: scale(0.97);
-	}
-	form {
-  	  padding: 0 20px;
-	}
+      position: relative;
+      width: 90%;
+    }
+    .input-icon-box input {
+      width: 100%;
+      padding-right: 40px;
+      height: 30px;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    .input-icon-box .inside-icon-btn {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #373279;
+    }
+    .form-buttons {
+      display: flex !important;
+    }
+    #checkAvailabilityBtn {
+      background-color: #373279;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    #checkAvailabilityBtn:hover {
+      background-color: #2b0d73;
+      transform: scale(1.05);
+    }
+    #checkAvailabilityBtn:active {
+      transform: scale(0.97);
+    }
+    form {
+      padding: 0 20px;
+    }
   </style>
 </head>
 <body>
@@ -102,23 +95,23 @@
 
       <div>
         <label>Locker Type</label>
-		<div class="input-icon-box">
-		  <input type="text" name="lockerTypeSearch" id="lockerTypeSearch"
-		         oninput="this.value = this.value.toUpperCase();" readonly>
-		  <button type="button" class="inside-icon-btn" title="Search Locker Type">🔍</button>
-		</div>
+        <div class="input-icon-box">
+          <input type="text" name="lockerTypeSearch" id="lockerTypeSearch"
+                 oninput="this.value = this.value.toUpperCase();" readonly>
+          <button type="button" class="inside-icon-btn" title="Search Locker Type">🔍</button>
+        </div>
       </div>
 
       <div>
         <label>Locker Number</label>
         <div style="display:flex; gap:4px; align-items:center;">
-		  <input type="text" name="lockerNumberSearch" id="lockerNumberSearch"
-				       class="form-input"
-				       oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();">
-		  <button type="button" class="icon-btn" onclick="openLockerLookup()"
-		          style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
-		                 border-radius:8px; font-size:18px; cursor:pointer;">…</button>
-		</div>
+          <input type="text" name="lockerNumberSearch" id="lockerNumberSearch"
+                 class="form-input"
+                 oninput="this.value = this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();">
+          <button type="button" class="icon-btn" onclick="openLockerLookup()"
+                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+                         border-radius:8px; font-size:18px; cursor:pointer;">…</button>
+        </div>
       </div>
 
       <div style="display:flex; align-items:flex-end;">
@@ -143,17 +136,16 @@
         <input type="text" name="keyNo" id="keyNo" readonly>
       </div>
 
-
       <div>
         <label>Customer Id</label>
-		        <div style="display:flex; gap:4px; align-items:center;">
-		  <input type="text" name="customerIdLookup" id="customerIdLookup"
-				       class="form-input"
-				       oninput="this.value = this.value.replace(/[^0-9]/g,'')">
-		  <button type="button" class="icon-btn" onclick="openCustomerLookup()"
-		          style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
-		                 border-radius:8px; font-size:18px; cursor:pointer;">…</button>
-		</div>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <input type="text" name="customerIdLookup" id="customerIdLookup"
+                 class="form-input"
+                 oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+          <button type="button" class="icon-btn" onclick="openCustomerLookup()"
+                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+                         border-radius:8px; font-size:18px; cursor:pointer;">…</button>
+        </div>
       </div>
 
       <div>
@@ -170,15 +162,15 @@
         <label>Category</label>
         <input type="text" name="category" id="category" value="PUBLIC" readonly>
       </div>
+      
+      <div>
+        <label>Mobile No.</label>
+        <input type="text" name="dispMobile" id="dispMobile" readonly>
+      </div>
 
       <div>
         <label>Address 1</label>
         <input type="text" name="dispAddress1" id="dispAddress1" readonly>
-      </div>
-
-      <div>
-        <label>Mobile No.</label>
-        <input type="text" name="dispMobile" id="dispMobile" readonly>
       </div>
 
       <div>
@@ -187,13 +179,13 @@
       </div>
 
       <div>
-        <label>Telephone Res.</label>
-        <input type="text" name="dispTelRes" id="dispTelRes" readonly>
-      </div>
-
-      <div>
         <label>Address 3</label>
         <input type="text" name="dispAddress3" id="dispAddress3" readonly>
+      </div>
+      
+      <div>
+        <label>Telephone Res.</label>
+        <input type="text" name="dispTelRes" id="dispTelRes" readonly>
       </div>
 
       <div>
@@ -201,9 +193,12 @@
         <input type="text" name="dispTelOffice" id="dispTelOffice" readonly>
       </div>
 
+      <!-- ✅ CITY — changed from readonly input to AJAX dropdown -->
       <div>
-        <label>City</label>
-        <input type="text" name="dispCity" id="dispCity" readonly>
+        <label>City <span class="dd-spinner" id="citySpinner"></span></label>
+        <select name="dispCity" id="dispCity" class="dd-loading">
+          <option value="">Loading...</option>
+        </select>
       </div>
 
       <div>
@@ -254,10 +249,10 @@
   <!-- ══════════════════════════════════════════════════ -->
   <!-- BUTTON SECTION                                    -->
   <!-- ══════════════════════════════════════════════════ -->
-<div class="form-buttons">
+  <div class="form-buttons">
     <button type="submit">Issue Locker</button>
     <button type="button" onclick="resetLockerForm()">Reset</button>
-</div>
+  </div>
 
 </form>
 
@@ -270,7 +265,47 @@ window.onload = function() {
             window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerIssues.jsp') : 'Locker Issues'
         );
     }
+    loadCityDropdown();
 };
+
+// ── Load City dropdown from AddCustomerDataLoader ───────────────────
+function loadCityDropdown() {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(data) {
+            var citySelect  = document.getElementById('dispCity');
+            var citySpinner = document.getElementById('citySpinner');
+            var cities      = data.city;
+
+            if (Array.isArray(cities) && cities.length > 0) {
+                citySelect.innerHTML = '<option value="">-- Select City --</option>';
+                cities.forEach(function(item) {
+                    var opt = document.createElement('option');
+                    opt.value       = item.v;
+                    opt.textContent = item.l;
+                    citySelect.appendChild(opt);
+                });
+            } else {
+                citySelect.innerHTML = '<option value="">-- Error loading --</option>';
+                citySelect.style.borderColor = '#f44336';
+            }
+
+            citySelect.classList.remove('dd-loading');
+            if (citySpinner) citySpinner.classList.add('done');
+        })
+        .catch(function(err) {
+            console.error('City dropdown error:', err);
+            var citySelect  = document.getElementById('dispCity');
+            var citySpinner = document.getElementById('citySpinner');
+            citySelect.innerHTML   = '<option value="">-- Error: reload page --</option>';
+            citySelect.classList.remove('dd-loading');
+            citySelect.style.borderColor = '#f44336';
+            if (citySpinner) { citySpinner.style.background = '#f44336'; citySpinner.classList.add('done'); }
+        });
+}
 
 function checkLockerAvailability() {
     var lockerType   = document.getElementById('lockerTypeSearch').value.trim();
@@ -280,23 +315,34 @@ function checkLockerAvailability() {
         return;
     }
     fetch(window.APP_CONTEXT_PATH + '/loaders/LockerAvailabilityLoader'
-        + '?lockerType=' + encodeURIComponent(lockerType)
+        + '?lockerType='   + encodeURIComponent(lockerType)
         + '&lockerNumber=' + encodeURIComponent(lockerNumber))
     .then(function(res) { return res.json(); })
     .then(function(data) {
         if (data.available) {
-            // Auto-fill display fields
-            document.getElementById('keyNo').value           = data.keyNo        || '';
+            document.getElementById('keyNo').value              = data.keyNo        || '';
             document.getElementById('customerNameDisplay').value = data.customerName || '';
-            document.getElementById('dispAddress1').value    = data.address1     || '';
-            document.getElementById('dispAddress2').value    = data.address2     || '';
-            document.getElementById('dispAddress3').value    = data.address3     || '';
-            document.getElementById('dispMobile').value      = data.mobile       || '';
-            document.getElementById('dispTelRes').value      = data.telRes       || '';
-            document.getElementById('dispTelOffice').value   = data.telOffice    || '';
-            document.getElementById('dispCity').value        = data.city         || '';
-            document.getElementById('dispPin').value         = data.pin          || '';
-            document.getElementById('rentPaidTillDate').value= data.rentPaidTill || '';
+            document.getElementById('dispAddress1').value       = data.address1     || '';
+            document.getElementById('dispAddress2').value       = data.address2     || '';
+            document.getElementById('dispAddress3').value       = data.address3     || '';
+            document.getElementById('dispMobile').value         = data.mobile       || '';
+            document.getElementById('dispTelRes').value         = data.telRes       || '';
+            document.getElementById('dispTelOffice').value      = data.telOffice    || '';
+            document.getElementById('dispPin').value            = data.pin          || '';
+            document.getElementById('rentPaidTillDate').value   = data.rentPaidTill || '';
+
+            // ✅ Set city dropdown to value returned from availability check
+            var citySelect = document.getElementById('dispCity');
+            if (data.city) {
+                for (var i = 0; i < citySelect.options.length; i++) {
+                    if (citySelect.options[i].value === data.city ||
+                        citySelect.options[i].text  === data.city) {
+                        citySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
             alert('Locker is Available!');
         } else {
             alert('Locker is NOT available or not found.');
@@ -307,18 +353,18 @@ function checkLockerAvailability() {
 
 function resetLockerForm() {
     document.querySelector('form').reset();
-    // Clear readonly fields that reset() won't clear
-    document.getElementById('keyNo').value = '';
+    document.getElementById('keyNo').value              = '';
     document.getElementById('customerNameDisplay').value = '';
-    document.getElementById('dispAddress1').value = '';
-    document.getElementById('dispAddress2').value = '';
-    document.getElementById('dispAddress3').value = '';
-    document.getElementById('dispMobile').value = '';
-    document.getElementById('dispTelRes').value = '';
-    document.getElementById('dispTelOffice').value = '';
-    document.getElementById('dispCity').value = '';
-    document.getElementById('dispPin').value = '';
-    document.getElementById('rentPaidTillDate').value = '';
+    document.getElementById('dispAddress1').value       = '';
+    document.getElementById('dispAddress2').value       = '';
+    document.getElementById('dispAddress3').value       = '';
+    document.getElementById('dispMobile').value         = '';
+    document.getElementById('dispTelRes').value         = '';
+    document.getElementById('dispTelOffice').value      = '';
+    document.getElementById('dispPin').value            = '';
+    document.getElementById('rentPaidTillDate').value   = '';
+    // Reset city dropdown to first option
+    document.getElementById('dispCity').selectedIndex   = 0;
 }
 </script>
 </body>

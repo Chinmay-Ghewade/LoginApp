@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*, db.DBConnection" %>
+ <%@ page import="java.sql.*, db.DBConnection" %>
 <%@ page contentType="application/json; charset=UTF-8" %>
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -176,13 +176,13 @@
 
                 } else if ("pending_txn_cash".equals(cardId)) {
                     if (workingDate != null) {
-                    	ps = conn.prepareStatement(
-                    		    "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
-                    		    "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
-                    		    "AND TRANSACTIONINDICATOR_CODE LIKE 'CS%' " +
-                    		    "AND TRANIDENTIFICATION_ID != 88 " +
-                    		    "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
-                    		);
+                        ps = conn.prepareStatement(
+                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
+                            "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
+                            "AND TRANSACTIONINDICATOR_CODE LIKE 'CS%' " +
+                            "AND TRANIDENTIFICATION_ID != 88 " +
+                            "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
+                        );
                         ps.setString(1, branchCode);
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
@@ -193,13 +193,13 @@
 
                 } else if ("pending_txn_transfer".equals(cardId)) {
                     if (workingDate != null) {
-                    	ps = conn.prepareStatement(
-                    		    "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
-                    		    "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
-                    		    "AND TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
-                    		    "AND TRANIDENTIFICATION_ID != 88 " +
-                    		    "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
-                    		);
+                        ps = conn.prepareStatement(
+                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
+                            "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
+                            "AND TRANSACTIONINDICATOR_CODE LIKE 'TR%' " +
+                            "AND TRANIDENTIFICATION_ID != 88 " +
+                            "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
+                        );
                         ps.setString(1, branchCode);
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
@@ -219,12 +219,34 @@
                     value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
 
                 } else if ("pending_shares_modes".equals(cardId)) {
+                    // ✅ FIXED: exact same WHERE as authorizationSharesMode.jsp list page
                     if (workingDate != null) {
                         ps = conn.prepareStatement(
-                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL " +
-                            "WHERE BRANCH_CODE = ? AND TRANSACTIONSTATUS = 'E' " +
-                            "AND TRANSACTIONINDICATOR_CODE IN ('TRCD', 'CSCR', 'TRCR', 'CSDR') " +
-                            "AND TRUNC(SCROLL_DATE) = TRUNC(?)"
+                            "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL d " +
+                            "WHERE d.BRANCH_CODE = ? " +
+                            "AND ( " +
+                            "    (d.TRANSACTIONINDICATOR_CODE IN ('CSCR','CSDR') " +
+                            "        AND SUBSTR(d.ACCOUNT_CODE, 5, 3) = '901') " +
+                            "    OR " +
+                            "    (d.TRANSACTIONINDICATOR_CODE = 'TRCR' " +
+                            "        AND SUBSTR(d.ACCOUNT_CODE, 5, 3) = '901') " +
+                            "    OR " +
+                            "    (d.TRANSACTIONINDICATOR_CODE = 'TRCR' " +
+                            "        AND SUBSTR(d.FORACCOUNT_CODE, 5, 3) = '901' " +
+                            "        AND SUBSTR(d.ACCOUNT_CODE,    5, 3) != '901') " +
+                            "    OR " +
+                            "    (d.TRANSACTIONINDICATOR_CODE = 'TRDR' " +
+                            "        AND SUBSTR(d.FORACCOUNT_CODE, 5, 3) = '901' " +
+                            "        AND NOT EXISTS ( " +
+                            "            SELECT 1 FROM TRANSACTION.DAILYSCROLL d2 " +
+                            "            WHERE d2.SCROLL_NUMBER = d.SCROLL_NUMBER " +
+                            "            AND   d2.BRANCH_CODE   = d.BRANCH_CODE " +
+                            "            AND   d2.TRANSACTIONINDICATOR_CODE = 'TRCR' " +
+                            "            AND  (SUBSTR(d2.ACCOUNT_CODE,    5, 3) = '901' " +
+                            "              OR  SUBSTR(d2.FORACCOUNT_CODE, 5, 3) = '901') " +
+                            "        )) " +
+                            ") " +
+                            "AND TRUNC(d.SCROLL_DATE) = TRUNC(?)"
                         );
                         ps.setString(1, branchCode);
                         ps.setDate(2, workingDate);
