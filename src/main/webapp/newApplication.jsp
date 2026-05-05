@@ -195,6 +195,14 @@
             font-size: 14px;
             color: #3D316F;
         }
+        
+        .label1 {
+            font-weight: bold;
+            font-size: 14px;
+            color: #3D316F;
+            text-align-last: end;
+        }
+        
 
         .input-box {
             display: flex;
@@ -204,7 +212,7 @@
 
         input {
             padding: 10px;
-            width: 180px;
+            width: 70px;
             border: 2px solid #C8B7F6;
             border-radius: 8px;
             background-color: #F4EDFF;
@@ -223,6 +231,14 @@
         
         input.editable {
             background-color: #fff;
+        }
+
+        /* ✅ Bold green style for prodDescription */
+        #prodDescription {
+            color: #1a8c4e;
+            font-weight: bold;
+            border-color: #b6e4cc;
+            background-color: #f4fff9;
         }
 
         .icon-btn {
@@ -322,59 +338,58 @@
         <div class="card">
 
             <fieldset>
-                <div class="row">
+    <div class="row">
 
-                    <!-- Account Type -->
-                    <div>
-                        <div class="label">Account Type</div>
-                        <div class="input-box">
-                            <input type="text" 
-                                   name="accountType" 
-                                   id="accountType" 
-                                   placeholder="Enter code" 
-                                   maxlength="2"
-                                   class="editable"
-                                   style="text-transform: uppercase;">
-                            <button type="button" class="icon-btn" onclick="openLookup('account')">…</button>
-                        </div>
-                    </div>
+        <!-- Account Type -->
+        <div>
+            <div class="label1">Account Type</div>
+            <div class="input-box">
+                <button type="button" class="icon-btn" onclick="openLookup('account')">…</button>
+                <input type="text" 
+                       name="accountType" 
+                       id="accountType" 
+                       placeholder="Enter code" 
+                       maxlength="2"
+                       class="editable">
+            </div>
+        </div>
 
-                    <div>
-                        <div class="label">Description</div>
-                        <input type="text" 
-                               name="accDescription" 
-                               id="accDescription" 
-                               placeholder="Description" 
-                               style="width: 230px;" 
-                               readonly>
-                    </div>
+        <div>
+            <div class="label">Description</div>
+            <input type="text" 
+                   name="accDescription" 
+                   id="accDescription" 
+                   placeholder="Description" 
+                   style="width: 150px;" 
+                   readonly>
+        </div>
 
-                    <!-- Product Code -->
-                    <div>
-                        <div class="label">Product Code</div>
-                        <div class="input-box">
-                            <input type="text" 
-                                   name="productCode" 
-                                   id="productCode" 
-                                   placeholder="Enter code" 
-                                   maxlength="3"
-                                   class="editable">
-                            <button type="button" class="icon-btn" onclick="openLookup('product', document.getElementById('accountType').value)">…</button>
-                        </div>
-                    </div>
+        <!-- Product Code -->
+        <div>
+            <div class="label1">Product Code</div>
+            <div class="input-box">
+                <button type="button" class="icon-btn" onclick="openLookup('product', document.getElementById('accountType').value)">…</button>
+                <input type="text" 
+                       name="productCode" 
+                       id="productCode" 
+                       placeholder="Enter code" 
+                       maxlength="3"
+                       class="editable">
+            </div>
+        </div>
 
-                    <div>
-                        <div class="label">Description</div>
-                        <input type="text" 
-                               name="prodDescription" 
-                               id="prodDescription" 
-                               placeholder="Description" 
-                               style="width: 230px;" 
-                               readonly>
-                    </div>
+        <div>
+            <div class="label">Description</div>
+            <input type="text" 
+                   name="prodDescription" 
+                   id="prodDescription" 
+                   placeholder="Description" 
+                   style="width: 230px; color: #1a8c4e; font-weight: 700;" 
+                   readonly>
+        </div>
 
-                </div>
-            </fieldset>
+    </div>
+</fieldset>
 
         </div>
     </form>
@@ -491,9 +506,6 @@ function showToast(message, type = 'error') {
 
 // ========== VALIDATION FUNCTIONS ==========
 
-/**
- * Validate Account Type: 2 alphabetic characters only
- */
 function validateAccountType(value) {
     const input = document.getElementById('accountType');
     const regex = /^[A-Za-z]{0,2}$/;
@@ -507,9 +519,6 @@ function validateAccountType(value) {
     return true;
 }
 
-/**
- * Validate Product Code: up to 3 digits only
- */
 function validateProductCode(value) {
     const input = document.getElementById('productCode');
     const regex = /^\d{0,3}$/;
@@ -523,13 +532,9 @@ function validateProductCode(value) {
     return true;
 }
 
-/**
- * Fetch Account Type description from database
- */
 function fetchAccountTypeDescription(accountType) {
     if (!accountType || accountType.length !== 2) {
         document.getElementById('accDescription').value = '';
-        // Clear product fields when account type changes
         document.getElementById('productCode').value = '';
         document.getElementById('prodDescription').value = '';
         document.getElementById('resultFrame').src = '';
@@ -544,8 +549,6 @@ function fetchAccountTypeDescription(accountType) {
             if (data.success) {
                 descField.value = data.name;
                 descField.classList.remove('error');
-                
-                // Clear product fields when account type changes
                 document.getElementById('productCode').value = '';
                 document.getElementById('prodDescription').value = '';
                 document.getElementById('resultFrame').src = '';
@@ -562,9 +565,6 @@ function fetchAccountTypeDescription(accountType) {
         });
 }
 
-/**
- * Fetch Product Code description from database
- */
 function fetchProductCodeDescription(productCode, accountType) {
     if (!productCode || productCode.length === 0) {
         document.getElementById('prodDescription').value = '';
@@ -572,7 +572,6 @@ function fetchProductCodeDescription(productCode, accountType) {
     }
     
     if (!accountType || accountType.length !== 2) {
-        // Don't show toast - just silently return since this is automatic validation
         return;
     }
     
@@ -585,8 +584,6 @@ function fetchProductCodeDescription(productCode, accountType) {
             if (data.success) {
                 descField.value = data.description;
                 descField.classList.remove('error');
-                
-                // Auto submit form when valid product is selected
                 autoSubmitForm();
             } else {
                 descField.value = 'No product code found';
@@ -607,26 +604,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const accountTypeInput = document.getElementById('accountType');
     const productCodeInput = document.getElementById('productCode');
     
-    // Account Type input validation and fetch
     accountTypeInput.addEventListener('input', function(e) {
         let value = e.target.value.toUpperCase();
         e.target.value = value;
         
-        // Remove non-alphabetic characters
         if (!/^[A-Z]*$/.test(value)) {
             e.target.value = value.replace(/[^A-Z]/g, '');
-            // Don't show toast for every keystroke - just prevent the input
             return;
         }
         
         validateAccountType(e.target.value);
         
-        // Clear product code and iframe when account type changes
         document.getElementById('productCode').value = '';
         document.getElementById('prodDescription').value = '';
         document.getElementById('resultFrame').src = '';
         
-        // Fetch immediately when 2 characters entered
         if (e.target.value.length === 2) {
             fetchAccountTypeDescription(e.target.value);
         } else if (e.target.value.length < 2) {
@@ -634,37 +626,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ✅ Handle Enter/Tab key press
     accountTypeInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === 'Tab') {
             const value = e.target.value.trim();
             const descField = document.getElementById('accDescription');
             
-            // Only move focus if account type is valid and description is fetched
             if (value.length === 2 && descField.value && descField.value !== 'No account type found' && descField.value !== 'Error fetching data') {
-                e.preventDefault(); // Prevent default tab/enter behavior
+                e.preventDefault();
                 document.getElementById('productCode').focus();
             }
         }
     });
     
-    // Product Code input validation and fetch
     productCodeInput.addEventListener('input', function(e) {
         let value = e.target.value;
         
-        // Remove non-numeric characters
         if (!/^\d*$/.test(value)) {
             e.target.value = value.replace(/\D/g, '');
-            // Don't show toast for every keystroke - just prevent the input
             return;
         }
         
         validateProductCode(e.target.value);
         
-        // Clear iframe when product code changes or is removed
         document.getElementById('resultFrame').src = '';
         
-        // Fetch only when 3 digits are entered
         const accountType = document.getElementById('accountType').value.trim();
 
         if (e.target.value.length === 3) {
@@ -674,7 +659,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (e.target.value.length === 0) {
             document.getElementById('prodDescription').value = '';
         } else {
-            // Clear any previous error messages while typing
             const descField = document.getElementById('prodDescription');
             if (descField.value === 'No product code found' || descField.value === 'Error fetching data') {
                 descField.value = '';
@@ -717,8 +701,6 @@ function setValueFromLookup(code, desc, type) {
     if (type === "account") {
         document.getElementById("accountType").value = code;
         document.getElementById("accDescription").value = desc;
-        
-        // Clear product fields and IFrame when new account type selected
         document.getElementById("productCode").value = "";
         document.getElementById("prodDescription").value = "";
         document.getElementById("resultFrame").src = "";
@@ -727,8 +709,6 @@ function setValueFromLookup(code, desc, type) {
     if (type === "product") {
         document.getElementById("productCode").value = code;
         document.getElementById("prodDescription").value = desc;
-        
-        // Auto submit form when product is selected
         autoSubmitForm();
     }
 
@@ -756,21 +736,19 @@ function autoSubmitForm() {
     };
 
     if (pageMap[accType]) {
-        // ✅ Show loader immediately
         showLoader(accType, prodCode);
-
         document.getElementById("productForm").action = pageMap[accType];
         document.getElementById("productForm").submit();
     } else {
         showToast('No page found for Account Type: ' + accType, 'error');
     }
 }
+
 function showLoader(accType, prodCode) {
     const loader = document.getElementById('pageLoader');
     const loaderText = document.getElementById('loaderText');
     const loaderSub = document.getElementById('loaderSub');
 
-    // Customize message based on account type
     const typeNames = {
         "SB": "Saving Account",
         "CA": "Current Account",
