@@ -84,6 +84,9 @@
 	#checkAvailabilityBtn:active {
 	  transform: scale(0.97);
 	}
+	form {
+  	  padding: 0 20px;
+	}
   </style>
 </head>
 <body>

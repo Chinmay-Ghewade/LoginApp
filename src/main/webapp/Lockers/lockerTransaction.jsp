@@ -161,6 +161,9 @@
       font-family: inherit;
       box-sizing: border-box;
     }
+    form {
+  	  padding: 0 20px;
+	}
     #message:focus { outline: 2px solid #373279; }
   </style>
 </head>

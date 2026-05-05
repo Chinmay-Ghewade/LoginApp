@@ -124,6 +124,9 @@
       cursor: pointer !important;
       white-space: nowrap !important;
     }
+    form {
+  	  padding: 0 20px;
+	}
   </style>
 </head>
 <body>

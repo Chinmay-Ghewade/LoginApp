@@ -70,6 +70,9 @@
     .txn-mode-row .radio-group {
       flex-direction: row;
     }
+    form {
+  	  padding: 0 20px;
+	}
   </style>
 </head>
 <body>
