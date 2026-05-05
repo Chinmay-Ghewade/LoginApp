@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             previousValue = newValue;
         });
-     }
+        }
 });
 </script>
 </body>
