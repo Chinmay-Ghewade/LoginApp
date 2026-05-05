@@ -15,7 +15,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Locker Surrender</title>
-  <link rel="stylesheet" href="../css/addCustomer.css">
+  <link rel="stylesheet" href="../css/locker.css">
   <link rel="stylesheet" href="../css/tabs-navigation.css">
   <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
