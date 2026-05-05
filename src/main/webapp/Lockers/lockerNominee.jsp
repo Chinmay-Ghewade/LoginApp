@@ -42,17 +42,12 @@
     }
     .dd-spinner.done { display: none; }
 
-    /* ── LAYOUT FIXES ONLY — no color/font changes ── */
-
-    /* Nominee header: title left, remove button right */
     .nominee-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
     }
-
-    /* Customer ID row: radio + CID field on the same line */
     .nominee-cid-row {
       display: flex;
       align-items: flex-end;
@@ -65,13 +60,9 @@
       flex-direction: column;
       gap: 4px;
     }
-
-    /* Customer ID input + search button flush */
     .nominee-cid-row .input-icon-box {
       display: flex;
     }
-
-    /* Each nominee block is visually separated like its own sub-fieldset */
     .nominee-block {
       border: 1px solid #c9c5e8;
       border-radius: 6px;
@@ -81,16 +72,12 @@
     .nominee-block:last-of-type {
       margin-bottom: 4px;
     }
-
-    /* Form buttons centered */
     .form-buttons {
       display: flex;
       gap: 10px;
       justify-content: center;
       margin-top: 4px;
     }
-
-    /* Equal 3-column grid — overrides addCustomer.css for nominee fields only */
     .nominee-block .personal-grid {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
@@ -98,8 +85,6 @@
       align-items: end !important;
       width: 100% !important;
     }
-
-    /* Every cell stacks label + field */
     .nominee-block .personal-grid > div {
       display: flex !important;
       flex-direction: column !important;
@@ -107,8 +92,6 @@
       min-width: 0 !important;
       width: 100% !important;
     }
-
-    /* ALL inputs AND selects same width — overrides addCustomer.css */
     .nominee-block .personal-grid input,
     .nominee-block .personal-grid select {
       width: 100% !important;
@@ -117,8 +100,6 @@
       max-width: 100% !important;
       display: block !important;
     }
-
-    /* zipError must not affect cell height / grid alignment */
     .nominee-block .personal-grid .zip-input + small.zipError {
       position: absolute !important;
       font-size: 11px !important;
@@ -128,8 +109,6 @@
     .nominee-block .personal-grid div:has(.zip-input) {
       position: relative !important;
     }
-
-    /* Declaration cell — spans all 3 cols, checkbox+text centered */
     .nominee-block .personal-grid .declaration-cell {
       grid-column: 1 / -1 !important;
       display: flex !important;
@@ -173,7 +152,11 @@
 
 
   <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 2: NOMINEE -->
+  <!-- FIELDSET 2: NOMINEE                                            -->
+  <!-- 5 dropdowns use AJAX via AddCustomerDataLoader:                -->
+  <!--   salutation | relation | city | state | country               -->
+  <!-- Gender is static (Male/Female/Other) — no DB needed            -->
+  <!-- All other fields are plain inputs — no DB needed               -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
@@ -187,16 +170,14 @@
 
     <div class="nominee-card nominee-block">
 
-      <!-- Header: title left, remove button right -->
       <div class="nominee-header">
-        <div class="nominee-title"
-             style="font-weight:bold; font-size:15px; color:#373279;">
+        <div class="nominee-title" style="font-weight:bold; font-size:15px; color:#373279;">
           Nominee <span class="nominee-serial">1</span>
         </div>
         <button type="button" class="nominee-remove" onclick="removeNominee(this)">✖</button>
       </div>
 
-      <!-- Customer ID row: radio + CID field side by side -->
+      <!-- Has Customer ID row -->
       <div class="nominee-cid-row">
         <div>
           <label>Has Customer ID ?</label>
@@ -205,7 +186,6 @@
             <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="no"  onchange="toggleNomineeCustomerID(this)" checked> No</label>
           </div>
         </div>
-
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
@@ -217,33 +197,15 @@
 
       <div class="personal-grid">
 
+        <!-- ✅ AJAX — key "salutation" from AddCustomerDataLoader -->
         <div>
-          <label>Salutation Code</label>
-          <select name="nomineeSalutation[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psSalutation = null;
-              ResultSet rsSalutation = null;
-              try (Connection connSal = DBConnection.getConnection()) {
-                psSalutation = connSal.prepareStatement(
-                  "SELECT SALUTATION_CODE FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE");
-                rsSalutation = psSalutation.executeQuery();
-                while (rsSalutation.next()) {
-                  String sal = rsSalutation.getString("SALUTATION_CODE");
-            %>
-                  <option value="<%= sal %>"><%= sal %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading Salutation Code</option>");
-              } finally {
-                if (rsSalutation != null) rsSalutation.close();
-                if (psSalutation != null) psSalutation.close();
-              }
-            %>
+          <label>Salutation Code <span class="dd-spinner nominee-sp-salutation"></span></label>
+          <select name="nomineeSalutation[]" class="nominee-dd-salutation dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Nominee Name</label>
           <input type="text" name="nomineeName[]" required
@@ -255,6 +217,7 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
+        <!-- static options — no DB -->
         <div>
           <label>Gender</label>
           <select name="nomineeGender[]" required>
@@ -265,6 +228,7 @@
           </select>
         </div>
 
+        <!-- plain inputs — no DB -->
         <div>
           <label>Address 1</label>
           <input type="text" name="nomineeAddress1[]" required>
@@ -280,98 +244,38 @@
           <input type="text" name="nomineeAddress3[]">
         </div>
 
+        <!-- ✅ AJAX — key "city" from AddCustomerDataLoader -->
         <div>
-          <label>City</label>
-          <select name="nomineeCity[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psCity = null;
-              ResultSet rsCity = null;
-              try (Connection connCt = DBConnection.getConnection()) {
-                psCity = connCt.prepareStatement(
-                  "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)");
-                rsCity = psCity.executeQuery();
-                while (rsCity.next()) {
-                  String cyc = rsCity.getString("CITY_CODE");
-                  String cyn = rsCity.getString("NAME");
-            %>
-                  <option value="<%= cyc %>"><%= cyn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading cities</option>");
-              } finally {
-                if (rsCity != null) rsCity.close();
-                if (psCity != null) psCity.close();
-              }
-            %>
+          <label>City <span class="dd-spinner nominee-sp-city"></span></label>
+          <select name="nomineeCity[]" class="nominee-dd-city dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
-        
+
+        <!-- ✅ AJAX — key "state" from AddCustomerDataLoader -->
         <div>
-          <label>State</label>
-          <select name="nomineeState[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psState = null;
-              ResultSet rsState = null;
-              try (Connection connSt = DBConnection.getConnection()) {
-                psState = connSt.prepareStatement(
-                  "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME");
-                rsState = psState.executeQuery();
-                while (rsState.next()) {
-                  String sc = rsState.getString("STATE_CODE");
-                  String sn = rsState.getString("NAME");
-            %>
-                  <option value="<%= sc %>"><%= sn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading states</option>");
-              } finally {
-                if (rsState != null) rsState.close();
-                if (psState != null) psState.close();
-              }
-            %>
+          <label>State <span class="dd-spinner nominee-sp-state"></span></label>
+          <select name="nomineeState[]" class="nominee-dd-state dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
-        
-         <div>
-          <label>Country</label>
-          <select name="nomineeCountry[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psCountry = null;
-              ResultSet rsCountry = null;
-              try (Connection connC = DBConnection.getConnection()) {
-                psCountry = connC.prepareStatement(
-                  "SELECT COUNTRY_CODE, NAME FROM GLOBALCONFIG.COUNTRY ORDER BY NAME");
-                rsCountry = psCountry.executeQuery();
-                while (rsCountry.next()) {
-                  String cc = rsCountry.getString("COUNTRY_CODE");
-                  String cn = rsCountry.getString("NAME");
-            %>
-                  <option value="<%= cc %>"><%= cn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading countries</option>");
-              } finally {
-                if (rsCountry != null) rsCountry.close();
-                if (psCountry != null) psCountry.close();
-              }
-            %>
+
+        <!-- ✅ AJAX — key "country" from AddCustomerDataLoader -->
+        <div>
+          <label>Country <span class="dd-spinner nominee-sp-country"></span></label>
+          <select name="nomineeCountry[]" class="nominee-dd-country dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
-        
-        
-        
-         <div>
+
+        <!-- plain input — no DB -->
+        <div>
           <label>Mobile Number</label>
           <input type="text" name="nomineeMobile[]"
                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
@@ -379,35 +283,15 @@
           <small class="zipError"></small>
         </div>
 
+        <!-- ✅ AJAX — key "relation" from AddCustomerDataLoader -->
         <div>
-          <label>Relation with Nominee</label>
-          <select name="nomineeRelation[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psRelation = null;
-              ResultSet rsRelation = null;
-              try (Connection connRel = DBConnection.getConnection()) {
-                psRelation = connRel.prepareStatement(
-                  "SELECT RELATION_ID, DESCRIPTION FROM GLOBALCONFIG.RELATION ORDER BY RELATION_ID");
-                rsRelation = psRelation.executeQuery();
-                while (rsRelation.next()) {
-                  String rid  = rsRelation.getString("RELATION_ID");
-                  String rdesc = rsRelation.getString("DESCRIPTION");
-            %>
-                  <option value="<%= rid %>"><%= rdesc %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading relation</option>");
-              } finally {
-                if (rsRelation != null) rsRelation.close();
-                if (psRelation != null) psRelation.close();
-              }
-            %>
+          <label>Relation with Nominee <span class="dd-spinner nominee-sp-relation"></span></label>
+          <select name="nomineeRelation[]" class="nominee-dd-relation dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
-        <!-- Declaration: last cell in the grid, aligned bottom-right -->
+        <!-- declaration — no DB -->
         <div class="declaration-cell">
           <label>
             <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
@@ -416,7 +300,6 @@
         </div>
 
       </div><!-- /.personal-grid -->
-
     </div><!-- /.nominee-block -->
   </fieldset>
 
@@ -434,121 +317,243 @@
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
-// ── Nominee serial renumbering ──────────────────────────────────────
-function renumberNominees() {
-  document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
-    var serial = card.querySelector('.nominee-serial');
-    if (serial) serial.textContent = idx + 1;
+// ═══════════════════════════════════════════════════════════════════════
+// AJAX DROPDOWN LOADER
+// ✅ Calls AddCustomerDataLoader — no new Java file needed.
+//
+// AddCustomerDataLoader returns 12 keys. We only READ 5 of them:
+//   "salutation" → Salutation Code
+//   "relation"   → Relation with Nominee
+//   "city"       → City
+//   "state"      → State
+//   "country"    → Country
+//
+// The other 7 keys (religion, caste, category, etc.) arrive in the
+// response but are simply ignored — causes zero issues.
+// ═══════════════════════════════════════════════════════════════════════
 
-    var radios = card.querySelectorAll('.nomineeHasCustomerRadio');
-    radios.forEach(function(r) {
-      r.name = 'nomineeHasCustomerID_' + (idx + 1);
+// Fetched once on load → reused instantly for every addNominee() clone
+var _nomineeDropdownCache = null;
+
+// Only the 5 keys this page needs, mapped to their select/spinner classes
+var NOMINEE_DD_MAP = {
+    salutation : { sel: '.nominee-dd-salutation', sp: '.nominee-sp-salutation' },
+    relation   : { sel: '.nominee-dd-relation',   sp: '.nominee-sp-relation'   },
+    city       : { sel: '.nominee-dd-city',        sp: '.nominee-sp-city'       },
+    state      : { sel: '.nominee-dd-state',       sp: '.nominee-sp-state'      },
+    country    : { sel: '.nominee-dd-country',     sp: '.nominee-sp-country'    }
+};
+
+// Fill one <select> from [{v, l}, ...] array
+function _fillNomineeSelect(selectEl, items) {
+    selectEl.innerHTML = '';
+    var blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = '-- Select --';
+    selectEl.appendChild(blank);
+    items.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item.v;
+        opt.textContent = item.l;
+        selectEl.appendChild(opt);
     });
-  });
+    selectEl.classList.remove('dd-loading');
+    selectEl.style.color = '';
+    selectEl.style.fontStyle = '';
 }
 
-// ── Add nominee card (clones the first card) ────────────────────────
+// Fill only the 5 nominee dropdowns inside one nominee block
+function _fillNomineeBlock(block, data) {
+    Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
+        var cfg   = NOMINEE_DD_MAP[key];
+        var selEl = block.querySelector(cfg.sel);
+        var spEl  = block.querySelector(cfg.sp);
+        if (!selEl) return;
+        var items = data[key];
+        if (Array.isArray(items) && items.length > 0) {
+            _fillNomineeSelect(selEl, items);
+        } else {
+            selEl.innerHTML = '<option value="">-- Error loading --</option>';
+            selEl.classList.remove('dd-loading');
+        }
+        if (spEl) spEl.classList.add('done');
+    });
+}
+
+// ── Fires once on page open ─────────────────────────────────────────
+(function loadNomineeDropdowns() {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')  // ✅ same Java file
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(data) {
+            if (data._error) console.warn('Nominee dropdown warning:', data._error);
+            _nomineeDropdownCache = data;                               // cache for clones
+            var firstBlock = document.querySelector('.nominee-block');
+            if (firstBlock) _fillNomineeBlock(firstBlock, data);
+            console.log('✅ Nominee dropdowns loaded via AddCustomerDataLoader');
+        })
+        .catch(function(err) {
+            console.error('❌ Nominee dropdown error:', err);
+            var firstBlock = document.querySelector('.nominee-block');
+            if (!firstBlock) return;
+            Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
+                var cfg   = NOMINEE_DD_MAP[key];
+                var selEl = firstBlock.querySelector(cfg.sel);
+                var spEl  = firstBlock.querySelector(cfg.sp);
+                if (selEl) {
+                    selEl.innerHTML = '<option value="">-- Error: reload page --</option>';
+                    selEl.classList.remove('dd-loading');
+                    selEl.style.borderColor = '#f44336';
+                }
+                if (spEl) { spEl.style.background = '#f44336'; spEl.classList.add('done'); }
+            });
+        });
+})();
+
+
+// ── Renumber nominee serials & radio names after add/remove ────────
+function renumberNominees() {
+    document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
+        var serial = card.querySelector('.nominee-serial');
+        if (serial) serial.textContent = idx + 1;
+        card.querySelectorAll('.nomineeHasCustomerRadio').forEach(function(r) {
+            r.name = 'nomineeHasCustomerID_' + (idx + 1);
+        });
+    });
+}
+
+// ── Add new nominee card ────────────────────────────────────────────
 function addNominee() {
-  var fieldset  = document.getElementById('nomineeFieldset');
-  var firstCard = fieldset.querySelector('.nominee-block');
-  var newCard   = firstCard.cloneNode(true);
+    var fieldset  = document.getElementById('nomineeFieldset');
+    var firstCard = fieldset.querySelector('.nominee-block');
+    var newCard   = firstCard.cloneNode(true);
 
-  newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
-    if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
-    if (el.type === 'checkbox') { el.checked = false; return; }
-    el.value = '';
-  });
+    // Reset all field values
+    newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
+        if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
+        if (el.type === 'checkbox') { el.checked = false; return; }
+        el.value = '';
+    });
 
-  var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
-  if (cidContainer) cidContainer.style.display = 'none';
+    // Hide Customer ID container
+    var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
+    if (cidContainer) cidContainer.style.display = 'none';
 
-  newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
+    // Clear any zip errors
+    newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
 
-  var blocks = fieldset.querySelectorAll('.nominee-block');
-  blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
+    // Reset spinners to visible
+    newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
-  renumberNominees();
+    // Mark nominee dropdowns as loading
+    Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
+        var selEl = newCard.querySelector(NOMINEE_DD_MAP[key].sel);
+        if (selEl) {
+            selEl.innerHTML = '<option value="">Loading...</option>';
+            selEl.classList.add('dd-loading');
+        }
+    });
+
+    var blocks = fieldset.querySelectorAll('.nominee-block');
+    blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
+    renumberNominees();
+
+    // Fill from cache instantly — no extra network call
+    if (_nomineeDropdownCache) {
+        _fillNomineeBlock(newCard, _nomineeDropdownCache);
+    } else {
+        // Edge case: cache not ready yet — refetch same loader
+        fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                _nomineeDropdownCache = data;
+                _fillNomineeBlock(newCard, data);
+            });
+    }
 }
 
 // ── Remove nominee card ─────────────────────────────────────────────
 function removeNominee(btn) {
-  var blocks = document.querySelectorAll('.nominee-block');
-  if (blocks.length <= 1) {
-    alert('At least one nominee is required.');
-    return;
-  }
-  btn.closest('.nominee-block').remove();
-  renumberNominees();
+    var blocks = document.querySelectorAll('.nominee-block');
+    if (blocks.length <= 1) {
+        alert('At least one nominee is required.');
+        return;
+    }
+    btn.closest('.nominee-block').remove();
+    renumberNominees();
 }
 
-// ── Toggle Customer ID container visibility ─────────────────────────
+// ── Toggle Customer ID field visibility ─────────────────────────────
 function toggleNomineeCustomerID(radio) {
-  var card      = radio.closest('.nominee-block');
-  var container = card.querySelector('.nomineeCustomerIDContainer');
-  if (!container) return;
-  container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
-
-  var input = container.querySelector('.nomineeCustomerIDInput');
-  if (input && radio.value !== 'yes') input.value = '';
+    var card      = radio.closest('.nominee-block');
+    var container = card.querySelector('.nomineeCustomerIDContainer');
+    if (!container) return;
+    container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
+    var input = container.querySelector('.nomineeCustomerIDInput');
+    if (input && radio.value !== 'yes') input.value = '';
 }
 
-// ── Nominee customer lookup ─────────────────────────────────────────
+// ── Customer lookup modal trigger ───────────────────────────────────
 function openNomineeCustomerLookup(triggerEl) {
-  var card  = triggerEl.closest('.nominee-block');
-  var input = card.querySelector('.nomineeCustomerIDInput');
-  // TODO: open modal and on select → input.value = selectedId
+    var card  = triggerEl.closest('.nominee-block');
+    var input = card.querySelector('.nomineeCustomerIDInput');
+    // TODO: open modal → on select: input.value = selectedCustomerId
 }
 
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
-  var valid = true;
+    var valid = true;
 
-  var shareInputs = document.querySelectorAll('input[name="nomineePercentageShare[]"]');
-  var totalShare  = 0;
-  shareInputs.forEach(function(inp) {
-    var val = parseFloat(inp.value);
-    if (isNaN(val) || val < 0 || val > 100) {
-      alert('Each Percentage Share must be between 0 and 100.');
-      valid = false;
-    }
-    totalShare += (isNaN(val) ? 0 : val);
-  });
-  if (valid && Math.round(totalShare) !== 100) {
-    alert('Total Percentage Share across all nominees must equal 100. Current total: ' + totalShare.toFixed(2));
-    valid = false;
-  }
-
-  if (valid) {
-    document.querySelectorAll('.zip-input').forEach(function(inp) {
-      if (inp.closest('.nominee-block') && (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value))) {
-        inp.nextElementSibling.textContent = 'Must be exactly 6 digits';
+    // Percentage share check (if field exists)
+    var shareInputs = document.querySelectorAll('input[name="nomineePercentageShare[]"]');
+    var totalShare  = 0;
+    shareInputs.forEach(function(inp) {
+        var val = parseFloat(inp.value);
+        if (isNaN(val) || val < 0 || val > 100) {
+            alert('Each Percentage Share must be between 0 and 100.');
+            valid = false;
+        }
+        totalShare += (isNaN(val) ? 0 : val);
+    });
+    if (valid && shareInputs.length > 0 && Math.round(totalShare) !== 100) {
+        alert('Total Percentage Share must equal 100. Current: ' + totalShare.toFixed(2));
         valid = false;
-      } else if (inp.nextElementSibling) {
-        inp.nextElementSibling.textContent = '';
-      }
-    });
-  }
-
-  if (valid) {
-    var unchecked = false;
-    document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
-      if (!cb.checked) unchecked = true;
-    });
-    if (unchecked) {
-      alert('Please accept the declaration for all nominees.');
-      valid = false;
     }
-  }
 
-  return valid;
+    // Zip validation
+    if (valid) {
+        document.querySelectorAll('.zip-input').forEach(function(inp) {
+            var errEl = inp.nextElementSibling;
+            if (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value)) {
+                if (errEl) errEl.textContent = 'Must be exactly 6 digits';
+                valid = false;
+            } else {
+                if (errEl) errEl.textContent = '';
+            }
+        });
+    }
+
+    // Declaration check
+    if (valid) {
+        document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
+            if (!cb.checked) { valid = false; }
+        });
+        if (!valid) alert('Please accept the declaration for all nominees.');
+    }
+
+    return valid;
 }
 
 window.onload = function() {
-  if (window.parent && window.parent.updateParentBreadcrumb) {
-    window.parent.updateParentBreadcrumb(
-      window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerNominee.jsp') : 'Locker Nominee'
-    );
-  }
+    if (window.parent && window.parent.updateParentBreadcrumb) {
+        window.parent.updateParentBreadcrumb(
+            window.buildBreadcrumbPath
+                ? window.buildBreadcrumbPath('Lockers/lockerNominee.jsp')
+                : 'Locker Nominee'
+        );
+    }
 };
 </script>
 

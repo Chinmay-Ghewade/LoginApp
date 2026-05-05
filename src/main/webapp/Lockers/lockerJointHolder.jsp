@@ -169,7 +169,10 @@
 
 
   <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 2: JOINT HOLDER -->
+  <!-- FIELDSET 2: JOINT HOLDER                                       -->
+  <!-- 4 dropdowns use AJAX via AddCustomerDataLoader:                -->
+  <!--   salutation | city | state | relation                         -->
+  <!-- All other fields are plain inputs — no DB needed               -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
@@ -194,33 +197,15 @@
 
       <div class="personal-grid">
 
+        <!-- ✅ AJAX — key "salutation" from AddCustomerDataLoader -->
         <div>
-          <label>Salutation Code</label>
-          <select name="nomineeSalutation[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psSalutation = null;
-              ResultSet rsSalutation = null;
-              try (Connection connSal = DBConnection.getConnection()) {
-                psSalutation = connSal.prepareStatement(
-                  "SELECT SALUTATION_CODE FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE");
-                rsSalutation = psSalutation.executeQuery();
-                while (rsSalutation.next()) {
-                  String sal = rsSalutation.getString("SALUTATION_CODE");
-            %>
-                  <option value="<%= sal %>"><%= sal %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading Salutation Code</option>");
-              } finally {
-                if (rsSalutation != null) rsSalutation.close();
-                if (psSalutation != null) psSalutation.close();
-              }
-            %>
+          <label>Salutation Code <span class="dd-spinner jh-sp-salutation"></span></label>
+          <select name="nomineeSalutation[]" class="jh-dd-salutation dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Name</label>
           <input type="text" name="nomineeName[]" required
@@ -232,6 +217,7 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
@@ -239,106 +225,49 @@
           <small class="zipError"></small>
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Address 1</label>
           <input type="text" name="nomineeAddress1[]" required>
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Address 2</label>
           <input type="text" name="nomineeAddress2[]">
         </div>
 
+        <!-- plain input — no DB -->
         <div>
           <label>Address 3</label>
           <input type="text" name="nomineeAddress3[]">
         </div>
 
+        <!-- ✅ AJAX — key "city" from AddCustomerDataLoader -->
         <div>
-          <label>City</label>
-          <select name="nomineeCity[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psCity = null;
-              ResultSet rsCity = null;
-              try (Connection connCt = DBConnection.getConnection()) {
-                psCity = connCt.prepareStatement(
-                  "SELECT CITY_CODE, NAME FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)");
-                rsCity = psCity.executeQuery();
-                while (rsCity.next()) {
-                  String cyc = rsCity.getString("CITY_CODE");
-                  String cyn = rsCity.getString("NAME");
-            %>
-                  <option value="<%= cyc %>"><%= cyn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading cities</option>");
-              } finally {
-                if (rsCity != null) rsCity.close();
-                if (psCity != null) psCity.close();
-              }
-            %>
+          <label>City <span class="dd-spinner jh-sp-city"></span></label>
+          <select name="nomineeCity[]" class="jh-dd-city dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
+        <!-- ✅ AJAX — key "state" from AddCustomerDataLoader -->
         <div>
-          <label>State</label>
-          <select name="nomineeState[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psState = null;
-              ResultSet rsState = null;
-              try (Connection connSt = DBConnection.getConnection()) {
-                psState = connSt.prepareStatement(
-                  "SELECT STATE_CODE, NAME FROM GLOBALCONFIG.STATE ORDER BY NAME");
-                rsState = psState.executeQuery();
-                while (rsState.next()) {
-                  String sc = rsState.getString("STATE_CODE");
-                  String sn = rsState.getString("NAME");
-            %>
-                  <option value="<%= sc %>"><%= sn %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading states</option>");
-              } finally {
-                if (rsState != null) rsState.close();
-                if (psState != null) psState.close();
-              }
-            %>
+          <label>State <span class="dd-spinner jh-sp-state"></span></label>
+          <select name="nomineeState[]" class="jh-dd-state dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
+        <!-- ✅ AJAX — key "relation" from AddCustomerDataLoader -->
         <div>
-          <label>Relation with Nominee</label>
-          <select name="nomineeRelation[]" required>
-            <option value="">-- Select --</option>
-            <%
-              PreparedStatement psRelation = null;
-              ResultSet rsRelation = null;
-              try (Connection connRel = DBConnection.getConnection()) {
-                psRelation = connRel.prepareStatement(
-                  "SELECT RELATION_ID, DESCRIPTION FROM GLOBALCONFIG.RELATION ORDER BY RELATION_ID");
-                rsRelation = psRelation.executeQuery();
-                while (rsRelation.next()) {
-                  String rid  = rsRelation.getString("RELATION_ID");
-                  String rdesc = rsRelation.getString("DESCRIPTION");
-            %>
-                  <option value="<%= rid %>"><%= rdesc %></option>
-            <%
-                }
-              } catch (Exception e) {
-                out.println("<option disabled>Error loading relation</option>");
-              } finally {
-                if (rsRelation != null) rsRelation.close();
-                if (psRelation != null) psRelation.close();
-              }
-            %>
+          <label>Relation with Nominee <span class="dd-spinner jh-sp-relation"></span></label>
+          <select name="nomineeRelation[]" class="jh-dd-relation dd-loading" required>
+            <option value="">Loading...</option>
           </select>
         </div>
 
-        <!-- Declaration: last cell (col 3), checkbox+text pinned to bottom-right -->
+        <!-- Declaration: last cell, checkbox+text centered -->
         <div class="declaration-cell">
           <label>
             <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
@@ -365,111 +294,222 @@
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
+// ═══════════════════════════════════════════════════════════════════════
+// AJAX DROPDOWN LOADER
+// ✅ Reuses AddCustomerDataLoader — no new Java file needed.
+// Keys used here must match exactly what AddCustomerDataLoader returns:
+//   "salutation" | "city" | "state" | "relation"
+// The other 8 keys in the response are ignored — causes zero issues.
+// ═══════════════════════════════════════════════════════════════════════
+
+// Fetched once on load → reused instantly for every addNominee() clone
+var _jhDropdownCache = null;
+
+// Only the 4 keys this page needs, mapped to their select/spinner classes
+var JH_DD_MAP = {
+    salutation : { sel: '.jh-dd-salutation', sp: '.jh-sp-salutation' },
+    city       : { sel: '.jh-dd-city',       sp: '.jh-sp-city'       },
+    state      : { sel: '.jh-dd-state',      sp: '.jh-sp-state'      },
+    relation   : { sel: '.jh-dd-relation',   sp: '.jh-sp-relation'   }
+};
+
+// Fill one <select> from [{v, l}, ...] array
+function _fillJHSelect(selectEl, items) {
+    selectEl.innerHTML = '';
+    var blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = '-- Select --';
+    selectEl.appendChild(blank);
+    items.forEach(function(item) {
+        var opt = document.createElement('option');
+        opt.value = item.v;
+        opt.textContent = item.l;
+        selectEl.appendChild(opt);
+    });
+    selectEl.classList.remove('dd-loading');
+    selectEl.style.color = '';
+    selectEl.style.fontStyle = '';
+}
+
+// Fill only the 4 joint holder dropdowns inside one block
+function _fillJHBlock(block, data) {
+    Object.keys(JH_DD_MAP).forEach(function(key) {
+        var cfg   = JH_DD_MAP[key];
+        var selEl = block.querySelector(cfg.sel);
+        var spEl  = block.querySelector(cfg.sp);
+        if (!selEl) return;
+        var items = data[key];
+        if (Array.isArray(items) && items.length > 0) {
+            _fillJHSelect(selEl, items);
+        } else {
+            selEl.innerHTML = '<option value="">-- Error loading --</option>';
+            selEl.classList.remove('dd-loading');
+        }
+        if (spEl) spEl.classList.add('done');
+    });
+}
+
+// ── Fires once on page open ─────────────────────────────────────────
+(function loadJHDropdowns() {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')  // ✅ same Java file
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(data) {
+            if (data._error) console.warn('Joint holder dropdown warning:', data._error);
+            _jhDropdownCache = data;                                    // cache for clones
+            var firstBlock = document.querySelector('.nominee-block');
+            if (firstBlock) _fillJHBlock(firstBlock, data);
+            console.log('✅ Joint holder dropdowns loaded via AddCustomerDataLoader');
+        })
+        .catch(function(err) {
+            console.error('❌ Joint holder dropdown error:', err);
+            var firstBlock = document.querySelector('.nominee-block');
+            if (!firstBlock) return;
+            Object.keys(JH_DD_MAP).forEach(function(key) {
+                var cfg   = JH_DD_MAP[key];
+                var selEl = firstBlock.querySelector(cfg.sel);
+                var spEl  = firstBlock.querySelector(cfg.sp);
+                if (selEl) {
+                    selEl.innerHTML = '<option value="">-- Error: reload page --</option>';
+                    selEl.classList.remove('dd-loading');
+                    selEl.style.borderColor = '#f44336';
+                }
+                if (spEl) { spEl.style.background = '#f44336'; spEl.classList.add('done'); }
+            });
+        });
+})();
+
+
 // ── Joint holder serial renumbering ────────────────────────────────
 function renumberNominees() {
-  document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
-    var serial = card.querySelector('.nominee-serial');
-    if (serial) serial.textContent = idx + 1;
-
-    var radios = card.querySelectorAll('.nomineeHasCustomerRadio');
-    radios.forEach(function(r) {
-      r.name = 'nomineeHasCustomerID_' + (idx + 1);
+    document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
+        var serial = card.querySelector('.nominee-serial');
+        if (serial) serial.textContent = idx + 1;
+        card.querySelectorAll('.nomineeHasCustomerRadio').forEach(function(r) {
+            r.name = 'nomineeHasCustomerID_' + (idx + 1);
+        });
     });
-  });
 }
 
 // ── Add joint holder card (clones the first card) ───────────────────
 function addNominee() {
-  var fieldset  = document.getElementById('nomineeFieldset');
-  var firstCard = fieldset.querySelector('.nominee-block');
-  var newCard   = firstCard.cloneNode(true);
+    var fieldset  = document.getElementById('nomineeFieldset');
+    var firstCard = fieldset.querySelector('.nominee-block');
+    var newCard   = firstCard.cloneNode(true);
 
-  newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
-    if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
-    if (el.type === 'checkbox') { el.checked = false; return; }
-    el.value = '';
-  });
+    // Reset all field values
+    newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
+        if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
+        if (el.type === 'checkbox') { el.checked = false; return; }
+        el.value = '';
+    });
 
-  var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
-  if (cidContainer) cidContainer.style.display = 'none';
+    // Hide Customer ID container if present
+    var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
+    if (cidContainer) cidContainer.style.display = 'none';
 
-  newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
+    // Clear zip errors
+    newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
 
-  var blocks = fieldset.querySelectorAll('.nominee-block');
-  blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
+    // Reset spinners to visible
+    newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
-  renumberNominees();
+    // Mark dropdowns as loading
+    Object.keys(JH_DD_MAP).forEach(function(key) {
+        var selEl = newCard.querySelector(JH_DD_MAP[key].sel);
+        if (selEl) {
+            selEl.innerHTML = '<option value="">Loading...</option>';
+            selEl.classList.add('dd-loading');
+        }
+    });
+
+    var blocks = fieldset.querySelectorAll('.nominee-block');
+    blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
+    renumberNominees();
+
+    // Fill instantly from cache — no extra network call
+    if (_jhDropdownCache) {
+        _fillJHBlock(newCard, _jhDropdownCache);
+    } else {
+        // Edge case: cache not ready yet — refetch same loader
+        fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                _jhDropdownCache = data;
+                _fillJHBlock(newCard, data);
+            });
+    }
 }
 
 // ── Remove joint holder card ────────────────────────────────────────
 function removeNominee(btn) {
-  var blocks = document.querySelectorAll('.nominee-block');
-  if (blocks.length <= 1) {
-    alert('At least one joint holder is required.');
-    return;
-  }
-  btn.closest('.nominee-block').remove();
-  renumberNominees();
+    var blocks = document.querySelectorAll('.nominee-block');
+    if (blocks.length <= 1) {
+        alert('At least one joint holder is required.');
+        return;
+    }
+    btn.closest('.nominee-block').remove();
+    renumberNominees();
 }
 
 // ── Toggle Customer ID container visibility ─────────────────────────
 function toggleNomineeCustomerID(radio) {
-  var card      = radio.closest('.nominee-block');
-  var container = card.querySelector('.nomineeCustomerIDContainer');
-  if (!container) return;
-  container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
-
-  var input = container.querySelector('.nomineeCustomerIDInput');
-  if (input && radio.value !== 'yes') input.value = '';
+    var card      = radio.closest('.nominee-block');
+    var container = card.querySelector('.nomineeCustomerIDContainer');
+    if (!container) return;
+    container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
+    var input = container.querySelector('.nomineeCustomerIDInput');
+    if (input && radio.value !== 'yes') input.value = '';
 }
 
 // ── Customer lookup (Locker Information fieldset) ───────────────────
 function openCustomerLookup(triggerEl) {
-  // TODO: open modal and on select → document.getElementById('customerID').value = selectedId
+    // TODO: open modal and on select → document.getElementById('customerID').value = selectedId
 }
 
 // ── Nominee customer lookup ─────────────────────────────────────────
 function openNomineeCustomerLookup(triggerEl) {
-  var card  = triggerEl.closest('.nominee-block');
-  var input = card.querySelector('.nomineeCustomerIDInput');
-  // TODO: open modal and on select → input.value = selectedId
+    var card  = triggerEl.closest('.nominee-block');
+    var input = card.querySelector('.nomineeCustomerIDInput');
+    // TODO: open modal and on select → input.value = selectedId
 }
 
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
-  var valid = true;
+    var valid = true;
 
-  if (valid) {
     document.querySelectorAll('.zip-input').forEach(function(inp) {
-      if (inp.closest('.nominee-block') && (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value))) {
-        inp.nextElementSibling.textContent = 'Must be exactly 6 digits';
-        valid = false;
-      } else if (inp.nextElementSibling) {
-        inp.nextElementSibling.textContent = '';
-      }
+        var errEl = inp.nextElementSibling;
+        if (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value)) {
+            if (errEl) errEl.textContent = 'Must be exactly 6 digits';
+            valid = false;
+        } else {
+            if (errEl) errEl.textContent = '';
+        }
     });
-  }
 
-  if (valid) {
-    var unchecked = false;
-    document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
-      if (!cb.checked) unchecked = true;
-    });
-    if (unchecked) {
-      alert('Please accept the declaration for all joint holders.');
-      valid = false;
+    if (valid) {
+        var unchecked = false;
+        document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
+            if (!cb.checked) unchecked = true;
+        });
+        if (unchecked) {
+            alert('Please accept the declaration for all joint holders.');
+            valid = false;
+        }
     }
-  }
 
-  return valid;
+    return valid;
 }
 
 window.onload = function() {
-  if (window.parent && window.parent.updateParentBreadcrumb) {
-    window.parent.updateParentBreadcrumb(
-      window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp') : 'Locker Joint Holder'
-    );
-  }
+    if (window.parent && window.parent.updateParentBreadcrumb) {
+        window.parent.updateParentBreadcrumb(
+            window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp') : 'Locker Joint Holder'
+        );
+    }
 };
 </script>
 
