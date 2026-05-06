@@ -178,55 +178,26 @@ function setSelectValue(selectElement, value, fieldName) {
 // ........................COMMON FUNCTIONS............................
 
 //Customer Lookup Functions with exclusion support
-// ✅ MODIFY: Update openCustomerLookup to handle exclusions properly
 function openCustomerLookup(excludeCustomerId) {
-    if (typeof excludeCustomerId === 'undefined') {
-        excludeCustomerId = null;
-    }
-    
-    const modal = document.getElementById('customerLookupModal');
-    const content = document.getElementById('customerLookupContent');
+    var excludeIds = [];
 
-    modal.style.display = 'flex';
-    content.innerHTML = '<div style="text-align:center;padding:40px;">Loading customers...</div>';
+    // collect all currently used customer IDs
+    var allUsed = getAllUsedCustomerIds();
+    excludeIds = excludeIds.concat(allUsed);
 
-    // Build URL with all exclusions
-    let url = 'lookupForCustomerId.jsp';
-    let excludeIds = [];
-    
-    if (excludeCustomerId) {
-        excludeIds.push(excludeCustomerId);
-    }
-    
-    // ✅ For Application fieldset: exclude all other used customer IDs
-    const isApplicationLookup = !window.currentNomineeInput && !window.currentJointInput && 
-        !window.currentCoBorrowerInput && !window.currentGuarantorInput;
-    
-    if (isApplicationLookup) {
-        const allUsed = getAllUsedCustomerIds();
-        excludeIds = excludeIds.concat(allUsed);
-    }
-    
-    if (excludeIds.length > 0) {
-        url = url + '?excludeCustomerIds=' + encodeURIComponent(excludeIds.join(','));
+    if (excludeCustomerId && excludeCustomerId.trim()) {
+        excludeIds.push(excludeCustomerId.trim());
     }
 
-    fetch(url)
-        .then(response => response.text())
-        .then(html => {
-            content.innerHTML = html;
-            const scripts = content.querySelectorAll('script');
-            scripts.forEach(script => {
-                const newScript = document.createElement('script');
-                newScript.textContent = script.textContent;
-                document.body.appendChild(newScript);
-                document.body.removeChild(newScript);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading customer lookup:', error);
-            content.innerHTML = '<div style="text-align:center;padding:40px;color:red;">Failed to load customer list. Please try again.</div>';
-        });
+    // Remove duplicates
+    excludeIds = excludeIds.filter(function(v, i, a){ return a.indexOf(v) === i; });
+
+    // Ask newApplication.jsp to open its modal
+    window.parent.postMessage({
+        type       : 'OPEN_CUSTOMER_LOOKUP',
+        callbackId : 'mainCustomer',
+        excludeIds : excludeIds
+    }, '*');
 }
 
 function closeCustomerLookup() {
@@ -439,16 +410,17 @@ function clearNomineeFields(block) {
     block.querySelector('input[name="nomineeZip[]"]').value = '0';
 }
 
-// Update Nominee Customer Lookup
 function openNomineeCustomerLookup(button) {
-    const nomineeBlock = button.closest('.nominee-block');
-    const input = nomineeBlock.querySelector('.nomineeCustomerIDInput');
-    window.currentNomineeInput = input;
+    var nomineeBlock = button.closest('.nominee-block');
+    window.currentNomineeInput = nomineeBlock.querySelector('.nomineeCustomerIDInput');
     window.currentNomineeBlock = nomineeBlock;
-
-    // Get main customer ID to exclude from lookup
-    const mainCustomerId = document.getElementById('customerId') ? document.getElementById('customerId').value : null;
-    openCustomerLookup(mainCustomerId);
+    var mainId = document.getElementById('customerId') ?
+                 document.getElementById('customerId').value : '';
+    window.parent.postMessage({
+        type: 'OPEN_CUSTOMER_LOOKUP',
+        callbackId: 'nominee',
+        excludeIds: mainId ? [mainId] : []
+    }, '*');
 }
 
 function addNominee() {
@@ -595,16 +567,17 @@ function clearJointFields(block) {
     block.querySelector('input[name="jointZip[]"]').value = '0';
 }
 
-// Update Joint Holder Customer Lookup
 function openJointCustomerLookup(button) {
-    const jointBlock = button.closest('.joint-block');
-    const input = jointBlock.querySelector('.jointCustomerIDInput');
-    window.currentJointInput = input;
+    var jointBlock = button.closest('.joint-block');
+    window.currentJointInput = jointBlock.querySelector('.jointCustomerIDInput');
     window.currentJointBlock = jointBlock;
-
-    // Get main customer ID to exclude from lookup
-    const mainCustomerId = document.getElementById('customerId') ? document.getElementById('customerId').value : null;
-    openCustomerLookup(mainCustomerId);
+    var mainId = document.getElementById('customerId') ?
+                 document.getElementById('customerId').value : '';
+    window.parent.postMessage({
+        type: 'OPEN_CUSTOMER_LOOKUP',
+        callbackId: 'joint',
+        excludeIds: mainId ? [mainId] : []
+    }, '*');
 }
 
 function addJointHolder() {
@@ -751,16 +724,17 @@ function clearCoBorrowerFields(block) {
     block.querySelector('input[name="coBorrowerZip[]"]').value = '0';
 }
 
-// Update Co-Borrower Customer Lookup
 function openCoBorrowerCustomerLookup(button) {
-    const coBorrowerBlock = button.closest('.coBorrower-block');
-    const input = coBorrowerBlock.querySelector('.coBorrowerCustomerIDInput');
-    window.currentCoBorrowerInput = input;
+    var coBorrowerBlock = button.closest('.coBorrower-block');
+    window.currentCoBorrowerInput = coBorrowerBlock.querySelector('.coBorrowerCustomerIDInput');
     window.currentCoBorrowerBlock = coBorrowerBlock;
-
-    // Get main customer ID to exclude from lookup
-    const mainCustomerId = document.getElementById('customerId') ? document.getElementById('customerId').value : null;
-    openCustomerLookup(mainCustomerId);
+    var mainId = document.getElementById('customerId') ?
+                 document.getElementById('customerId').value : '';
+    window.parent.postMessage({
+        type: 'OPEN_CUSTOMER_LOOKUP',
+        callbackId: 'coborrower',
+        excludeIds: mainId ? [mainId] : []
+    }, '*');
 }
 
 function addCoBorrower() {
@@ -919,16 +893,17 @@ function clearGuarantorFields(block) {
     block.querySelector('input[name="guarantorBirthDate[]"]').value = '';
 }
 
-// Update Guarantor Customer Lookup
 function openGuarantorCustomerLookup(button) {
-    const guarantorBlock = button.closest('.guarantor-block');
-    const input = guarantorBlock.querySelector('.guarantorCustomerIDInput');
-    window.currentGuarantorInput = input;
+    var guarantorBlock = button.closest('.guarantor-block');
+    window.currentGuarantorInput = guarantorBlock.querySelector('.guarantorCustomerIDInput');
     window.currentGuarantorBlock = guarantorBlock;
-
-    // Get main customer ID to exclude from lookup
-    const mainCustomerId = document.getElementById('customerId') ? document.getElementById('customerId').value : null;
-    openCustomerLookup(mainCustomerId);
+    var mainId = document.getElementById('customerId') ?
+                 document.getElementById('customerId').value : '';
+    window.parent.postMessage({
+        type: 'OPEN_CUSTOMER_LOOKUP',
+        callbackId: 'guarantor',
+        excludeIds: mainId ? [mainId] : []
+    }, '*');
 }
 
 function addGuarantor() {
@@ -1363,3 +1338,77 @@ function showToast(message, type) {
 	        return;
 	    }
 	}
+	
+	// Receive customer data back from newApplication.jsp modal
+	window.addEventListener('message', function(e) {
+	    if (e.data && e.data.type === 'CUSTOMER_SELECTED') {
+	        var d = e.data;
+
+	        if (window.currentNomineeInput) {
+	            if (isCustomerUsedInSameFieldset(d.custId, 'nominee', window.currentNomineeBlock)) {
+	                showToast('This customer is already added as another nominee!', 'error');
+	                return;
+	            }
+	            window.currentNomineeInput.value = d.custId;
+	            fetchCustomerDetails(d.custId, 'nominee', window.currentNomineeBlock);
+	            window.currentNomineeInput = null;
+	            window.currentNomineeBlock = null;
+	            return;
+	        }
+
+	        if (window.currentJointInput) {
+	            if (isCustomerUsedInSameFieldset(d.custId, 'joint', window.currentJointBlock)) {
+	                showToast('This customer is already added as another joint holder!', 'error');
+	                return;
+	            }
+	            window.currentJointInput.value = d.custId;
+	            fetchCustomerDetails(d.custId, 'joint', window.currentJointBlock);
+	            window.currentJointInput = null;
+	            window.currentJointBlock = null;
+	            return;
+	        }
+
+	        if (window.currentCoBorrowerInput) {
+	            if (isCustomerUsedInSameFieldset(d.custId, 'coborrower', window.currentCoBorrowerBlock)) {
+	                showToast('This customer is already added as another co-borrower!', 'error');
+	                return;
+	            }
+	            window.currentCoBorrowerInput.value = d.custId;
+	            fetchCustomerDetails(d.custId, 'coborrower', window.currentCoBorrowerBlock);
+	            window.currentCoBorrowerInput = null;
+	            window.currentCoBorrowerBlock = null;
+	            return;
+	        }
+
+	        if (window.currentGuarantorInput) {
+	            if (isCustomerUsedInSameFieldset(d.custId, 'guarantor', window.currentGuarantorBlock)) {
+	                showToast('This customer is already added as another guarantor!', 'error');
+	                return;
+	            }
+	            window.currentGuarantorInput.value = d.custId;
+	            fetchCustomerDetails(d.custId, 'guarantor', window.currentGuarantorBlock);
+	            window.currentGuarantorInput = null;
+	            window.currentGuarantorBlock = null;
+	            return;
+	        }
+
+	        // Main application customer
+	        var oldId = document.getElementById('customerId') ?
+	                    document.getElementById('customerId').value.trim() : '';
+	        if (oldId && oldId !== d.custId) {
+	            var cleared = clearCustomerFromOtherFieldsets(oldId);
+	            if (cleared > 0) {
+	                showToast('Previous customer cleared from ' + cleared + ' fieldset(s)', 'warning');
+	            }
+	        }
+
+	        document.getElementById('customerId').value  = d.custId;
+	        document.getElementById('customerName').value = d.custName;
+	        if (document.getElementById('categoryCode')) {
+	            document.getElementById('categoryCode').value = d.catCode || '';
+	        }
+	        if (document.getElementById('riskCategory')) {
+	            document.getElementById('riskCategory').value = d.riskCat || '';
+	        }
+	    }
+	});

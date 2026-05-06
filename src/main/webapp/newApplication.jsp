@@ -463,6 +463,210 @@
     </div>
 </div>
 
+<!-- CUSTOMER LOOKUP MODAL — lives in newApplication.jsp -->
+<div id="newAppCustomerModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+">
+  <div style="
+      background: #fff;
+      width: 85%;
+      max-width: 900px;
+      max-height: 85vh;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+  ">
+    <!-- Modal header -->
+    <div style="
+        background: #373279;
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    ">
+      <span style="color:#fff; font-size:16px; font-weight:bold;">
+        🔍 Select Customer
+      </span>
+      <span onclick="closeNewAppModal()"
+            style="color:rgba(255,255,255,0.8); font-size:26px; cursor:pointer; line-height:1;">
+        &times;
+      </span>
+    </div>
+
+    <!-- Search box -->
+    <div style="padding:12px 16px; border-bottom:1px solid #eee; flex-shrink:0;">
+      <input type="text"
+             id="newAppModalSearch"
+             placeholder="Search by Customer ID or Name..."
+             oninput="filterNewAppModal()"
+             style="
+                 width:100%; padding:10px 14px;
+                 font-size:14px; border:2px solid #9c8ed8;
+                 border-radius:8px; background:#f5f3ff;
+                 box-sizing:border-box; outline:none;
+             ">
+    </div>
+
+    <!-- Count -->
+    <div style="padding:6px 16px; font-size:13px; color:#666; flex-shrink:0;">
+      Showing <strong id="newAppModalCount">0</strong> customers
+    </div>
+
+    <!-- Table — scrollable -->
+    <div style="overflow-y:auto; flex:1;">
+      <table id="newAppModalTable" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="position:sticky; top:0; z-index:10;">
+            <th style="background:#373279;color:#fff;padding:10px 14px;text-align:left;font-size:13px;">Customer ID</th>
+            <th style="background:#373279;color:#fff;padding:10px 14px;text-align:left;font-size:13px;">Customer Name</th>
+            <th style="background:#373279;color:#fff;padding:10px 14px;text-align:left;font-size:13px;">Category</th>
+            <th style="background:#373279;color:#fff;padding:10px 14px;text-align:left;font-size:13px;">Risk Category</th>
+          </tr>
+        </thead>
+        <tbody id="newAppModalBody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+var _newAppModalCallback = null;
+var _newAppModalRows = [];
+
+// Listen for messages from resultFrame (savingAcc.jsp, loan.jsp, etc.)
+window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'OPEN_CUSTOMER_LOOKUP') {
+        _newAppModalCallback = e.data.callbackId;
+        openNewAppModal(e.data.excludeIds || []);
+    }
+});
+
+function openNewAppModal(excludeIds) {
+    var modal = document.getElementById('newAppCustomerModal');
+    var body  = document.getElementById('newAppModalBody');
+    var count = document.getElementById('newAppModalCount');
+
+    modal.style.display = 'flex';
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#666;">Loading...</td></tr>';
+    count.textContent = '0';
+    document.getElementById('newAppModalSearch').value = '';
+
+    var url = 'OpenAccount/lookupForCustomerId.jsp';
+    if (excludeIds && excludeIds.length > 0) {
+        url += '?excludeCustomerIds=' + encodeURIComponent(excludeIds.join(','));
+    }
+
+    // We fetch the JSP but only extract the table rows from it
+    // Easier: call a JSON endpoint. But since you already have lookupForCustomerId.jsp
+    // we parse its HTML to grab the rows.
+    fetch(url)
+        .then(function(r){ return r.text(); })
+        .then(function(html){
+            var parser = new DOMParser();
+            var doc    = parser.parseFromString(html, 'text/html');
+            var rows   = doc.querySelectorAll('#customerTable tbody tr');
+
+            _newAppModalRows = [];
+            var fragment = document.createDocumentFragment();
+
+            rows.forEach(function(row) {
+                var cells = row.querySelectorAll('td');
+                if (cells.length < 2) return;
+
+                var custId   = cells[0] ? cells[0].textContent.trim() : '';
+                var custName = cells[1] ? cells[1].textContent.trim() : '';
+                var catCode  = cells[2] ? cells[2].textContent.trim() : '';
+                var riskCat  = cells[3] ? cells[3].textContent.trim() : '';
+
+                _newAppModalRows.push({ custId, custName, catCode, riskCat });
+
+                var tr = document.createElement('tr');
+                tr.style.cssText = 'cursor:pointer; transition:background 0.15s;';
+                tr.innerHTML =
+                    '<td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">' + custId   + '</td>' +
+                    '<td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">' + custName + '</td>' +
+                    '<td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">' + catCode  + '</td>' +
+                    '<td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;">' + riskCat  + '</td>';
+
+                tr.onmouseover = function(){ this.style.background = '#e8e4fc'; };
+                tr.onmouseout  = function(){ this.style.background = ''; };
+                tr.onclick = function(){
+                    selectNewAppCustomer(custId, custName, catCode, riskCat);
+                };
+                fragment.appendChild(tr);
+            });
+
+            body.innerHTML = '';
+            body.appendChild(fragment);
+            count.textContent = _newAppModalRows.length;
+
+            if (_newAppModalRows.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#666;">No customers found</td></tr>';
+            }
+        })
+        .catch(function(){
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:red;">Failed to load customers</td></tr>';
+        });
+}
+
+function selectNewAppCustomer(custId, custName, catCode, riskCat) {
+    // Send selected customer back to the resultFrame
+    var iframe = document.getElementById('resultFrame');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+            type       : 'CUSTOMER_SELECTED',
+            callbackId : _newAppModalCallback,
+            custId     : custId,
+            custName   : custName,
+            catCode    : catCode,
+            riskCat    : riskCat
+        }, '*');
+    }
+    closeNewAppModal();
+}
+
+function closeNewAppModal() {
+    document.getElementById('newAppCustomerModal').style.display = 'none';
+    _newAppModalCallback = null;
+}
+
+function filterNewAppModal() {
+    var q    = document.getElementById('newAppModalSearch').value.toUpperCase();
+    var rows = document.getElementById('newAppModalBody').querySelectorAll('tr');
+    var visible = 0;
+    rows.forEach(function(tr) {
+        var cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        var text = (cells[0].textContent + ' ' + cells[1].textContent).toUpperCase();
+        var show = text.indexOf(q) > -1;
+        tr.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('newAppModalCount').textContent = visible;
+}
+
+// Close on backdrop click
+document.getElementById('newAppCustomerModal').addEventListener('click', function(e) {
+    if (e.target === this) closeNewAppModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNewAppModal();
+});
+</script>
+
 <script>
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
@@ -771,5 +975,6 @@ function hideLoader() {
     document.getElementById('pageLoader').style.display = 'none';
 }
 </script>
+
 </body>
 </html>
