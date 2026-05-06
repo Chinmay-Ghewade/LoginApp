@@ -193,14 +193,14 @@
 	      </div>
 	
 	      <div>
-	  		<label>Introduer A/c Code</label>
+	  		<label>Introducer A/c Code</label>
 	  		<input type="text" name="introducerAccCode" maxlength="14" pattern="[0-9]{14}" inputmode="numeric"
-	    	title="Introduer Account Code must be exactly 14 digits" required>
+	    	title="Introduer Account Code must be exactly 14 digits">
 		</div>
 	
 	      <div>
 	  		<label>Introducer A/c Name</label>
-	  		<input type="text" name="introducerAccName" required oninput="this.value = this.value
+	  		<input type="text" name="introducerAccName" oninput="this.value = this.value
 	        .replace(/[^A-Za-z ]/g, '')
 	        .replace(/\s{2,}/g, ' ')
 	        .replace(/^\s+/g, '')
@@ -248,7 +248,7 @@
 	  
 	    <div>
 	      <label>Resolution No</label>
-	      <input type="text" name="resolutionNo" required>
+	      <input type="text" value=0 name="resolutionNo" required>
 	    </div>
 	
 		<div>
@@ -258,17 +258,17 @@
 	
 	    <div>
 	      <label>Register Amount</label>
-	      <input type="number" step="0.01" name="registerAmount" required >
+	      <input type="number" value=0 name="registerAmount" required >
 	    </div>
 	
 		<div>
-	  		<label>Limit Amount</label>
-	  		<input type="number" step="0.01" name="limitAmount" id="limitAmount" required>
+	  		<label>Loan Amount</label>
+	  		<input type="number"  name="limitAmount" id="limitAmount" required>
 		</div>
 	
 		<div>
 		  <label>Drawing Power</label>
-		  <input type="number" step="0.01" name="drawingPower" id="drawingPower" required>
+		  <input type="number"  name="drawingPower" id="drawingPower" required>
 		</div>
 	
 	    <div>
@@ -278,7 +278,7 @@
 	
 		<div>
 		  <label>Sanction Amount</label>
-		  <input type="number" step="0.01" name="sanctionAmount" id="sanctionAmount" required>
+		  <input type="number"  name="sanctionAmount" id="sanctionAmount" required>
 		</div>
 	
 	    <div>

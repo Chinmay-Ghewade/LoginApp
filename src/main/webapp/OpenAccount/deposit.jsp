@@ -124,7 +124,7 @@
 
       <div>
         <label>Introducer A/c Name</label>
-        <input type="text" name="introducerAccName" required oninput="this.value = this.value
+        <input type="text" name="introducerAccName" oninput="this.value = this.value
         .replace(/[^A-Za-z ]/g, '')
         .replace(/\s{2,}/g, ' ')
         .replace(/^\s+/g, '')
