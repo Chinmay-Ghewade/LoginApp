@@ -293,20 +293,32 @@
 	
 	
 		<div>
-	    		<label for="installmentTypeId">Installment Type Id</label>
-	    	<div class="input-icon-box">
-	        	<input type="text" id="installmentTypeId" name="installmentTypeId" 
-	               onclick="openInstallmentLookup()" readonly required>
-	        	<button type="button" class="inside-icon-btn" 
-	                onclick="openInstallmentLookup()" title="Search Installment Type">🔍</button>
-	    	</div>
+		    <label for="installmentTypeId">Installment Type</label>
+		    <select name="installmentTypeId" id="installmentTypeId" required>
+		        <option value="">-- Select --</option>
+		        <%
+		          PreparedStatement psInst = null;
+		          ResultSet rsInst = null;
+		          try (Connection connInst = DBConnection.getConnection()) {
+		            String sql = "SELECT INSTALLMENTTYPE_ID, DISCRIPTION FROM HEADOFFICE.INSTALLMENTTYPE ORDER BY INSTALLMENTTYPE_ID";
+		            psInst = connInst.prepareStatement(sql);
+		            rsInst = psInst.executeQuery();
+		            while (rsInst.next()) {
+		              String id = rsInst.getString("INSTALLMENTTYPE_ID");
+		              String desc = rsInst.getString("DISCRIPTION");
+		        %>
+		              <option value="<%= id %>"><%= id %> — <%= desc %></option>
+		        <%
+		            }
+		          } catch (Exception e) {
+		            out.println("<option disabled>Error loading Installment Types</option>");
+		          } finally {
+		            if (rsInst != null) rsInst.close();
+		            if (psInst != null) psInst.close();
+		          }
+		        %>
+		    </select>
 		</div>
-	
-	
-	    <div>
-	      <label for="installmentType">Installment Type</label>
-		  <input type="text" name="installmentType" id="installmentType" readonly>
-	    </div>
 	
 	    <div>
 	      <label>Repayment Freq.</label>
@@ -368,21 +380,35 @@
 	        <label><input type="radio" name="consortiumLoan" value="N" checked> No</label>
 	      </div>
 	    </div>
-	
 	<div>
-	  <label>Area Code</label>
-	  <div class="input-icon-box">
-	    <input type="text" id="areaCode" name="areaCode" 
-	           onclick="openAreaLookup()" readonly required>
-	    <button type="button" class="inside-icon-btn" 
-	            onclick="openAreaLookup()" title="Search Area">🔍</button>
-	  </div>
-	</div>
-	
-	<div>
-	  <label>Area Name</label>
-	  <input type="text" id="areaName" name="areaName" readonly>
-	</div>
+    <label>Area</label>
+    <select name="areaCode" id="areaCode" required onchange="handleAreaChange(this)">
+        <option value="">-- Select --</option>
+        <%
+          PreparedStatement psArea = null;
+          ResultSet rsArea = null;
+          try (Connection connArea = DBConnection.getConnection()) {
+            String sql = "SELECT AREA_CODE, AREA_DESCRIPTION FROM BRANCH.BRANCHAREA WHERE BRANCH_CODE = ? ORDER BY AREA_CODE";
+            psArea = connArea.prepareStatement(sql);
+            psArea.setString(1, branchCode);
+            rsArea = psArea.executeQuery();
+            while (rsArea.next()) {
+              String code = rsArea.getString("AREA_CODE");
+              String desc = rsArea.getString("AREA_DESCRIPTION");
+        %>
+              <option value="<%= code %>" data-name="<%= desc %>"><%= code %> — <%= desc %></option>
+        <%
+            }
+          } catch (Exception e) {
+            out.println("<option disabled>Error loading Areas</option>");
+          } finally {
+            if (rsArea != null) rsArea.close();
+            if (psArea != null) psArea.close();
+          }
+        %>
+    </select>
+</div>
+<input type="hidden" id="areaName" name="areaName">
 	    
 	       <div>
 	  <label>Social Section Id</label>
@@ -416,21 +442,17 @@
 	</div>
 	
 	
-	<div>
-	  <label>Sub Area Code</label>
-	  <div class="input-icon-box">
-	    <input type="text" id="subAreaCode" name="subAreaCode" 
-	           onclick="openSubAreaLookup()" readonly required>
-	    <button type="button" class="inside-icon-btn" 
-	            onclick="openSubAreaLookup()" title="Search Sub Area">🔍</button>
-	  </div>
-	</div>
-	
-	<div>
-	  <label>Sub Area Name</label>
-	  <input type="text" id="subAreaName" name="subAreaName" readonly>
-	</div>
-	    
+<div>
+    <label>Sub Area</label>
+    <select name="subAreaCode" id="subAreaCode" required onchange="handleSubAreaChange(this)">
+        <option value="">-- Select Area First --</option>
+    </select>
+</div>
+
+<!-- Keep subAreaName as hidden so it still submits -->
+<input type="hidden" id="subAreaName" name="subAreaName">
+
+
 	    <div>
 	  <label>LBR Code</label>
 	  <select name="lbrCode" required>
@@ -462,20 +484,44 @@
 	</div>
 	
 	    
-	    <div>
-	  <label>Social Sector Id</label>
-	  <div class="input-icon-box">
-	    <input type="text" id="socialSectorId" name="socialSectorId" 
-	           onclick="openSocialSectorLookup()" readonly required>
-	    <button type="button" class="inside-icon-btn" 
-	            onclick="openSocialSectorLookup()" title="Search Social Sector">🔍</button>
-	  </div>
-	</div>
-	
-	<div>
-	  <label>Social Sector Description</label>
-	  <input type="text" id="socialSectorDesc" name="socialSectorDesc" readonly>
-	</div>
+<div>
+    <label>Social Sector</label>
+    <select name="socialSectorId" id="socialSectorId" required onchange="handleSocialSectorChange(this)">
+        <option value="">-- Select --</option>
+        <%
+          PreparedStatement psSS = null;
+          ResultSet rsSS = null;
+          try (Connection connSS = DBConnection.getConnection()) {
+            String sql = "SELECT SOCIALSECTOR_ID, DESCRIPTION FROM GLOBALCONFIG.SOCIALSECTOR ORDER BY SOCIALSECTOR_ID";
+            psSS = connSS.prepareStatement(sql);
+            rsSS = psSS.executeQuery();
+            while (rsSS.next()) {
+              String id = rsSS.getString("SOCIALSECTOR_ID");
+              String desc = rsSS.getString("DESCRIPTION");
+        %>
+              <option value="<%= id %>" data-desc="<%= desc %>"><%= id %> — <%= desc %></option>
+        <%
+            }
+          } catch (Exception e) {
+            out.println("<option disabled>Error loading Social Sectors</option>");
+          } finally {
+            if (rsSS != null) rsSS.close();
+            if (psSS != null) psSS.close();
+          }
+        %>
+    </select>
+</div>
+
+<input type="hidden" id="socialSectorDesc" name="socialSectorDesc">
+
+<div>
+    <label>Social SubSector</label>
+    <select name="socialSubSectorId" id="socialSubSectorId" required onchange="handleSocialSubSectorChange(this)">
+        <option value="">-- Select Sector First --</option>
+    </select>
+</div>
+
+<input type="hidden" id="socialSubSectorDesc" name="socialSubSectorDesc">
 	
 	    <div>
 	  <label>Purpose Id</label>
@@ -508,20 +554,7 @@
 	</div>
 	
 	    
-	    <div>
-	  <label>Social SubSector Id</label>
-	  <div class="input-icon-box">
-	    <input type="text" id="socialSubSectorId" name="socialSubSectorId" 
-	           onclick="openSocialSubSectorLookup()" readonly required>
-	    <button type="button" class="inside-icon-btn" 
-	            onclick="openSocialSubSectorLookup()" title="Search Social SubSector">🔍</button>
-	  </div>
-	</div>
-	
-	<div>
-	  <label>Social SubSector Description</label>
-	  <input type="text" id="socialSubSectorDesc" name="socialSubSectorDesc" readonly>
-	</div>
+
 	
 	    <div>
 	  <label>Classification Id</label>
@@ -2548,43 +2581,6 @@
 	  </div>
 	</div>
 	
-	<!-- INSTALLMENT TYPE LOOKUP MODAL -->
-	<div id="installmentLookupModal" class="customer-modal">
-	    <div class="customer-modal-content">
-	        <span class="customer-close" onclick="closeInstallmentLookup()">&times;</span>
-	        <div id="installmentLookupContent"></div>
-	    </div>
-	</div>
-	<!-- SOCIAL SECTOR LOOKUP MODAL -->
-	<div id="socialSectorLookupModal" class="customer-modal">
-	    <div class="customer-modal-content">
-	        <span class="customer-close" onclick="closeSocialSectorLookup()">&times;</span>
-	        <div id="socialSectorLookupContent"></div>
-	    </div>
-	</div>
-	
-	<!-- SOCIAL SUBSECTOR LOOKUP MODAL -->
-	<div id="socialSubSectorLookupModal" class="customer-modal">
-	    <div class="customer-modal-content">
-	        <span class="customer-close" onclick="closeSocialSubSectorLookup()">&times;</span>
-	        <div id="socialSubSectorLookupContent"></div>
-	    </div>
-	</div>
-	<!-- AREA LOOKUP MODAL -->
-	<div id="areaLookupModal" class="customer-modal">
-	    <div class="customer-modal-content">
-	        <span class="customer-close" onclick="closeAreaLookup()">&times;</span>
-	        <div id="areaLookupContent"></div>
-	    </div>
-	</div>
-	
-	<!-- SUB AREA LOOKUP MODAL -->
-	<div id="subAreaLookupModal" class="customer-modal">
-	    <div class="customer-modal-content">
-	        <span class="customer-close" onclick="closeSubAreaLookup()">&times;</span>
-	        <div id="subAreaLookupContent"></div>
-	    </div>
-	</div>
 	<script src="js/application.js"></script>
 	<script src="js/savingAcc.js"></script>
 	<script src="js/application-tabs.js"></script>
@@ -3519,6 +3515,125 @@
 		    }
 		  });
 		}
+		
+		
+		// ==================== AREA / SUB AREA DROPDOWN HANDLERS ====================
+
+		function handleAreaChange(select) {
+		    const selectedOption = select.options[select.selectedIndex];
+		    // Store area name in hidden field
+		    document.getElementById('areaName').value = selectedOption.getAttribute('data-name') || '';
+
+		    // Reset sub area
+		    const subAreaSelect = document.getElementById('subAreaCode');
+		    subAreaSelect.innerHTML = '<option value="">Loading...</option>';
+		    document.getElementById('subAreaName').value = '';
+
+		    const areaCode = select.value;
+		    if (!areaCode) {
+		        subAreaSelect.innerHTML = '<option value="">-- Select Area First --</option>';
+		        return;
+		    }
+
+		    // Fetch sub areas for selected area via existing JSP
+		    fetch('lookupForLoan.jsp?type=subArea&areaCode=' + encodeURIComponent(areaCode))
+		        .then(response => response.text())
+		        .then(html => {
+		            // Parse the returned HTML table to extract options
+		            const parser = new DOMParser();
+		            const doc = parser.parseFromString(html, 'text/html');
+		            const rows = doc.querySelectorAll('table tr');
+
+		            subAreaSelect.innerHTML = '<option value="">-- Select --</option>';
+
+		            rows.forEach((row, index) => {
+		                if (index === 0) return; // skip header
+		                const cells = row.querySelectorAll('td');
+		                if (cells.length >= 2) {
+		                    const code = cells[0].textContent.trim();
+		                    const desc = cells[1].textContent.trim();
+		                    if (code) {
+		                        const opt = document.createElement('option');
+		                        opt.value = code;
+		                        opt.setAttribute('data-name', desc);
+		                        opt.textContent = code + ' — ' + desc;
+		                        subAreaSelect.appendChild(opt);
+		                    }
+		                }
+		            });
+
+		            if (subAreaSelect.options.length <= 1) {
+		                subAreaSelect.innerHTML = '<option value="">No sub areas found</option>';
+		            }
+		        })
+		        .catch(err => {
+		            console.error('Sub area load error:', err);
+		            subAreaSelect.innerHTML = '<option value="">Error loading sub areas</option>';
+		        });
+		}
+
+		function handleSubAreaChange(select) {
+		    const selectedOption = select.options[select.selectedIndex];
+		    document.getElementById('subAreaName').value = selectedOption.getAttribute('data-name') || '';
+		}
+
+		// ==================== SOCIAL SECTOR / SUBSECTOR DROPDOWN HANDLERS ====================
+
+		function handleSocialSectorChange(select) {
+		    const selectedOption = select.options[select.selectedIndex];
+		    document.getElementById('socialSectorDesc').value = selectedOption.getAttribute('data-desc') || '';
+
+		    // Reset sub sector
+		    const subSectorSelect = document.getElementById('socialSubSectorId');
+		    subSectorSelect.innerHTML = '<option value="">Loading...</option>';
+		    document.getElementById('socialSubSectorDesc').value = '';
+
+		    const sectorId = select.value;
+		    if (!sectorId) {
+		        subSectorSelect.innerHTML = '<option value="">-- Select Sector First --</option>';
+		        return;
+		    }
+
+		    fetch('lookupForLoan.jsp?type=socialSubSector&sectorId=' + encodeURIComponent(sectorId))
+		        .then(response => response.text())
+		        .then(html => {
+		            const parser = new DOMParser();
+		            const doc = parser.parseFromString(html, 'text/html');
+		            const rows = doc.querySelectorAll('table tr');
+
+		            subSectorSelect.innerHTML = '<option value="">-- Select --</option>';
+
+		            rows.forEach((row, index) => {
+		                if (index === 0) return; // skip header
+		                const cells = row.querySelectorAll('td');
+		                if (cells.length >= 2) {
+		                    const id = cells[0].textContent.trim();
+		                    const desc = cells[1].textContent.trim();
+		                    if (id) {
+		                        const opt = document.createElement('option');
+		                        opt.value = id;
+		                        opt.setAttribute('data-desc', desc);
+		                        opt.textContent = id + ' — ' + desc;
+		                        subSectorSelect.appendChild(opt);
+		                    }
+		                }
+		            });
+
+		            if (subSectorSelect.options.length <= 1) {
+		                subSectorSelect.innerHTML = '<option value="">No sub sectors found</option>';
+		            }
+		        })
+		        .catch(err => {
+		            console.error('Social sub sector load error:', err);
+		            subSectorSelect.innerHTML = '<option value="">Error loading sub sectors</option>';
+		        });
+		}
+
+		function handleSocialSubSectorChange(select) {
+		    const selectedOption = select.options[select.selectedIndex];
+		    document.getElementById('socialSubSectorDesc').value = selectedOption.getAttribute('data-desc') || '';
+		}
+		
 		
 		//==================== STOCK STATEMENT FUNCTIONS ====================
 		function addStockStatement() {
