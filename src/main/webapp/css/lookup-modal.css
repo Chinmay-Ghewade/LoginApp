@@ -1,0 +1,772 @@
+/* ============================================================
+   lookup-modal.css
+   Unified Lookup Modal Styles — Transactions, Open Account,
+   Shares, Utility (and any future modules)
+   ============================================================ */
+
+/* ── CSS Variables ── */
+:root {
+    --lk-primary:        #373279;
+    --lk-primary-dark:   #2b0d73;
+    --lk-primary-light:  #e8e4fc;
+    --lk-primary-mid:    #8066E8;
+    --lk-accent:         #5a54a8;
+    --lk-text:           #1a1a4e;
+    --lk-text-muted:     #666;
+    --lk-border:         #c8b7f6;
+    --lk-border-light:   #e0dcf8;
+    --lk-row-hover:      #efecfb;
+    --lk-row-stripe:     #f8f7fe;
+    --lk-white:          #ffffff;
+    --lk-radius-sm:      6px;
+    --lk-radius-md:      10px;
+    --lk-radius-lg:      14px;
+    --lk-shadow:         0 8px 32px rgba(55, 50, 121, 0.18);
+    --lk-shadow-sm:      0 2px 8px rgba(55, 50, 121, 0.10);
+    --lk-transition:     0.18s ease;
+    --lk-font:           Arial, sans-serif;
+}
+
+/* ============================================================
+   BACKDROP / OVERLAY
+   ============================================================ */
+.lk-overlay,
+.lookup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 16, 60, 0.52);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 56px;
+    animation: lk-fade-in var(--lk-transition) both;
+}
+
+.lk-overlay.open,
+.lk-overlay.active,
+.lookup-overlay.open,
+.lookup-overlay.active,
+.lk-overlay[style*="flex"],
+.lookup-overlay[style*="flex"] {
+    display: flex;
+}
+
+@keyframes lk-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ============================================================
+   MODAL CONTAINER
+   ============================================================ */
+.lk-modal,
+.lookup-modal {
+    background: var(--lk-white);
+    border-radius: var(--lk-radius-lg);
+    box-shadow: var(--lk-shadow);
+    width: 880px;
+    max-width: 95vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: lk-slide-in 0.22s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+    font-family: var(--lk-font);
+}
+
+@keyframes lk-slide-in {
+    from { transform: translateY(-18px) scale(0.97); opacity: 0; }
+    to   { transform: translateY(0)     scale(1);    opacity: 1; }
+}
+
+/* ============================================================
+   MODAL HEADER
+   ============================================================ */
+.lk-header,
+.lookup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px 14px;
+    background: linear-gradient(135deg, var(--lk-primary) 0%, var(--lk-primary-dark) 100%);
+    flex-shrink: 0;
+    border-radius: var(--lk-radius-lg) var(--lk-radius-lg) 0 0;
+}
+
+.lk-header-icon,
+.lookup-header-icon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--lk-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.lk-header-title,
+.lookup-header-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+    flex: 1;
+}
+
+.lk-header-badge,
+.lookup-header-badge {
+    background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.92);
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 3px 11px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.22);
+}
+
+.lk-header-close,
+.lookup-header-close {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: var(--lk-radius-sm);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background var(--lk-transition), border-color var(--lk-transition);
+    font-family: var(--lk-font);
+    flex-shrink: 0;
+}
+
+.lk-header-close:hover,
+.lookup-header-close:hover {
+    background: rgba(255, 80, 80, 0.55);
+    border-color: rgba(255,140,140,0.4);
+}
+
+/* ============================================================
+   SEARCH BAR
+   ============================================================ */
+.lk-search-wrap,
+.lookup-search-wrap {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--lk-border-light);
+    flex-shrink: 0;
+    background: var(--lk-primary-light);
+}
+
+.lk-search-input,
+.lookup-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 14px 0 42px;
+    border: 1.5px solid var(--lk-border);
+    border-radius: var(--lk-radius-md);
+    font-size: 0.875rem;
+    font-family: var(--lk-font);
+    color: var(--lk-text);
+    background: var(--lk-white)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%238066E8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E")
+        no-repeat 13px center;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--lk-transition), box-shadow var(--lk-transition);
+}
+
+.lk-search-input:focus,
+.lookup-search-input:focus {
+    border-color: var(--lk-primary);
+    box-shadow: 0 0 0 3px rgba(55, 50, 121, 0.10);
+    background-color: var(--lk-white);
+}
+
+.lk-search-input::placeholder,
+.lookup-search-input::placeholder {
+    color: #a090cc;
+    font-size: 0.84rem;
+}
+
+/* ============================================================
+   METADATA BAR (count / hint)
+   ============================================================ */
+.lk-meta,
+.lookup-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 18px;
+    font-size: 0.75rem;
+    color: var(--lk-text-muted);
+    border-bottom: 1px solid var(--lk-border-light);
+    flex-shrink: 0;
+    background: var(--lk-white);
+}
+
+.lk-meta strong,
+.lookup-meta strong {
+    color: var(--lk-primary);
+}
+
+/* ============================================================
+   SCROLLABLE TABLE BODY
+   ============================================================ */
+.lk-body,
+.lookup-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.lk-body::-webkit-scrollbar,
+.lookup-body::-webkit-scrollbar {
+    width: 7px;
+}
+
+.lk-body::-webkit-scrollbar-track,
+.lookup-body::-webkit-scrollbar-track {
+    background: var(--lk-primary-light);
+}
+
+.lk-body::-webkit-scrollbar-thumb,
+.lookup-body::-webkit-scrollbar-thumb {
+    background: var(--lk-border);
+    border-radius: 10px;
+}
+
+.lk-body::-webkit-scrollbar-thumb:hover,
+.lookup-body::-webkit-scrollbar-thumb:hover {
+    background: var(--lk-primary-mid);
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.lk-table,
+.lookup-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--lk-font);
+}
+
+/* --- Head --- */
+.lk-table thead tr,
+.lookup-table thead tr {
+    background: linear-gradient(90deg, var(--lk-primary) 0%, var(--lk-accent) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.lk-table thead th,
+.lookup-table thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 0.77rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.95);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.12);
+    white-space: nowrap;
+}
+
+.lk-table thead th:last-child,
+.lookup-table thead th:last-child {
+    border-right: none;
+}
+
+/* --- Body --- */
+.lk-table tbody tr,
+.lookup-table tbody tr {
+    border-bottom: 1px solid var(--lk-border-light);
+    cursor: pointer;
+    transition: background var(--lk-transition), transform 0.1s ease;
+    border-left: 3px solid transparent;
+}
+
+.lk-table tbody tr:nth-child(even),
+.lookup-table tbody tr:nth-child(even) {
+    background: var(--lk-row-stripe);
+}
+
+.lk-table tbody tr:hover,
+.lookup-table tbody tr:hover {
+    background: var(--lk-row-hover);
+    border-left-color: var(--lk-primary-mid);
+    transform: translateX(2px);
+}
+
+.lk-table tbody td,
+.lookup-table tbody td {
+    padding: 11px 16px;
+    font-size: 0.875rem;
+    color: var(--lk-text);
+    vertical-align: middle;
+    border-right: 1px solid var(--lk-border-light);
+}
+
+.lk-table tbody td:last-child,
+.lookup-table tbody td:last-child {
+    border-right: none;
+}
+
+/* First column — code / ID */
+.lk-table tbody td:first-child,
+.lookup-table tbody td:first-child {
+    font-weight: 700;
+    color: var(--lk-primary);
+    font-size: 0.84rem;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   EMPTY / LOADING / ERROR STATES
+   ============================================================ */
+.lk-msg,
+.lookup-msg {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--lk-text-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.lk-err,
+.lookup-err {
+    text-align: center;
+    padding: 20px;
+    color: #c0392b;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.lk-loading,
+.lookup-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 30px 20px;
+    color: var(--lk-primary-mid);
+    font-size: 0.875rem;
+}
+
+/* Spinner */
+.lk-spinner,
+.lookup-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid var(--lk-border-light);
+    border-top-color: var(--lk-primary-mid);
+    border-radius: 50%;
+    animation: lk-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes lk-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   STATUS BAR (footer hint)
+   ============================================================ */
+.lk-status,
+.lookup-status {
+    padding: 8px 18px;
+    font-size: 0.72rem;
+    color: #9898c0;
+    border-top: 1px solid var(--lk-border-light);
+    flex-shrink: 0;
+    background: var(--lk-primary-light);
+    border-radius: 0 0 var(--lk-radius-lg) var(--lk-radius-lg);
+}
+
+/* ============================================================
+   HIGHLIGHT (search term match)
+   ============================================================ */
+.lk-hl,
+.lookup-hl {
+    background: #ffe000;
+    border-radius: 3px;
+    padding: 1px 3px;
+    font-weight: 700;
+    color: var(--lk-primary-dark);
+}
+
+/* ============================================================
+   PRODUCT / CATEGORY BADGE (in table cells)
+   ============================================================ */
+.lk-badge,
+.lookup-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--lk-primary-light);
+    color: var(--lk-primary);
+    border: 1px solid var(--lk-border);
+    white-space: nowrap;
+}
+
+/* ============================================================
+   LOOKUP TITLE (used inside loaded iframe content)
+   ============================================================ */
+.lookup-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--lk-primary);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--lk-primary-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ============================================================
+   INLINE SEARCH BOX (inside iframe-loaded content)
+   ============================================================ */
+.lookup-search-box {
+    margin-bottom: 12px;
+}
+
+.lookup-search-box input {
+    width: 100%;
+    height: 38px;
+    padding: 0 14px 0 40px;
+    border: 1.5px solid var(--lk-border);
+    border-radius: var(--lk-radius-md);
+    font-size: 0.875rem;
+    font-family: var(--lk-font);
+    color: var(--lk-text);
+    background: var(--lk-white)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%238066E8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E")
+        no-repeat 12px center;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--lk-transition), box-shadow var(--lk-transition);
+}
+
+.lookup-search-box input:focus {
+    border-color: var(--lk-primary);
+    box-shadow: 0 0 0 3px rgba(55, 50, 121, 0.10);
+}
+
+/* ============================================================
+   STANDALONE LOOKUP TABLE (iframe content, not inside .lk-modal)
+   ============================================================ */
+.lookup-standalone-table,
+table.lookup-standalone-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    border-radius: var(--lk-radius-sm);
+    overflow: hidden;
+    box-shadow: var(--lk-shadow-sm);
+}
+
+.lookup-standalone-table th {
+    background: var(--lk-primary);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.77rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.12);
+}
+
+.lookup-standalone-table th:last-child {
+    border-right: none;
+}
+
+.lookup-standalone-table td {
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    color: var(--lk-text);
+    border-bottom: 1px solid var(--lk-border-light);
+    border-right: 1px solid var(--lk-border-light);
+    cursor: pointer;
+}
+
+.lookup-standalone-table td:last-child {
+    border-right: none;
+}
+
+.lookup-standalone-table tbody tr {
+    border-left: 3px solid transparent;
+    transition: background var(--lk-transition), transform 0.1s ease;
+}
+
+.lookup-standalone-table tbody tr:nth-child(even) {
+    background: var(--lk-row-stripe);
+}
+
+.lookup-standalone-table tbody tr:hover {
+    background: var(--lk-row-hover);
+    border-left-color: var(--lk-primary-mid);
+    transform: translateX(2px);
+}
+
+.lookup-standalone-table tbody td:first-child {
+    font-weight: 700;
+    color: var(--lk-primary);
+}
+
+/* ============================================================
+   CUSTOMER LOOKUP MODAL (Open Account, Utility)
+   ============================================================ */
+.customer-modal,
+.lk-customer-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 16, 60, 0.52);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.customer-modal.open,
+.customer-modal.active,
+.customer-modal[style*="flex"],
+.lk-customer-modal.open,
+.lk-customer-modal[style*="flex"] {
+    display: flex;
+}
+
+.customer-modal-content,
+.lk-customer-modal-content {
+    background: var(--lk-white);
+    width: 85%;
+    max-width: 920px;
+    max-height: 84vh;
+    overflow: hidden;
+    border-radius: var(--lk-radius-lg);
+    box-shadow: var(--lk-shadow);
+    display: flex;
+    flex-direction: column;
+    animation: lk-slide-in 0.22s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+    font-family: var(--lk-font);
+}
+
+/* Header inside customer modal */
+.customer-modal-content > .lk-header,
+.customer-modal-content > .lookup-header {
+    border-radius: var(--lk-radius-lg) var(--lk-radius-lg) 0 0;
+}
+
+/* Legacy close button inside modals */
+.customer-close,
+.lk-close {
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    font-size: 28px;
+    font-weight: 700;
+    cursor: pointer;
+    color: rgba(255,255,255,0.75);
+    line-height: 1;
+    transition: color var(--lk-transition);
+    background: none;
+    border: none;
+}
+
+.customer-close:hover,
+.lk-close:hover {
+    color: #fff;
+}
+
+/* Scrollable table container */
+.table-container,
+.lk-table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.table-container::-webkit-scrollbar,
+.lk-table-container::-webkit-scrollbar {
+    width: 7px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.lk-table-container::-webkit-scrollbar-track {
+    background: var(--lk-primary-light);
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.lk-table-container::-webkit-scrollbar-thumb {
+    background: var(--lk-border);
+    border-radius: 10px;
+}
+
+/* Customer count line */
+.customer-count,
+.lk-count {
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    color: var(--lk-text-muted);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.customer-count strong,
+.lk-count strong {
+    color: var(--lk-primary);
+}
+
+/* ============================================================
+   ERROR MESSAGE (inside content area)
+   ============================================================ */
+.error-message,
+.lk-error-block {
+    color: #c0392b;
+    padding: 16px 20px;
+    border: 1px solid #f5c6cb;
+    background-color: #fff0f0;
+    border-radius: var(--lk-radius-sm);
+    margin: 10px 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ============================================================
+   NO RESULTS ROW
+   ============================================================ */
+.lk-no-results td,
+.no-results {
+    text-align: center;
+    padding: 28px;
+    color: var(--lk-text-muted);
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+/* ============================================================
+   GENERAL MODAL WRAPPER (transactions.jsp style)
+   ============================================================ */
+.lookup-modal-wrap {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 16, 60, 0.52);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.lookup-modal-wrap[style*="flex"] {
+    display: flex;
+}
+
+.lookup-modal-box {
+    background: var(--lk-white);
+    width: 80%;
+    max-height: 80vh;
+    overflow: auto;
+    padding: 24px;
+    border-radius: var(--lk-radius-lg);
+    box-shadow: var(--lk-shadow);
+    animation: lk-slide-in 0.22s cubic-bezier(0.34, 1.42, 0.64, 1) both;
+    font-family: var(--lk-font);
+    position: relative;
+}
+
+.lookup-modal-box-close {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--lk-radius-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+    transition: background var(--lk-transition);
+}
+
+.lookup-modal-box-close:hover {
+    background: #a93226;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .lk-modal,
+    .lookup-modal {
+        width: 98vw;
+        max-height: 90vh;
+        border-radius: var(--lk-radius-md);
+    }
+
+    .lk-header,
+    .lookup-header {
+        padding: 13px 14px;
+        border-radius: var(--lk-radius-md) var(--lk-radius-md) 0 0;
+    }
+
+    .lk-header-title,
+    .lookup-header-title {
+        font-size: 0.95rem;
+    }
+
+    .lk-table thead th,
+    .lookup-table thead th,
+    .lk-table tbody td,
+    .lookup-table tbody td,
+    .lookup-standalone-table th,
+    .lookup-standalone-table td {
+        padding: 9px 10px;
+        font-size: 0.80rem;
+    }
+
+    .customer-modal-content,
+    .lk-customer-modal-content {
+        width: 97%;
+        max-height: 90vh;
+        border-radius: var(--lk-radius-md);
+    }
+
+    .lookup-modal-box {
+        width: 95%;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lk-overlay,
+    .lookup-overlay {
+        padding-top: 20px;
+        align-items: flex-start;
+    }
+
+    .lk-header-badge,
+    .lookup-header-badge {
+        display: none;
+    }
+}
