@@ -9,9 +9,6 @@ body {
 /* ============================================
    SIDEBAR STYLES
    ============================================ */
-/* ============================================
-   ENHANCED SIDEBAR STYLES
-   ============================================ */
 .sidebar {
     width: 250px;
     background: linear-gradient(90deg,#182542, #1d314f);
@@ -24,25 +21,22 @@ body {
     left: 0;
     z-index: 200;
     transition: width 0.3s ease;
-    /* NOTE: overflow must NOT be hidden — tooltips need to escape */
-    /*box-shadow: 4px 0 15px rgba(0, 0, 0, 0.3); */
 }
 
 /* ── Collapsed: icon-only strip ── */
 .sidebar.collapsed {
-    width: 62px;
+    width: 50px;
 }
 
 .profile-section {
     text-align: center;
-    padding: 30px 10px 5px;
+    padding: 20px 8px 5px;
     background: linear-gradient(90deg,#182542, #1d314f);
     overflow: hidden;
     white-space: nowrap;
     flex-shrink: 0;
     transition: padding 0.3s ease;
 }
-
 
 .profile-pic {
     width: 90px;
@@ -56,8 +50,8 @@ body {
     margin: 0 auto;
 }
 .sidebar.collapsed .profile-pic {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
     border-width: 2px;
 }
 
@@ -87,15 +81,15 @@ body {
 /* Enhanced Sidebar Menu */ 
 .menu {
     list-style: none;
-    padding: 20px 12px;
+    padding: 15px 8px;
     margin: 0;
     flex-grow: 1;
     overflow-y: auto;
-    overflow-x: visible; /* allow tooltips to escape */
+    overflow-x: visible;
 }
 
 .menu::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 .menu::-webkit-scrollbar-track {
@@ -104,53 +98,47 @@ body {
 
 .menu::-webkit-scrollbar-thumb {
     background: rgba(0, 119, 182, 0.5);
-    border-radius: 3px;
-}
-
-.menu::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 119, 182, 0.8);
+    border-radius: 2px;
 }
 
 .menu li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     position: relative;
 }
  
 .menu li a {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     text-decoration: none;
     color: #b8c5d6;
-    padding: 14px 16px;
+    padding: 12px 14px;
     width: 100%;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     z-index: 1;
     box-sizing: border-box;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 13px;
     background: linear-gradient(90deg, rgb(178 178 183 / 52%), rgba(0, 180, 216, 0.1));
-    transform: translateX(4px);
+    transform: translateX(3px);
     box-shadow: 0 2px 8px rgba(0, 119, 182, 0.2);
     white-space: nowrap;
 }
 
-/* Subtle hover background */
 .menu li a:hover {
     background: linear-gradient(90deg, rgba(0, 119, 182, 0.15), rgba(0, 180, 216, 0.1));
     color: #ffffff;
-    transform: translateX(4px);
+    transform: translateX(3px);
     box-shadow: 0 2px 8px rgba(0, 119, 182, 0.2);
 }
 
-/* Modern sliding indicator from left */
 .menu li a::before {
     content: "";
     position: absolute;
-    width: 4px;
+    width: 3px;
     height: 0%;
     background: linear-gradient(180deg, #0077b6, #00b4d8);
     left: 0;
@@ -158,31 +146,28 @@ body {
     transform: translateY(-50%);
     transition: all 0.3s ease;
     z-index: -1;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 3px 3px 0;
 }
 
-/* Expand indicator on hover */
 .menu li a:hover::before {
     height: 100%;
 }
 
-/* Active state with modern styling */
 .menu li.active > a {
     background: linear-gradient(90deg, rgba(0, 119, 182, 0.25), rgba(0, 180, 216, 0.15));
     color: #ffffff;
     font-weight: 600;
-    box-shadow: inset 4px 0 0 #0077b6, 0 2px 12px rgba(0, 119, 182, 0.3);
+    box-shadow: inset 3px 0 0 #0077b6, 0 2px 12px rgba(0, 119, 182, 0.3);
 }
 
 .menu li.active > a::before {
     height: 100%;
-    width: 4px;
+    width: 3px;
 }
 
-/* Enhanced arrow icon styling */
 .menu li a img {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
     vertical-align: middle;
     flex: 0 0 auto;
@@ -192,29 +177,25 @@ body {
     flex-shrink: 0;
 }
 
-/* Arrow animation on hover */
 .menu li a:hover img {
-    transform: translateX(4px);
+    transform: translateX(3px);
     opacity: 1;
     filter: brightness(1.5) drop-shadow(0 0 4px rgba(0, 180, 216, 0.6));
 }
 
-/* Active arrow styling */
 .menu li.active > a img {
     opacity: 1;
     filter: brightness(1.5) drop-shadow(0 0 6px rgba(0, 180, 216, 0.8));
 }
 
-/* Menu text animation */
 .menu li a span {
     transition: all 0.3s ease;
 }
 
 .menu li a:hover span {
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
-/* ── Menu label — hide when collapsed ── */
 .menu li a .menu-label {
     transition: opacity 0.2s ease, max-width 0.3s ease;
     overflow: hidden;
@@ -228,10 +209,9 @@ body {
     letter-spacing: 0;
 }
 
-/* Collapsed: centre the icon */
 .sidebar.collapsed .menu li a {
     justify-content: center;
-    padding: 14px 21px;
+    padding: 12px 16px;
     gap: 0;
     transform: none;
     overflow: visible;
@@ -240,15 +220,14 @@ body {
     transform: none !important;
 }
 
-/* ── Tooltip label (shown on hover when collapsed) ── */
 .menu li .tooltip-label {
     position: fixed;
-    left: 72px;
+    left: 60px;
     background: #0f2744;
     color: #ffffff;
-    padding: 6px 13px;
-    border-radius: 7px;
-    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
     pointer-events: none;
@@ -265,7 +244,7 @@ body {
     position: absolute;
     right: 100%; top: 50%;
     transform: translateY(-50%);
-    border: 6px solid transparent;
+    border: 5px solid transparent;
     border-right-color: rgba(0,180,216,0.35);
 }
 .menu li .tooltip-label::after {
@@ -273,7 +252,7 @@ body {
     position: absolute;
     right: calc(100% - 1px); top: 50%;
     transform: translateY(-50%);
-    border: 6px solid transparent;
+    border: 5px solid transparent;
     border-right-color: #0f2744;
 }
 .sidebar.collapsed .menu li:hover .tooltip-label {
@@ -282,9 +261,8 @@ body {
     visibility: visible;
 }
 
-/* Enhanced Logout section */
 .logout {
-    padding: 20px;
+    padding: 15px;
     text-align: center;
     background: linear-gradient(90deg,#182542, #1d314f);
     overflow: visible;
@@ -296,12 +274,12 @@ body {
     color: #b8c5d6;
     text-decoration: none;
     font-weight: 500;
-    font-size: 15px;
+    font-size: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
+    gap: 6px;
+    padding: 8px 15px;
+    border-radius: 6px;
     transition: all 0.3s ease;
     background: rgba(211, 47, 47, 0.1);
     white-space: nowrap;
@@ -314,7 +292,6 @@ body {
     box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
 }
 
-/* Logout text — hide when collapsed */
 .logout .logout-text {
     transition: opacity 0.2s ease, max-width 0.3s ease;
     max-width: 200px;
@@ -325,20 +302,19 @@ body {
     max-width: 0;
 }
 .sidebar.collapsed .logout a {
-    padding: 10px 0;
+    padding: 8px 0;
     width: 100%;
     justify-content: center;
 }
 
-/* Logout tooltip */
 .logout .tooltip-label {
     position: fixed;
-    left: 72px;
+    left: 60px;
     background: #0f2744;
     color: #ffffff;
-    padding: 6px 13px;
-    border-radius: 7px;
-    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
     pointer-events: none;
@@ -355,7 +331,7 @@ body {
     position: absolute;
     right: 100%; top: 50%;
     transform: translateY(-50%);
-    border: 6px solid transparent;
+    border: 5px solid transparent;
     border-right-color: rgba(0,180,216,0.35);
 }
 .logout .tooltip-label::after {
@@ -363,7 +339,7 @@ body {
     position: absolute;
     right: calc(100% - 1px); top: 50%;
     transform: translateY(-50%);
-    border: 6px solid transparent;
+    border: 5px solid transparent;
     border-right-color: #0f2744;
 }
 .sidebar.collapsed .logout:hover .tooltip-label {
@@ -372,25 +348,8 @@ body {
     visibility: visible;
 }
 
-/* Add ripple effect on click */
 .menu li a:active {
-    transform: scale(0.98) translateX(4px);
-}
-
-/* Responsive adjustments */
-@media (max-width: 767px) {
-    .sidebar {
-        width: 250px;
-    }
-    
-    .menu {
-        padding: 15px 10px;
-    }
-    
-    .menu li a {
-        padding: 12px 14px;
-        font-size: 14px;
-    }
+    transform: scale(0.98) translateX(3px);
 }
 
 /* ============================================
@@ -405,8 +364,8 @@ body {
     transition: margin-left 0.3s ease, width 0.3s ease;
 }
 body.sidebar-collapsed .main-content {
-    margin-left: 62px;
-    width: calc(100% - 62px);
+    margin-left: 50px;
+    width: calc(100% - 50px);
 }
 
 /* ============================================
@@ -414,7 +373,7 @@ body.sidebar-collapsed .main-content {
    ============================================ */
 header {
     background: linear-gradient(90deg, #1d314f, #5aa7f0);
-    padding: 8px 30px 6px 30px;
+    padding: 8px 20px 6px 20px;
     color: white;
     display: flex;
     flex-direction: column;
@@ -427,27 +386,26 @@ header {
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: width 0.3s ease, left 0.3s ease;
-    min-height: 79px; /* Fixed header height */
-    max-height: 79px; /* Prevent header from growing */
+    min-height: auto;
+    max-height: none;
 }
 body.sidebar-collapsed header {
-    width: calc(100% - 62px);
-    left: 62px;
+    width: calc(100% - 50px);
+    left: 50px;
 }
 
-/* ── Hamburger toggle button ── */
 .sidebar-toggle {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border: none;
     background: rgba(255,255,255,0.12);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 4px;
     transition: background 0.2s;
     flex-shrink: 0;
     padding: 0;
@@ -455,69 +413,66 @@ body.sidebar-collapsed header {
 .sidebar-toggle:hover { background: rgba(255,255,255,0.22); }
 .sidebar-toggle span {
     display: block;
-    width: 18px;
+    width: 16px;
     height: 2px;
     background: #fff;
     border-radius: 2px;
     transition: transform 0.3s, opacity 0.3s;
 }
 
-/* Title Row - Bank Left, Branch Right */
+/* Title Row */
 .title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2px;
-    gap: 15px;
-    min-height: 32px; /* Fixed height */
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-/* Bank Section with Icon */
 .bank-section {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex: 1;
     min-width: 0;
 }
 
 .bank-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
     flex-shrink: 0;
 }
 
 .bank-title {
-    font-size: 22px; /* Fixed size instead of clamp */
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     margin: 0;
     padding: 0;
-    line-height: 1.2;
-    white-space: nowrap;
+    line-height: 1.1;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Branch Section */
 .branch-section {
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, rgba(79, 195, 247, 0.25), rgba(33, 150, 243, 0.3));
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 2px solid #4fc3f7;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #4fc3f7;
     flex-shrink: 0;
     transition: all 0.3s ease;
-    height: 24px; /* Fixed height */
+    height: auto;
 }
 
 .branch-section:hover {
@@ -527,17 +482,18 @@ body.sidebar-collapsed header {
 }
 
 .branch-name {
-    font-size: 20px; /* Fixed size instead of clamp */
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 0px;
     white-space: nowrap;
     color:#ffffff;
 }
 .branch-name::before {
-    content: "BRANCH:";
+    content: "B:";
     font-weight: 600;
-    margin-right: 6px;
+    margin-right: 4px;
     opacity: 0.9;
+    font-size: 11px;
 }
 
 /* Navigation Row */
@@ -546,30 +502,26 @@ body.sidebar-collapsed header {
     justify-content: space-between;
     align-items: center;
     padding-top: 0;
-    min-height: 26px; /* Fixed height */
-    max-height: 26px;
-    flex-wrap: nowrap; /* Prevent wrapping */
-    gap: 8px;
-    overflow: hidden; /* Hide overflow if content is too wide */
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow: hidden;
 }
 
-/* Breadcrumb Navigation - Responsive */
 .breadcrumb-container {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px; /* Fixed size instead of clamp */
+    gap: 6px;
+    font-size: 11px;
     color: #ffffff;
     flex: 1 1 auto;
-    min-width: 200px;
-    flex-wrap: nowrap; /* Prevent wrapping */
-    overflow-x: auto; /* Add horizontal scroll if needed */
+    min-width: 80px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     overflow-y: hidden;
 }
 
-/* Hide scrollbar but keep functionality */
 .breadcrumb-container::-webkit-scrollbar {
-    height: 3px;
+    height: 2px;
 }
 
 .breadcrumb-container::-webkit-scrollbar-track {
@@ -578,13 +530,13 @@ body.sidebar-collapsed header {
 
 .breadcrumb-container::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
+    border-radius: 2px;
 }
 
 .breadcrumb-item {
     display: flex;
     align-items: center;
-    gap: clamp(6px, 0.5vw, 8px);
+    gap: 4px;
 }
 
 .breadcrumb-link {
@@ -592,58 +544,58 @@ body.sidebar-collapsed header {
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s ease;
-    padding: 3px 8px;
-    font-size: 14px; /* Fixed size */
-    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 11px;
+    border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
-    line-height: 1.3;
+    line-height: 1.2;
     white-space: nowrap;
 }
 
 .breadcrumb-link:hover {
     background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .breadcrumb-separator {
     color: #ffffff;
     font-weight: 600;
     user-select: none;
-    font-size: 16px; /* Fixed size */
+    font-size: 12px;
 }
 
 .breadcrumb-current {
     color: #ffffff;
     font-weight: 600;
     background: rgba(255, 255, 255, 0.15);
-    padding: 3px 10px;
-    border-radius: 4px;
-    line-height: 1.3;
-    font-size: 14px; /* Fixed size */
+    padding: 2px 8px;
+    border-radius: 3px;
+    line-height: 1.2;
+    font-size: 11px;
     white-space: nowrap;
 }
 
-/* Working Date - Responsive */
 #workingDate {
     color: #ffffff;
-    font-size: 14px; /* Fixed size instead of clamp */
+    font-size: 11px;
     font-weight: 500;
-    padding: 3px 10px;
+    padding: 2px 8px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: 3px;
     white-space: nowrap;
-    line-height: 1.3;
+    line-height: 1.2;
     flex-shrink: 0;
 }
 
-/* iframe - Fully Responsive */
+/* iframe */
 iframe {
     flex: 1;
     width: 100%;
-    height: 100%;
-    margin-top: 79px; /* Match fixed header height */
+    height: calc(100vh - 79px);
+    margin-top: 79px;
     border: none;
     overflow: auto;
+    box-sizing: border-box;
 }
 
 /* ============================================
@@ -663,11 +615,11 @@ iframe {
 
 .logout-modal-content {
     background: linear-gradient(135deg, #192947, #1d314f);
-    margin: 15% auto;
-    padding: 30px;
-    border-radius: 12px;
-    width: 400px;
-    max-width: 90%;
+    margin: 20% auto;
+    padding: 25px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     color: white;
     text-align: center;
@@ -677,30 +629,32 @@ iframe {
 .logout-modal-content h2 {
     margin-top: 0;
     color: #fff;
-    font-size: 24px;
+    font-size: 20px;
     margin-bottom: 10px;
 }
 
 .logout-modal-content p {
     color: #cfd8dc;
-    font-size: 16px;
-    margin-bottom: 25px;
+    font-size: 14px;
+    margin-bottom: 20px;
 }
 
 .logout-modal-buttons {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .logout-btn {
-    padding: 12px 30px;
+    padding: 11px 24px;
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
+    border-radius: 5px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
+    min-width: 100px;
 }
 
 .logout-btn-confirm {
@@ -754,124 +708,137 @@ iframe {
 }
 
 /* ============================================
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE BREAKPOINTS - MOBILE FIRST
    ============================================ */
 
-/* Tablet - Landscape (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Extra Small Mobile (280px - 359px) */
+@media (max-width: 359px) {
+    .sidebar {
+        width: 50px;
+    }
+    body.sidebar-collapsed .main-content,
+    .main-content {
+        margin-left: 50px;
+        width: calc(100% - 50px);
+    }
+    
     header {
-        padding: 6px 15px 5px 15px;
+        width: calc(100% - 50px);
+        left: 50px;
+        padding: 6px 10px 5px 10px;
+        gap: 4px;
+    }
+    
+    .bank-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 11px;
     }
     
     .bank-title {
-        font-size: 15px;
+        font-size: 11px;
+        letter-spacing: 0px;
+    }
+    
+    .sidebar-toggle {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .sidebar-toggle span {
+        width: 14px;
+        height: 1.5px;
+        gap: 3px;
     }
     
     .branch-name {
-        font-size: 12px;
+        font-size: 10px;
     }
-    
-    .breadcrumb-container {
-        min-width: 150px;
-    }
-    
-    iframe {
-        margin-top: 79px;
-    }
-}
-
-/* Tablet - Portrait & Mobile (max-width: 767px) */
-@media (max-width: 767px) {
-    .sidebar {
-        width: 250px;
-    }
-    .sidebar.collapsed {
-        width: 62px;
-    }
-    
-    .main-content {
-        margin-left: 62px;
-        width: calc(100% - 62px);
-        height: auto;
-        min-height: 100vh;
-    }
-    body.sidebar-collapsed .main-content {
-        margin-left: 62px;
-        width: calc(100% - 62px);
-    }
-    
-    header {
-        width: calc(100% - 62px);
-        left: 62px;
-        padding: 6px 15px 5px 15px;
-        position: fixed;
-    }
-    body.sidebar-collapsed header {
-        width: calc(100% - 62px);
-        left: 62px;
-    }
-    
-    .title-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .bank-section {
-        width: 100%;
-    }
-    
-    .bank-title {
-        white-space: normal;
-        word-wrap: break-word;
+    .branch-name::before {
+        content: "B:";
+        font-size: 10px;
     }
     
     .branch-section {
-        padding: 6px 15px;
-        border-left-width: 3px;
-    }
-    .branch-name {
-        font-size: 12px;
+        padding: 3px 8px;
+        border: 1px solid #4fc3f7;
     }
     
-    .nav-row {
-        flex-direction: column;
-        align-items: flex-start;
+    .title-row {
         gap: 6px;
     }
     
     .breadcrumb-container {
-        width: 100%;
-        min-width: auto;
+        min-width: 60px;
+        font-size: 10px;
+        gap: 3px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+    
+    .breadcrumb-separator {
+        font-size: 11px;
     }
     
     #workingDate {
-        align-self: flex-start;
-    }
-    
-    iframe {
-        position: relative;
-        margin-top: 0;
-        width: 100%;
-        min-height: calc(100vh - 250px);
-        height: auto;
-    }
-
-    .menu {
-        padding: 15px 10px;
+        font-size: 10px;
+        padding: 1px 6px;
     }
     
     .menu li a {
-        padding: 12px 14px;
-        font-size: 14px;
+        padding: 10px 12px;
+        font-size: 12px;
+        gap: 8px;
+    }
+    
+    .menu li a img {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .profile-pic {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .user-name {
+        font-size: 11px;
+        margin-top: 3px;
+    }
+    
+    .logout a {
+        font-size: 11px;
+        padding: 6px 12px;
+        gap: 4px;
+    }
+    
+    iframe {
+        margin-top: auto;
+        height: auto;
+        min-height: calc(100vh - 120px);
     }
 }
 
-/* Mobile - Small (360px - 480px) */
-@media (max-width: 480px) {
+/* Small Mobile (360px - 480px) */
+@media (min-width: 360px) and (max-width: 480px) {
+    .sidebar {
+        width: 50px;
+    }
+    body.sidebar-collapsed .main-content,
+    .main-content {
+        margin-left: 50px;
+        width: calc(100% - 50px);
+    }
+    
     header {
-        padding: 5px 10px 4px 10px;
-        gap: 3px;
+        width: calc(100% - 50px);
+        left: 50px;
+        padding: 6px 12px 5px 12px;
+        gap: 4px;
     }
     
     .bank-icon {
@@ -881,64 +848,305 @@ iframe {
     }
     
     .bank-title {
-        font-size: 11px;
-        letter-spacing: 0.3px;
+        font-size: 12px;
+        letter-spacing: 0.2px;
     }
     
-    .branch-section {
-        padding: 5px 12px;
+    .sidebar-toggle {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .sidebar-toggle span {
+        width: 15px;
     }
     
     .branch-name {
         font-size: 11px;
     }
     .branch-name::before {
-        font-size: 1em;
-        margin-right: 6px;
+        content: "B:";
+        font-size: 10px;
+    }
+    
+    .branch-section {
+        padding: 4px 9px;
+    }
+    
+    .title-row {
+        gap: 8px;
+    }
+    
+    .breadcrumb-container {
+        min-width: 70px;
+        font-size: 11px;
+        gap: 4px;
     }
     
     .breadcrumb-link,
-    .breadcrumb-current,
-    #workingDate {
+    .breadcrumb-current {
         font-size: 11px;
-        padding: 2px 6px;
+        padding: 2px 5px;
     }
     
     .breadcrumb-separator {
+        font-size: 12px;
+    }
+    
+    #workingDate {
+        font-size: 11px;
+        padding: 2px 7px;
+    }
+    
+    .menu li a {
+        padding: 11px 13px;
+        font-size: 13px;
+        gap: 9px;
+    }
+    
+    .menu li a img {
+        width: 15px;
+        height: 15px;
+    }
+    
+    .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-width: 2px;
+    }
+    
+    .user-name {
+        font-size: 12px;
+        margin-top: 4px;
+    }
+    
+    .logout a {
+        font-size: 12px;
+        padding: 7px 13px;
+    }
+    
+    iframe {
+        margin-top: auto;
+        height: auto;
+        min-height: calc(100vh - 140px);
+    }
+}
+
+/* Tablet & Mobile (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+    .sidebar {
+        width: 50px;
+    }
+    body.sidebar-collapsed .main-content,
+    .main-content {
+        margin-left: 50px;
+        width: calc(100% - 50px);
+    }
+    
+    header {
+        width: calc(100% - 50px);
+        left: 50px;
+        padding: 8px 15px 6px 15px;
+    }
+    
+    .bank-title {
+        font-size: 14px;
+    }
+    
+    .branch-name {
+        font-size: 12px;
+    }
+    .branch-name::before {
+        content: "Branch: ";
+        font-size: 11px;
+    }
+    
+    .breadcrumb-container {
+        min-width: 100px;
+        font-size: 12px;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        font-size: 12px;
+    }
+    
+    #workingDate {
+        font-size: 12px;
+    }
+    
+    .menu li a {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+    
+    .menu li a img {
+        width: 17px;
+        height: 17px;
+    }
+    
+    iframe {
+        height: calc(100vh - 79px);
+    }
+}
+
+/* Tablet Landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    header {
+        padding: 8px 15px 6px 15px;
+    }
+    
+    .bank-title {
+        font-size: 15px;
+    }
+    
+    .branch-name {
+        font-size: 12px;
+    }
+    .branch-name::before {
+        content: "BRANCH: ";
+    }
+    
+    .breadcrumb-container {
+        min-width: 120px;
         font-size: 13px;
     }
     
     iframe {
-        min-height: calc(100vh - 280px);
+        height: calc(100vh - 79px);
     }
 }
 
-/* Mobile - Extra Small (max-width: 359px) */
-@media (max-width: 359px) {
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+    .sidebar {
+        width: 250px;
+    }
+    body.sidebar-collapsed .sidebar {
+        width: 50px;
+    }
+    
+    body.sidebar-collapsed .main-content {
+        margin-left: 50px;
+        width: calc(100% - 50px);
+    }
+    
+    .main-content {
+        margin-left: 250px;
+        width: calc(100% - 250px);
+    }
+    
+    header {
+        width: calc(100% - 250px);
+        left: 250px;
+        padding: 8px 30px 6px 30px;
+    }
+    body.sidebar-collapsed header {
+        width: calc(100% - 50px);
+        left: 50px;
+    }
+    
     .bank-title {
-        font-size: 10px;
+        font-size: 22px;
+        letter-spacing: 1px;
     }
     
     .branch-name {
-        font-size: 10px;
+        font-size: 20px;
+    }
+    .branch-name::before {
+        content: "BRANCH: ";
+        margin-right: 6px;
+    }
+    
+    .breadcrumb-container {
+        min-width: 150px;
+        font-size: 14px;
+        gap: 8px;
     }
     
     .breadcrumb-link,
-    .breadcrumb-current,
-    #workingDate {
-        font-size: 10px;
-        padding: 2px 5px;
+    .breadcrumb-current {
+        font-size: 14px;
+        padding: 3px 10px;
     }
     
-    iframe {
-        min-height: calc(100vh - 300px);
+    #workingDate {
+        font-size: 14px;
+        padding: 3px 10px;
+    }
+    
+    .menu li a {
+        padding: 14px 16px;
+        font-size: 15px;
+        gap: 12px;
+    }
+    
+    .menu li a img {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .profile-pic {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .user-name {
+        font-size: 20px;
+        margin-top: 6px;
+    }
+    
+    .logout a {
+        font-size: 15px;
+        padding: 10px 20px;
     }
 }
 
-/* Landscape orientation adjustments */
+/* Landscape Orientation (max-height: 600px) */
 @media (max-height: 600px) and (orientation: landscape) {
+    header {
+        min-height: auto;
+        max-height: auto;
+        gap: 2px;
+    }
+    
+    .title-row {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .nav-row {
+        gap: 4px;
+    }
+    
+    .bank-title {
+        font-size: 13px;
+    }
+    
+    .branch-name {
+        font-size: 11px;
+    }
+    
+    .breadcrumb-container {
+        font-size: 10px;
+    }
+    
+    #workingDate {
+        font-size: 10px;
+    }
+    
     iframe {
-        min-height: 400px;
+        height: auto;
+        min-height: 350px;
+        margin-top: auto;
+    }
+}
+
+/* Very Tall Screens (height > 900px) */
+@media (min-height: 900px) {
+    iframe {
+        height: calc(100vh - 79px);
     }
 }
 

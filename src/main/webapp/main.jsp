@@ -152,7 +152,8 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             width: 90%;
             max-width: 450px;
-            overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
             animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
@@ -251,6 +252,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
+            box-sizing: border-box;
         }
         
         .btn-change-password:hover {
@@ -405,7 +407,64 @@
         input[type="password"]::-webkit-password-toggle-button {
             display: none !important;
         }
-        
+
+        /* Mobile Modal Responsive */
+        @media (max-width: 480px) {
+            .password-change-modal {
+                width: 95%;
+                max-width: 100%;
+                border-radius: 12px;
+                max-height: 95vh;
+            }
+            
+            .modal-header-custom {
+                padding: 25px 20px;
+            }
+            
+            .modal-header-custom h3 {
+                font-size: 20px;
+            }
+            
+            .modal-header-custom p {
+                font-size: 12px;
+            }
+            
+            .modal-body-custom {
+                padding: 25px 20px;
+            }
+            
+            .form-group-custom {
+                margin-bottom: 18px;
+            }
+            
+            .form-group-custom input {
+                padding: 12px 45px 12px 14px;
+                font-size: 14px;
+            }
+            
+            .btn-change-password {
+                padding: 14px;
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 359px) {
+            .password-change-modal {
+                width: 98%;
+            }
+            
+            .modal-header-custom {
+                padding: 20px 15px;
+            }
+            
+            .modal-header-custom h3 {
+                font-size: 18px;
+            }
+            
+            .modal-body-custom {
+                padding: 20px 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -552,7 +611,7 @@
         <div class="title-row">
             <!-- Bank Section with Icon -->
             <div class="bank-section">
-                <!-- ☰ Hamburger toggle — ADDED -->
+                <!-- Hamburger toggle button -->
                 <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle menu">
                     <span></span><span></span><span></span>
                 </button>
@@ -562,7 +621,7 @@
                 </h1>
             </div>
             
-            <!-- Branch Section (Without "BRANCH" text) -->
+            <!-- Branch Section -->
             <div class="branch-section">
                 <div class="branch-name" id="branchName">
                     Loading...
@@ -632,7 +691,6 @@
                             <div class="rule-item" id="rule-number"><span class="rule-icon">✗</span> At least 1 number</div>
                             <div class="rule-item" id="rule-special"><span class="rule-icon">✗</span> At least 1 special character (!@#$%^&amp;*)</div>
                         </div>
-                        </div>
                     </div>
                     
                     <div class="form-group-custom">
@@ -668,7 +726,7 @@
 <script>
 
 /* ============================================================
-   SIDEBAR COLLAPSE / EXPAND  — ADDED
+   SIDEBAR COLLAPSE / EXPAND
    ============================================================ */
 var isCollapsed = sessionStorage.getItem('sidebarCollapsed') === 'true';
 
@@ -687,6 +745,7 @@ function applyState() {
         mc.style.width      = 'calc(100% - 250px)';
     }
     sessionStorage.setItem('sidebarCollapsed', isCollapsed);
+    adjustIframeHeight();
 }
 
 function toggleSidebar() {
@@ -713,10 +772,37 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* ============================================================
-   ORIGINAL SCRIPTS BELOW — UNCHANGED
+   RESPONSIVE IFRAME HEIGHT ADJUSTMENT
    ============================================================ */
+function adjustIframeHeight() {
+    var header = document.querySelector('header');
+    var iframe = document.getElementById('contentFrame');
+    
+    if (header && iframe) {
+        var headerHeight = header.offsetHeight;
+        iframe.style.marginTop = headerHeight + 'px';
+        iframe.style.height = 'calc(100vh - ' + headerHeight + 'px)';
+    }
+}
 
-//========== PASSWORD CHANGE MODAL LOGIC ==========
+// Adjust on load and resize
+window.addEventListener('load', adjustIframeHeight);
+window.addEventListener('resize', adjustIframeHeight);
+
+// Adjust when sidebar collapses or header content changes
+var observer = new MutationObserver(function() {
+    setTimeout(adjustIframeHeight, 100);
+});
+observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+observer.observe(document.querySelector('header'), { 
+    childList: true, 
+    subtree: true, 
+    characterData: true 
+});
+
+/* ============================================================
+   PASSWORD CHANGE MODAL LOGIC
+   ============================================================ */
 
 <% if (needsPasswordChange) { %>
 // Show password change modal on page load
@@ -727,7 +813,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 <% } %>
 
-// *** Logout after password change so DB status resets to 'U' ***
+// Logout after password change so DB status resets to 'U'
 function doLogout() {
     sessionStorage.clear();
     document.getElementById('contentFrame').src = 'about:blank';
@@ -736,10 +822,10 @@ function doLogout() {
 
 // Show/hide eye icon based on input
 document.addEventListener('DOMContentLoaded', function() {
-    const newPasswordInput = document.getElementById('newPassword');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const eyeIconNew = document.getElementById('eyeIconNew');
-    const eyeIconConfirm = document.getElementById('eyeIconConfirm');
+    var newPasswordInput = document.getElementById('newPassword');
+    var confirmPasswordInput = document.getElementById('confirmPassword');
+    var eyeIconNew = document.getElementById('eyeIconNew');
+    var eyeIconConfirm = document.getElementById('eyeIconConfirm');
     
     if (newPasswordInput) {
         newPasswordInput.addEventListener('input', function() {
@@ -769,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== PASSWORD STRENGTH CHECKER ==========
 function checkPasswordStrength(password) {
-    const rules = {
+    var rules = {
         length:  password.length >= 8,
         upper:   /[A-Z]/.test(password),
         lower:   /[a-z]/.test(password),
@@ -778,9 +864,9 @@ function checkPasswordStrength(password) {
     };
 
     Object.keys(rules).forEach(function(key) {
-        const el = document.getElementById('rule-' + key);
+        var el = document.getElementById('rule-' + key);
         if (!el) return;
-        const icon = el.querySelector('.rule-icon');
+        var icon = el.querySelector('.rule-icon');
         if (rules[key]) {
             el.classList.add('passed');
             icon.textContent = '✓';
@@ -790,9 +876,9 @@ function checkPasswordStrength(password) {
         }
     });
 
-    const score = Object.values(rules).filter(Boolean).length;
-    const bar = document.getElementById('strengthBarFill');
-    const label = document.getElementById('strengthLabel');
+    var score = Object.values(rules).filter(Boolean).length;
+    var bar = document.getElementById('strengthBarFill');
+    var label = document.getElementById('strengthLabel');
 
     if (password.length === 0) {
         bar.style.width = '0%';
@@ -818,8 +904,8 @@ function checkPasswordStrength(password) {
 
 // Toggle password visibility
 function togglePasswordVisibility(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
+    var input = document.getElementById(inputId);
+    var icon = document.getElementById(iconId);
     
     if (input.type === "password") {
         input.type = "text";
@@ -830,112 +916,115 @@ function togglePasswordVisibility(inputId, iconId) {
     }
 }
 
-
 // Handle password change form submission
-document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const errorAlert = document.getElementById('errorAlert');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    // Clear previous errors
-    errorAlert.style.display = 'none';
-    errorAlert.textContent = '';
-    
-    // Validate passwords match
-    if (newPassword !== confirmPassword) {
-        errorAlert.textContent = '❌ Passwords do not match!';
-        errorAlert.style.display = 'block';
-        return;
-    }
-    
-    // Validate password is not empty
-    if (newPassword.trim() === '') {
-        errorAlert.textContent = '❌ Password cannot be empty!';
-        errorAlert.style.display = 'block';
-        return;
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('changePasswordForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var newPassword = document.getElementById('newPassword').value;
+            var confirmPassword = document.getElementById('confirmPassword').value;
+            var errorAlert = document.getElementById('errorAlert');
+            var submitBtn = document.getElementById('submitBtn');
+            
+            // Clear previous errors
+            errorAlert.style.display = 'none';
+            errorAlert.textContent = '';
+            
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                errorAlert.textContent = '❌ Passwords do not match!';
+                errorAlert.style.display = 'block';
+                return;
+            }
+            
+            // Validate password is not empty
+            if (newPassword.trim() === '') {
+                errorAlert.textContent = '❌ Password cannot be empty!';
+                errorAlert.style.display = 'block';
+                return;
+            }
 
-    // Validate strong password rules
-    const pwRules = {
-        length:  newPassword.length >= 8,
-        upper:   /[A-Z]/.test(newPassword),
-        lower:   /[a-z]/.test(newPassword),
-        number:  /[0-9]/.test(newPassword),
-        special: /[!@#$%^&*()_+\-=\[\]{};':"|,.<>\/?]/.test(newPassword)
-    };
-    const ruleMessages = {
-        length:  'at least 8 characters',
-        upper:   'at least 1 uppercase letter',
-        lower:   'at least 1 lowercase letter',
-        number:  'at least 1 number',
-        special: 'at least 1 special character'
-    };
-    const failedRules = Object.keys(pwRules).filter(k => !pwRules[k]);
-    if (failedRules.length > 0) {
-        errorAlert.textContent = '❌ Password must contain ' + failedRules.map(k => ruleMessages[k]).join(', ') + '.';
-        errorAlert.style.display = 'block';
-        return;
-    }
+            // Validate strong password rules
+            var pwRules = {
+                length:  newPassword.length >= 8,
+                upper:   /[A-Z]/.test(newPassword),
+                lower:   /[a-z]/.test(newPassword),
+                number:  /[0-9]/.test(newPassword),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"|,.<>\/?]/.test(newPassword)
+            };
+            var ruleMessages = {
+                length:  'at least 8 characters',
+                upper:   'at least 1 uppercase letter',
+                lower:   'at least 1 lowercase letter',
+                number:  'at least 1 number',
+                special: 'at least 1 special character'
+            };
+            var failedRules = Object.keys(pwRules).filter(function(k) { return !pwRules[k]; });
+            if (failedRules.length > 0) {
+                errorAlert.textContent = '❌ Password must contain ' + failedRules.map(function(k) { return ruleMessages[k]; }).join(', ') + '.';
+                errorAlert.style.display = 'block';
+                return;
+            }
 
-    
-    // Disable submit button
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Changing Password...';
-    
-    // Send AJAX request to change password (AES encrypted)
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'main.jsp?action=changePassword', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
-                
-                if (response.success) {
-                    // Show success message
-                    document.getElementById('modalOverlay').classList.remove('active');
-                    document.getElementById('successPopupOverlay').classList.add('active');
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Changing Password...';
+            
+            // Send AJAX request to change password (AES encrypted)
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'main.jsp?action=changePassword', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        
+                        if (response.success) {
+                            // Show success message
+                            document.getElementById('modalOverlay').classList.remove('active');
+                            document.getElementById('successPopupOverlay').classList.add('active');
 
+                        } else {
+                            errorAlert.textContent = '❌ ' + response.message;
+                            errorAlert.style.display = 'block';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Change Password';
+                        }
+                    } catch (e) {
+                        errorAlert.textContent = '❌ An error occurred. Please try again.';
+                        errorAlert.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Change Password';
+                    }
                 } else {
-                    errorAlert.textContent = '❌ ' + response.message;
+                    errorAlert.textContent = '❌ Server error. Please try again.';
                     errorAlert.style.display = 'block';
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Change Password';
                 }
-            } catch (e) {
-                errorAlert.textContent = '❌ An error occurred. Please try again.';
+            };
+            
+            xhr.onerror = function() {
+                errorAlert.textContent = '❌ Network error. Please check your connection.';
                 errorAlert.style.display = 'block';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Change Password';
-            }
-        } else {
-            errorAlert.textContent = '❌ Server error. Please try again.';
-            errorAlert.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Change Password';
-        }
-    };
-    
-    xhr.onerror = function() {
-        errorAlert.textContent = '❌ Network error. Please check your connection.';
-        errorAlert.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Change Password';
-    };
-    
-    xhr.send('newPassword=' + encodeURIComponent(newPassword));
+            };
+            
+            xhr.send('newPassword=' + encodeURIComponent(newPassword));
+        });
+    }
 });
 
 //========== SESSION MONITORING ==========
 
 function checkSession() {
     fetch('sessionCheck.jsp')
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (!data.sessionValid) {
                 sessionStorage.clear();
                 document.getElementById('contentFrame').src = 'about:blank';
@@ -946,7 +1035,7 @@ function checkSession() {
                 }
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Session check error:', error);
         });
 }
@@ -960,13 +1049,13 @@ document.addEventListener('visibilitychange', function() {
  }
 });
 
-['click', 'keydown', 'mousemove'].forEach(event => {
+['click', 'keydown', 'mousemove'].forEach(function(event) {
  document.addEventListener(event, function() {
      if (!window.lastSessionCheck || Date.now() - window.lastSessionCheck > 10000) {
          window.lastSessionCheck = Date.now();
          checkSession();
      }
- }, { passive: true, once: false });
+ }, { passive: true });
 });
 
 // ========== USER PROFILE FUNCTION ==========
@@ -976,10 +1065,10 @@ function openUserProfile() {
 }
 
 // ========== PAGE STATE PERSISTENCE ==========
-const navigationStack = [];
+var navigationStack = [];
 
 function loadPage(page, title, anchorEl) {
-    let breadcrumbPath = buildBreadcrumbPath(page);
+    var breadcrumbPath = buildBreadcrumbPath(page);
     
     addToNavigationStack(page, breadcrumbPath);
     
@@ -990,29 +1079,28 @@ function loadPage(page, title, anchorEl) {
     document.getElementById("contentFrame").src = page;
     updateBreadcrumb(breadcrumbPath);
     
-    document.querySelectorAll(".menu li").forEach(li => li.classList.remove("active"));
+    document.querySelectorAll(".menu li").forEach(function(li) { li.classList.remove("active"); });
     if (anchorEl && anchorEl.closest) {
-        const menuItem = anchorEl.closest('li');
+        var menuItem = anchorEl.closest('li');
         menuItem.classList.add("active");
-        currentActiveMenu = menuItem;
+        window.currentActiveMenu = menuItem;
     }
 }
 
 function loadNavigationStack() {
-    const stored = sessionStorage.getItem('navigationStack');
+    var stored = sessionStorage.getItem('navigationStack');
     if (stored) {
-        const parsed = JSON.parse(stored);
-        navigationStack.push(...parsed);
+        var parsed = JSON.parse(stored);
+        navigationStack = navigationStack.concat(parsed);
     }
 }
 
 function addToNavigationStack(page, breadcrumbPath) {
-    // SANITIZE: Ensure page is always a relative path
     page = getRelativePath(page);
     
-    const entry = { page, breadcrumbPath };
+    var entry = { page: page, breadcrumbPath: breadcrumbPath };
     
-    const currentIndex = navigationStack.findIndex(e => e.breadcrumbPath === breadcrumbPath);
+    var currentIndex = navigationStack.findIndex(function(e) { return e.breadcrumbPath === breadcrumbPath; });
     if (currentIndex !== -1) {
         navigationStack.splice(currentIndex + 1);
     } else {
@@ -1023,7 +1111,7 @@ function addToNavigationStack(page, breadcrumbPath) {
 }
 
 function navigateToBreadcrumb(page, title) {
-    let path = buildBreadcrumbPath(page);
+    var path = buildBreadcrumbPath(page);
     
     sessionStorage.setItem('currentPage', page);
     sessionStorage.setItem('currentBreadcrumb', path);
@@ -1034,8 +1122,8 @@ function navigateToBreadcrumb(page, title) {
 
 // ========== BREADCRUMB FUNCTIONS ==========
 
-let _breadcrumbTimeout = null;
-let _currentBreadcrumbPath = null;
+var _breadcrumbTimeout = null;
+var _currentBreadcrumbPath = null;
 
 function updateBreadcrumb(path) {
     if (path === _currentBreadcrumbPath) return;
@@ -1043,7 +1131,7 @@ function updateBreadcrumb(path) {
     if (_breadcrumbTimeout) {
         clearTimeout(_breadcrumbTimeout);
     }
-    _breadcrumbTimeout = setTimeout(() => {
+    _breadcrumbTimeout = setTimeout(function() {
         _breadcrumbTimeout = null;
         _doUpdateBreadcrumb(path);
     }, 100);
@@ -1052,14 +1140,14 @@ function updateBreadcrumb(path) {
 function _doUpdateBreadcrumb(path) {
     _currentBreadcrumbPath = path;
 
-    const breadcrumbNav = document.getElementById("breadcrumbNav");
+    var breadcrumbNav = document.getElementById("breadcrumbNav");
     if (!breadcrumbNav) return;
 
-    const parts = path.split(' > ');
-    const breadcrumbParts = [];
+    var parts = path.split(' > ');
+    var breadcrumbParts = [];
 
-    for (let index = 0; index < parts.length; index++) {
-        const part = parts[index];
+    for (var index = 0; index < parts.length; index++) {
+        var part = parts[index];
         if (index === parts.length - 1) {
             breadcrumbParts.push('<span class="breadcrumb-current">' + escapeHtml(part) + '</span>');
         } else {
@@ -1085,13 +1173,13 @@ function escapeHtml(text) {
 }
 
 function updateActiveMenuFromSession() {
-    const savedMenu = sessionStorage.getItem('activeMenu');
+    var savedMenu = sessionStorage.getItem('activeMenu');
     if (savedMenu) {
-        document.querySelectorAll(".menu li").forEach(li => {
-            const link = li.querySelector('a');
+        document.querySelectorAll(".menu li").forEach(function(li) {
+            var link = li.querySelector('a');
             if (link && link.textContent.trim().includes(savedMenu)) {
                 li.classList.add('active');
-                currentActiveMenu = li;
+                window.currentActiveMenu = li;
             } else {
                 li.classList.remove('active');
             }
@@ -1108,11 +1196,11 @@ window.updateParentBreadcrumb = function(path) {
 
 function updateWorkingDateAndBankName() {
     fetch('getWorkingDate.jsp')
-        .then(response => response.json())
-        .then(data => {
-            const dateElement = document.getElementById("workingDate");
-            const bankNameElement = document.getElementById("bankNameTitle");
-            const branchNameElement = document.getElementById("branchName");
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            var dateElement = document.getElementById("workingDate");
+            var bankNameElement = document.getElementById("bankNameTitle");
+            var branchNameElement = document.getElementById("branchName");
             
             if (data.error) {
                 dateElement.innerText = "Error: " + data.error;
@@ -1135,8 +1223,9 @@ function updateWorkingDateAndBankName() {
                     sessionStorage.setItem('branchCode', data.branchCode);
                 }
             }
+            adjustIframeHeight();
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error fetching working date and bank name:', error);
             document.getElementById("workingDate").innerText = "Connection Error";
             document.getElementById("bankNameTitle").innerText = "Connection Error";
@@ -1150,16 +1239,16 @@ window.onload = function () {
     checkSession();
     loadNavigationStack();
     
-    const savedPage = sessionStorage.getItem('currentPage');
-    const savedBreadcrumb = sessionStorage.getItem('currentBreadcrumb');
+    var savedPage = sessionStorage.getItem('currentPage');
+    var savedBreadcrumb = sessionStorage.getItem('currentBreadcrumb');
 
     if (savedPage && savedBreadcrumb) {
         document.getElementById("contentFrame").src = savedPage;
         updateBreadcrumb(savedBreadcrumb);
         updateActiveMenuFromSession();
     } else {
-        const defaultPage = "Dashboard/dashboard.jsp";
-        const defaultBreadcrumb = "Dashboard";
+        var defaultPage = "Dashboard/dashboard.jsp";
+        var defaultBreadcrumb = "Dashboard";
         
         document.getElementById("contentFrame").src = defaultPage;
         updateBreadcrumb(defaultBreadcrumb);
@@ -1169,15 +1258,18 @@ window.onload = function () {
         
         addToNavigationStack(defaultPage, defaultBreadcrumb);
         
-        const dashboardItem = document.querySelector('.menu li[data-page="Dashboard/dashboard.jsp"]');
+        var dashboardItem = document.querySelector('.menu li[data-page="Dashboard/dashboard.jsp"]');
         if (dashboardItem) {
             dashboardItem.classList.add('active');
-            currentActiveMenu = dashboardItem;
+            window.currentActiveMenu = dashboardItem;
         }
     }
 
     updateWorkingDateAndBankName();
     setInterval(updateWorkingDateAndBankName, 30000);
+    
+    // Ensure iframe height is set on load
+    setTimeout(adjustIframeHeight, 500);
 };
 
 // ========== LOGOUT FUNCTIONS ==========
@@ -1198,7 +1290,7 @@ function confirmLogout() {
 }
 
 window.onclick = function(event) {
-    const modal = document.getElementById("logoutModal");
+    var modal = document.getElementById("logoutModal");
     if (event.target === modal) {
         closeLogoutModal();
     }
@@ -1211,28 +1303,25 @@ document.addEventListener('keydown', function(event) {
 });
 
 function navigateToBreadcrumbByIndex(index) {
-    const currentPath = sessionStorage.getItem('currentBreadcrumb');
+    var currentPath = sessionStorage.getItem('currentBreadcrumb');
     if (!currentPath) return;
     
-    const currentParts = currentPath.split(' > ');
-    const targetPath = currentParts.slice(0, index + 1).join(' > ');
+    var currentParts = currentPath.split(' > ');
+    var targetPath = currentParts.slice(0, index + 1).join(' > ');
     
-    const navStack = JSON.parse(sessionStorage.getItem('navigationStack') || '[]');
+    var navStack = JSON.parse(sessionStorage.getItem('navigationStack') || '[]');
     
-    for (let i = navStack.length - 1; i >= 0; i--) {
+    for (var i = navStack.length - 1; i >= 0; i--) {
         if (navStack[i].breadcrumbPath === targetPath) {
-            const targetPage = navStack[i].page;
+            var targetPage = navStack[i].page;
             
-            // Handle both absolute and relative paths
-            let iframeSrc = targetPage;
+            var iframeSrc = targetPage;
             
-            // Ensure path starts with proper format
             if (iframeSrc && !iframeSrc.startsWith('/')) {
-                // Add context path if needed
                 iframeSrc = iframeSrc;
             }
             
-            console.log('Navigating to:', iframeSrc);  // Debug log
+            console.log('Navigating to:', iframeSrc);
             
             document.getElementById("contentFrame").src = iframeSrc;
             updateBreadcrumb(targetPath);
@@ -1241,7 +1330,6 @@ function navigateToBreadcrumbByIndex(index) {
         }
     }
     
-    // Fallback: try to match by label in PAGE_EXCEPTIONS
     if (typeof PAGE_EXCEPTIONS !== 'undefined') {
         for (var url in PAGE_EXCEPTIONS) {
             if (PAGE_EXCEPTIONS[url] === targetPath.split(' > ').pop()) {
@@ -1257,20 +1345,16 @@ function navigateToBreadcrumbByIndex(index) {
     console.warn('No navigation history found for:', targetPath);
 }
 
-//Helper: Extract relative path from absolute or relative URL
 function getRelativePath(urlOrPath) {
     if (!urlOrPath) return '';
     
-    // If it's already a relative path, return as-is
     if (!urlOrPath.startsWith('http')) {
         return urlOrPath.startsWith('/') ? urlOrPath.substring(1) : urlOrPath;
     }
     
-    // Extract path from absolute URL
     var pathPart = urlOrPath.replace(/^https?:\/\/[^\/]+/, '');
     
-    // Remove context path (e.g., /LoginApp)
-    var contextSegments = window.location.pathname.split('/').filter(s => s);
+    var contextSegments = window.location.pathname.split('/').filter(function(s) { return s; });
     if (contextSegments.length > 0) {
         var contextPath = '/' + contextSegments[0];
         if (pathPart.startsWith(contextPath)) {
@@ -1278,7 +1362,6 @@ function getRelativePath(urlOrPath) {
         }
     }
     
-    // Remove leading slash and query params
     return pathPart.replace(/^\//, '').split('?')[0];
 }
 
@@ -1293,7 +1376,6 @@ window.updateParentBreadcrumb = function(path, currentPage) {
         var cleanPage = getRelativePath(currentPage);
         addToNavigationStack(cleanPage, path);
     } else {
-        // Auto-derive page from current iframe src
         var iframe = document.getElementById('contentFrame');
         if (iframe && iframe.src) {
             var cleanSrc = getRelativePath(iframe.src);
