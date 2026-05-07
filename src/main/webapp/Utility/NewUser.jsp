@@ -218,7 +218,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
 
         .grid-row-2 {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             align-items: end;
         }
