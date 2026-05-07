@@ -79,6 +79,7 @@
   <link rel="stylesheet" href="css/savingAcc.css">
   <link rel="stylesheet" href="css/application-tabs.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="../css/lookup-modal.css">
 </head>
 <body>
 

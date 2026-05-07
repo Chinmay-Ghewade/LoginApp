@@ -57,9 +57,9 @@
 
 <div class="lookup-search-box">
     <input type="text" 
-           id="customerSearch" 
-           placeholder="Search by Customer ID or Name..." 
-           onkeyup="searchCustomer()">
+       id="lookupCustomerSearch" 
+       placeholder="Search by Customer ID or Name..." 
+       onkeyup="searchCustomer()">
 </div>
 
 <div class="customer-count">
@@ -123,7 +123,7 @@
 document.getElementById('customerCount').textContent = '<%= totalCount %>';
 
 function searchCustomer() {
-    const input = document.getElementById('customerSearch');
+    const input = document.getElementById('lookupCustomerSearch');
     const filter = input.value.toUpperCase();
     const table = document.getElementById('customerTable');
     const tbody = table.getElementsByTagName('tbody')[0];

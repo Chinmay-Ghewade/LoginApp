@@ -14,7 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shares Allotment</title>
-    <link rel="stylesheet" href="css/lookup-modal.css">
+    <link rel="stylesheet" href="../css/lookup-modal.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #eaeaf5; min-height: 100vh; padding: 24px 28px 44px; color: #1a1a6e; }
@@ -449,10 +449,10 @@
     <div class="lk-overlay" id="lkOverlay" onclick="if(event.target===this)lkClose()">
         <div class="lk-modal">
             <div class="lk-header">
-                <span class="lk-head-title">Select Account</span>
-                <span class="lk-head-badge" id="lkBadge">CUSTOMER</span>
-                <button class="lk-head-close" onclick="lkClose()">&#10005;</button>
-            </div>
+    			<span class="lk-header-title">Select Account</span>
+    			<span class="lk-header-badge" id="lkBadge">CUSTOMER</span>
+    			<button class="lk-header-close" onclick="lkClose()">&#10005;</button>
+			</div>
             <div class="lk-search-wrap">
                 <input class="lk-search-input" id="lkSearchInput" type="text"
                        placeholder="Search by Account Code or Name..."

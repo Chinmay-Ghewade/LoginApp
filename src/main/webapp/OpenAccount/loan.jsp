@@ -158,6 +158,7 @@
 	  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 	  <link rel="stylesheet" type="text/css" href="css/savingAcc.css">
 	  <link rel="stylesheet" href="css/application-tabs.css">
+	  <link rel="stylesheet" href="../css/lookup-modal.css">
 	</head>
 	<body>
 	<form action="LoanServlet" method="post">
@@ -2562,8 +2563,6 @@
   </div>
 </fieldset>
 <% } %>
-	
-	
 	
 	  <div class="form-buttons">
 	    <button type="submit">Save</button>

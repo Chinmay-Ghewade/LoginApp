@@ -81,14 +81,6 @@ body {
   cursor: pointer;
   color: #373279;
 }
-    .customer-close:hover {
-      color: #373279;
-    }
-    .search-box input:focus {
-      outline: none;
-      border-color: #373279;
-      background-color: #fff;
-    }
     .personal-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);

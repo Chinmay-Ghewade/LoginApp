@@ -397,7 +397,7 @@
 
     <!-- 🔽 IFRAME for loading dynamic pages -->
     <iframe id="resultFrame" name="resultFrame"
-        onload="hideLoader()"
+         onload="if(typeof hideLoader === 'function') hideLoader();"
         style="width:100%; height:800px; border:1px solid #ccc; margin-top:20px;">
 </iframe>
 <!-- LOADING OVERLAY -->

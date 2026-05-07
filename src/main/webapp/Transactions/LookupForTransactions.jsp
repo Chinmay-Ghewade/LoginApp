@@ -107,37 +107,6 @@
 
 <link rel="stylesheet" href="../../css/lookup-modal.css">
 <style>
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-th, td {
-    border: 1px solid #999;
-    padding: 10px;
-    cursor: pointer;
-}
-th {
-    background-color: #373279;
-    color: white;
-    font-weight: bold;
-}
-tr:hover { 
-    background-color: #e8e4fc;
-}
-.lookup-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #373279;
-}
-
-.no-results {
-    text-align: center;
-    padding: 20px;
-    color: #999;
-    font-style: italic;
-}
 .category-badge {
     display: inline-block;
     padding: 4px 12px;
