@@ -32,6 +32,24 @@ if (sessionDate == null || sessionDate.isEmpty()) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try{
+
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd")
+        .parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy")
+        .format(d);
+
+}catch(Exception e){
+
+    displayDate = "";
+}
+
+
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 
@@ -70,7 +88,7 @@ String oracleToDate="";
 
 if(fromDate!=null && !fromDate.trim().equals("")){
     java.util.Date d =
-    new SimpleDateFormat("yyyy-MM-dd").parse(fromDate);
+    new SimpleDateFormat("dd/MM/yyyy").parse(fromDate);
 
     oracleFromDate =
     new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
@@ -79,7 +97,7 @@ if(fromDate!=null && !fromDate.trim().equals("")){
 
 if(toDate!=null && !toDate.trim().equals("")){
     java.util.Date d =
-    new SimpleDateFormat("yyyy-MM-dd").parse(toDate);
+    new SimpleDateFormat("dd/MM/yyyy").parse(toDate);
 
     oracleToDate =
     new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
@@ -193,6 +211,37 @@ if (jasperPrint.getPages().isEmpty()) {
 /* ---------------- CONSOLIDATED REPORT ---------------- */
 
 else{
+	
+	String condition2 = "";
+
+	if("B".equals(reportSel)){
+
+	    condition2 =
+	    " and gl.alie in ('A','L') ";
+
+	}
+	else if("P".equals(reportSel)){
+
+	    condition2 =
+	    " and gl.alie in ('I','E') ";
+
+	}
+	else if("C".equals(reportSel)){
+
+	    condition2 =
+	    " and gl.alie in ('A','L','I','E') ";
+	}
+	
+	String condition3 = "";
+
+	if("S".equals(accountSel)
+	    && glCode != null
+	    && !glCode.trim().equals("")){
+
+	    condition3 =
+	        " and op.glaccount_code='"
+	        + glCode + "' ";
+	}
 
 String sqlConsolidated =
 " SELECT accountcode account_code, accountname description, "+
@@ -218,7 +267,9 @@ String sqlConsolidated =
 " GROUP BY glaccount_code) bet, "+
 " headoffice.glaccount gl "+
 " WHERE op.glaccount_code=bet.glaccount_code "+
-" AND op.glaccount_code=gl.glaccount_code "+
+		" AND op.glaccount_code=gl.glaccount_code "+
+		condition2+
+		condition3+
 " ) "+
 " GROUP BY accountcode,accountname "+
 " ORDER BY accountcode";
@@ -455,20 +506,21 @@ autocomplete="off">
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
 
-<input type="date"
+<input type="text"
 name="from_date"
 class="input-field"
-value="<%= sessionDate %>"
-required>
+value="<%= displayDate %>"
+placeholder="DD/MM/YYYY" required>
 
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
 
-<input type="date"
+<input type="text"
 name="to_date"
 class="input-field"
+placeholder="DD/MM/YYYY"
 required>
 
 </div>

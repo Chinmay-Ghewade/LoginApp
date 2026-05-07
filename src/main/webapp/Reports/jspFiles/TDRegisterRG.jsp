@@ -14,13 +14,14 @@
 <%@ page import="db.DBConnection" %>
 
 <%
-Object obj = session.getAttribute("workingDate");
+/* ================= SESSION DATA ================= */
 
 String sessionDate = "";
+Object obj = session.getAttribute("workingDate");
 
 if (obj != null) {
     if (obj instanceof java.sql.Date) {
-        sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+        sessionDate = new SimpleDateFormat("yyyy-MM-dd")
                 .format((java.sql.Date) obj);
     } else {
         sessionDate = obj.toString();
@@ -28,7 +29,7 @@ if (obj != null) {
 }
 
 if (sessionDate == null || sessionDate.isEmpty()) {
-    sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
+    sessionDate = new SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
 
@@ -53,12 +54,17 @@ if (sessionBranchCode == null) sessionBranchCode = "";
 %>
 
 <%
+/* ================= DOWNLOAD LOGIC ================= */
+
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
 
     String reporttype  = request.getParameter("reporttype");
-    String branchCode = request.getParameter("branch_code");
+    String branchCode  = request.getParameter("branch_code");
+    String productCode = request.getParameter("product_code");
+    String singleAll   = request.getParameter("single_all");
+    String asOnDate    = request.getParameter("as_on_date");
 
     if (branchCode == null || branchCode.trim().isEmpty()) {
         branchCode = sessionBranchCode;
@@ -68,37 +74,42 @@ if ("download".equals(action)) {
     if (!"Y".equalsIgnoreCase(isSupportUser)) {
         branchCode = sessionBranchCode;
     }
-    String productCode = request.getParameter("product_code");
-    String singleAll   = request.getParameter("single_all");
-    String asOnDate    = request.getParameter("as_on_date");
 
-    if(productCode == null) productCode="";
+    if(productCode == null) productCode = "";
     productCode = productCode.trim();
 
-    /* VALIDATION */
+    /* ================= VALIDATION ================= */
 
     if("S".equals(singleAll) && productCode.equals("")){
         out.println("<h3 style='color:red'>Please enter Product Code</h3>");
         return;
     }
 
+    if(asOnDate == null || asOnDate.trim().equals("")){
+        out.println("<h3 style='color:red'>Please select As On Date</h3>");
+        return;
+    }
+
     /* DATE FORMAT */
 
-    String oracleDateStr="";
+    String oracleDateStr = "";
 
-    if(asOnDate!=null && !asOnDate.trim().equals("")){
-
-    	java.util.Date d =
-    		    new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
+    try {
+        java.util.Date d =
+            new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
 
         oracleDateStr =
             new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
             .format(d).toUpperCase();
+
+    } catch(Exception e){
+        out.println("<h3 style='color:red'>Invalid Date Format</h3>");
+        return;
     }
 
     /* FINAL PRODUCT CODE */
 
-    String finalProductCode="";
+    String finalProductCode = "";
 
     if("A".equals(singleAll)){
         finalProductCode = branchCode + "4%";
@@ -106,45 +117,52 @@ if ("download".equals(action)) {
         finalProductCode = branchCode + productCode + "%";
     }
 
-    Connection conn=null;
+    Connection conn = null;
 
-    try{
+    try {
 
         response.reset();
-        response.setBufferSize(1024*1024);
+        response.setBufferSize(1024 * 1024);
 
         conn = DBConnection.getConnection();
 
         /* LOAD REPORT */
 
         String jasperPath =
-        application.getRealPath("/Reports/TDRegisterRG.jasper");
+            application.getRealPath("/Reports/TDRegisterRG.jasper");
+
+        File file = new File(jasperPath);
+
+        if (!file.exists()) {
+            throw new RuntimeException("Jasper file not found: " + jasperPath);
+        }
 
         JasperReport jasperReport =
-        (JasperReport)JRLoader.loadObject(new File(jasperPath));
+            (JasperReport) JRLoader.loadObject(file);
 
         /* PARAMETERS */
 
         Map<String,Object> parameters = new HashMap<>();
 
-        parameters.put("branch_code",branchCode);
-        parameters.put("as_on_date",oracleDateStr);
+        parameters.put("branch_code", branchCode);
+        parameters.put("as_on_date", oracleDateStr);
         parameters.put("report_title","TERM DEPOSIT REGISTER");
-        parameters.put("finalProductCode",finalProductCode);
-        
-        /* ✅ USER ID (FIXED) */
+        parameters.put("finalProductCode", finalProductCode);
+
         String userId = (String) session.getAttribute("userId");
+        if(userId == null) userId = "admin";
+
         parameters.put("user_id", userId);
 
         parameters.put("SUBREPORT_DIR",
             application.getRealPath("/Reports/"));
 
-        parameters.put(JRParameter.REPORT_CONNECTION,conn);
+        parameters.put(JRParameter.REPORT_CONNECTION, conn);
 
         /* FILL REPORT */
 
         JasperPrint jasperPrint =
-            JasperFillManager.fillReport(jasperReport,parameters,conn);
+            JasperFillManager.fillReport(jasperReport, parameters, conn);
 
         if (jasperPrint.getPages().isEmpty()) {
 
@@ -157,25 +175,23 @@ if ("download".equals(action)) {
 
             return;
         }
-        
-        /* EXPORT */
+
+        /* ================= EXPORT ================= */
 
         if("pdf".equalsIgnoreCase(reporttype)){
 
             response.setContentType("application/pdf");
 
             response.setHeader("Content-Disposition",
-            "inline; filename=\"TD_Register_Report.pdf\"");
+                "inline; filename=\"TD_Register_Report.pdf\"");
 
-            ServletOutputStream outStream =
-            response.getOutputStream();
+            ServletOutputStream outStream = response.getOutputStream();
 
             JasperExportManager.exportReportToPdfStream(
-            jasperPrint,outStream);
+                jasperPrint, outStream);
 
             outStream.flush();
             outStream.close();
-
             return;
         }
 
@@ -184,35 +200,31 @@ if ("download".equals(action)) {
             response.setContentType("application/vnd.ms-excel");
 
             response.setHeader("Content-Disposition",
-            "attachment; filename=\"TD_Register_Report.xls\"");
+                "attachment; filename=\"TD_Register_Report.xls\"");
 
-            ServletOutputStream outStream =
-            response.getOutputStream();
+            ServletOutputStream outStream = response.getOutputStream();
 
             JRXlsExporter exporter = new JRXlsExporter();
 
             exporter.setParameter(
-                JRXlsExporterParameter.JASPER_PRINT,
-                jasperPrint);
+                JRXlsExporterParameter.JASPER_PRINT, jasperPrint);
 
             exporter.setParameter(
-                JRXlsExporterParameter.OUTPUT_STREAM,
-                outStream);
+                JRXlsExporterParameter.OUTPUT_STREAM, outStream);
 
             exporter.exportReport();
 
             outStream.flush();
             outStream.close();
-
             return;
         }
 
-    }catch(Exception e){
+    } catch(Exception e){
 
         out.println("<h3 style='color:red'>Error Generating Report</h3>");
         e.printStackTrace(new PrintWriter(out));
 
-    }finally{
+    } finally {
 
         if(conn!=null){
             try{conn.close();}catch(Exception ex){}
@@ -225,7 +237,7 @@ if ("download".equals(action)) {
 <html>
 <head>
 
-<title>Consolidated Balance Sheet</title>
+<title>Term Deposit Register</title>
 
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css">
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
@@ -237,213 +249,160 @@ var contextPath = "<%=request.getContextPath()%>";
 <script src="<%=request.getContextPath()%>/js/lookup.js"></script>
 
 <style>
-.container{
-    width:900px;
-    margin:auto;
-}
-
-.section{
-    background:#f5f5f5;
-    padding:20px;
-    border-radius:10px;
-}
-
-.label{
-    font-weight:bold;
-    margin-bottom:5px;
-}
-
-.input{
-    width:100%;
-    padding:8px;
-}
-
-.row{
+.radio-container {
+    margin-top:8px;
     display:flex;
-    gap:20px;
-    margin-bottom:15px;
+    gap:40px;
 }
 
-.btn{
+.input-field:disabled {
+    background-color:#e0e0e0;
+    cursor:not-allowed;
+}
+
+.input-box { display:flex; gap:10px; }
+
+.icon-btn {
     background:#2D2B80;
     color:white;
-    padding:10px 20px;
     border:none;
-    border-radius:6px;
+    width:40px;
+    border-radius:8px;
     cursor:pointer;
 }
 
-.error-box{
-    color:red;
-    font-weight:bold;
-    text-align:center;
-    margin-top:10px;
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:#f5f5f5;
+    width:80%;
+    max-height:85%;
+    padding:20px;
+    border-radius:8px;
 }
 </style>
-
-<script>
-
-function validateForm(){
-    var date = document.getElementById("as_on_date").value;
-
-    if(date == ""){
-        alert("Please enter As On Date");
-        return false;
-    }
-    return true;
-}
-
-/* SET REPORT TYPE */
-function setReport(val){
-    document.getElementById("report_select").value = val;
-    document.getElementById("action").value = "download";
-    document.forms[0].target = "_blank";
-    document.forms[0].submit();
-
-    /* reset */
-    document.forms[0].target = "";
-    document.getElementById("action").value = "";
-}
-
-</script>
 
 </head>
 
 <body>
 
-<div class="container">
+<div class="report-container">
 
-<h2 style="text-align:center;">
-CONSOLIDATED BALANCE SHEET
-</h2>
+<h1 class="report-title">
+TERM DEPOSIT REGISTER
+</h1>
 
 <form method="post"
-      action="ConsolidatedBalancesheet.jsp"
-      onsubmit="return validateForm();">
+      action="<%=request.getContextPath()%>/Reports/jspFiles/TDRegisterRG.jsp"
+      target="_blank"
+      autocomplete="off">
 
-<!-- HIDDEN -->
-<input type="hidden" name="action" id="action">
-<input type="hidden" name="report_select" id="report_select" value="BS">
+<input type="hidden" name="action" value="download"/>
 
-<div class="section">
+<div class="parameter-section">
 
-<div class="row">
+<!-- Branch -->
 
-<div style="flex:1;">
-<div class="label">Branch Code</div>
+<div class="parameter-group">
+<div class="parameter-label">Branch Code</div>
 
+<div class="input-box">
 <input type="text"
-       id="branch_code"
        name="branch_code"
-       class="input"
-       value="<%=sessionBranchCode%>"
-       readonly>
+       class="input-field"
+       value="<%= sessionBranchCode %>"
+       <%= !"Y".equalsIgnoreCase(isSupportUser) ? "readonly" : "" %>
+       required>
+
+<% if ("Y".equalsIgnoreCase(isSupportUser)) { %>
+<button type="button" class="icon-btn"
+onclick="openLookup('branch')">…</button>
+<% } %>
+</div>
 </div>
 
-<div style="flex:2;">
-<div class="label">Branch Name</div>
+<!-- Product -->
+
+<div class="parameter-group">
+<div class="parameter-label">Product Code</div>
+
+<div class="input-box">
 <input type="text"
-       id="branchName"
-       class="input"
-       readonly>
+       name="product_code"
+       class="input-field">
+
+<button type="button"
+onclick="openLookup('product')"
+class="icon-btn">…</button>
 </div>
 
+<div class="radio-container">
+<label><input type="radio" name="single_all" value="S" checked onclick="toggleProduct()">Single</label>
+<label><input type="radio" name="single_all" value="A" onclick="toggleProduct()">All</label>
+</div>
 </div>
 
-<div class="row">
+<!-- Date -->
 
-<div style="flex:1;">
-<div class="label">As On Date</div>
-
+<div class="parameter-group">
+<div class="parameter-label">As On Date</div>
 <input type="text"
-       id="as_on_date"
        name="as_on_date"
-       class="input"
-       value="<%=displayDate%>"
-       placeholder="DD/MM/YYYY">
-</div>
-
-<div style="flex:1;">
-<div class="label">Select</div>
-
-<label>
-<input type="radio" name="regularclosing" value="R" checked> Regular
-</label>
-
-<label>
-<input type="radio" name="regularclosing" value="C"> Closing
-</label>
-
+       class="input-field"
+       value="<%= displayDate %>"
+       placeholder="DD/MM/YYYY"  required>
 </div>
 
 </div>
 
+<div class="format-section">
+<div class="parameter-label">Report Type</div>
+
+<label><input type="radio" name="reporttype" value="pdf" checked> PDF</label>
+<label><input type="radio" name="reporttype" value="xls"> Excel</label>
 </div>
 
-<!-- REPORT TYPE -->
-
-<div class="section" style="margin-top:10px;">
-
-<div class="label">Report Format</div>
-
-<label>
-<input type="radio" name="reporttype" value="pdf" checked> PDF
-</label>
-
-<label>
-<input type="radio" name="reporttype" value="xls"> Excel
-</label>
-
-</div>
-
-<!-- ERROR -->
-
-<div class="error-box">
-<%= session.getAttribute("errorMessage") != null ? session.getAttribute("errorMessage") : "" %>
-</div>
-
-<br>
-
-<div style="text-align:center; display:flex; gap:10px; justify-content:center;">
-
-<button type="submit" name="action" value="validate" class="btn">
-Validate
+<button type="submit" class="download-button">
+Generate Report
 </button>
-
-<button type="submit" name="action" value="generate" class="btn">
-Generate Records
-</button>
-
-<button type="button"
-        onclick="setReport('BS')"
-        class="btn">
-Balance Sheet
-</button>
-
-<button type="button"
-        onclick="setReport('PL')"
-        class="btn">
-P & L
-</button>
-
-<button type="submit" name="action" value="cancel" class="btn">
-Cancel
-</button>
-
-</div>
 
 </form>
 
 </div>
 
-<!-- LOOKUP MODAL -->
-
 <div id="lookupModal" class="modal">
-<div class="modal-content">
-<button onclick="closeLookup()" style="float:right;">✖</button>
-<div id="lookupTable"></div>
+    <div class="modal-content">
+        <button onclick="closeLookup()" style="float:right;">✖</button>
+        <div id="lookupTable"></div>
+    </div>
 </div>
-</div>
+
+<script>
+function toggleProduct(){
+    var single =
+        document.querySelector('input[name="single_all"][value="S"]').checked;
+
+    var field =
+        document.querySelector('input[name="product_code"]');
+
+    if(single){
+        field.disabled = false;
+    } else {
+        field.value = "";
+        field.disabled = true;
+    }
+}
+
+window.onload = toggleProduct;
+</script>
 
 </body>
 </html>

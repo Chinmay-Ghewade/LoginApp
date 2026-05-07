@@ -29,6 +29,19 @@ if (sessionDate == null || sessionDate.isEmpty()) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 
@@ -67,7 +80,7 @@ if ("download".equals(action)) {
         response.setDateHeader("Expires", 0);
 
         /* DATE FORMAT */
-        SimpleDateFormat inFmt  = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat inFmt  = new SimpleDateFormat("dd/MM/yyyy");
         SimpleDateFormat outFmt = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
         String oracleDate = outFmt.format(inFmt.parse(asOnDateUI)).toUpperCase();
 
@@ -259,9 +272,10 @@ var contextPath = "<%=request.getContextPath()%>";
 
             <div class="parameter-group">
                 <div class="parameter-label">As On Date</div>
-                <input type="date" name="as_on_date"
+                <input type="text" name="as_on_date"
                        class="input-field"
-                       value="<%= sessionDate %>" required>
+                       value="<%= displayDate %>"
+                        placeholder="DD/MM/YYYY" required>
             </div>
         </div>
 

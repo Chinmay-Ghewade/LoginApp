@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TDMaturityReminder(WithoutReceipt)" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d57d5fb5-70a7-429f-8ed0-bac5ed4d89c5">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.y" value="192"/>
 	<parameter name="branch_code" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -24,6 +24,9 @@
 	<parameter name="report_title" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
     D.ACCOUNT_CODE,
@@ -38,11 +41,16 @@ FROM
     CUSTOMER.CUSTOMER C
 WHERE
     D.ACCOUNT_CODE = A.ACCOUNT_CODE
---AND A.CUSTOMER_ID = C.CUSTOMER_ID
---AND A.ACCOUNT_STATUS IN ('L','M')
---AND A.DATEACCOUNTCLOSE IS NULL
+AND A.CUSTOMER_ID = C.CUSTOMER_ID
+AND A.ACCOUNT_STATUS IN ('L','M')
+AND A.DATEACCOUNTCLOSE IS NULL
 AND SUBSTR(D.ACCOUNT_CODE,1,4)=$P{branch_code}
 AND D.MATURITYDATE BETWEEN $P{from_date} AND $P{To_date}
+
+AND (
+    $P{product_code} IS NULL
+    OR SUBSTR(D.ACCOUNT_CODE,5,3) = $P{product_code}
+)
 ORDER BY D.ACCOUNT_CODE]]>
 	</queryString>
 	<field name="ACCOUNT_CODE" class="java.lang.String"/>
@@ -55,7 +63,7 @@ ORDER BY D.ACCOUNT_CODE]]>
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="447" splitType="Stretch">
+		<band height="440" splitType="Stretch">
 			<staticText>
 				<reportElement x="2" y="349" width="473" height="18" uuid="a775c654-d2cf-4b28-a93a-810746ae17db"/>
 				<textElement verticalAlignment="Middle">
@@ -217,14 +225,16 @@ ORDER BY D.ACCOUNT_CODE]]>
 				<textFieldExpression><![CDATA[$F{DEPOSITAMOUNT}]]></textFieldExpression>
 			</textField>
 			<subreport>
-				<reportElement x="2" y="32" width="553" height="40" uuid="20a36cd5-dcfb-4e99-b725-81784b11c470"/>
+				<reportElement x="0" y="12" width="555" height="46" uuid="f1785a08-9d48-40ac-a95a-d320a4eb3019"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="as_on_date">
 					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
 				</subreportParameter>
-				<subreportParameter name="report_title"/>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
 			</subreport>

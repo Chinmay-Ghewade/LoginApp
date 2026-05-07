@@ -403,11 +403,18 @@ function initCustomerAutoFetch() {
 // ===============================
 function selectCity(code, name) {
 
-    let field = document.getElementById("city_code");
-    if (field) field.value = code;
+    if (activeInput) {
+        // set code in clicked input
+        activeInput.value = code;
 
-    let nameField = document.getElementById("cityName");
-    if (nameField) nameField.value = name;
+        // find second input (name field)
+        let box = activeInput.closest(".input-box");
+        let inputs = box.querySelectorAll("input");
+
+        if (inputs.length > 1) {
+            inputs[1].value = name;
+        }
+    }
 
     closeLookup();
 }

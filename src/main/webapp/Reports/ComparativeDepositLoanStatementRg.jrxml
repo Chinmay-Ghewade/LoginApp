@@ -400,7 +400,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="55" y="0" width="100" height="20" uuid="0bf31cdb-0ace-4b06-9031-6fff18612cda"/>
+				<reportElement x="56" y="0" width="118" height="20" uuid="0bf31cdb-0ace-4b06-9031-6fff18612cda"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 		</band>

@@ -25,6 +25,19 @@ if (sessionDate == null || sessionDate.isEmpty()) {
     sessionDate = new java.text.SimpleDateFormat("yyyy-MM-dd")
             .format(new java.util.Date());
 }
+
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 
@@ -51,10 +64,10 @@ if ("download".equals(action)) {
     String oracleFromDate="", oracleToDate="";
 
     try {
-        java.util.Date d1 = new SimpleDateFormat("yyyy-MM-dd").parse(fromDate);
+        java.util.Date d1 = new SimpleDateFormat("dd/MM/yyyy").parse(fromDate);
         oracleFromDate = new SimpleDateFormat("dd/MM/yyyy").format(d1);
 
-        java.util.Date d2 = new SimpleDateFormat("yyyy-MM-dd").parse(toDate);
+        java.util.Date d2 = new SimpleDateFormat("dd/MM/yyyy").parse(toDate);
         oracleToDate = new SimpleDateFormat("dd/MM/yyyy").format(d2);
 
     } catch(Exception e){
@@ -85,11 +98,6 @@ if ("download".equals(action)) {
             return;
         }
         
-        if(reportStream == null){
-            out.println("<h3 style='color:red'>Jasper file not found</h3>");
-            return;
-        }
-
         JasperReport jasperReport =
         (JasperReport) JRLoader.loadObject(reportStream);
 
@@ -281,19 +289,20 @@ onclick="openLookup('branch')">…</button>
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
 
-<input type="date"
+<input type="text"
 name="from_date"
 class="input-field"
-value="<%=sessionDate%>"  
-required>
+value="<%=displayDate%>"
+placeholder="DD/MM/YYYY"required>
 </div>
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
 
-<input type="date"
+<input type="text"
 name="to_date"
 class="input-field"
+placeholder="DD/MM/YYYY"
 required>
 </div>
 

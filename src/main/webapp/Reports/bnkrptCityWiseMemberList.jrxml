@@ -111,7 +111,7 @@ order by CITY_CODE]]>
 			</band>
 		</groupHeader>
 		<groupFooter>
-			<band height="2"/>
+			<band height="3"/>
 		</groupFooter>
 	</group>
 	<background>
@@ -292,25 +292,28 @@ order by CITY_CODE]]>
 		<band splitType="Stretch"/>
 	</columnFooter>
 	<pageFooter>
-		<band height="17">
+		<band height="25">
 			<textField>
-				<reportElement x="0" y="0" width="42" height="15" uuid="d1ee0fa4-59ba-4f3c-8776-bf6de7a6fd3a"/>
-				<textElement verticalAlignment="Middle"/>
+				<reportElement x="1" y="10" width="42" height="15" uuid="d1ee0fa4-59ba-4f3c-8776-bf6de7a6fd3a"/>
+				<textElement verticalAlignment="Top"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="42" y="0" width="130" height="15" uuid="0920df58-30fa-460d-a274-9c4e7564b183"/>
+				<reportElement x="42" y="10" width="130" height="15" uuid="0920df58-30fa-460d-a274-9c4e7564b183"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="776" y="0" width="57" height="15" uuid="683a90ce-76f0-4eea-a109-0e047c10b018"/>
+				<reportElement x="776" y="10" width="57" height="15" uuid="683a90ce-76f0-4eea-a109-0e047c10b018"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="833" y="0" width="36" height="15" uuid="2cf98dee-274f-4ec0-9570-767f98230278"/>
+				<reportElement x="832" y="10" width="36" height="15" uuid="2cf98dee-274f-4ec0-9570-767f98230278"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="1" y="1" width="869" height="1" uuid="4ec43f19-9344-479d-843f-0a6c52e3824e"/>
+			</line>
 		</band>
 	</pageFooter>
 	<summary>

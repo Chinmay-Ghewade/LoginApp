@@ -29,6 +29,19 @@ if (sessionDate == null || sessionDate.isEmpty()) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String branchCode = (String) session.getAttribute("branchCode");
 String userId     = (String) session.getAttribute("userId");
 
@@ -74,7 +87,7 @@ if ("download".equals(action)) {
 
     if(asOnDate != null && !asOnDate.isEmpty()){
         java.util.Date d =
-        new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
+        new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
 
         oracleDate =
         new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
@@ -365,9 +378,10 @@ All
 <div class="parameter-group">
 <div class="parameter-label">As On Date</div>
 
-<input type="date"
+<input type="text"
 name="as_on_date"
-value="<%=sessionDate%>"
+value="<%=displayDate%>"
+placeholder="DD/MM/YYYY"
 class="input-field"
 required>
 </div>

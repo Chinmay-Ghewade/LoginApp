@@ -29,6 +29,19 @@ if (sessionDate == null || sessionDate.isEmpty()) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String isSupportUser     = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 String userId            = (String) session.getAttribute("userId");
@@ -91,7 +104,7 @@ if ("download".equals(action)) {
 
         String oracleDate =
         new SimpleDateFormat("dd-MMM-yyyy",Locale.ENGLISH)
-        .format(new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate))
+        .format(new SimpleDateFormat("dd/MM/yyyy").parse(asOnDate))
         .toUpperCase();
 
         /* LOAD REPORT */
@@ -208,7 +221,7 @@ if ("download".equals(action)) {
 var contextPath = "<%=request.getContextPath()%>";
 </script>
 
-<script src="<%=request.getContextPath()%>/js/lookup.js"></script>
+<script src="<%=request.getContextPath()%>/js/lookup.js?v=4"></script>
 
 <style>
 
@@ -283,12 +296,12 @@ autocomplete="off">
 
 <input type="text"
 name="from_city"
-id="city_code"
+id="from_city_code"
 class="input-field"
 required>
 
 <input type="text"
-id="cityName"
+id="from_city_name"
 class="input-field"
 readonly
 placeholder="City Name">
@@ -309,12 +322,12 @@ onclick="openLookup('city')">…</button>
 
 <input type="text"
 name="to_city"
-id="city_code"
+id="to_city_code"
 class="input-field"
 required>
 
 <input type="text"
-id="cityName"
+id="to_city_name"
 class="input-field"
 readonly
 placeholder="City Name">
@@ -330,9 +343,10 @@ onclick="openLookup('city')">…</button>
 <div class="parameter-group">
 <div class="parameter-label">As On Date</div>
 
-<input type="date"
+<input type="text"
 name="as_on_date"
-value="<%=sessionDate%>"
+value="<%=displayDate%>"
+placeholder="DD/MM/YYYY"
 class="input-field"
 required>
 </div>

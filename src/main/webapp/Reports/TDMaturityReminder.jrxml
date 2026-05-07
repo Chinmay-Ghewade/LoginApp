@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TDMaturityReminder" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3e750ff7-a0f9-45eb-b183-c63be509a4a9">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="73"/>
+	<property name="ireport.y" value="52"/>
 	<parameter name="from_date" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
@@ -24,6 +24,9 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
     D.ACCOUNT_CODE,
@@ -41,11 +44,16 @@ FROM
 WHERE
   D.ACCOUNT_CODE = A.ACCOUNT_CODE
 AND D.ACCOUNT_CODE = R.ACCOUNT_CODE
---AND A.CUSTOMER_ID = C.CUSTOMER_ID
---AND A.ACCOUNT_STATUS IN ('L','M')
---AND A.DATEACCOUNTCLOSE IS NULL
+AND A.CUSTOMER_ID = C.CUSTOMER_ID
+AND A.ACCOUNT_STATUS IN ('L','M')
+AND A.DATEACCOUNTCLOSE IS NULL
 AND SUBSTR(D.ACCOUNT_CODE,1,4)=$P{branch_code}
 AND D.MATURITYDATE BETWEEN $P{from_date} AND $P{To_date}
+
+AND (
+    $P{product_code} IS NULL
+    OR SUBSTR(D.ACCOUNT_CODE,5,3) = $P{product_code}
+)
 ORDER BY D.ACCOUNT_CODE]]>
 	</queryString>
 	<field name="ACCOUNT_CODE" class="java.lang.String"/>
@@ -59,7 +67,7 @@ ORDER BY D.ACCOUNT_CODE]]>
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="451" splitType="Stretch">
+		<band height="444" splitType="Stretch">
 			<staticText>
 				<reportElement x="0" y="96" width="33" height="20" uuid="b1e09dfd-d05d-44f0-bef6-a79d0a5e5691"/>
 				<textElement verticalAlignment="Middle">

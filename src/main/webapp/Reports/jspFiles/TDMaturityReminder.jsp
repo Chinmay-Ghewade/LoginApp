@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
+<%@ page buffer="none" %>
 
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
@@ -13,32 +14,46 @@
 <%@ page import="db.DBConnection" %>
 
 <%
-Object obj = session.getAttribute("workingDate");
+/* ================= SESSION DATA ================= */
 
 String sessionDate = "";
+Object obj = session.getAttribute("workingDate");
 
 if (obj != null) {
-
     if (obj instanceof java.sql.Date) {
-
-        sessionDate =
-            new java.text.SimpleDateFormat("yyyy-MM-dd")
-            .format((java.sql.Date) obj);
-
+        sessionDate = new SimpleDateFormat("yyyy-MM-dd")
+                .format((java.sql.Date) obj);
     } else {
-
         sessionDate = obj.toString();
     }
 }
 
-/* ❌ NO DEFAULT TODAY DATE */
-if (sessionDate == null) {
-    sessionDate = "";
+if (sessionDate == null || sessionDate.isEmpty()) {
+    sessionDate = new SimpleDateFormat("yyyy-MM-dd")
+            .format(new java.util.Date());
 }
+
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
+String isSupportUser = (String) session.getAttribute("isSupportUser");
+String sessionBranchCode = (String) session.getAttribute("branchCode");
+
+if (isSupportUser == null) isSupportUser = "N";
+if (sessionBranchCode == null) sessionBranchCode = "";
 %>
 
 <%
-
 String action = request.getParameter("action");
 
 if ("download".equals(action)) {
@@ -48,31 +63,78 @@ if ("download".equals(action)) {
 
     String branchCode  = request.getParameter("branch_code");
     String productCode = request.getParameter("product_code");
+    String allProducts = request.getParameter("all_products");
+    
+    if(allProducts == null){
+        allProducts = "SINGLE";
+    }
+
+    /* 🔥 SAME AS JAVA LOGIC */
+    if ("ALL".equalsIgnoreCase(allProducts)) {
+        productCode = null;   // ignore product filter
+    }
     String fromDate    = request.getParameter("from_date");
     String toDate      = request.getParameter("to_date");
 
     Connection conn = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
 
     try {
 
-        conn = DBConnection.getConnection();
+        /* ================= VALIDATION ================= */
 
-        /* DATE FORMAT */
+        if(branchCode == null || branchCode.trim().equals("")){
+            out.println("<h3 style='color:red'>Branch Code is required</h3>");
+            return;
+        }
 
-        SimpleDateFormat inputFormat  = new SimpleDateFormat("yyyy-MM-dd");
+        if(fromDate == null || fromDate.trim().equals("")){
+            out.println("<h3 style='color:red'>From Date is required</h3>");
+            return;
+        }
+
+        if(toDate == null || toDate.trim().equals("")){
+            out.println("<h3 style='color:red'>To Date is required</h3>");
+            return;
+        }
+
+        /* ================= DATE FORMAT ================= */
+
+        SimpleDateFormat inputFormat  = new SimpleDateFormat("dd/MM/yyyy");
         SimpleDateFormat oracleFormat = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
 
-        String fromOracle =
-                oracleFormat.format(inputFormat.parse(fromDate)).toUpperCase();
+        String fromOracle = oracleFormat.format(inputFormat.parse(fromDate)).toUpperCase();
+        String toOracle   = oracleFormat.format(inputFormat.parse(toDate)).toUpperCase();
 
-        String toOracle =
-                oracleFormat.format(inputFormat.parse(toDate)).toUpperCase();
+        String asOnDate   = oracleFormat.format(new java.util.Date()).toUpperCase();
 
-        String asOnDate =
-                oracleFormat.format(new java.util.Date()).toUpperCase();
+        /* ================= DB CONNECTION ================= */
 
+        conn = DBConnection.getConnection();
+        
 
-        /* SELECT REPORT */
+        if (!"ALL".equalsIgnoreCase(allProducts)) {
+
+            if(productCode == null || productCode.trim().equals("")){
+                out.println("<h3 style='color:red'>Product Code is required</h3>");
+                return;
+            }
+
+            ps = conn.prepareStatement(
+                "SELECT 1 FROM HEADOFFICE.TDPRODUCTS WHERE PRODUCT_CODE = ?"
+            );
+
+            ps.setString(1, productCode);
+            rs = ps.executeQuery();
+
+            if(!rs.next()){
+                out.println("<h3 style='color:red;text-align:center;margin-top:50px;'>No data available for this product!</h3>");
+                return;
+            }
+        }
+
+        /* ================= LOAD / CACHE REPORT ================= */
 
         String jasperFile;
 
@@ -82,97 +144,113 @@ if ("download".equals(action)) {
             jasperFile = "TDMaturityReminder(WithoutReceipt).jasper";
         }
 
-        String jasperPath =
-                application.getRealPath("/Reports/" + jasperFile);
+        String jasperPath = application.getRealPath("/Reports/" + jasperFile);
 
         File file = new File(jasperPath);
 
         if (!file.exists()) {
-            throw new RuntimeException("Jasper file not found : " + jasperPath);
+            throw new RuntimeException("Jasper file not found: " + jasperPath);
         }
 
-        JasperReport report =
-                (JasperReport) JRLoader.loadObject(file);
+        // 🔥 CACHE REPORT
+        JasperReport report = (JasperReport)application.getAttribute(jasperFile);
 
+        if(report == null){
+            report = (JasperReport) JRLoader.loadObject(file);
+            application.setAttribute(jasperFile, report);
+        }
 
-        /* PARAMETERS */
+        /* ================= PARAMETERS ================= */
 
-        Map<String,Object> param = new HashMap<String,Object>();
+        Map<String,Object> param = new HashMap<>();
 
         param.put("branch_code", branchCode);
-        param.put("product_code", productCode);
-        param.put("from_date", fromOracle);
+        if(productCode != null && !productCode.trim().equals("")){
+            param.put("product_code", productCode);
+        } else {
+            param.put("product_code", null);
+        }        param.put("from_date", fromOracle);
         param.put("To_date", toOracle);
         param.put("as_on_date", asOnDate);
         param.put("report_title","TD MATURITY REMINDER LETTER");
 
-        String userId = (String)session.getAttribute("user_id");
-        if(userId == null || userId.trim().equals(""))
-            userId = "admin";
+        String userId = (String) session.getAttribute("userId");
 
-        param.put("user_id",userId);
+        if(userId == null || userId.trim().equals("")){
+            userId = "admin";
+        }
+
+        param.put("user_id", userId);
 
         param.put("SUBREPORT_DIR",
                 application.getRealPath("/Reports/"));
 
+        /* ================= FILL REPORT ================= */
 
-        /* FILL REPORT */
+        JasperPrint print = JasperFillManager.fillReport(report, param, conn);
 
-        JasperPrint print =
-                JasperFillManager.fillReport(report,param,conn);
-
-
-        /* PDF */
-
-        if("pdf".equalsIgnoreCase(reportType)){
+        if (print.getPages().isEmpty()) {
 
             response.reset();
+            response.setContentType("text/html");
+
+            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println("No Records Found!");
+            out.println("</h2>");
+
+            return;
+        }
+        /* ================= EXPORT ================= */
+
+        response.reset();
+        response.setBufferSize(1024 * 1024);
+
+        ServletOutputStream outStream = response.getOutputStream();
+
+        /* ===== PDF ===== */
+        if("pdf".equalsIgnoreCase(reportType)){
+
             response.setContentType("application/pdf");
 
             response.setHeader(
-                    "Content-Disposition",
-                    "inline; filename=\"TDMaturityReminder.pdf\"");
+                "Content-Disposition",
+                "inline; filename=\"TDMaturityReminder.pdf\"");
 
-            ServletOutputStream outStream = response.getOutputStream();
-
-            JasperExportManager.exportReportToPdfStream(print,outStream);
-
-            outStream.flush();
-            outStream.close();
-            return;
+            JasperExportManager.exportReportToPdfStream(print, outStream);
         }
 
+        /* ===== EXCEL ===== */
+        else if("xls".equalsIgnoreCase(reportType)){
 
-        /* EXCEL */
-
-        if("xls".equalsIgnoreCase(reportType)){
-
-            response.reset();
             response.setContentType("application/vnd.ms-excel");
 
             response.setHeader(
-                    "Content-Disposition",
-                    "attachment; filename=\"TDMaturityReminder.xls\"");
-
-            ServletOutputStream outStream = response.getOutputStream();
+                "Content-Disposition",
+                "attachment; filename=\"TDMaturityReminder.xls\"");
 
             JRXlsExporter exporter = new JRXlsExporter();
 
             exporter.setParameter(
-                    JRXlsExporterParameter.JASPER_PRINT,print);
+                JRXlsExporterParameter.JASPER_PRINT, print);
 
             exporter.setParameter(
-                    JRXlsExporterParameter.OUTPUT_STREAM,outStream);
+                JRXlsExporterParameter.OUTPUT_STREAM, outStream);
+
+            // 🔥 PERFORMANCE OPTIONS
+            exporter.setParameter(
+                JRXlsExporterParameter.IS_DETECT_CELL_TYPE, Boolean.TRUE);
+
+            exporter.setParameter(
+                JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
 
             exporter.exportReport();
-
-            outStream.flush();
-            outStream.close();
-            return;
         }
 
-    }
-    catch(Exception e){
+        outStream.flush();
+        outStream.close();
+        return;
+
+    } catch(Exception e){
 
         response.setContentType("text/html");
 
@@ -182,16 +260,23 @@ if ("download".equals(action)) {
         out.println("</pre>");
 
         return;
-    }
-    finally{
 
-        if(conn!=null){
-            try{conn.close();}catch(Exception ex){}
+    } finally {
+
+        if(rs != null){
+            try{ rs.close(); } catch(Exception e){}
+        }
+
+        if(ps != null){
+            try{ ps.close(); } catch(Exception e){}
+        }
+
+        if(conn != null){
+            try{ conn.close(); } catch(Exception ex){}
         }
     }
 }
 %>
-
 
 <!DOCTYPE html>
 <html>
@@ -256,19 +341,34 @@ autocomplete="off">
 
 <div class="parameter-section">
 
+<!-- 🔹 Branch Code -->
+
 <div class="parameter-group">
 <div class="parameter-label">Branch Code</div>
-<div class="input-box">
-            <input type="text"
-                   name="branch_code"
-                   id="branch_code"
-                   class="input-field"
-                   required>
 
-            <button type="button"
-                    class="icon-btn"
-                    onclick="openLookup('branch')">…</button>
-        </div>
+<div class="input-box">
+
+<input type="text"
+name="branch_code"
+id="branch_code"
+class="input-field"
+value="<%= sessionBranchCode %>"
+<%= !"Y".equalsIgnoreCase(isSupportUser) ? "readonly" : "" %>
+required>
+
+<% if ("Y".equalsIgnoreCase(isSupportUser)) { %> <button type="button"
+     class="icon-btn"
+     onclick="openLookup('branch')">…</button>
+<% } %>
+
+</div>
+</div>
+
+<!-- 🔹 Branch Name -->
+
+<div class="parameter-group">
+    <div class="parameter-label">Branch Name</div>
+    <input type="text" id="branchName" class="input-field" readonly>
 </div>
 
 
@@ -285,6 +385,21 @@ autocomplete="off">
                     onclick="openLookup('product')">…</button>
         </div>
         
+    <div class="parameter-label">
+
+    <label>
+        <input type="radio" name="all_products" value="ALL"
+               onclick="toggleProduct(this)">
+        All Products
+    </label>
+
+    <label>
+        <input type="radio" name="all_products" value="SINGLE" checked
+               onclick="toggleProduct(this)">
+        Product Wise
+    </label>
+    
+    </div>
 </div>
 
 <div class="parameter-group">
@@ -300,18 +415,19 @@ autocomplete="off">
 
 <div class="parameter-group">
 <div class="parameter-label">From Date</div>
-<input type="date" name="from_date"
+<input type="text" name="from_date"
 class="input-field" 
-value="<%=sessionDate%>"
-required>
+value="<%= displayDate %>"
+placeholder="DD/MM/YYYY" required>
 </div>
 
 
 <div class="parameter-group">
 <div class="parameter-label">To Date</div>
-<input type="date"
+<input type="text"
        name="to_date"
        class="input-field"
+       placeholder="DD/MM/YYYY"
        required>
 </div>
 
@@ -376,6 +492,17 @@ Generate Report
         <div id="lookupTable"></div>
     </div>
 </div>
+
+<script>
+function toggleProduct(radio){
+    if(radio.value === "ALL"){
+        document.getElementById("product_code").readOnly = true;
+        document.getElementById("product_code").value = "";
+    } else {
+        document.getElementById("product_code").readOnly = false;
+    }
+}
+</script>
 
 </body>
 </html>

@@ -397,7 +397,7 @@ ORDER BY
 		<band height="25" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="5" width="50" height="20" uuid="0f895947-17b4-4554-b596-675010ba082f"/>
-				<textElement verticalAlignment="Middle"/>
+				<textElement verticalAlignment="Top"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -410,7 +410,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="50" y="5" width="100" height="20" uuid="abb3818b-63af-4abe-945c-8fc0092f28e9"/>
+				<reportElement x="50" y="5" width="121" height="20" uuid="abb3818b-63af-4abe-945c-8fc0092f28e9"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<line>

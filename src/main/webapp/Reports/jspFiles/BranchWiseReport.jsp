@@ -175,9 +175,28 @@ if("process".equals(action)){
         return;
 
     }catch(Exception e){
-        response.reset();
-        out.println("<h3 style='color:red'>Error generating report</h3>");
-        e.printStackTrace(new java.io.PrintWriter(out));
+
+        e.printStackTrace();  // keep for logs
+
+        Throwable cause = e;
+
+        while(cause.getCause() != null){
+            cause = cause.getCause();
+        }
+
+        String msg = cause.getMessage();
+
+        if(msg != null && msg.contains("ORA-")){
+            msg = msg.substring(msg.indexOf("ORA-"));
+        }
+
+        session.setAttribute(
+            "errorMessage",
+            "Error Message = " + msg
+        );
+
+        response.sendRedirect("BranchWiseReport.jsp");
+        return;
     }finally{
         if(conn!=null) try{conn.close();}catch(Exception ex){}
     }
@@ -236,6 +255,21 @@ var contextPath = "<%=request.getContextPath()%>";
 <div class="report-container">
 
 <h1 class="report-title">BRANCH WISE REPORT</h1>
+
+<%
+String errorMessage = (String)session.getAttribute("errorMessage");
+
+if(errorMessage != null){
+%>
+
+<div class="error-message">
+    <%= errorMessage %>
+</div>
+
+<%
+session.removeAttribute("errorMessage");
+}
+%>
 
 <form method="post"
       action="BranchWiseReport.jsp"
