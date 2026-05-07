@@ -64,9 +64,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <title>Total Users for Branch: <%=selectedBranch%></title>
-
     <link rel="stylesheet" href="../css/totalCustomers.css">
-
+	<link rel="stylesheet" href="../css/lookup-modal.css">
     <style>
 
     body {

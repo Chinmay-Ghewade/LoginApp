@@ -393,11 +393,29 @@
 </form>
 
 <!-- Customer Lookup Modal (same as original) -->
-<div id="customerLookupModal" class="customer-modal">
-  <div class="customer-modal-content">
-    <span class="customer-close" onclick="closeCustomerLookup()">&times;</span>
-    <div id="customerLookupContent"></div>
-  </div>
+<div class="customer-modal" id="customerLookupModal">
+    <div class="customer-modal-content">
+
+        <div class="lk-header">
+            <div class="lk-header-icon">🔍</div>
+            <span class="lk-header-title">Select Customer</span>
+            <button class="lk-header-close" onclick="closeCustomerLookup()">&#10005;</button>
+        </div>
+
+        <div class="lk-search-wrap">
+            <input class="lk-search-input" type="text"
+                   id="customerSearch"
+                   placeholder="Search by Customer ID or Name..."
+                   onkeyup="searchCustomer()">
+        </div>
+
+        <div class="customer-count">Total: <strong id="customerCount">0</strong></div>
+
+        <div class="table-container">
+            <div id="customerLookupContent"></div>
+        </div>
+
+    </div>
 </div>
 
 <script src="js/savingAcc.js"></script>

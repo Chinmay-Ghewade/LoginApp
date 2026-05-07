@@ -52,10 +52,10 @@
         
         rs = ps.executeQuery();
 %>
-
+<link rel="stylesheet" href="../../css/lookup-modal.css">
 <div class="lookup-title">🔍 Select Customer</div>
 
-<div class="search-box">
+<div class="lookup-search-box">
     <input type="text" 
            id="customerSearch" 
            placeholder="Search by Customer ID or Name..." 
@@ -67,7 +67,7 @@
 </div>
 
 <div class="table-container">
-    <table id="customerTable">
+<table id="customerTable" class="lookup-standalone-table">
         <thead>
             <tr>
                 <th>Customer ID</th>

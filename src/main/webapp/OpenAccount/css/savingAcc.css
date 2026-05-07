@@ -81,125 +81,14 @@ body {
   cursor: pointer;
   color: #373279;
 }
-
-    .customer-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 80%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .customer-modal-content {
-      background: white;
-      width: 85%;
-      max-width: 1000px;
-      max-height: 85vh;
-      overflow: auto;
-      padding: 17px;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      position: top;
-    }
-
-    .customer-close {
-      position: absolute;
-      right: 20px;
-      top: 15px;
-      font-size: 32px;
-      font-weight: bold;
-      cursor: pointer;
-      color: #666;
-      transition: color 0.3s;
-    }
-
     .customer-close:hover {
       color: #373279;
     }
-
-    .lookup-title {
-      font-size: 20px;
-      margin-bottom: 10px;
-      font-weight: bold;
-      color: #373279;
-      text-align: center;
-    }
-
-    .search-box {
-      margin-bottom: 10px;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 12px 15px;
-      font-size: 15px;
-      border: 2px solid #9c8ed8;
-      border-radius: 8px;
-      background-color: #f5f3ff;
-      box-sizing: border-box;
-    }
-
     .search-box input:focus {
       outline: none;
       border-color: #373279;
       background-color: #fff;
     }
-
-    .table-container {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: white;
-    }
-
-    .customer-modal-content table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .customer-modal-content th,
-    .customer-modal-content td {
-      border: 1px solid #ddd;
-      padding: 12px 15px;
-      text-align: left;
-    }
-
-    .customer-modal-content th {
-      background-color: #373279;
-      color: white;
-      font-weight: bold;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .customer-modal-content tbody tr {
-      transition: all 0.2s;
-    }
-
-    .customer-modal-content tbody tr:hover {
-      background-color: #e8e4fc;
-      cursor: pointer;
-      transform: scale(1.01);
-    }
-
-    .customer-modal-content tbody tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    .customer-count {
-      text-align: right;
-      margin-bottom: 5px;
-      color: #666;
-      font-size: 14px;
-    }
-
     .personal-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);

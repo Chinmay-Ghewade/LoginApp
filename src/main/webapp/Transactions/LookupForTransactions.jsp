@@ -105,6 +105,7 @@
         rs = ps.executeQuery();
 %>
 
+<link rel="stylesheet" href="../../css/lookup-modal.css">
 <style>
 table {
     width: 100%;
@@ -179,7 +180,7 @@ tr:hover {
 </div>
 
 <% if ("account".equals(type)) { %>
-   <div class="search-container">
+<div class="lookup-search-box">
    <input id="searchBox" 
            class="search-box" 
            placeholder="🔍 Search by Account Code or Name..." 
@@ -187,7 +188,7 @@ tr:hover {
            </div>
 <% } %>
 
-<table id="lookupTable">
+<table id="lookupTable" class="lookup-standalone-table">
     <tr>
         <th>Code</th>
         <th><%= "account".equals(type) ? "Name" : "Description" %></th>

@@ -165,7 +165,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
     <meta charset="UTF-8">
     <title>New User Creation</title>
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/OpenAccount/css/savingAcc.css">
-
+	<link rel="stylesheet" href="../css/lookup-modal.css">
     <style>
         :root {
             --bg-lavender:   #E6E6FA;
@@ -599,32 +599,10 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
             font-weight: bold;
             cursor: pointer;
         }
-
-        /* ── CUSTOMER LOOKUP MODAL ── */
-        .customer-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
+        .loading { 
+        	opacity: 0.5; 
+        	pointer-events: none; 
         }
-
-        .customer-modal-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .customer-close { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; }
-        .loading        { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -780,11 +758,26 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
 
     <!-- ── Customer Lookup Modal ── -->
     <div id="customerLookupModal" class="customer-modal">
-        <div class="customer-modal-content">
-            <span class="customer-close" onclick="closeCustomerLookup()">&times;</span>
+    <div class="customer-modal-content">
+
+        <div class="lk-header">
+            <div class="lk-header-icon">🔍</div>
+            <span class="lk-header-title">Select Customer</span>
+            <button class="lk-header-close" onclick="closeCustomerLookup()">&#10005;</button>
+        </div>
+
+        <div class="lk-search-wrap">
+            <input class="lk-search-input" type="text"
+                   placeholder="Search by Customer ID or Name..."
+                   oninput="filterCustomerModal()">
+        </div>
+
+        <div class="table-container">
             <div id="customerLookupContent"></div>
         </div>
+
     </div>
+</div>
 
 <script>
     let userIdExists    = false;

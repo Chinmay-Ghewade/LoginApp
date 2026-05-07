@@ -124,6 +124,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
+    <link rel="stylesheet" href="css/lookup-modal.css">
     
     <style>
         body {
@@ -448,17 +449,10 @@
 </style>
 </div>
 
-<!-- LOOKUP MODAL -->
-<div id="lookupModal" style="
-    display:none; 
-    position:fixed; 
-    top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.5); 
-    justify-content:center; 
-    align-items:center;
-">
-    <div style="background:white; width:80%; max-height:80%; overflow:auto; padding:20px; border-radius:6px;">
-        <button onclick="closeLookup()" style="float:right; cursor:pointer;">✖</button>
+<!-- Unified Lookup Modal -->
+<div id="lookupModal" class="lookup-modal-wrap" style="display:none;">
+    <div class="lookup-modal-box">
+        <button class="lookup-modal-box-close" onclick="closeLookup()">&#10006;</button>
         <div id="lookupContent"></div>
     </div>
 </div>

@@ -1,39 +1,7 @@
 <%@ page import="java.sql.*, db.DBConnection" %> 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<style>
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-th, td {
-    border: 1px solid #999;
-    padding: 10px;
-    cursor: pointer;
-}
-th {
-    background-color: #373279;
-    color: white;
-    font-weight: bold;
-}
-tr:hover { 
-    background-color: #e8e4fc;
-}
-.lookup-title {
-    font-size: 20px;
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #373279;
-}
-.error-message {
-    color: red;
-    padding: 20px;
-    border: 1px solid red;
-    background-color: #ffe6e6;
-    margin: 10px 0;
-}
-</style>
+<link rel="stylesheet" href="../css/lookup-modal.css">
 
 <%
     // Get branch code from session
@@ -85,7 +53,7 @@ tr:hover {
     Select <%= ("account".equals(type) ? "Account Type" : "Product Code") %>
 </div>
 
-<table>
+<table class="lookup-standalone-table">
     <tr>
         <th>Code</th>
         <th>Description</th>

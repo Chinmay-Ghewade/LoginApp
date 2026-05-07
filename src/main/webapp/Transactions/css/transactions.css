@@ -504,29 +504,6 @@
         .submit-btn:active {
             transform: scale(0.97);
         }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 9999;
-        }
-        
-        .modal-content {
-            background: #fff;
-            width: 60%;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 12px;
-        }
-        
-        .close {
-            float: right;
-            font-size: 22px;
-            cursor: pointer;
-        }
         .operation-display-box {
 		    padding: 15px 15px;
 		    border-radius: 12px;

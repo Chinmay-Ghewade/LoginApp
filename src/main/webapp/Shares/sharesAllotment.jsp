@@ -14,6 +14,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shares Allotment</title>
+    <link rel="stylesheet" href="css/lookup-modal.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #eaeaf5; min-height: 100vh; padding: 24px 28px 44px; color: #1a1a6e; }
@@ -193,32 +194,12 @@
         .btn-ok-grey { background: #909090 !important; }
         .btn-ok-grey:hover { background: #707070 !important; }
 
-        .lk-overlay { display: none; position: fixed; inset: 0; background: rgba(20,20,60,.5); z-index: 9999; align-items: flex-start; justify-content: center; padding-top: 60px; }
-        .lk-overlay.open { display: flex; }
-        .lk-modal { background: #fff; border-radius: 8px; box-shadow: 0 8px 40px rgba(30,30,100,.25); width: 900px; max-width: 96vw; max-height: 82vh; display: flex; flex-direction: column; overflow: hidden; }
-        .lk-head { display: flex; align-items: center; gap: 14px; padding: 18px 22px 14px; border-bottom: none; flex-shrink: 0; background: #fff; }
-        .lk-head-title { font-size: 1.22rem; font-weight: 700; color: #1a1a5e; }
-        .lk-head-badge { background: #ece9fc; color: #5540b5; font-size: .74rem; font-weight: 700; padding: 4px 16px; border-radius: 20px; letter-spacing: .04em; }
-        .lk-head-close { margin-left: auto; width: 36px; height: 36px; background: #e02020; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 900; cursor: pointer; line-height: 36px; text-align: center; }
         .lk-head-close:hover { background: #c01818; }
-        .lk-search-wrap { padding: 0 22px 14px; border-bottom: none; flex-shrink: 0; }
-        .lk-search-input { width: 100%; height: 42px; padding: 0 14px 0 42px; border: 1.5px solid #b8b8d8; border-radius: 5px; font-size: .90rem; font-family: inherit; color: #1a1a5e; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%237070c0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E") no-repeat 14px center; outline: none; }
         .lk-search-input:focus { border-color: #5050b0; box-shadow: 0 0 0 2px rgba(80,80,180,.10); }
         .lk-search-input::placeholder { color: #a0a0c0; }
-        .lk-body { flex: 1; overflow-y: auto; }
-        .lk-table { width: 100%; border-collapse: collapse; }
-        .lk-table thead tr { background: #38388a; color: #fff; position: sticky; top: 0; z-index: 1; }
-        .lk-table thead th { padding: 12px 18px; text-align: left; font-size: .84rem; font-weight: 700; color: #fff; letter-spacing: .02em; border-right: 1px solid #5050a8; }
         .lk-table thead th:last-child { border-right: none; }
-        .lk-table tbody tr { border-bottom: 1.5px solid #ededf8; cursor: pointer; background: #fff; transition: background .1s; border-left: 4px solid #3535a0; }
-        .lk-table tbody tr:hover { background: #f0f0ff; }
-        .lk-table tbody td { padding: 13px 18px; font-size: .90rem; color: #222222; font-weight: 400; vertical-align: middle; border-right: none; }
         .lk-table tbody td:nth-child(1) { white-space: nowrap; }
         .lk-table tbody td:nth-child(3) { white-space: nowrap; }
-        .lk-msg { text-align: center; padding: 28px; color: #9898c0; font-style: italic; font-size: .88rem; }
-        .lk-err { text-align: center; padding: 16px; color: #b03030; font-size: .85rem; }
-        .lk-hl  { background: #ffe000; border-radius: 2px; padding: 1px 3px; font-weight: 700; color: #1a1a6e; }
-        .lk-status { padding: 7px 18px; font-size: .73rem; color: #7878a8; border-top: 1px solid #f0f0f8; flex-shrink: 0; }
 
         .toast-wrap { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 999999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
         .toast { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #c0c0e0; border-left: 4px solid #3535a0; border-radius: 8px; padding: 11px 16px 11px 14px; font-size: .84rem; color: #1a1a6e; box-shadow: 0 4px 18px rgba(30,30,100,.13); pointer-events: all; min-width: 260px; max-width: 420px; animation: toastIn .22s ease; }
@@ -467,7 +448,7 @@
     <!-- ── Lookup Modal ── -->
     <div class="lk-overlay" id="lkOverlay" onclick="if(event.target===this)lkClose()">
         <div class="lk-modal">
-            <div class="lk-head">
+            <div class="lk-header">
                 <span class="lk-head-title">Select Account</span>
                 <span class="lk-head-badge" id="lkBadge">CUSTOMER</span>
                 <button class="lk-head-close" onclick="lkClose()">&#10005;</button>
