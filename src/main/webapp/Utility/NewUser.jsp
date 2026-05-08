@@ -114,12 +114,84 @@ if ("getRoles".equals(request.getParameter("action"))) {
 }
 
 // ─────────────────────────────────────────────
+// AJAX: Load customers as JSON (replaces lookupForCustomerId.jsp fetch)
+// ─────────────────────────────────────────────
+if ("getCustomers".equals(request.getParameter("action"))) {
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setDateHeader("Expires", 0);
+
+    String branchCodeParam = (String) session.getAttribute("branchCode");
+    if (branchCodeParam == null) {
+        out.print("{\"success\":false,\"message\":\"Session expired\"}");
+        return;
+    }
+
+    Connection conn   = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs      = null;
+
+    try {
+        conn = DBConnection.getConnection();
+        if (conn == null) {
+            out.print("{\"success\":false,\"message\":\"Database connection failed\"}");
+            return;
+        }
+
+        String sql = "SELECT CUSTOMER_ID, CUSTOMER_NAME, CATEGORY_CODE, RISK_CATEGORY " +
+                     "FROM CUSTOMERS " +
+                     "WHERE BRANCH_CODE = ? AND STATUS = 'A' " +
+                     "ORDER BY CUSTOMER_ID";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, branchCodeParam);
+        rs = pstmt.executeQuery();
+
+        StringBuilder json = new StringBuilder("{\"success\":true,\"customers\":[");
+        boolean first = true;
+
+        while (rs.next()) {
+            if (!first) json.append(",");
+            first = false;
+
+            String custId   = rs.getString("CUSTOMER_ID");   if (custId   == null) custId   = "";
+            String custName = rs.getString("CUSTOMER_NAME"); if (custName == null) custName = "";
+            String catCode  = rs.getString("CATEGORY_CODE"); if (catCode  == null) catCode  = "";
+            String riskCat  = rs.getString("RISK_CATEGORY"); if (riskCat  == null) riskCat  = "";
+
+            // JSON-escape values
+            custId   = custId.replace("\\","\\\\").replace("\"","\\\"");
+            custName = custName.replace("\\","\\\\").replace("\"","\\\"");
+            catCode  = catCode.replace("\\","\\\\").replace("\"","\\\"");
+            riskCat  = riskCat.replace("\\","\\\\").replace("\"","\\\"");
+
+            json.append("{\"id\":\"").append(custId)
+                .append("\",\"name\":\"").append(custName)
+                .append("\",\"cat\":\"").append(catCode)
+                .append("\",\"risk\":\"").append(riskCat)
+                .append("\"}");
+        }
+
+        json.append("]}");
+        out.print(json.toString());
+
+    } catch (Exception e) {
+        out.print("{\"success\":false,\"message\":\"" + e.getMessage().replace("\"","\\\"") + "\"}");
+    } finally {
+        try { if (rs    != null) rs.close();    } catch (Exception ignored) {}
+        try { if (pstmt != null) pstmt.close(); } catch (Exception ignored) {}
+        try { if (conn  != null) conn.close();  } catch (Exception ignored) {}
+    }
+    return;
+}
+
+// ─────────────────────────────────────────────
 // Read and immediately clear popup status from SESSION
-// Using session ensures it works after servlet forward
 // ─────────────────────────────────────────────
 String popupStatus = (String) session.getAttribute("popupStatus");
 String popupMsg    = (String) session.getAttribute("popupMsg");
-session.removeAttribute("popupStatus"); // clear so refresh doesn't re-show
+session.removeAttribute("popupStatus");
 session.removeAttribute("popupMsg");
 
 if (popupStatus == null) popupStatus = "";
@@ -165,7 +237,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
     <meta charset="UTF-8">
     <title>New User Creation</title>
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/OpenAccount/css/savingAcc.css">
-	<link rel="stylesheet" href="<%= request.getContextPath() %>/css/lookup-modal.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/lookup-modal.css">
     <style>
         :root {
             --bg-lavender:   #E6E6FA;
@@ -588,7 +660,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }
 
         .msg-icon        { font-size: 45px; color: var(--success-green); margin-bottom: 15px; display: block; }
-        .msg-title       { font-size: 20px; font-weight: bold; color: #3cb554 ; margin-bottom: 20px; }
+        .msg-title       { font-size: 20px; font-weight: bold; color: #3cb554; margin-bottom: 20px; }
         .msg-confirm-btn {
             background-color: #3cb554;
             color: white;
@@ -599,9 +671,16 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
             font-weight: bold;
             cursor: pointer;
         }
-        .loading { 
-        	opacity: 0.5; 
-        	pointer-events: none; 
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* ── CUSTOMER LOOKUP MODAL ── */
+        /* Uses .lk-* classes from lookup-modal.css; only override widths here */
+        #customerLookupModal .customer-modal-content {
+            width: 88%;
+            max-width: 960px;
         }
     </style>
 </head>
@@ -711,7 +790,6 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                 <legend>User Roles</legend>
                 <div class="roles-container">
 
-                    <!-- Dropdown trigger -->
                     <div class="role-dropdown-wrapper">
                         <label>Select Roles <span style="color:red;">*</span></label>
 
@@ -724,7 +802,6 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                             <span class="dropdown-arrow">&#9660;</span>
                         </button>
 
-                        <!-- Dropdown panel -->
                         <div class="role-dropdown-panel" id="roleDropdownPanel">
                             <div class="roles-checkbox-grid" id="rolesCheckboxContainer">
                                 <div class="no-roles-message">Loading roles...</div>
@@ -736,7 +813,6 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                         </div>
                     </div>
 
-                    <!-- Selected role tags -->
                     <div>
                         <div class="selected-tags-label" id="selectedTagsLabel">Selected Roles</div>
                         <div class="selected-tags-wrap"  id="selectedTagsWrap"></div>
@@ -756,36 +832,71 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         </form>
     </div>
 
-    <!-- ── Customer Lookup Modal ── -->
-    <div id="customerLookupModal" class="customer-modal">
-    <div class="customer-modal-content">
+    <%-- ══════════════════════════════════════════════════════════════
+         CUSTOMER LOOKUP MODAL
+         Uses lookup-modal.css classes entirely.
+         Data is loaded via JSON (getCustomers action above) so there
+         is NO duplicate search bar or title from an inner JSP.
+    ══════════════════════════════════════════════════════════════ --%>
+    <div class="customer-modal" id="customerLookupModal">
+        <div class="customer-modal-content">
 
-        <div class="lk-header">
-            <div class="lk-header-icon">🔍</div>
-            <span class="lk-header-title">Select Customer</span>
-            <button class="lk-header-close" onclick="closeCustomerLookup()">&#10005;</button>
+            <%-- Header --%>
+            <div class="lk-header">
+                <div class="lk-header-icon">🔍</div>
+                <span class="lk-header-title">Select Customer</span>
+                <button class="lk-header-close" onclick="closeCustomerLookup()">&#10005;</button>
+            </div>
+
+            <%-- Search (single, owned by this modal only) --%>
+            <div class="lk-search-wrap">
+                <input class="lk-search-input"
+                       type="text"
+                       id="customerSearchInput"
+                       placeholder="Search by Customer ID or Name..."
+                       oninput="filterCustomers()">
+            </div>
+
+            <%-- Count --%>
+            <div class="customer-count">
+                Total Customers: <strong id="customerCount">0</strong>
+            </div>
+
+            <%-- Scrollable table — populated entirely by JS --%>
+            <div class="table-container">
+                <table class="lk-table" id="customerTable">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Customer Name</th>
+                            <th>Category Code</th>
+                            <th>Risk Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <tr>
+                            <td colspan="4" class="lk-msg">Loading customers&hellip;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
-
-        <div class="lk-search-wrap">
-            <input class="lk-search-input" type="text"
-                   placeholder="Search by Customer ID or Name..."
-                   oninput="filterCustomerModal()">
-        </div>
-
-        <div class="table-container">
-            <div id="customerLookupContent"></div>
-        </div>
-
     </div>
-</div>
 
 <script>
+    /* ─────────────────────────────────────────────
+       State
+    ───────────────────────────────────────────── */
     let userIdExists    = false;
     let toastTimeout;
     let rolesLoaded     = false;
     let selectedRoleIds = new Set();
 
-    // ── Popup status written by JSP from session at render time ──
+    /* All customer rows cached after first load */
+    let _allCustomers = [];
+
+    /* ── Popup status written by JSP ── */
     var POPUP_STATUS = '<%=popupStatus%>';
     var POPUP_MSG    = '<%=popupMsg%>';
 
@@ -798,13 +909,17 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         loadAllRoles();
     };
 
-    // ── Popup ──
+    /* ─────────────────────────────────────────────
+       Popup
+    ───────────────────────────────────────────── */
     function closeStatusPopup() {
         document.getElementById('statusPopup').style.display = 'none';
         window.location.href = '<%=request.getContextPath()%>/Utility/NewUser.jsp';
     }
 
-    // ── Toast ──
+    /* ─────────────────────────────────────────────
+       Toast
+    ───────────────────────────────────────────── */
     function showToast(message) {
         const overlay = document.getElementById('toastOverlay');
         const toast   = document.getElementById('toast');
@@ -825,7 +940,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }, 200);
     }
 
-    // ── Roles Dropdown ──
+    /* ─────────────────────────────────────────────
+       Roles Dropdown
+    ───────────────────────────────────────────── */
     function toggleRoleDropdown() {
         const panel = document.getElementById('roleDropdownPanel');
         const btn   = document.getElementById('roleDropdownBtn');
@@ -852,7 +969,6 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         document.getElementById('roleDropdownBtn').classList.remove('open');
     }
 
-    // Close panel when clicking outside
     document.addEventListener('click', function (e) {
         const wrapper = document.querySelector('.role-dropdown-wrapper');
         if (wrapper && !wrapper.contains(e.target)) {
@@ -860,7 +976,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }
     });
 
-    // ── Load Roles from DB ──
+    /* ─────────────────────────────────────────────
+       Load Roles from DB
+    ───────────────────────────────────────────── */
     function loadAllRoles() {
         if (rolesLoaded) return;
 
@@ -870,10 +988,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         fetch('<%=request.getContextPath()%>/Utility/NewUser.jsp?action=getRoles')
             .then(res => {
                 if (!res.ok) throw new Error('Status ' + res.status);
-                return res.text();
+                return res.json();
             })
-            .then(text => {
-                const data = JSON.parse(text);
+            .then(data => {
                 if (data.success && data.roles && data.roles.length > 0) {
                     renderRolesGrid(data.roles);
                     rolesLoaded = true;
@@ -997,7 +1114,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }
     }
 
-    // ── User ID Validation ──
+    /* ─────────────────────────────────────────────
+       User ID Validation
+    ───────────────────────────────────────────── */
     function checkUserId() {
         const userIdInput = document.getElementById('userId');
         const userId      = userIdInput.value.trim();
@@ -1011,9 +1130,8 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         }
 
         fetch('<%=request.getContextPath()%>/Utility/NewUser.jsp?action=checkUserId&userId=' + encodeURIComponent(userId))
-            .then(res => res.text())
-            .then(text => {
-                const data = JSON.parse(text);
+            .then(res => res.json())
+            .then(data => {
                 if (data.error) {
                     showToast(data.message);
                     userIdMsg.textContent = '';
@@ -1044,7 +1162,9 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         userIdExists = false;
     }
 
-    // ── Form Submit Validation ──
+    /* ─────────────────────────────────────────────
+       Form Submit Validation
+    ───────────────────────────────────────────── */
     document.getElementById('userForm').addEventListener('submit', function (e) {
         if (userIdExists) {
             e.preventDefault();
@@ -1066,19 +1186,136 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
         document.getElementById('roleErrorMsg').style.display = 'none';
     });
 
-    // ── Customer Lookup ──
-    window.setCustomerData = function (customerId, customerName, categoryCode, riskCategory) {
-        document.getElementById('customerId').value    = customerId;
-        document.getElementById('customerName').value  = customerName || '';
+    /* ─────────────────────────────────────────────
+       Customer Lookup — JSON-based, no inner JSP
+    ───────────────────────────────────────────── */
+
+    /**
+     * Called when a row is clicked in the modal table.
+     * Sets fields on the main form and fetches extra details.
+     */
+    window.setCustomerData = function (customerId, customerName) {
+        document.getElementById('customerId').value   = customerId;
+        document.getElementById('customerName').value = customerName || '';
         closeCustomerLookup();
         fetchCustomerDetails(customerId);
     };
 
+    function openCustomerLookup() {
+        const modal = document.getElementById('customerLookupModal');
+        modal.style.display = 'flex';
+        document.getElementById('customerSearchInput').value = '';
+
+        /* Use cache if already loaded */
+        if (_allCustomers.length > 0) {
+            renderCustomerRows(_allCustomers);
+            return;
+        }
+
+        const tbody = document.getElementById('customerTableBody');
+        tbody.innerHTML = '<tr><td colspan="4" class="lk-msg">Loading customers&hellip;</td></tr>';
+
+        fetch('<%=request.getContextPath()%>/Utility/NewUser.jsp?action=getCustomers')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.customers) {
+                    _allCustomers = data.customers;
+                    renderCustomerRows(_allCustomers);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="lk-msg">'
+                        + (data.message || 'No customers found.') + '</td></tr>';
+                    document.getElementById('customerCount').textContent = '0';
+                }
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="4" class="lk-err">'
+                    + 'Failed to load customers. Please try again.</td></tr>';
+                document.getElementById('customerCount').textContent = '0';
+            });
+    }
+
+    function renderCustomerRows(customers) {
+        const tbody = document.getElementById('customerTableBody');
+        document.getElementById('customerCount').textContent = customers.length;
+
+        if (customers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="lk-msg">No customers found.</td></tr>';
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        customers.forEach(function (c) {
+            const tr = document.createElement('tr');
+
+            const tdId   = document.createElement('td');
+            const tdName = document.createElement('td');
+            const tdCat  = document.createElement('td');
+            const tdRisk = document.createElement('td');
+
+            tdId.textContent   = c.id;
+            tdName.textContent = c.name;
+            tdCat.textContent  = c.cat;
+            tdRisk.textContent = c.risk;
+
+            tr.appendChild(tdId);
+            tr.appendChild(tdName);
+            tr.appendChild(tdCat);
+            tr.appendChild(tdRisk);
+
+            tr.style.cursor = 'pointer';
+            tr.addEventListener('click', function () {
+                setCustomerData(c.id, c.name);
+            });
+
+            fragment.appendChild(tr);
+        });
+
+        tbody.innerHTML = '';
+        tbody.appendChild(fragment);
+    }
+
+    /** Live filter — runs on every keystroke in the modal search box */
+    function filterCustomers() {
+        const query   = document.getElementById('customerSearchInput').value.toUpperCase().trim();
+        const rows    = document.getElementById('customerTableBody').querySelectorAll('tr');
+        let   visible = 0;
+
+        rows.forEach(function (tr) {
+            const cells = tr.querySelectorAll('td');
+            if (!cells || cells.length < 2) return;
+
+            /* Search across Customer ID and Customer Name only */
+            const text = (cells[0].textContent + ' ' + cells[1].textContent).toUpperCase();
+            const show = !query || text.includes(query);
+            tr.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        document.getElementById('customerCount').textContent = visible;
+    }
+
+    function closeCustomerLookup() {
+        document.getElementById('customerLookupModal').style.display = 'none';
+    }
+
+    /* Close on backdrop click */
+    document.getElementById('customerLookupModal').addEventListener('click', function (e) {
+        if (e.target === this) closeCustomerLookup();
+    });
+
+    /* Close on Escape */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeCustomerLookup();
+    });
+
+    /** Fetch extra address/contact details for selected customer */
     function fetchCustomerDetails(customerId) {
         const fieldset = document.getElementById('addressFieldset');
         if (fieldset) fieldset.classList.add('loading');
 
-        fetch('<%=request.getContextPath()%>/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
+        fetch('<%=request.getContextPath()%>/OpenAccount/getCustomerDetails.jsp?customerId='
+                + encodeURIComponent(customerId))
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.customer) {
@@ -1091,28 +1328,10 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                     document.getElementById('email').value  = c.email          || '';
                 }
             })
-            .finally(() => fieldset.classList.remove('loading'));
-    }
-
-    function openCustomerLookup() {
-        document.getElementById('customerLookupModal').style.display = 'flex';
-        fetch('<%=request.getContextPath()%>/OpenAccount/lookupForCustomerId.jsp')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('customerLookupContent').innerHTML = html;
-                document.getElementById('customerLookupContent')
-                    .querySelectorAll('script')
-                    .forEach(s => {
-                        const ns = document.createElement('script');
-                        ns.textContent = s.textContent;
-                        document.body.appendChild(ns);
-                        document.body.removeChild(ns);
-                    });
+            .catch(() => showToast('Failed to load customer details.'))
+            .finally(() => {
+                if (fieldset) fieldset.classList.remove('loading');
             });
-    }
-
-    function closeCustomerLookup() {
-        document.getElementById('customerLookupModal').style.display = 'none';
     }
 </script>
 
