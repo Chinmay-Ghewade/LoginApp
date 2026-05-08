@@ -15,14 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shares Allotment</title>
     <link rel="stylesheet" href="../css/lookup-modal.css">
+    <link rel="stylesheet" href="../css/shares.css">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #eaeaf5; min-height: 100vh; padding: 24px 28px 44px; color: #1a1a6e; }
-        .page-title { text-align: center; font-size: 1.45rem; font-weight: 800; color: #1a1a6e; margin-bottom: 20px; }
-
-        .box { background: #fff; border: 1.5px solid #c0c0e0; border-radius: 12px; position: relative; margin-bottom: 20px; padding: 22px 16px 18px; }
-        .box-legend { position: absolute; top: -11px; left: 14px; background: #fff; padding: 0 8px; font-size: .88rem; font-weight: 700; color: #1a1a6e; }
-
+        /* ── Allotment-specific layout ── */
         .modules-row {
             display: grid;
             grid-template-columns: 22% 38% 40%;
@@ -38,112 +33,11 @@
             padding: 8px 16px 16px;
             display: flex; flex-direction: column; gap: 10px;
         }
-        .mod-title { font-size: .76rem; font-weight: 800; color: #1a1a6e; letter-spacing: .05em; text-transform: uppercase; padding-bottom: 7px; border-bottom: 1.5px solid #dcdcf0; }
 
         .fg-row  { display: grid; grid-template-columns: 1fr 1fr;     gap: 8px; align-items: start; }
         .fg-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: start; }
-        .fg { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-        .fg > label { font-size: .78rem; font-weight: 600; color: #1a1a6e; }
 
-        input[type=text], input[type=number], input[type=date] {
-            height: 34px; padding: 0 10px; border: 1px solid #c0c0e0; border-radius: 6px;
-            font-size: .84rem; font-family: inherit; color: #1a1a6e; background: #fff;
-            outline: none; width: 100%; transition: border-color .15s, box-shadow .15s;
-        }
-        input:focus { border-color: #5050b0; box-shadow: 0 0 0 2px rgba(80,80,176,.10); }
-        input[readonly], input[disabled] { background: #ebebf5; color: #6060a0; border-color: #d0d0e8; cursor: default; }
-        input::placeholder { color: #a0a0c8; font-size: .82rem; }
-
-        input.field-error { border-color: #cc2222 !important; box-shadow: 0 0 0 2px rgba(200,30,30,.18) !important; }
-
-        .field-error-msg {
-            display: block;
-            visibility: hidden;
-            color: #cc2222;
-            font-size: .82rem;
-            font-weight: 700;
-            margin-top: 2px;
-            line-height: 1.2;
-        }
-        .field-error-msg.show { visibility: visible; }
-
-        @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            15%      { transform: translateX(-6px); }
-            30%      { transform: translateX(6px); }
-            45%      { transform: translateX(-5px); }
-            60%      { transform: translateX(5px); }
-            75%      { transform: translateX(-3px); }
-            90%      { transform: translateX(3px); }
-        }
-        .shake { animation: shake .45s ease; }
-
-        .hint-xs { color: #8080b0; font-size: .70rem; margin-top: 1px; }
-        .ib { display: flex; gap: 5px; align-items: center; width: 100%; }
-        .ib input { flex: 1; min-width: 0; }
-        .sw { position: relative; flex: 1; min-width: 0; }
-        .sw input { width: 100%; }
-
-        .sdrop {
-            position: absolute; top: calc(100% + 4px); left: 0;
-            width: 620px;
-            background: #fff; border: 1.5px solid #c0c8e8;
-            border-radius: 8px; box-shadow: 0 6px 24px rgba(40,40,120,.15);
-            z-index: 2000; display: none; overflow: hidden;
-        }
-        .sdrop.on { display: block; }
-        .sr-item {
-            display: flex; align-items: center; gap: 20px;
-            padding: 13px 18px; cursor: pointer;
-            border-bottom: 1px solid #f0f0f8;
-            border-left: 4px solid #3535a0;
-        }
-        .sr-item:last-child { border-bottom: none; }
-        .sr-item:hover { background: #f0f0ff; }
-        .sr-code { font-size: .90rem; font-weight: 400; color: #1a1a6e; white-space: nowrap; flex-shrink: 0; min-width: 180px; }
-        .sr-name { font-size: .90rem; font-weight: 700; color: #2a2aaa; flex: 1; }
-        .sr-prod { font-size: .90rem; font-weight: 700; color: #cc2222; white-space: nowrap; flex-shrink: 0; }
-        .hl { background: #ffe000; border-radius: 2px; padding: 1px 3px; font-weight: 700; color: #1a1a6e; }
-        .sr-hint { padding: 10px 16px; color: #9898c0; font-size: .76rem; font-style: italic; }
-
-        .btn-dot { height: 34px; min-width: 38px; padding: 0 8px; background: #1a1a5e; color: #fff; border: none; border-radius: 6px; font-size: .88rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background .12s; }
-        .btn-dot:hover { background: #252588; }
-        .btn-dot:disabled { background: #a0a0c8; cursor: default; }
-
-        .btn-add {
-            height: 34px; padding: 0 16px; background: #1a1a5e; color: #fff;
-            border: none; border-radius: 6px; font-size: .84rem; font-weight: 700;
-            font-family: inherit; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-            transition: background .12s, opacity .12s;
-        }
-        .btn-add:hover:not(:disabled) { background: #252588; }
-        .btn-add:disabled { background: #a0a0c8; cursor: not-allowed; opacity: 0.7; }
-
-        .rg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .rg label { display: flex; align-items: center; gap: 7px; padding: 0 18px; height: 34px; border: 1.5px solid #c0c0e0; border-radius: 6px; font-size: .84rem; font-weight: 500; color: #1a1a6e; cursor: pointer; background: #fff; user-select: none; transition: border-color .15s, background .15s; }
-        .rg label.on { border-color: #1a1a5e; background: #ebebff; font-weight: 700; }
-        .rg input[type=radio] { width: 15px; height: 15px; accent-color: #1a1a5e; cursor: pointer; }
-
-        .spin { display: none; width: 14px; height: 14px; border: 2px solid #d0d0e8; border-top-color: #3535a0; border-radius: 50%; animation: sp .65s linear infinite; flex-shrink: 0; margin-left: 2px; }
-        @keyframes sp { to { transform: rotate(360deg); } }
-
-        .tr-table-wrap { display: none; border: 1.5px solid #4a4aaa; overflow: hidden; margin: 20px 0 0; }
-        .tr-table-wrap.show { display: block; }
-        .tr-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-        .tr-table thead tr { background: #38388a; color: #fff; }
-        .tr-table thead th { padding: 11px 14px; text-align: center; font-weight: 700; font-size: .80rem; letter-spacing: .03em; text-transform: uppercase; border-right: 1px solid #5050a8; color: #fff; }
-        .tr-table thead th:last-child { border-right: none; }
-        .tr-table tbody tr { border-bottom: 1.5px solid #dcdcf0; background: #fff; border-left: 4px solid #3535a0; }
-        .tr-table tbody tr:nth-child(even) { background: #f8f8fd; }
-        .tr-table tbody tr:hover { background: #efeffc; }
-        .tr-table tbody td { padding: 10px 14px; color: #1a1a6e; vertical-align: middle; border-right: 1px solid #eeeef8; }
-        .tr-table tbody td:last-child { border-right: none; }
-        .tr-table tfoot tr { background: #f0f0fa; border-top: 2px solid #4a4aaa; }
-        .tr-table tfoot td { padding: 10px 14px; font-weight: 700; color: #1a1a6e; border-right: 1px solid #eeeef8; }
-        .tr-table tfoot td:last-child { border-right: none; }
-        .btn-remove { height: 26px; padding: 0 10px; background: #fff; color: #b03030; border: 1px solid #e0a0a0; border-radius: 4px; font-size: .75rem; font-weight: 700; cursor: pointer; transition: background .12s; }
-        .btn-remove:hover { background: #fff0f0; }
-
+        /* ── Show/hide helpers ── */
         #acDetails        { display: none; margin-top: 24px; }
         #acDetails.show   { display: block; }
         #trPayDetails     { display: none; margin-top: 24px; }
@@ -208,6 +102,9 @@
         .toast-close { background: none; border: none; cursor: pointer; color: #9898c8; font-size: 1rem; line-height: 1; padding: 0 0 0 6px; flex-shrink: 0; }
         .toast-close:hover { color: #3535a0; }
         @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        /* ── Lookup modal border-bottom override ── */
+        .lk-head { border-bottom: none; }
+        .lk-search-wrap { border-bottom: none; }
     </style>
 </head>
 <body>

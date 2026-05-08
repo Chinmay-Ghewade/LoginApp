@@ -19,7 +19,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="css/transactions.css">
-    <link rel="stylesheet" href="../css/lookup-modal.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/lookup-modal.css">
     <style>
         /* ===== CHEQUE FIELDS STYLES ===== */
         .cheque-fields-row {

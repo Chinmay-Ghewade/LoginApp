@@ -76,7 +76,7 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="css/savingAcc.css">
   <link rel="stylesheet" href="css/application-tabs.css">
-  <link rel="stylesheet" href="../css/lookup-modal.css">
+  <link rel="stylesheet" href="<%= request.getContextPath() %>/css/lookup-modal.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>

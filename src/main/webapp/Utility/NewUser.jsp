@@ -165,7 +165,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
     <meta charset="UTF-8">
     <title>New User Creation</title>
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/OpenAccount/css/savingAcc.css">
-	<link rel="stylesheet" href="../css/lookup-modal.css">
+	<link rel="stylesheet" href="<%= request.getContextPath() %>/css/lookup-modal.css">
     <style>
         :root {
             --bg-lavender:   #E6E6FA;
@@ -218,7 +218,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
 
         .grid-row-2 {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             align-items: end;
         }
