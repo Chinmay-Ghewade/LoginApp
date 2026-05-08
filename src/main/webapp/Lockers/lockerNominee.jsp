@@ -17,6 +17,7 @@
   <title>Locker Nominee Management</title>
   <link rel="stylesheet" href="../css/locker.css">
   <link rel="stylesheet" href="../css/tabs-navigation.css">
+  <link rel="stylesheet" href="../css/lookup-modal.css">
   <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -125,8 +126,110 @@
       white-space: nowrap !important;
     }
     form {
-  	  padding: 0 20px;
-	}
+      padding: 0 20px;
+    }
+
+    /* ── Lookup table styling scoped to nominee lookup content ── */
+    #nomineeCustomerLookupContent .lookup-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--lk-primary);
+      padding: 16px 18px 12px 18px;
+      border-bottom: 1px solid var(--lk-border-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #nomineeCustomerLookupContent .search-box {
+      padding: 14px 18px 8px 18px;
+      background: var(--lk-primary-light);
+      border-bottom: 1px solid var(--lk-border-light);
+    }
+    #nomineeCustomerLookupContent #customerSearch {
+      width: 100%;
+      height: 40px;
+      padding: 0 14px 0 42px;
+      border: 1.5px solid var(--lk-border);
+      border-radius: var(--lk-radius-md);
+      font-size: 0.875rem;
+      font-family: var(--lk-font);
+      color: var(--lk-text);
+      box-sizing: border-box;
+      outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%238066E8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E") no-repeat 13px center;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    #nomineeCustomerLookupContent #customerSearch::placeholder { color: #a090cc; }
+    #nomineeCustomerLookupContent #customerSearch:focus {
+      border-color: var(--lk-primary);
+      box-shadow: 0 0 0 3px rgba(55,50,121,0.10);
+    }
+    #nomineeCustomerLookupContent .customer-count {
+      font-size: 0.75rem;
+      color: var(--lk-text-muted);
+      text-align: right;
+      padding: 6px 18px;
+      border-bottom: 1px solid var(--lk-border-light);
+    }
+    #nomineeCustomerLookupContent .customer-count strong { color: var(--lk-primary); }
+    #nomineeCustomerLookupContent .table-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+      min-height: 0;
+    }
+    #nomineeCustomerLookupContent .table-container::-webkit-scrollbar { width: 7px; }
+    #nomineeCustomerLookupContent .table-container::-webkit-scrollbar-track { background: var(--lk-primary-light); }
+    #nomineeCustomerLookupContent .table-container::-webkit-scrollbar-thumb { background: var(--lk-border); border-radius: 10px; }
+    #nomineeCustomerLookupContent #customerTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--lk-font);
+    }
+    #nomineeCustomerLookupContent #customerTable thead tr {
+      background: linear-gradient(90deg, var(--lk-primary) 0%, var(--lk-accent) 100%);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    #nomineeCustomerLookupContent #customerTable thead th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      white-space: nowrap;
+    }
+    #nomineeCustomerLookupContent #customerTable thead th:last-child { border-right: none; }
+    #nomineeCustomerLookupContent #customerTable tbody tr {
+      border-bottom: 1px solid var(--lk-border-light);
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.1s ease;
+      border-left: 3px solid transparent;
+    }
+    #nomineeCustomerLookupContent #customerTable tbody tr:nth-child(even) { background: var(--lk-row-stripe); }
+    #nomineeCustomerLookupContent #customerTable tbody tr:hover {
+      background: var(--lk-row-hover);
+      border-left-color: var(--lk-primary-mid);
+      transform: translateX(2px);
+    }
+    #nomineeCustomerLookupContent #customerTable tbody td {
+      padding: 11px 16px;
+      font-size: 0.875rem;
+      color: var(--lk-text);
+      vertical-align: middle;
+      border-right: 1px solid var(--lk-border-light);
+    }
+    #nomineeCustomerLookupContent #customerTable tbody td:last-child { border-right: none; }
+    #nomineeCustomerLookupContent #customerTable tbody td:first-child {
+      font-weight: 700;
+      color: var(--lk-primary);
+      font-size: 0.84rem;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -156,10 +259,6 @@
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 2: NOMINEE                                            -->
-  <!-- 5 dropdowns use AJAX via AddCustomerDataLoader:                -->
-  <!--   salutation | relation | city | state | country               -->
-  <!-- Gender is static (Male/Female/Other) — no DB needed            -->
-  <!-- All other fields are plain inputs — no DB needed               -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
@@ -200,7 +299,6 @@
 
       <div class="personal-grid">
 
-        <!-- ✅ AJAX — key "salutation" from AddCustomerDataLoader -->
         <div>
           <label>Salutation Code <span class="dd-spinner nominee-sp-salutation"></span></label>
           <select name="nomineeSalutation[]" class="nominee-dd-salutation dd-loading" required>
@@ -208,7 +306,6 @@
           </select>
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Nominee Name</label>
           <input type="text" name="nomineeName[]" required
@@ -220,7 +317,6 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
-        <!-- static options — no DB -->
         <div>
           <label>Gender</label>
           <select name="nomineeGender[]" required>
@@ -231,7 +327,6 @@
           </select>
         </div>
 
-        <!-- plain inputs — no DB -->
         <div>
           <label>Address 1</label>
           <input type="text" name="nomineeAddress1[]" required>
@@ -247,7 +342,6 @@
           <input type="text" name="nomineeAddress3[]">
         </div>
 
-        <!-- ✅ AJAX — key "city" from AddCustomerDataLoader -->
         <div>
           <label>City <span class="dd-spinner nominee-sp-city"></span></label>
           <select name="nomineeCity[]" class="nominee-dd-city dd-loading" required>
@@ -255,7 +349,6 @@
           </select>
         </div>
 
-        <!-- ✅ AJAX — key "state" from AddCustomerDataLoader -->
         <div>
           <label>State <span class="dd-spinner nominee-sp-state"></span></label>
           <select name="nomineeState[]" class="nominee-dd-state dd-loading" required>
@@ -263,7 +356,6 @@
           </select>
         </div>
 
-        <!-- ✅ AJAX — key "country" from AddCustomerDataLoader -->
         <div>
           <label>Country <span class="dd-spinner nominee-sp-country"></span></label>
           <select name="nomineeCountry[]" class="nominee-dd-country dd-loading" required>
@@ -271,14 +363,12 @@
           </select>
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Mobile Number</label>
           <input type="text" name="nomineeMobile[]"
                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
@@ -286,7 +376,6 @@
           <small class="zipError"></small>
         </div>
 
-        <!-- ✅ AJAX — key "relation" from AddCustomerDataLoader -->
         <div>
           <label>Relation with Nominee <span class="dd-spinner nominee-sp-relation"></span></label>
           <select name="nomineeRelation[]" class="nominee-dd-relation dd-loading" required>
@@ -294,7 +383,6 @@
           </select>
         </div>
 
-        <!-- declaration — no DB -->
         <div class="declaration-cell">
           <label>
             <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
@@ -317,28 +405,57 @@
 
 </form>
 
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- CUSTOMER LOOKUP MODAL — exact same structure as NewUser.jsp    -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="nomineeCustomerLookupModal" class="customer-modal">
+    <div style="background:#fff; border-radius:14px; width:85%; max-width:920px;
+                max-height:84vh; overflow:hidden; display:flex; flex-direction:column;
+                box-shadow:0 8px 32px rgba(55,50,121,0.18); font-family:Arial,sans-serif;">
+
+        <!-- Header -->
+        <div style="display:flex; align-items:center; justify-content:space-between;
+                    padding:14px 18px; background:linear-gradient(135deg,#373279,#2b0d73);
+                    border-radius:14px 14px 0 0; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);
+                            border-radius:6px;display:flex;align-items:center;
+                            justify-content:center;font-size:17px;">🔍</div>
+                <span style="font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:0.02em;">Customer Lookup</span>
+            </div>
+            <span onclick="closeNomineeCustomerLookup()"
+                  style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.75);
+                         cursor:pointer;line-height:1;padding:0 4px;"
+                  onmouseover="this.style.color='#fff'"
+                  onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
+        </div>
+
+        <!-- Loading indicator shown until content loads -->
+        <div id="nomineeCustomerLookupLoading"
+             style="display:flex;align-items:center;justify-content:center;
+                    gap:10px;padding:40px 20px;color:#8066E8;font-size:14px;">
+            <div style="width:18px;height:18px;border:2.5px solid #e0dcf8;
+                        border-top-color:#8066E8;border-radius:50%;
+                        animation:lk-spin 0.7s linear infinite;"></div>
+            Loading customers...
+        </div>
+
+        <!-- Content loaded from lookupForCustomerId.jsp -->
+        <div id="nomineeCustomerLookupContent"
+             style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
+
+    </div>
+</div>
+
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
 // ═══════════════════════════════════════════════════════════════════════
 // AJAX DROPDOWN LOADER
-// ✅ Calls AddCustomerDataLoader — no new Java file needed.
-//
-// AddCustomerDataLoader returns 12 keys. We only READ 5 of them:
-//   "salutation" → Salutation Code
-//   "relation"   → Relation with Nominee
-//   "city"       → City
-//   "state"      → State
-//   "country"    → Country
-//
-// The other 7 keys (religion, caste, category, etc.) arrive in the
-// response but are simply ignored — causes zero issues.
 // ═══════════════════════════════════════════════════════════════════════
 
-// Fetched once on load → reused instantly for every addNominee() clone
 var _nomineeDropdownCache = null;
 
-// Only the 5 keys this page needs, mapped to their select/spinner classes
 var NOMINEE_DD_MAP = {
     salutation : { sel: '.nominee-dd-salutation', sp: '.nominee-sp-salutation' },
     relation   : { sel: '.nominee-dd-relation',   sp: '.nominee-sp-relation'   },
@@ -347,7 +464,6 @@ var NOMINEE_DD_MAP = {
     country    : { sel: '.nominee-dd-country',     sp: '.nominee-sp-country'    }
 };
 
-// Fill one <select> from [{v, l}, ...] array
 function _fillNomineeSelect(selectEl, items) {
     selectEl.innerHTML = '';
     var blank = document.createElement('option');
@@ -365,7 +481,6 @@ function _fillNomineeSelect(selectEl, items) {
     selectEl.style.fontStyle = '';
 }
 
-// Fill only the 5 nominee dropdowns inside one nominee block
 function _fillNomineeBlock(block, data) {
     Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
         var cfg   = NOMINEE_DD_MAP[key];
@@ -383,16 +498,15 @@ function _fillNomineeBlock(block, data) {
     });
 }
 
-// ── Fires once on page open ─────────────────────────────────────────
 (function loadNomineeDropdowns() {
-    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')  // ✅ same Java file
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
         .then(function(res) {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
         })
         .then(function(data) {
             if (data._error) console.warn('Nominee dropdown warning:', data._error);
-            _nomineeDropdownCache = data;                               // cache for clones
+            _nomineeDropdownCache = data;
             var firstBlock = document.querySelector('.nominee-block');
             if (firstBlock) _fillNomineeBlock(firstBlock, data);
             console.log('✅ Nominee dropdowns loaded via AddCustomerDataLoader');
@@ -433,24 +547,19 @@ function addNominee() {
     var firstCard = fieldset.querySelector('.nominee-block');
     var newCard   = firstCard.cloneNode(true);
 
-    // Reset all field values
     newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
         if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
         if (el.type === 'checkbox') { el.checked = false; return; }
         el.value = '';
     });
 
-    // Hide Customer ID container
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
     if (cidContainer) cidContainer.style.display = 'none';
 
-    // Clear any zip errors
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
 
-    // Reset spinners to visible
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
-    // Mark nominee dropdowns as loading
     Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
         var selEl = newCard.querySelector(NOMINEE_DD_MAP[key].sel);
         if (selEl) {
@@ -463,11 +572,9 @@ function addNominee() {
     blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
     renumberNominees();
 
-    // Fill from cache instantly — no extra network call
     if (_nomineeDropdownCache) {
         _fillNomineeBlock(newCard, _nomineeDropdownCache);
     } else {
-        // Edge case: cache not ready yet — refetch same loader
         fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
             .then(function(res) { return res.json(); })
             .then(function(data) {
@@ -498,18 +605,93 @@ function toggleNomineeCustomerID(radio) {
     if (input && radio.value !== 'yes') input.value = '';
 }
 
-// ── Customer lookup modal trigger ───────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// CUSTOMER LOOKUP — same pattern as NewUser.jsp
+// ═══════════════════════════════════════════════════════════════════════
+
+var _activeNomineeCard = null;
+
 function openNomineeCustomerLookup(triggerEl) {
-    var card  = triggerEl.closest('.nominee-block');
-    var input = card.querySelector('.nomineeCustomerIDInput');
-    // TODO: open modal → on select: input.value = selectedCustomerId
+    _activeNomineeCard = triggerEl.closest('.nominee-block');
+    document.getElementById('nomineeCustomerLookupModal').style.display = 'flex';
+    document.getElementById('nomineeCustomerLookupLoading').style.display = 'flex';
+    document.getElementById('nomineeCustomerLookupContent').innerHTML = '';
+
+    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/lookupForCustomerId.jsp')
+        .then(function(res) { return res.text(); })
+        .then(function(html) {
+            document.getElementById('nomineeCustomerLookupLoading').style.display = 'none';
+            var content = document.getElementById('nomineeCustomerLookupContent');
+            content.innerHTML = html;
+            content.querySelectorAll('script').forEach(function(s) {
+                var ns = document.createElement('script');
+                ns.textContent = s.textContent;
+                document.body.appendChild(ns);
+                document.body.removeChild(ns);
+            });
+        });
 }
+
+function closeNomineeCustomerLookup() {
+    document.getElementById('nomineeCustomerLookupModal').style.display = 'none';
+}
+
+// Called by lookupForCustomerId.jsp when a row is clicked
+window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
+    if (!_activeNomineeCard) return;
+
+    var idInput = _activeNomineeCard.querySelector('.nomineeCustomerIDInput');
+    if (idInput) idInput.value = customerId;
+
+    closeNomineeCustomerLookup();
+
+    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (!data.success || !data.customer) return;
+            var c = data.customer;
+
+            var fieldMap = {
+                'nomineeName[]'     : c.customerName || '',
+                'nomineeMobile[]'   : c.mobileNo     || '',
+                'nomineeAddress1[]' : c.address1     || '',
+                'nomineeAddress2[]' : c.address2     || '',
+                'nomineeAddress3[]' : c.address3     || '',
+                'nomineeZip[]'      : c.zipCode      || ''
+            };
+
+            Object.keys(fieldMap).forEach(function(name) {
+                var el = _activeNomineeCard.querySelector('[name="' + name + '"]');
+                if (el) el.value = fieldMap[name];
+            });
+
+            var ddMap = {
+                'nomineeCity[]'    : c.city    || '',
+                'nomineeState[]'   : c.state   || '',
+                'nomineeCountry[]' : c.country || ''
+            };
+
+            Object.keys(ddMap).forEach(function(name) {
+                var sel = _activeNomineeCard.querySelector('[name="' + name + '"]');
+                if (!sel || !ddMap[name]) return;
+                for (var i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === ddMap[name] ||
+                        sel.options[i].text  === ddMap[name]) {
+                        sel.selectedIndex = i;
+                        break;
+                    }
+                }
+            });
+        })
+        .catch(function(err) {
+            console.error('Failed to fetch nominee customer details:', err);
+        });
+};
 
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
     var valid = true;
 
-    // Percentage share check (if field exists)
     var shareInputs = document.querySelectorAll('input[name="nomineePercentageShare[]"]');
     var totalShare  = 0;
     shareInputs.forEach(function(inp) {
@@ -525,7 +707,6 @@ function validateForm() {
         valid = false;
     }
 
-    // Zip validation
     if (valid) {
         document.querySelectorAll('.zip-input').forEach(function(inp) {
             var errEl = inp.nextElementSibling;
@@ -538,7 +719,6 @@ function validateForm() {
         });
     }
 
-    // Declaration check
     if (valid) {
         document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
             if (!cb.checked) { valid = false; }

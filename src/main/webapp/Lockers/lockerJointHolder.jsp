@@ -17,6 +17,7 @@
   <title>Locker Joint Holder</title>
   <link rel="stylesheet" href="../css/locker.css">
   <link rel="stylesheet" href="../css/tabs-navigation.css">
+  <link rel="stylesheet" href="../css/lookup-modal.css">
   <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -133,8 +134,110 @@
       white-space: nowrap !important;
     }
     form {
-  	  padding: 0 20px;
-	}
+      padding: 0 20px;
+    }
+
+    /* ── Lookup table styling scoped to joint holder customer lookup content ── */
+    #jhCustomerLookupContent .lookup-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--lk-primary);
+      padding: 16px 18px 12px 18px;
+      border-bottom: 1px solid var(--lk-border-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #jhCustomerLookupContent .search-box {
+      padding: 14px 18px 8px 18px;
+      background: var(--lk-primary-light);
+      border-bottom: 1px solid var(--lk-border-light);
+    }
+    #jhCustomerLookupContent #customerSearch {
+      width: 100%;
+      height: 40px;
+      padding: 0 14px 0 42px;
+      border: 1.5px solid var(--lk-border);
+      border-radius: var(--lk-radius-md);
+      font-size: 0.875rem;
+      font-family: var(--lk-font);
+      color: var(--lk-text);
+      box-sizing: border-box;
+      outline: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='%238066E8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11'/%3E%3C/svg%3E") no-repeat 13px center;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    #jhCustomerLookupContent #customerSearch::placeholder { color: #a090cc; }
+    #jhCustomerLookupContent #customerSearch:focus {
+      border-color: var(--lk-primary);
+      box-shadow: 0 0 0 3px rgba(55,50,121,0.10);
+    }
+    #jhCustomerLookupContent .customer-count {
+      font-size: 0.75rem;
+      color: var(--lk-text-muted);
+      text-align: right;
+      padding: 6px 18px;
+      border-bottom: 1px solid var(--lk-border-light);
+    }
+    #jhCustomerLookupContent .customer-count strong { color: var(--lk-primary); }
+    #jhCustomerLookupContent .table-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+      min-height: 0;
+    }
+    #jhCustomerLookupContent .table-container::-webkit-scrollbar { width: 7px; }
+    #jhCustomerLookupContent .table-container::-webkit-scrollbar-track { background: var(--lk-primary-light); }
+    #jhCustomerLookupContent .table-container::-webkit-scrollbar-thumb { background: var(--lk-border); border-radius: 10px; }
+    #jhCustomerLookupContent #customerTable {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--lk-font);
+    }
+    #jhCustomerLookupContent #customerTable thead tr {
+      background: linear-gradient(90deg, var(--lk-primary) 0%, var(--lk-accent) 100%);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    #jhCustomerLookupContent #customerTable thead th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 0.77rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-right: 1px solid rgba(255,255,255,0.12);
+      white-space: nowrap;
+    }
+    #jhCustomerLookupContent #customerTable thead th:last-child { border-right: none; }
+    #jhCustomerLookupContent #customerTable tbody tr {
+      border-bottom: 1px solid var(--lk-border-light);
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.1s ease;
+      border-left: 3px solid transparent;
+    }
+    #jhCustomerLookupContent #customerTable tbody tr:nth-child(even) { background: var(--lk-row-stripe); }
+    #jhCustomerLookupContent #customerTable tbody tr:hover {
+      background: var(--lk-row-hover);
+      border-left-color: var(--lk-primary-mid);
+      transform: translateX(2px);
+    }
+    #jhCustomerLookupContent #customerTable tbody td {
+      padding: 11px 16px;
+      font-size: 0.875rem;
+      color: var(--lk-text);
+      vertical-align: middle;
+      border-right: 1px solid var(--lk-border-light);
+    }
+    #jhCustomerLookupContent #customerTable tbody td:last-child { border-right: none; }
+    #jhCustomerLookupContent #customerTable tbody td:first-child {
+      font-weight: 700;
+      color: var(--lk-primary);
+      font-size: 0.84rem;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -159,12 +262,11 @@
       </div>
 
       <div style="display:flex; flex-direction:column; gap:4px;">
-        <label>Customer ID</label>
-        <div style="display:flex; flex-direction:row; align-items:stretch; gap:0;">
-          <input type="text" id="customerID" name="customerID" onclick="openCustomerLookup(this)" readonly style="flex:1; min-width:0; box-sizing:border-box;">
-          <button type="button" onclick="openCustomerLookup(this)" title="Search Customer"
-            style="background:#f0f0f0;border:1px solid #ccc;border-left:none;border-radius:0 4px 4px 0;padding:0 10px;cursor:pointer;flex-shrink:0;">🔍</button>
-        </div>
+         <label>Customer ID</label>
+          <div class="input-icon-box">
+            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCustomerLookup(this)" readonly>
+            <button type="button" class="inside-icon-btn" onclick="openJHCustomerLookup(this)" title="Search Customer">🔍</button>
+          </div>
       </div>
 
     </div>
@@ -173,9 +275,6 @@
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 2: JOINT HOLDER                                       -->
-  <!-- 4 dropdowns use AJAX via AddCustomerDataLoader:                -->
-  <!--   salutation | city | state | relation                         -->
-  <!-- All other fields are plain inputs — no DB needed               -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
@@ -196,6 +295,24 @@
           Joint Holder <span class="nominee-serial">1</span>
         </div>
         <button type="button" class="nominee-remove" onclick="removeNominee(this)">✖</button>
+      </div>
+
+      <!-- Has Customer ID row -->
+      <div class="nominee-cid-row">
+        <div>
+          <label>Has Customer ID ?</label>
+          <div style="flex-direction: row;" class="radio-group">
+            <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="yes" onchange="toggleNomineeCustomerID(this)"> Yes</label>
+            <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="no"  onchange="toggleNomineeCustomerID(this)" checked> No</label>
+          </div>
+        </div>
+        <div class="nomineeCustomerIDContainer" style="display:none;">
+          <label>Customer ID</label>
+          <div class="input-icon-box">
+            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCustomerLookup(this)" readonly>
+            <button type="button" class="inside-icon-btn" onclick="openJHCustomerLookup(this)" title="Search Customer">🔍</button>
+          </div>
+        </div>
       </div>
 
       <div class="personal-grid">
@@ -294,21 +411,58 @@
 
 </form>
 
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- CUSTOMER LOOKUP MODAL (Locker Information fieldset)            -->
+<!-- exact same structure as lockerNominee.jsp                      -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="jhCustomerLookupModal" class="customer-modal">
+    <div style="background:#fff; border-radius:14px; width:85%; max-width:920px;
+                max-height:84vh; overflow:hidden; display:flex; flex-direction:column;
+                box-shadow:0 8px 32px rgba(55,50,121,0.18); font-family:Arial,sans-serif;">
+
+        <!-- Header -->
+        <div style="display:flex; align-items:center; justify-content:space-between;
+                    padding:14px 18px; background:linear-gradient(135deg,#373279,#2b0d73);
+                    border-radius:14px 14px 0 0; flex-shrink:0;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);
+                            border-radius:6px;display:flex;align-items:center;
+                            justify-content:center;font-size:17px;">🔍</div>
+                <span style="font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:0.02em;">Customer Lookup</span>
+            </div>
+            <span onclick="closeJHCustomerLookup()"
+                  style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.75);
+                         cursor:pointer;line-height:1;padding:0 4px;"
+                  onmouseover="this.style.color='#fff'"
+                  onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
+        </div>
+
+        <!-- Loading indicator shown until content loads -->
+        <div id="jhCustomerLookupLoading"
+             style="display:flex;align-items:center;justify-content:center;
+                    gap:10px;padding:40px 20px;color:#8066E8;font-size:14px;">
+            <div style="width:18px;height:18px;border:2.5px solid #e0dcf8;
+                        border-top-color:#8066E8;border-radius:50%;
+                        animation:lk-spin 0.7s linear infinite;"></div>
+            Loading customers...
+        </div>
+
+        <!-- Content loaded from lookupForCustomerId.jsp -->
+        <div id="jhCustomerLookupContent"
+             style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
+
+    </div>
+</div>
+
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
 // ═══════════════════════════════════════════════════════════════════════
 // AJAX DROPDOWN LOADER
-// ✅ Reuses AddCustomerDataLoader — no new Java file needed.
-// Keys used here must match exactly what AddCustomerDataLoader returns:
-//   "salutation" | "city" | "state" | "relation"
-// The other 8 keys in the response are ignored — causes zero issues.
 // ═══════════════════════════════════════════════════════════════════════
 
-// Fetched once on load → reused instantly for every addNominee() clone
 var _jhDropdownCache = null;
 
-// Only the 4 keys this page needs, mapped to their select/spinner classes
 var JH_DD_MAP = {
     salutation : { sel: '.jh-dd-salutation', sp: '.jh-sp-salutation' },
     city       : { sel: '.jh-dd-city',       sp: '.jh-sp-city'       },
@@ -316,7 +470,6 @@ var JH_DD_MAP = {
     relation   : { sel: '.jh-dd-relation',   sp: '.jh-sp-relation'   }
 };
 
-// Fill one <select> from [{v, l}, ...] array
 function _fillJHSelect(selectEl, items) {
     selectEl.innerHTML = '';
     var blank = document.createElement('option');
@@ -334,7 +487,6 @@ function _fillJHSelect(selectEl, items) {
     selectEl.style.fontStyle = '';
 }
 
-// Fill only the 4 joint holder dropdowns inside one block
 function _fillJHBlock(block, data) {
     Object.keys(JH_DD_MAP).forEach(function(key) {
         var cfg   = JH_DD_MAP[key];
@@ -352,16 +504,15 @@ function _fillJHBlock(block, data) {
     });
 }
 
-// ── Fires once on page open ─────────────────────────────────────────
 (function loadJHDropdowns() {
-    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')  // ✅ same Java file
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
         .then(function(res) {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
         })
         .then(function(data) {
             if (data._error) console.warn('Joint holder dropdown warning:', data._error);
-            _jhDropdownCache = data;                                    // cache for clones
+            _jhDropdownCache = data;
             var firstBlock = document.querySelector('.nominee-block');
             if (firstBlock) _fillJHBlock(firstBlock, data);
             console.log('✅ Joint holder dropdowns loaded via AddCustomerDataLoader');
@@ -402,24 +553,19 @@ function addNominee() {
     var firstCard = fieldset.querySelector('.nominee-block');
     var newCard   = firstCard.cloneNode(true);
 
-    // Reset all field values
     newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
         if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
         if (el.type === 'checkbox') { el.checked = false; return; }
         el.value = '';
     });
 
-    // Hide Customer ID container if present
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
     if (cidContainer) cidContainer.style.display = 'none';
 
-    // Clear zip errors
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
 
-    // Reset spinners to visible
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
-    // Mark dropdowns as loading
     Object.keys(JH_DD_MAP).forEach(function(key) {
         var selEl = newCard.querySelector(JH_DD_MAP[key].sel);
         if (selEl) {
@@ -432,11 +578,9 @@ function addNominee() {
     blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
     renumberNominees();
 
-    // Fill instantly from cache — no extra network call
     if (_jhDropdownCache) {
         _fillJHBlock(newCard, _jhDropdownCache);
     } else {
-        // Edge case: cache not ready yet — refetch same loader
         fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
             .then(function(res) { return res.json(); })
             .then(function(data) {
@@ -467,16 +611,121 @@ function toggleNomineeCustomerID(radio) {
     if (input && radio.value !== 'yes') input.value = '';
 }
 
-// ── Customer lookup (Locker Information fieldset) ───────────────────
+// ═══════════════════════════════════════════════════════════════════════
+// CUSTOMER LOOKUP (Locker Information fieldset) — same pattern as lockerNominee.jsp
+// ═══════════════════════════════════════════════════════════════════════
+
 function openCustomerLookup(triggerEl) {
-    // TODO: open modal and on select → document.getElementById('customerID').value = selectedId
+    document.getElementById('jhCustomerLookupModal').style.display = 'flex';
+    document.getElementById('jhCustomerLookupLoading').style.display = 'flex';
+    document.getElementById('jhCustomerLookupContent').innerHTML = '';
+
+    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/lookupForCustomerId.jsp')
+        .then(function(res) { return res.text(); })
+        .then(function(html) {
+            document.getElementById('jhCustomerLookupLoading').style.display = 'none';
+            var content = document.getElementById('jhCustomerLookupContent');
+            content.innerHTML = html;
+            content.querySelectorAll('script').forEach(function(s) {
+                var ns = document.createElement('script');
+                ns.textContent = s.textContent;
+                document.body.appendChild(ns);
+                document.body.removeChild(ns);
+            });
+        });
 }
 
-// ── Nominee customer lookup ─────────────────────────────────────────
-function openNomineeCustomerLookup(triggerEl) {
-    var card  = triggerEl.closest('.nominee-block');
-    var input = card.querySelector('.nomineeCustomerIDInput');
-    // TODO: open modal and on select → input.value = selectedId
+function closeJHCustomerLookup() {
+    document.getElementById('jhCustomerLookupModal').style.display = 'none';
+}
+
+// Called by lookupForCustomerId.jsp when a row is clicked (Locker Information fieldset)
+window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
+    document.getElementById('customerID').value = customerId;
+
+    closeJHCustomerLookup();
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// JOINT HOLDER CARD — Customer Lookup (same pattern as lockerNominee.jsp)
+// ═══════════════════════════════════════════════════════════════════════
+
+var _activeJHCard = null;
+
+function openJHCustomerLookup(triggerEl) {
+    _activeJHCard = triggerEl.closest('.nominee-block');
+    document.getElementById('jhCustomerLookupModal').style.display = 'flex';
+    document.getElementById('jhCustomerLookupLoading').style.display = 'flex';
+    document.getElementById('jhCustomerLookupContent').innerHTML = '';
+
+    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/lookupForCustomerId.jsp')
+        .then(function(res) { return res.text(); })
+        .then(function(html) {
+            document.getElementById('jhCustomerLookupLoading').style.display = 'none';
+            var content = document.getElementById('jhCustomerLookupContent');
+            content.innerHTML = html;
+            content.querySelectorAll('script').forEach(function(s) {
+                var ns = document.createElement('script');
+                ns.textContent = s.textContent;
+                document.body.appendChild(ns);
+                document.body.removeChild(ns);
+            });
+            // Switch setCustomerData to joint holder card mode
+            window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
+                if (!_activeJHCard) return;
+
+                var idInput = _activeJHCard.querySelector('.nomineeCustomerIDInput');
+                if (idInput) idInput.value = customerId;
+
+                closeJHCustomerLookup();
+
+                fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (!data.success || !data.customer) return;
+                        var c = data.customer;
+
+                        var fieldMap = {
+                            'nomineeName[]'     : c.customerName || '',
+                            'nomineeAddress1[]' : c.address1     || '',
+                            'nomineeAddress2[]' : c.address2     || '',
+                            'nomineeAddress3[]' : c.address3     || '',
+                            'nomineeZip[]'      : c.zipCode      || ''
+                        };
+
+                        Object.keys(fieldMap).forEach(function(name) {
+                            var el = _activeJHCard.querySelector('[name="' + name + '"]');
+                            if (el) el.value = fieldMap[name];
+                        });
+
+                        var ddMap = {
+                            'nomineeCity[]'  : c.city  || '',
+                            'nomineeState[]' : c.state || ''
+                        };
+
+                        Object.keys(ddMap).forEach(function(name) {
+                            var sel = _activeJHCard.querySelector('[name="' + name + '"]');
+                            if (!sel || !ddMap[name]) return;
+                            for (var i = 0; i < sel.options.length; i++) {
+                                if (sel.options[i].value === ddMap[name] ||
+                                    sel.options[i].text  === ddMap[name]) {
+                                    sel.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        });
+                    })
+                    .catch(function(err) {
+                        console.error('Failed to fetch joint holder customer details:', err);
+                    });
+
+                // Restore base setCustomerData for the Locker Information fieldset
+                window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
+                    document.getElementById('customerID').value = customerId;
+                    closeJHCustomerLookup();
+                };
+            };
+        });
 }
 
 // ── Form validation ─────────────────────────────────────────────────
