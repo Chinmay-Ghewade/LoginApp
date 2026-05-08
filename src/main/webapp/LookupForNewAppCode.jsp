@@ -1,8 +1,6 @@
 <%@ page import="java.sql.*, db.DBConnection" %> 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<link rel="stylesheet" href="../css/lookup-modal.css">
-
 <%
     // Get branch code from session
     HttpSession sess = request.getSession(false);

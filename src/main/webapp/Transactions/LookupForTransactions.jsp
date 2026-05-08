@@ -105,7 +105,6 @@
         rs = ps.executeQuery();
 %>
 
-<link rel="stylesheet" href="../../css/lookup-modal.css">
 <style>
 .category-badge {
     display: inline-block;

@@ -52,7 +52,6 @@
         
         rs = ps.executeQuery();
 %>
-<link rel="stylesheet" href="../../css/lookup-modal.css">
 <div class="lookup-title">🔍 Select Customer</div>
 
 <div class="lookup-search-box">
