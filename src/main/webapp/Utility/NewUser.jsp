@@ -765,24 +765,28 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                         <input type="text" id="mobile" name="mobile" readonly>
                     </div>
                 </div>
-                <div class="grid-row-2">
-                    <div class="form-group">
-                        <label>Address 1</label>
-                        <input type="text" id="addr1" name="addr1" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Address 2</label>
-                        <input type="text" id="addr2" name="addr2" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Address 3</label>
-                        <input type="text" id="addr3" name="addr3" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="email" name="email" readonly>
-                    </div>
-                </div>
+               <div class="grid-row-2">
+			    <div class="form-group">
+			        <label>Address 1</label>
+			        <input type="text" id="addr1" name="addr1" readonly>
+			    </div>
+			    <div class="form-group">
+			        <label>Address 2</label>
+			        <input type="text" id="addr2" name="addr2" readonly>
+			    </div>
+			    <div class="form-group">
+			        <label>Address 3</label>
+			        <input type="text" id="addr3" name="addr3" readonly>
+			    </div>
+			    <div class="form-group">
+			        <label>Email</label>
+			        <input type="email" id="email" name="email" readonly>
+			    </div>
+			    <div class="form-group">   <!-- ✅ now inside grid-row-2 -->
+			        <label>Zip Code</label>
+			        <input type="text" id="zip" name="zip" readonly>
+			    </div>
+			</div>
             </fieldset>
 
             <!-- ── User Roles ── -->
@@ -1326,6 +1330,7 @@ if (sessionBranchCode != null && !sessionBranchCode.isEmpty()) {
                     document.getElementById('addr2').value  = c.address2       || '';
                     document.getElementById('addr3').value  = c.address3       || '';
                     document.getElementById('email').value  = c.email          || '';
+                    document.getElementById('zip').value    = (c.zip && c.zip !== 0) ? String(c.zip) : '';
                 }
             })
             .catch(() => showToast('Failed to load customer details.'))

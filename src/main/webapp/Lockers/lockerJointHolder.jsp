@@ -690,7 +690,7 @@ function openJHCustomerLookup(triggerEl) {
                             'nomineeAddress1[]' : c.address1     || '',
                             'nomineeAddress2[]' : c.address2     || '',
                             'nomineeAddress3[]' : c.address3     || '',
-                            'nomineeZip[]'      : c.zipCode      || ''
+                            'nomineeZip[]'      : c.zip ? String(c.zip) : '' 
                         };
 
                         Object.keys(fieldMap).forEach(function(name) {
