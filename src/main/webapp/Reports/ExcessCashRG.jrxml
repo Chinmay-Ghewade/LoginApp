@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ExcessCashRG" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fe3910fe-e8f1-4073-bdd4-e7c3107d3e4d">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="limitamount" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="GLaccount_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ROWNUM AS SERIALNUMBER, TXN_DATE, AMOUNT,
+ABS($P{limitamount} - AMOUNT) DIFFERENCE
+FROM
+(
+    SELECT
+        TXN_DATE,
+        ABS(
+            OPENINGBALANCE -
+            (DEBITCASH + DEBITTRANSFER + DEBITCLEARING)
+            +
+            (CREDITCASH + CREDITTRANSFER + CREDITCLEARING)
+        ) AMOUNT
+    FROM BALANCE.BRANCHGLHISTORY
+    WHERE BRANCH_CODE = $P{branch_code}
+    AND GLACCOUNT_CODE = $P{GLaccount_code}
+
+    AND TXN_DATE BETWEEN
+        TO_DATE($P{from_date},'DD/MM/YYYY')
+        AND
+        TO_DATE($P{to_date},'DD/MM/YYYY')
+
+    ORDER BY TXN_DATE
+)
+
+WHERE AMOUNT > $P{limitamount}]]>
+	</queryString>
+	<field name="SERIALNUMBER" class="java.math.BigDecimal"/>
+	<field name="TXN_DATE" class="java.sql.Timestamp"/>
+	<field name="AMOUNT" class="java.math.BigDecimal"/>
+	<field name="DIFFERENCE" class="java.math.BigDecimal"/>
+	<variable name="CASH" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="EXTRA" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{DIFFERENCE}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="44" splitType="Stretch">
+			<subreport>
+				<reportElement x="14" y="0" width="329" height="44" uuid="cc73f2e3-7ea5-432a-9ad2-cbb96321e8f3"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="34" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="9077f338-016d-4eb1-bc56-e785074dfbb4"/>
+			</line>
+			<line>
+				<reportElement x="0" y="33" width="555" height="1" uuid="5c621add-1df3-4d01-ac15-a7b8fd963718"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="32" uuid="b4032393-1fd8-4be0-aeaf-a7183a0a0353"/>
+			</line>
+			<line>
+				<reportElement x="85" y="0" width="1" height="33" uuid="a0b8f14d-6a32-4dd3-8f9f-5805ef26c1e1"/>
+			</line>
+			<line>
+				<reportElement x="223" y="1" width="1" height="33" uuid="fa2fec5e-8c1e-469b-b24c-71e24bb56a09"/>
+			</line>
+			<line>
+				<reportElement x="381" y="0" width="1" height="33" uuid="3c0a13fe-7c61-4860-a0e1-efe2e02f5c38"/>
+			</line>
+			<line>
+				<reportElement x="555" y="0" width="1" height="34" uuid="018597d5-6d15-4a9e-be55-59af83d69a02"/>
+			</line>
+			<staticText>
+				<reportElement x="1" y="1" width="85" height="32" uuid="817f5221-adba-4d7c-a6f7-341d0aa3ac53"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="86" y="1" width="137" height="33" uuid="0438f2d6-9abc-44f5-9452-a767d53b2421"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Date ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="224" y="1" width="157" height="33" uuid="d7c6d8a6-357a-4b70-a9b4-1bc888694686"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cash In Hand]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="1" width="174" height="32" uuid="2b62c64b-5469-4643-8c9e-33f853380c29"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Extra Amount]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="0" width="85" height="20" uuid="8454db0a-5c98-4a81-98fd-dc5e90cd0066"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SERIALNUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="86" y="0" width="137" height="20" uuid="753a7f66-864c-4081-9222-2da7bdb30518"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TXN_DATE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="224" y="0" width="153" height="20" uuid="19f8e864-4dfb-4002-889f-ec971c4f6bfc"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="382" y="0" width="169" height="20" uuid="68abc985-5e1d-4427-9f49-9bffb53ad1a7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DIFFERENCE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-13" width="1" height="32" uuid="af0fa3d8-aec4-4880-8b0e-8ce6dbd5bf81"/>
+			</line>
+			<line>
+				<reportElement x="85" y="-12" width="1" height="32" uuid="1902aa81-d752-4a5f-a5a1-aa12a05a4de9"/>
+			</line>
+			<line>
+				<reportElement x="223" y="-13" width="1" height="32" uuid="477473a7-bb5f-466a-a8f6-4a300efe2f92"/>
+			</line>
+			<line>
+				<reportElement x="381" y="-13" width="1" height="32" uuid="ac4d9813-890c-48db-8377-6797868042f3"/>
+			</line>
+			<line>
+				<reportElement x="555" y="-13" width="1" height="32" uuid="a0f777b9-b6f4-4a20-9365-0a6cdfa05ab5"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="29" splitType="Stretch">
+			<line>
+				<reportElement x="1" y="-1" width="555" height="1" uuid="f3f0091b-30a3-46d2-b1d0-cf7c242d71cb"/>
+			</line>
+			<textField>
+				<reportElement x="435" y="9" width="80" height="20" uuid="c9f1f97a-9346-4fec-9ba6-be0d302c266d"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="515" y="9" width="40" height="20" uuid="66b49e9a-f7a2-4a02-82a1-2216870ac3e5"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="86" y="9" width="124" height="20" uuid="d8f9f37e-a814-4585-9990-18c290da602b"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="9" width="85" height="20" uuid="e2ba9f5f-60e2-42ec-8fbe-c4bc97f9e487"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="130" y="0" width="94" height="20" uuid="a49329a2-1b0d-4c38-8353-7b4cc641dedc"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="277" y="3" width="100" height="20" uuid="04a62d16-69c1-4983-8e7e-7e5eb598b41f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{CASH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="451" y="2" width="100" height="20" uuid="e0bcb52a-8198-4fe0-a282-a9357b202917"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{EXTRA}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="1" width="554" height="1" uuid="980023be-e80e-47d4-84a6-bb1fd80f53ba"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

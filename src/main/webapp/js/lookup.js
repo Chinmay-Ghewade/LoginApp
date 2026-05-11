@@ -366,11 +366,20 @@ function selectAccountType(code, name) {
 
 function selectCustomer(id, name) {
 
-    let field = document.getElementById("customer_id");
-    if (field) field.value = id;
+    // 🔥 USE ACTIVE INPUT
+    if(activeInput){
 
-    let nameField = document.getElementById("customerName");
-    if (nameField) nameField.value = name;
+        activeInput.value = id;
+    }
+
+    // OPTIONAL NAME FIELD
+    let nameField =
+    document.getElementById("customerName");
+
+    if(nameField){
+
+        nameField.value = name;
+    }
 
     closeLookup();
 }
@@ -499,6 +508,123 @@ function selectUser(id, name) {
     closeLookup();
 }
 // ===============================
+// 🔹 SELECT DEDUCTION TYPE
+// ===============================
+function selectDeductionType(code, desc, shortDesc) {
+
+    let codeField = document.getElementById("ed_no");
+    if (codeField) {
+        codeField.value = code;
+    }
+
+    let descField = document.getElementById("deductionTypeName");
+    if (descField) {
+        descField.value = desc;
+    }
+
+    let shortField = document.getElementById("shortDescription");
+    if (shortField) {
+        shortField.value = shortDesc;
+    }
+
+    closeLookup();
+}
+// ===============================
+// 🔹 AUTO FETCH DEDUCTION TYPE
+// ===============================
+function initDeductionTypeAutoFetch() {
+
+    let field = document.getElementById("ed_no");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code || code.trim() === "") return;
+
+        fetch(contextPath + "/CommonLookupServlet?type=deductionType&action=getName&code=" + encodeURIComponent(code))
+            .then(res => res.text())
+            .then(name => {
+
+                let desc = document.getElementById("deductionTypeName");
+
+                if (desc) {
+                    desc.value = name || "Not Found";
+                }
+            })
+            .catch(err => console.error("Deduction Type Fetch Error:", err));
+    });
+}
+// ===============================
+// 🔹 SELECT CASE TYPE
+// ===============================
+function selectCaseType(code, name) {
+
+    // CASE TYPE TO
+    if(activeInput &&
+       activeInput.id === "case_type_to"){
+
+        document.getElementById(
+            "case_type_to"
+        ).value = code;
+
+        closeLookup();
+        return;
+    }
+
+    // DEFAULT CASE TYPE FROM
+
+    let field =
+        document.getElementById(
+            "case_type_from"
+        );
+
+    if(field) {
+        field.value = code;
+    }
+
+    closeLookup();
+}
+
+// ===============================
+// 🔹 AUTO FETCH CASE NAME
+// ===============================
+function initCaseTypeAutoFetch() {
+
+    let field =
+        document.getElementById("case_code");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code || code.trim() === "") return;
+
+        fetch(
+            contextPath +
+            "/CommonLookupServlet?type=caseType&action=getName&code=" +
+            encodeURIComponent(code)
+        )
+        .then(res => res.text())
+        .then(name => {
+
+            let desc =
+                document.getElementById("caseName");
+
+            if (desc) {
+                desc.value = name || "Not Found";
+            }
+        })
+        .catch(err =>
+            console.error("Case Type Fetch Error:", err)
+        );
+    });
+}
+// ===============================
 // 🔹 AUTO INIT
 // ===============================
 window.addEventListener("DOMContentLoaded", function () {
@@ -511,6 +637,8 @@ window.addEventListener("DOMContentLoaded", function () {
 	initInstallmentAutoFetch();   
 	initCustomerAutoFetch();
 	initCityAutoFetch();
-	initMemberTypeAutoFetch();// ✅ ADD THIS
+	initMemberTypeAutoFetch();
+	initDeductionTypeAutoFetch();
+	initCaseTypeAutoFetch(); // ✅ ADD THIS
 
 });

@@ -117,6 +117,10 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT DISCREPTION FROM SHARES.MEMBERTYPE_MASTER WHERE MEMBER_TYPECODE=?";
                 } else if ("user".equalsIgnoreCase(type)) {
                     query = "SELECT NAME FROM ACL.USERREGISTER WHERE USER_ID=?";
+                } else if ("deductionType".equalsIgnoreCase(type)) {
+                    query = "SELECT DESCRIPTION FROM PAYROLL.EARNING_DEDUCTION_MASTER WHERE ED_NO=?";
+                } else if ("caseType".equalsIgnoreCase(type)) {
+                    query = "SELECT DESCRIPTION FROM HEADOFFICE.CASE_CODE WHERE CASE_CODE=?";
                 } else {
                     out.print("");
                     return;
@@ -165,6 +169,10 @@ public class CommonLookupServlet extends HttpServlet {
                 listMemberType(conn, out);
             } else if ("user".equalsIgnoreCase(type)) {
                 listUser(conn, out, request);
+            } else if ("deductionType".equalsIgnoreCase(type)) {
+                listDeductionType(conn, out);
+            } else if ("caseType".equalsIgnoreCase(type)) {
+                listCaseType(conn, out);
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -719,6 +727,107 @@ private void listUser(Connection conn, PrintWriter out, HttpServletRequest reque
              + id + "','" + name + "')\">");
 
      out.println("<td>" + id + "</td>");
+     out.println("<td>" + name + "</td>");
+     out.println("</tr>");
+ }
+
+ printTableFooter(out);
+
+ rs.close();
+ ps.close();
+}
+//===============================
+//🔹 DEDUCTION TYPE
+//===============================
+
+private void listDeductionType(Connection conn, PrintWriter out) throws Exception {
+
+ String sql =
+     "SELECT ED_NO, DESCRIPTION, SHORT_DESC " +
+     "FROM PAYROLL.EARNING_DEDUCTION_MASTER " +
+     "ORDER BY ED_NO";
+
+ PreparedStatement ps = conn.prepareStatement(sql);
+ ResultSet rs = ps.executeQuery();
+
+ out.println("<div class='lookup-container'>");
+ out.println("<div class='lookup-title'>Select Deduction Type</div>");
+ out.println("<div class='lookup-table-wrapper'>");
+ out.println("<table class='lookup-table'>");
+
+ out.println("<tr>");
+ out.println("<th>ED No</th>");
+ out.println("<th>Description</th>");
+ out.println("<th>Short Description</th>");
+ out.println("</tr>");
+
+ while (rs.next()) {
+
+     String code = rs.getString("ED_NO");
+     String desc = rs.getString("DESCRIPTION");
+     String shortDesc = rs.getString("SHORT_DESC");
+
+     if (code == null) code = "";
+     if (desc == null) desc = "";
+     if (shortDesc == null) shortDesc = "";
+
+     code = code.replace("'", "\\'");
+     desc = desc.replace("'", "\\'");
+     shortDesc = shortDesc.replace("'", "\\'");
+
+     out.println("<tr class='lookup-row' onclick=\"selectDeductionType('"
+             + code + "','" + desc + "','" + shortDesc + "')\">");
+
+     out.println("<td>" + code + "</td>");
+     out.println("<td>" + desc + "</td>");
+     out.println("<td>" + shortDesc + "</td>");
+     out.println("</tr>");
+ }
+
+ printTableFooter(out);
+
+ rs.close();
+ ps.close();
+}
+//===============================
+//🔹 CASE TYPE
+//===============================
+
+private void listCaseType(Connection conn, PrintWriter out) throws Exception {
+
+ String sql =
+     "SELECT CASE_CODE, DESCRIPTION " +
+     "FROM HEADOFFICE.CASE_CODE " +
+     "ORDER BY CASE_CODE";
+
+ PreparedStatement ps = conn.prepareStatement(sql);
+ ResultSet rs = ps.executeQuery();
+
+ printTableHeader(
+     out,
+     "Select Case Type",
+     "Case Code",
+     "Case Name",
+     false
+ );
+
+ while (rs.next()) {
+
+     String code = rs.getString("CASE_CODE");
+     String name = rs.getString("DESCRIPTION");
+
+     if (code == null) code = "";
+     if (name == null) name = "";
+
+     code = code.replace("'", "\\'");
+     name = name.replace("'", "\\'");
+
+     out.println(
+         "<tr class='lookup-row' onclick=\"selectCaseType('"
+         + code + "','" + name + "')\">"
+     );
+
+     out.println("<td>" + code + "</td>");
      out.println("<td>" + name + "</td>");
      out.println("</tr>");
  }

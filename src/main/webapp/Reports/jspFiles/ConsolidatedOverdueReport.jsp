@@ -29,6 +29,19 @@ if (sessionDate == null || sessionDate.equals("")) {
             .format(new java.util.Date());
 }
 
+String displayDate = "";
+
+try {
+    java.util.Date d =
+        new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
+
+    displayDate =
+        new SimpleDateFormat("dd/MM/yyyy").format(d);
+
+} catch(Exception e) {
+    displayDate = "";
+}
+
 String isSupportUser = (String) session.getAttribute("isSupportUser");
 String sessionBranchCode = (String) session.getAttribute("branchCode");
 
@@ -82,7 +95,7 @@ if("download".equals(action)){
 
     if(asOnDate!=null && !asOnDate.equals("")){
         java.util.Date d =
-            new java.text.SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
+            new java.text.SimpleDateFormat("dd/MM/yyyy").parse(asOnDate);
 
         oracleDate =
             new java.text.SimpleDateFormat("dd-MMM-yyyy",java.util.Locale.ENGLISH)
@@ -422,11 +435,11 @@ CONSOLIDATED OVERDUE REPORT
 <div class="parameter-group">
 <div class="parameter-label">As On Date</div>
 
-<input type="date"
+<input type="text"
        name="as_on_date"
        class="input-field"
-       value="<%=sessionDate%>"
-       required>
+       value="<%=displayDate%>"
+       placeholder="DD/MM/YYYY" required>
 </div>
 
 <!-- 🔹 Overdue Type -->

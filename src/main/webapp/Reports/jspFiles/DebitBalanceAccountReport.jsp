@@ -198,35 +198,12 @@ if("download".equals(action)){
         Map<String,Object> parameters =
             new HashMap<String,Object>();
 
-        parameters.put(
-            "branch_code",
-            branchCode
-        );
-
-        parameters.put(
-            "as_on_date",
-            oracleDateStr
-        );
-
-        parameters.put(
-            "from_product",
-            productCodeFrom
-        );
-
-        parameters.put(
-            "to_product",
-            productCodeTo
-        );
-
-        parameters.put(
-            "to_date",
-            oracleDateStr
-        );
-
-        parameters.put(
-            "report_title",
-            "DEBIT BALANCE ACCOUNT REPORT"
-        );
+        parameters.put("branch_code",branchCode);
+        parameters.put("as_on_date",oracleDateStr);
+        parameters.put("from_product",productCodeFrom);
+        parameters.put("to_product",productCodeTo);
+        parameters.put("to_date",oracleDateStr);
+        parameters.put("report_title","DEBIT BALANCE ACCOUNT REPORT");
 
         String userId =
             (String)session.getAttribute("userId");
