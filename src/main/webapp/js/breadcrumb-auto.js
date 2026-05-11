@@ -59,7 +59,15 @@ const PAGE_EXCEPTIONS = {
 		'Lockers/lockerSurrender.jsp':   'Locker Surrender',
 		'Lockers/lockerTransaction.jsp': 'Locker Transaction',
 		'Lockers/lockerNominee.jsp':     'Locker Nominee',
-		'Lockers/lockerJointHolder.jsp': 'Locker Joint Holder'
+		'Lockers/lockerJointHolder.jsp': 'Locker Joint Holder',
+		
+		
+		// ── Casher pages ──────────────────────────────
+		'Cashers/cashInOut.jsp'  			: 'Cash IN & OUT',
+		'Cashers/combineDenomination.jsp'  	: 'Combine Denimination',
+		'Cashers/denominationReport.jsp'  	: 'Denomination Master',
+		'Cashers/denominationView.jsp'  	: 'Denomination View',
+		'Cashers/userDenominationMaster.jsp': 'User Denomination Master',
 
 	
 	//Transactions
