@@ -52,7 +52,6 @@
         String sessionBranch = (String) session.getAttribute("branchCode");
         String lockerType    = request.getParameter("lockerType");
 
-        // ✅ DEBUG — check server console/logs
         System.out.println("DEBUG >>> branch='" + sessionBranch + "' | lockerType='" + lockerType + "'");
 
         if (sessionBranch == null) {
@@ -65,7 +64,6 @@
             conn = DBConnection.getConnection();
             if (conn == null) { out.print("{\"success\":false,\"message\":\"DB connection failed\"}"); return; }
 
-            // ✅ TRIM on all sides to avoid whitespace mismatch
             String sql = "SELECT LOCKER_NUMBER, LOCKER_TYPE, CUPBORD_NO, KEY_NO " +
                          "FROM BRANCH.BRANCHLOCKER " +
                          "WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
@@ -75,8 +73,6 @@
                 sql += " AND TRIM(LOCKER_TYPE) = TRIM(?)";
             }
             sql += " ORDER BY LOCKER_NUMBER";
-
-            System.out.println("DEBUG >>> SQL: " + sql);
 
             ps = conn.prepareStatement(sql);
             ps.setString(1, sessionBranch.trim());
@@ -95,15 +91,12 @@
                 arr.put(o);
             }
 
-            System.out.println("DEBUG >>> rows found: " + arr.length());
-
             JSONObject result = new JSONObject();
             result.put("success", true);
             result.put("lockers", arr);
             out.print(result.toString());
 
         } catch (Exception e) {
-            System.out.println("DEBUG >>> ERROR: " + e.getMessage());
             out.print("{\"success\":false,\"message\":\"" + e.getMessage().replace("\"","\\\"") + "\"}");
         } finally {
             try { if (rs!=null) rs.close(); } catch(Exception i){}
@@ -164,12 +157,7 @@
       opacity: 0.6;
     }
     .form-buttons { display: flex !important; }
-    #checkAvailabilityBtn {
-      background-color: #373279; color: white; border: none;
-      padding: 10px 25px; border-radius: 6px; font-size: 14px;
-      font-weight: bold; cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+    
     #checkAvailabilityBtn:hover  { background-color: #2b0d73; transform: scale(1.05); }
     #checkAvailabilityBtn:active { transform: scale(0.97); }
     form { padding: 0 20px; }
@@ -241,11 +229,96 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .simple-lookup-item:hover { background: #f0eefb; border-left-color: #373279; }
+
+    /* ── Success Modal ── */
+    #lockerSuccessModal {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.45);
+      align-items: center; justify-content: center;
+    }
+    #lockerSuccessModal.open { display: flex; }
+    .success-card {
+      background: #fff; border-radius: 18px;
+      padding: 36px 40px 30px 40px; text-align: center;
+      box-shadow: 0 12px 48px rgba(55,50,121,0.22);
+      max-width: 420px; width: 90%;
+      animation: popIn 0.28s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .success-icon {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: linear-gradient(135deg,#373279,#5a3ec8);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px auto; font-size: 32px;
+    }
+    .success-card h2 {
+      color: #373279; font-size: 1.25rem; margin: 0 0 8px 0;
+      font-family: Arial,sans-serif;
+    }
+    .success-card p {
+      color: #666; font-size: 0.9rem; margin: 5px 0;
+      font-family: Arial,sans-serif;
+    }
+    .success-detail-box {
+      background: #f4f2fc; border-radius: 10px;
+      padding: 14px 20px; margin: 16px 0;
+      text-align: left;
+    }
+    .success-detail-row {
+      display: flex; justify-content: space-between;
+      font-family: Arial,sans-serif; font-size: 0.88rem;
+      padding: 4px 0; border-bottom: 1px solid #e0daf5;
+    }
+    .success-detail-row:last-child { border-bottom: none; }
+    .success-detail-row span:first-child { color: #888; }
+    .success-detail-row span:last-child  { color: #373279; font-weight: 700; }
+    .success-ok-btn {
+      background: linear-gradient(135deg,#373279,#5a3ec8);
+      color: #fff; border: none; border-radius: 8px;
+      padding: 11px 48px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; font-family: Arial,sans-serif;
+      margin-top: 6px; transition: opacity 0.2s;
+    }
+    .success-ok-btn:hover { opacity: 0.88; }
   </style>
 </head>
 <body>
 
-<form action="LockerIssueServlet" method="post">
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- LOCKER ISSUE SUCCESS MODAL                                     -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="lockerSuccessModal">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Locker Issued Successfully!</h2>
+    <p>The locker has been assigned to the customer.</p>
+    <div class="success-detail-box">
+      <div class="success-detail-row">
+        <span>Locker Type</span>
+        <span id="successLockerType">—</span>
+      </div>
+      <div class="success-detail-row">
+        <span>Locker Number</span>
+        <span id="successLockerNumber">—</span>
+      </div>
+      <div class="success-detail-row">
+        <span>Customer ID</span>
+        <span id="successCustomerId">—</span>
+      </div>
+      <div class="success-detail-row">
+        <span>Customer Name</span>
+        <span id="successCustomerName">—</span>
+      </div>
+    </div>
+    <button class="success-ok-btn" onclick="closeSuccessModal()">OK</button>
+  </div>
+</div>
+
+
+<form id="lockerIssueForm" onsubmit="submitLockerIssue(event)">
 
   <!-- ══════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER TYPE DETAILS                   -->
@@ -280,12 +353,6 @@
         </small>
       </div>
 
-      <div style="display:flex; align-items:flex-end;">
-        <button type="button" id="checkAvailabilityBtn" onclick="checkLockerAvailability()">
-          Check Availability
-        </button>
-      </div>
-
     </div>
   </fieldset>
 
@@ -306,7 +373,7 @@
         <label>Customer Id</label>
         <div style="display:flex; gap:4px; align-items:center;">
           <input type="text" name="customerIdLookup" id="customerIdLookup"
-                 class="form-input" onclick="openCustomerLookup(this)" readonly>
+                 class="form-input" onclick="openCustomerLookup(this)">
           <button type="button" class="icon-btn" onclick="openCustomerLookup(this)"
                   style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
                          border-radius:8px; font-size:18px; cursor:pointer;">…</button>
@@ -315,7 +382,7 @@
 
       <div>
         <label>Customer Name</label>
-        <input type="text" name="customerNameDisplay" id="customerNameDisplay" readonly>
+        <input type="text" name="customerNameDisplay" id="customerNameDisplay">
       </div>
 
       <div>
@@ -325,37 +392,37 @@
 
       <div>
         <label>Category</label>
-        <input type="text" name="category" id="category" value="PUBLIC" readonly>
+        <input type="text" name="category" id="category" value="PUBLIC">
       </div>
 
       <div>
         <label>Mobile No.</label>
-        <input type="text" name="dispMobile" id="dispMobile" readonly>
+        <input type="text" name="dispMobile" id="dispMobile">
       </div>
 
       <div>
         <label>Address 1</label>
-        <input type="text" name="dispAddress1" id="dispAddress1" readonly>
+        <input type="text" name="dispAddress1" id="dispAddress1">
       </div>
 
       <div>
         <label>Address 2</label>
-        <input type="text" name="dispAddress2" id="dispAddress2" readonly>
+        <input type="text" name="dispAddress2" id="dispAddress2">
       </div>
 
       <div>
         <label>Address 3</label>
-        <input type="text" name="dispAddress3" id="dispAddress3" readonly>
+        <input type="text" name="dispAddress3" id="dispAddress3">
       </div>
 
       <div>
         <label>Telephone Res.</label>
-        <input type="text" name="dispTelRes" id="dispTelRes" readonly>
+        <input type="text" name="dispTelRes" id="dispTelRes">
       </div>
 
       <div>
         <label>Telephone Office</label>
-        <input type="text" name="dispTelOffice" id="dispTelOffice" readonly>
+        <input type="text" name="dispTelOffice" id="dispTelOffice">
       </div>
 
       <div>
@@ -367,12 +434,12 @@
 
       <div>
         <label>Pin</label>
-        <input type="text" name="dispPin" id="dispPin" readonly>
+        <input type="text" name="dispPin" id="dispPin">
       </div>
 
       <div>
         <label>Rent Paid Till Date</label>
-        <input type="date" name="rentPaidTillDate" id="rentPaidTillDate" readonly>
+        <input type="date" name="rentPaidTillDate" id="rentPaidTillDate">
       </div>
 
       <div>
@@ -410,7 +477,7 @@
   </fieldset>
 
   <div class="form-buttons">
-    <button type="submit">Issue Locker</button>
+    <button type="submit" id="issueLockerBtn">Issue Locker</button>
     <button type="button" onclick="resetLockerForm()">Reset</button>
   </div>
 
@@ -571,7 +638,95 @@ window.onload = function() {
         );
     }
     loadCityDropdown();
+
+    // Close success modal on backdrop click
+    document.getElementById('lockerSuccessModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSuccessModal();
+    });
 };
+
+
+// ══════════════════════════════════════════════════════════════════════
+// FORM SUBMIT — calls LockerIssueServlet via fetch, shows success popup
+// ══════════════════════════════════════════════════════════════════════
+function submitLockerIssue(e) {
+    e.preventDefault();
+
+    var btn = document.getElementById('issueLockerBtn');
+    if (btn.disabled) return;          // ← block double/multiple clicks
+    btn.disabled    = true;
+    btn.textContent = 'Issuing...';
+
+    var lockerType   = document.getElementById('lockerTypeSearch').value.trim();
+    var lockerNumber = document.getElementById('lockerNumberSearch').value.trim();
+    var customerId   = document.getElementById('customerIdLookup').value.trim();
+
+    // Client-side validation — re-enable button on failure
+    if (!lockerType) {
+        btn.disabled = false; btn.textContent = 'Issue Locker';
+        showToast('Please select a Locker Type.', true); return;
+    }
+    if (!lockerNumber) {
+        btn.disabled = false; btn.textContent = 'Issue Locker';
+        showToast('Please select a Locker Number.', true); return;
+    }
+    if (!customerId) {
+        btn.disabled = false; btn.textContent = 'Issue Locker';
+        showToast('Please select a Customer.', true); return;
+    }
+
+    var formData = new FormData(document.getElementById('lockerIssueForm'));
+
+    fetch(window.APP_CONTEXT_PATH + '/LockerIssueServlet', {
+        method: 'POST',
+        body:   formData
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        btn.disabled    = false;
+        btn.textContent = 'Issue Locker';
+
+        if (data.success) {
+            document.getElementById('successLockerType').textContent   = data.lockerType   || '—';
+            document.getElementById('successLockerNumber').textContent = data.lockerNumber || '—';
+            document.getElementById('successCustomerId').textContent   = data.customerId   || '—';
+            document.getElementById('successCustomerName').textContent = data.customerName || '—';
+            document.getElementById('lockerSuccessModal').classList.add('open');
+            resetLockerForm();
+        } else {
+            showToast(data.message || 'Failed to issue locker.', true);
+        }
+    })
+    .catch(function(err) {
+        btn.disabled    = false;
+        btn.textContent = 'Issue Locker';
+        showToast('Network error: ' + err.message, true);
+    });
+}
+
+function closeSuccessModal() {
+    document.getElementById('lockerSuccessModal').classList.remove('open');
+}
+
+// ── Toast helper ────────────────────────────────────────────────────
+function showToast(msg, isError) {
+    Toastify({
+        text:        msg,
+        duration:    3500,
+        gravity:     'top',
+        position:    'right',
+        stopOnFocus: true,
+        style: {
+            background:   isError
+                ? 'linear-gradient(to right,#e53935,#b71c1c)'
+                : 'linear-gradient(to right,#373279,#5a3ec8)',
+            borderRadius: '8px',
+            fontFamily:   'Arial,sans-serif',
+            fontSize:     '14px'
+        }
+    }).showToast();
+}
+
 
 // ── City Dropdown ───────────────────────────────────────────────────
 function loadCityDropdown() {
@@ -606,10 +761,9 @@ function loadCityDropdown() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // LOCKER TYPE LOOKUP
-// ═══════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════════
 var _allLockerTypes   = [];
 var _allLockerNumbers = [];
 
@@ -667,14 +821,12 @@ function selectLockerType(lockerType) {
     document.getElementById('lockerTypeSearch').value = lockerType;
     closeLockerTypeLookup();
 
-    // Enable locker number button
     var btn  = document.getElementById('lockerNumberBtn');
     var hint = document.getElementById('lockerNumberHint');
     btn.disabled     = false;
     btn.title        = 'Search available lockers';
     hint.textContent = '';
 
-    // Clear previous locker number selection & reset cache
     document.getElementById('lockerNumberSearch').value = '';
     document.getElementById('keyNo').value              = '';
     _allLockerNumbers = [];
@@ -689,13 +841,12 @@ document.getElementById('lockerTypeLookupModal').addEventListener('click', funct
 });
 
 
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // LOCKER NUMBER LOOKUP
-// ═══════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════════
 function openLockerNumberLookup() {
     var lockerType = document.getElementById('lockerTypeSearch').value.trim();
-    if (!lockerType) { alert('Please select a Locker Type first.'); return; }
+    if (!lockerType) { showToast('Please select a Locker Type first.', true); return; }
 
     document.getElementById('lockerNumberLookupModal').style.display = 'flex';
     document.getElementById('lockerNumberSearchInput').value = '';
@@ -752,8 +903,8 @@ function renderLockerNumberRows(items) {
 
         cells.forEach(function(c) {
             var td = document.createElement('td');
-            td.style.cssText  = c.style;
-            td.textContent    = c.val || '-';
+            td.style.cssText = c.style;
+            td.textContent   = c.val || '-';
             tr.appendChild(td);
         });
 
@@ -786,10 +937,9 @@ document.getElementById('lockerNumberLookupModal').addEventListener('click', fun
 });
 
 
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // CUSTOMER LOOKUP
-// ═══════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════════
 function openCustomerLookup(triggerEl) {
     document.getElementById('issueCustomerLookupModal').style.display = 'flex';
     document.getElementById('issueCustomerLookupLoading').style.display = 'flex';
@@ -845,52 +995,9 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
         .catch(function(err) { console.error('Failed to fetch customer details:', err); });
 };
 
-
-// ── Check Locker Availability ───────────────────────────────────────
-function checkLockerAvailability() {
-    var lockerType   = document.getElementById('lockerTypeSearch').value.trim();
-    var lockerNumber = document.getElementById('lockerNumberSearch').value.trim();
-    if (!lockerType && !lockerNumber) {
-        alert('Please select Locker Type and Locker Number first.');
-        return;
-    }
-    fetch(window.APP_CONTEXT_PATH + '/loaders/LockerAvailabilityLoader'
-        + '?lockerType='   + encodeURIComponent(lockerType)
-        + '&lockerNumber=' + encodeURIComponent(lockerNumber))
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-        if (data.available) {
-            document.getElementById('keyNo').value               = data.keyNo        || '';
-            document.getElementById('customerNameDisplay').value = data.customerName || '';
-            document.getElementById('dispAddress1').value        = data.address1     || '';
-            document.getElementById('dispAddress2').value        = data.address2     || '';
-            document.getElementById('dispAddress3').value        = data.address3     || '';
-            document.getElementById('dispMobile').value          = data.mobile       || '';
-            document.getElementById('dispTelRes').value          = data.telRes       || '';
-            document.getElementById('dispTelOffice').value       = data.telOffice    || '';
-            document.getElementById('dispPin').value             = data.pin          || '';
-            document.getElementById('rentPaidTillDate').value    = data.rentPaidTill || '';
-
-            var citySelect = document.getElementById('dispCity');
-            if (data.city) {
-                for (var i = 0; i < citySelect.options.length; i++) {
-                    if (citySelect.options[i].value === data.city || citySelect.options[i].text === data.city) {
-                        citySelect.selectedIndex = i; break;
-                    }
-                }
-            }
-            alert('Locker is Available!');
-        } else {
-            alert('Locker is NOT available or not found.');
-        }
-    })
-    .catch(function(err) { console.error('Availability check error:', err); });
-}
-
-
 // ── Reset Form ──────────────────────────────────────────────────────
 function resetLockerForm() {
-    document.querySelector('form').reset();
+    document.getElementById('lockerIssueForm').reset();
     ['keyNo','customerNameDisplay','dispAddress1','dispAddress2','dispAddress3',
      'dispMobile','dispTelRes','dispTelOffice','dispPin','rentPaidTillDate'].forEach(function(id) {
         document.getElementById(id).value = '';
