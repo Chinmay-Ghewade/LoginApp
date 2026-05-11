@@ -195,8 +195,8 @@ public class SavePigmyApplicationServlet extends HttpServlet {
             String pigmySQL = "INSERT INTO APPLICATION.APPLICATIONPIGMY (" +
                 "APPLICATION_NUMBER, AGENTBRANCH_CODE, FROMDATE, INSTALLMENTAMOUNT, " +
                 "UNITOFPERIOD, PERIODOFDEPOSIT, MATURITYDATE, AGENT_ID, " +
-                "INTERESTRATE, INSTALLMENTFREQUENCY) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "INTERESTRATE) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             System.out.println("📝 Pigmy SQL: " + pigmySQL);
             
@@ -239,7 +239,7 @@ public class SavePigmyApplicationServlet extends HttpServlet {
             if (interestRate != null) psPigmy.setDouble(9, interestRate);
             else psPigmy.setNull(9, java.sql.Types.NUMERIC);
             
-            psPigmy.setString(10, "M");
+           
             
             System.out.println("🚀 Executing Pigmy INSERT...");
 
