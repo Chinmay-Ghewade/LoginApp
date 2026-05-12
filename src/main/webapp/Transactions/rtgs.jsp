@@ -214,8 +214,8 @@
       <div>
         <label>Transaction Mode</label>
         <div class="inline-radio-row radio-group">
-          <label><input type="radio" name="transactionMode" value="Transfer" checked> Transfer</label>
-          <label><input type="radio" name="transactionMode" value="Cash"> Cash</label>
+          <label><input type="radio" name="transactionMode" value="Transfer" checked onchange="toggleModeSections(this.value)"> Transfer</label>
+		  <label><input type="radio" name="transactionMode" value="Cash" onchange="toggleModeSections(this.value)"> Cash</label>
         </div>
       </div>
 
@@ -693,6 +693,24 @@ function openOutlistLookup() {
 function openChequeLookup() {
     showToast('Cheque type lookup - To be implemented', false);
 }
+
+
+function toggleModeSections(mode) {
+    // Transfer Details inputs → readonly when Cash is selected
+    document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
+        el.readOnly = (mode === 'Cash');
+    });
+
+    // Cash Details inputs → readonly when Transfer is selected
+    document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
+        el.readOnly = (mode === 'Transfer');
+    });
+}
+
+// Run once on load to apply default (Transfer is checked by default)
+document.addEventListener('DOMContentLoaded', function() {
+    toggleModeSections('Transfer');
+});
 </script>
 
 </body>
