@@ -18,7 +18,6 @@
   <link rel="stylesheet" href="../css/rtgs.css">
   <link rel="stylesheet" href="../css/tabs-navigation.css">
   <link rel="stylesheet" href="../css/lookup-modal.css">
-  <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
@@ -217,7 +216,6 @@
         <div class="inline-radio-row radio-group">
           <label><input type="radio" name="transactionMode" value="Transfer" checked> Transfer</label>
           <label><input type="radio" name="transactionMode" value="Cash"> Cash</label>
-          <label><input type="radio" name="transactionMode" value="Check"> Check</label>
         </div>
       </div>
 
@@ -290,30 +288,7 @@
         <input type="text" name="newLedgerBalance" id="newLedgerBalance" readonly>
       </div>
 
-      <div>
-        <label>Outlist Serial</label>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <input type="text" name="outlistSerial" id="outlistSerial" class="form-input">
-          <button type="button" class="icon-btn" onclick="openOutlistLookup()"
-                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
-                         border-radius:8px; font-size:18px; cursor:pointer;">…</button>
-        </div>
-      </div>
 
-      <div>
-        <label>GL Outlist Desc</label>
-        <input type="text" name="glOutlistDesc" id="glOutlistDesc">
-      </div>
-
-      <div>
-        <label>GL OutList Doc.No</label>
-        <input type="text" name="glOutlistDocNo" id="glOutlistDocNo">
-      </div>
-
-      <div>
-        <label>Cheque Number</label>
-        <input type="text" name="chequeNumber" id="chequeNumber">
-      </div>
 
       <div>
         <label>Cheque Type</label>
@@ -323,6 +298,11 @@
                   style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
                          border-radius:8px; font-size:18px; cursor:pointer;">…</button>
         </div>
+      </div>
+      
+      <div>
+        <label>Cheque Number</label>
+        <input type="text" name="chequeNumber" id="chequeNumber">
       </div>
 
       <div>
@@ -537,11 +517,11 @@ window.APP_CONTEXT_PATH = '<%= contextPath %>';
 // ──────────────────────────────────────────────────────────────────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
-        window.parent.updateParentBreadcrumb(
-            window.buildBreadcrumbPath
-                ? window.buildBreadcrumbPath('Transactions/rtgs.jsp')
-                : 'RTGS Outward Entry'
-        );
+    	window.parent.updateParentBreadcrumb(
+    		    window.buildBreadcrumbPath
+    		        ? window.buildBreadcrumbPath('Transactions/rtgs.jsp')
+    		        : 'Transactions > RTGS / NEFT > RTGS Outward'
+    		);
     }
     
     // Close success modal on backdrop click

@@ -17,7 +17,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions</title>
+    <title>RTGS / NEFT</title>
     <link rel="stylesheet" href="../css/cardView.css">
 </head>
 <body>
@@ -25,21 +25,15 @@
 <div class="dashboard-container">
     <div class="cards-wrapper">
 
-        <!-- 1. Entry -->
-        <div class="card" onclick="openInParentFrame('Transactions/transactions.jsp', 'Transactions > Entry')">
-            <h3>Entry</h3>
+        <!-- 1. RTGS Outward -->
+        <div class="card" onclick="openInParentFrame('Transactions/rtgs.jsp', 'Transactions > RTGS Outward')">
+            <h3>RTGS Outward</h3>
             <p class="size-1">→</p>
         </div>
 
-        <!-- 2. Charges -->
-        <div class="card" onclick="openInParentFrame('Transactions/charges.jsp', 'Transactions > Charges')">
-            <h3>Charges</h3>
-            <p class="size-1">→</p>
-        </div>
-
-        <!-- 3. RTGS -->
-        <div class="card" onclick="openInParentFrame('Transactions/rtgsNeftCards.jsp', 'Transactions > RTGS / NEFT')">
-            <h3>RTGS / NEFT</h3>
+        <!-- 2. RTGS Inward -->
+        <div class="card" onclick="openInParentFrame('Transactions/rtgsInward.jsp', 'Transactions > RTGS Inward')">
+            <h3>RTGS Inward</h3>
             <p class="size-1">→</p>
         </div>
 
@@ -49,7 +43,7 @@
 <script>
     window.onload = function () {
         if (window.parent && window.parent.updateParentBreadcrumb) {
-            window.parent.updateParentBreadcrumb('Transactions');
+            window.parent.updateParentBreadcrumb('Transactions > RTGS / NEFT');
         }
     };
 
