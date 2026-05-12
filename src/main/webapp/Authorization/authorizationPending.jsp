@@ -61,6 +61,11 @@
                 <h3>Shares (Cash &amp; Transfer)</h3>
                 <p class="loading" id="pending-shares-mode-value">Loading...</p>
             </div>
+            
+             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingLockers.jsp', 'Authorization > Pending Lockers')">
+                <h3>Lockers</h3>
+                <p class="loading" id="pending-lockres-value">Loading...</p>
+            </div>
 
         </div>
     </div>
@@ -84,7 +89,8 @@
             loadCard('pending_txn_cash',     'pending-txn-cash-value',     'auth'),
             loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
             loadCard('pending_shares',       'pending-shares-value',       'auth'),
-            loadCard('pending_shares_modes', 'pending-shares-mode-value',  'auth')  // ✅ FIXED: matches the id above
+            loadCard('pending_shares_modes', 'pending-shares-mode-value',  'auth'),
+            loadCard('pending_lockres',      'pending-lockres-value',      'auth')
         ]);
     }
 
