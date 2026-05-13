@@ -89,72 +89,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Locker Details - <%= customerId %></title>
-<link rel="stylesheet" href="../css/totalCustomers.css">
+<link rel="stylesheet" href="../css/locker.css">
+<link rel="stylesheet" href="../css/addCustomer.css">
 <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background: #e8e8f0;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-
-.page-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 10px;
-}
-
-fieldset {
-    border: 1.5px solid #b0b8d0;
-    border-radius: 8px;
-    padding: 20px 25px 15px 25px;
-    margin-bottom: 20px;
-    background: #fff;
-}
-
-legend {
-    font-size: 15px;
-    font-weight: bold;
-    color: #2b0d73;
-    padding: 0 10px;
-}
-
-.form-grid {
-    display: grid;
-    gap: 15px 20px;
-}
-
-.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
-.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
-.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: bold;
-    color: #2b0d73;
-}
-
-.form-group input[type="text"] {
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f0f0f0;
-    font-size: 13px;
-    color: #333;
-    width: 100%;
-    cursor: default;
-}
 
 .btn-container {
     display: flex;
@@ -200,6 +139,147 @@ legend {
     margin-bottom: 20px;
     font-weight: bold;
 }
+
+/* ===== Modal Overlay ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 36px 32px 36px;
+    width: 420px;
+    max-width: 92vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    text-align: center;
+    animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+.modal-icon {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.auth-icon {
+    color: #28a745;
+}
+
+.reject-icon {
+    color: #dc3545;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2b0d73;
+    margin-bottom: 12px;
+}
+
+.modal-title.reject-title {
+    color: #dc3545;
+}
+
+.modal-message {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.modal-info {
+    background: #f4f4f8;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px solid #e0e0e8;
+}
+
+.modal-info-row:last-child {
+    border-bottom: none;
+}
+
+.modal-info-row span:first-child {
+    color: #666;
+    font-weight: 600;
+}
+
+.modal-info-row span:last-child {
+    color: #2b0d73;
+    font-weight: bold;
+}
+
+.modal-btn-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+}
+
+.modal-btn-cancel {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #e0e0e0;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-btn-cancel:hover { background: #ccc; }
+
+.modal-btn-confirm-auth {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #28a745;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-btn-confirm-auth:hover { background: #218838; }
+
+.modal-btn-confirm-reject {
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-btn-confirm-reject:hover { background: #b02a37; }
 
 @media (max-width: 900px) {
     .form-grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -309,6 +389,68 @@ legend {
 
 </div>
 
+<!-- ===== Authorize Modal ===== -->
+<div class="modal-overlay" id="authorizeModal">
+    <div class="modal-box">
+        <div class="modal-icon auth-icon">&#10003;</div>
+        <div class="modal-title">Confirm Authorization</div>
+        <p class="modal-message">Are you sure you want to <strong>authorize</strong> this locker?</p>
+        <div class="modal-info">
+            <div class="modal-info-row">
+                <span>Name</span>
+                <span><%= nameOfHire %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Key No</span>
+                <span><%= keyNo %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Locker Type</span>
+                <span><%= lockerType %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Locker Number</span>
+                <span><%= lockerNumber %></span>
+            </div>
+        </div>
+        <div class="modal-btn-row">
+            <button class="modal-btn-cancel" onclick="closeModal('authorizeModal')">Cancel</button>
+            <button class="modal-btn-confirm-auth" onclick="confirmAction('AUTHORIZE')">Yes, Authorize</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Reject Modal ===== -->
+<div class="modal-overlay" id="rejectModal">
+    <div class="modal-box">
+        <div class="modal-icon reject-icon">&#10007;</div>
+        <div class="modal-title reject-title">Confirm Rejection</div>
+        <p class="modal-message">Are you sure you want to <strong>reject</strong> this locker?</p>
+        <div class="modal-info">
+            <div class="modal-info-row">
+                <span>Name</span>
+                <span><%= nameOfHire %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Key No</span>
+                <span><%= keyNo %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Locker Type</span>
+                <span><%= lockerType %></span>
+            </div>
+            <div class="modal-info-row">
+                <span>Locker Number</span>
+                <span><%= lockerNumber %></span>
+            </div>
+        </div>
+        <div class="modal-btn-row">
+            <button class="modal-btn-cancel" onclick="closeModal('rejectModal')">Cancel</button>
+            <button class="modal-btn-confirm-reject" onclick="confirmAction('REJECT')">Yes, Reject</button>
+        </div>
+    </div>
+</div>
+
 <script>
 function goBack() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
@@ -320,16 +462,27 @@ function goBack() {
 }
 
 function authorizeLocker() {
-    if (confirm('Are you sure you want to AUTHORIZE this locker?')) {
-        window.location.href = 'authorizeLockerAction.jsp?customerId=<%= customerId %>&branchCode=<%= branchCode %>&action=AUTHORIZE';
-    }
+    document.getElementById('authorizeModal').classList.add('active');
 }
 
 function rejectLocker() {
-    if (confirm('Are you sure you want to REJECT this locker?')) {
-        window.location.href = 'authorizeLockerAction.jsp?customerId=<%= customerId %>&branchCode=<%= branchCode %>&action=REJECT';
-    }
+    document.getElementById('rejectModal').classList.add('active');
 }
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function confirmAction(action) {
+    window.location.href = 'authorizeLockerAction.jsp?customerId=<%= customerId %>&branchCode=<%= branchCode %>&action=' + action;
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+});
 
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
