@@ -189,7 +189,22 @@
     .ifsc-results::-webkit-scrollbar       { width: 7px; }
     .ifsc-results::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     .ifsc-results::-webkit-scrollbar-thumb { background: #8066E8; border-radius: 4px; }
-  </style>
+    
+    
+    select.dd-loading { color: #999; background-color: #f9f9f9; font-style: italic; }
+	.dd-spinner {
+	  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+	  background: #373279; margin-left: 4px;
+	  animation: ddPulse 0.8s ease-in-out infinite alternate; vertical-align: middle;
+	}
+	@keyframes ddPulse {
+	  from { opacity: 0.2; transform: scale(0.8); }
+	  to   { opacity: 1;   transform: scale(1.1); }
+	}
+	.dd-spinner.done { display: none; }
+	  </style>
+  
+  
 </head>
 <body>
 
@@ -500,14 +515,18 @@
       </div>
 
       <div>
-        <label>City</label>
-        <input type="text" name="beneficiaryCity" id="beneficiaryCity">
-      </div>
-
-      <div>
-        <label>State</label>
-        <input type="text" name="beneficiaryState" id="beneficiaryState">
-      </div>
+		  <label>City <span class="dd-spinner" id="citySpinner"></span></label>
+		  <select name="beneficiaryCity" id="beneficiaryCity" class="dd-loading form-input">
+		    <option value="">Loading...</option>
+		  </select>
+		</div>
+		
+		<div>
+		  <label>State <span class="dd-spinner" id="stateSpinner"></span></label>
+		  <select name="beneficiaryState" id="beneficiaryState" class="dd-loading form-input">
+		    <option value="">Loading...</option>
+		  </select>
+		</div>
 
       <div>
         <label>Sender To Receiver Info</label>
@@ -605,6 +624,7 @@ function closeRtgsErrorModal() {
 // ──────────────────────────────────────────────────────────────────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
+    	loadCityStateDropdowns();
         window.parent.updateParentBreadcrumb(
             window.buildBreadcrumbPath
                 ? window.buildBreadcrumbPath('Transactions/rtgs.jsp')
@@ -1046,7 +1066,7 @@ function captureSignature() { showRtgsError('Signature capture feature — To be
 function resetRtgsForm() {
     document.getElementById('rtgsForm').reset();
     ['accountName','ledgerBalance','availableBalance','newLedgerBalance',
-     'ifscBankName','ifscBranchName','totalAmount'].forEach(function(id) {
+    	 'ifscBankName','ifscBranchName','totalAmount'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
     });
@@ -1055,6 +1075,8 @@ function resetRtgsForm() {
     document.getElementById('applicableCharges').value = '0';
     document.getElementById('serviceTax').value        = '0';
     document.getElementById('totalAmount').value       = '0';
+    document.getElementById('beneficiaryCity').selectedIndex  = 0;
+    document.getElementById('beneficiaryState').selectedIndex = 0;
     // clear live-search dropdowns
     var di = document.getElementById('ifscResults');
     if (di) di.classList.remove('active');
@@ -1249,6 +1271,59 @@ function scheduleAccClose() {
     accCloseTimer = setTimeout(function() {
         document.getElementById('accResults').classList.remove('active');
     }, 200);
+}
+//══════════════════════════════════════════════════════════════════════
+// for city and state data load 
+//══════════════════════════════════════════════════════════════════════
+
+function loadCityStateDropdowns() {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+        .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+        .then(function(data) {
+            // City
+            var citySelect  = document.getElementById('beneficiaryCity');
+            var citySpinner = document.getElementById('citySpinner');
+            if (Array.isArray(data.city) && data.city.length > 0) {
+                citySelect.innerHTML = '<option value="">-- Select City --</option>';
+                data.city.forEach(function(item) {
+                    var opt = document.createElement('option');
+                    opt.value = item.v; opt.textContent = item.l;
+                    citySelect.appendChild(opt);
+                });
+            } else {
+                citySelect.innerHTML = '<option value="">-- Error loading --</option>';
+                citySelect.style.borderColor = '#f44336';
+            }
+            citySelect.classList.remove('dd-loading');
+            if (citySpinner) citySpinner.classList.add('done');
+
+            // State
+            var stateSelect  = document.getElementById('beneficiaryState');
+            var stateSpinner = document.getElementById('stateSpinner');
+            if (Array.isArray(data.state) && data.state.length > 0) {
+                stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+                data.state.forEach(function(item) {
+                    var opt = document.createElement('option');
+                    opt.value = item.v; opt.textContent = item.l;
+                    stateSelect.appendChild(opt);
+                });
+            } else {
+                stateSelect.innerHTML = '<option value="">-- Error loading --</option>';
+                stateSelect.style.borderColor = '#f44336';
+            }
+            stateSelect.classList.remove('dd-loading');
+            if (stateSpinner) stateSpinner.classList.add('done');
+        })
+        .catch(function(err) {
+            ['beneficiaryCity','beneficiaryState'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) { el.innerHTML = '<option value="">-- Error: reload page --</option>'; el.style.borderColor = '#f44336'; el.classList.remove('dd-loading'); }
+            });
+            ['citySpinner','stateSpinner'].forEach(function(id) {
+                var sp = document.getElementById(id);
+                if (sp) { sp.style.background = '#f44336'; sp.classList.add('done'); }
+            });
+        });
 }
 </script>
 
