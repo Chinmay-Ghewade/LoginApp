@@ -943,6 +943,10 @@ function openIfscLookup() {
     showRtgsError('IFSC lookup - To be implemented');
 }
 
+
+//──────────────────────────────────────────────────────────────────────
+//for input tags makes readonly
+//──────────────────────────────────────────────────────────────────────
 function toggleModeSections(mode) {
     // Transfer Details inputs → readonly when Cash is selected
     document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
@@ -959,6 +963,48 @@ function toggleModeSections(mode) {
 document.addEventListener('DOMContentLoaded', function() {
     toggleModeSections('Transfer');
 });
+
+//──────────────────────────────────────────────────────────────────────
+//search  FUNCTIONS
+//──────────────────────────────────────────────────────────────────────
+
+function filterTable() {
+    const searchBox = document.getElementById('searchBox');
+    if (!searchBox) return;
+    const searchValue = searchBox.value.toLowerCase().trim();
+    const table = document.getElementById('lookupTable');
+    if (!table) return;
+    const rows = table.getElementsByClassName('data-row');
+    let noResultsRow = document.getElementById('noResultsRow');
+    if (searchValue.length < 2) {
+        for (let i = 0; i < rows.length; i++) rows[i].style.display = '';
+        if (noResultsRow) noResultsRow.style.display = 'none';
+        return;
+    }
+    let visibleCount = 0;
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        if (cells.length < 2) continue;
+        const code = cells[0].textContent.toLowerCase();
+        const name = cells[1].textContent.toLowerCase();
+        if (code.includes(searchValue) || name.includes(searchValue)) {
+            rows[i].style.display = '';
+            visibleCount++;
+        } else {
+            rows[i].style.display = 'none';
+        }
+    }
+    if (visibleCount === 0) {
+        if (!noResultsRow) {
+            noResultsRow = table.insertRow(-1);
+            noResultsRow.id = 'noResultsRow';
+            noResultsRow.innerHTML = '<td colspan="2" class="no-results">No accounts found</td>';
+        }
+        noResultsRow.style.display = '';
+    } else {
+        if (noResultsRow) noResultsRow.style.display = 'none';
+    }
+}
 </script>
 
 </body>
