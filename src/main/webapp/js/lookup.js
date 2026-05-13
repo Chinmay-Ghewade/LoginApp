@@ -625,6 +625,156 @@ function initCaseTypeAutoFetch() {
     });
 }
 // ===============================
+// 🔹 SELECT AGENT
+// ===============================
+
+function selectAgent(code, name) {
+
+    if(activeInput){
+
+        activeInput.value = code;
+    }
+
+    let box =
+        activeInput.closest(".input-box");
+
+    if(box){
+
+        let inputs =
+            box.querySelectorAll("input");
+
+        if(inputs.length > 1){
+
+            inputs[1].value = name;
+        }
+    }
+
+    closeLookup();
+}
+
+// ===============================
+// 🔹 AUTO FETCH AGENT NAME
+// ===============================
+
+function initAgentAutoFetch() {
+
+    // FROM AGENT
+    let fromField =
+        document.getElementById("from_agent_code");
+
+    if(fromField){
+
+        fromField.addEventListener("blur", function(){
+
+            let code = this.value;
+
+            if(!code || code.trim()==="") return;
+
+            fetch(
+                contextPath +
+                "/CommonLookupServlet?type=agent&action=getName&code=" +
+                encodeURIComponent(code)
+            )
+            .then(res => res.text())
+            .then(name => {
+
+                let nameField =
+                    document.getElementById("fromAgentName");
+
+                if(nameField){
+
+                    nameField.value =
+                        name || "Not Found";
+                }
+            });
+        });
+    }
+
+    // TO AGENT
+    let toField =
+        document.getElementById("to_agent_code");
+
+    if(toField){
+
+        toField.addEventListener("blur", function(){
+
+            let code = this.value;
+
+            if(!code || code.trim()==="") return;
+
+            fetch(
+                contextPath +
+                "/CommonLookupServlet?type=agent&action=getName&code=" +
+                encodeURIComponent(code)
+            )
+            .then(res => res.text())
+            .then(name => {
+
+                let nameField =
+                    document.getElementById("toAgentName");
+
+                if(nameField){
+
+                    nameField.value =
+                        name || "Not Found";
+                }
+            });
+        });
+    }
+}
+// ===============================
+// 🔹 SINGLE AGENT AUTO FETCH
+// ===============================
+
+function initSingleAgentAutoFetch() {
+
+    let field =
+        document.getElementById(
+            "agent_code"
+        );
+
+    if (!field) return;
+
+    field.addEventListener(
+    "blur",
+    function () {
+
+        let code = this.value;
+
+        if (!code ||
+            code.trim() === "") {
+
+            return;
+        }
+
+        fetch(
+            contextPath +
+            "/CommonLookupServlet?type=agent&action=getName&code=" +
+            encodeURIComponent(code)
+        )
+        .then(res => res.text())
+        .then(name => {
+
+            let nameField =
+                document.getElementById(
+                    "agentName"
+                );
+
+            if (nameField) {
+
+                nameField.value =
+                    name || "Not Found";
+            }
+        })
+        .catch(err =>
+            console.error(
+                "Agent Fetch Error:",
+                err
+            )
+        );
+    });
+}
+// ===============================
 // 🔹 AUTO INIT
 // ===============================
 window.addEventListener("DOMContentLoaded", function () {
@@ -639,6 +789,8 @@ window.addEventListener("DOMContentLoaded", function () {
 	initCityAutoFetch();
 	initMemberTypeAutoFetch();
 	initDeductionTypeAutoFetch();
-	initCaseTypeAutoFetch(); // ✅ ADD THIS
+	initCaseTypeAutoFetch(); 
+	initAgentAutoFetch();
+	initSingleAgentAutoFetch();  // ✅ ADD NEW
 
 });

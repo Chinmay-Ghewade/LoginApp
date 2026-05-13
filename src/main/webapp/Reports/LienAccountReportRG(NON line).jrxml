@@ -124,7 +124,7 @@ ORDER BY
 	<title>
 		<band height="48" splitType="Stretch">
 			<subreport>
-				<reportElement x="368" y="0" width="477" height="48" uuid="d6b5767d-1f0a-4300-babd-01e180ecd212"/>
+				<reportElement x="330" y="0" width="477" height="48" uuid="d6b5767d-1f0a-4300-babd-01e180ecd212"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -337,23 +337,23 @@ ORDER BY
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="16" splitType="Stretch">
+		<band height="19" splitType="Stretch">
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="46" y="1" width="114" height="15" uuid="8b1c77fa-9818-4287-b54a-9a56c3ef9f85"/>
+				<reportElement x="46" y="4" width="114" height="15" uuid="8b1c77fa-9818-4287-b54a-9a56c3ef9f85"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="0" y="1" width="46" height="15" uuid="47727783-05a8-4ecb-b2bf-aa9631c3aeea"/>
-				<textElement verticalAlignment="Middle"/>
+				<reportElement x="0" y="4" width="46" height="15" uuid="47727783-05a8-4ecb-b2bf-aa9631c3aeea"/>
+				<textElement verticalAlignment="Top"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1136" y="1" width="59" height="15" uuid="dd1782b2-ac06-49bb-8c8b-65fbae9b9db7"/>
+				<reportElement x="1136" y="4" width="59" height="15" uuid="dd1782b2-ac06-49bb-8c8b-65fbae9b9db7"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="1195" y="1" width="34" height="15" uuid="8147fd93-6d08-4dd0-884b-7e2f483eccfd"/>
+				<reportElement x="1195" y="4" width="34" height="15" uuid="8147fd93-6d08-4dd0-884b-7e2f483eccfd"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>

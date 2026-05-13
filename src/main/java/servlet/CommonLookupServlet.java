@@ -121,6 +121,8 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT DESCRIPTION FROM PAYROLL.EARNING_DEDUCTION_MASTER WHERE ED_NO=?";
                 } else if ("caseType".equalsIgnoreCase(type)) {
                     query = "SELECT DESCRIPTION FROM HEADOFFICE.CASE_CODE WHERE CASE_CODE=?";
+                } else if ("agent".equalsIgnoreCase(type)) {
+                    query = "SELECT NAME FROM BRANCH.AGENT WHERE AGENT_ID=?";
                 } else {
                     out.print("");
                     return;
@@ -173,6 +175,8 @@ public class CommonLookupServlet extends HttpServlet {
                 listDeductionType(conn, out);
             } else if ("caseType".equalsIgnoreCase(type)) {
                 listCaseType(conn, out);
+            } else if ("agent".equalsIgnoreCase(type)) {
+                listAgent(conn, out, request);    
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -837,5 +841,76 @@ private void listCaseType(Connection conn, PrintWriter out) throws Exception {
  rs.close();
  ps.close();
 }
+//===============================
+//🔹 AGENT
+//===============================
+
+private void listAgent(Connection conn,PrintWriter out,HttpServletRequest request) throws Exception {
+
+ String branchCode = request.getParameter("branchCode");
+
+ if(branchCode == null){
+     branchCode = "";
+ }
+
+ String sql =
+     "SELECT AGENT_ID, NAME " +
+     "FROM BRANCH.AGENT " +
+     "WHERE AGENT_STATUS='Y' ";
+
+ // OPTIONAL BRANCH FILTER
+ if(!branchCode.trim().equals("")){
+
+     sql += " AND BRANCH_CODE=? ";
+ }
+
+ sql += " ORDER BY AGENT_ID";
+
+ PreparedStatement ps =conn.prepareStatement(sql);
+
+ if(!branchCode.trim().equals("")){
+
+     ps.setString(1, branchCode);
+ }
+
+ ResultSet rs = ps.executeQuery();
+
+ printTableHeader(
+     out,
+     "Select Agent",
+     "Agent Code",
+     "Agent Name",
+     false
+ );
+
+ while(rs.next()){
+
+     String code = rs.getString("AGENT_ID");
+
+     String name = rs.getString("NAME");
+
+     if(code == null) code = "";
+     if(name == null) name = "";
+
+     code = code.replace("'", "\\'");
+     name = name.replace("'", "\\'");
+
+     out.println(
+     "<tr class='lookup-row' " + "onclick=\"selectAgent('"
+     + code + "','" + name + "')\">"
+     );
+
+     out.println("<td>" + code + "</td>");
+     out.println("<td>" + name + "</td>");
+
+     out.println("</tr>");
+ }
+
+ printTableFooter(out);
+
+ rs.close();
+ ps.close();
+}
+
 }
 

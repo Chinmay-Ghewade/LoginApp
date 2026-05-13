@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LienAccountReportRG(lien)" language="groovy" pageWidth="1271" pageHeight="595" orientation="Landscape" columnWidth="1231" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="66d58d5f-9716-429b-b15b-8871433a4d12">
 	<property name="ireport.zoom" value="2.0"/>
-	<property name="ireport.x" value="690"/>
+	<property name="ireport.x" value="732"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="branch_code" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
@@ -122,7 +122,7 @@ ORDER BY   REP_SR]]>
 	<title>
 		<band height="46" splitType="Stretch">
 			<subreport>
-				<reportElement x="360" y="0" width="520" height="46" uuid="6a4a934b-3c92-47e4-9ba1-6df1501bdd22"/>
+				<reportElement x="345" y="0" width="520" height="46" uuid="6a4a934b-3c92-47e4-9ba1-6df1501bdd22"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -335,23 +335,23 @@ ORDER BY   REP_SR]]>
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="16" splitType="Stretch">
+		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="46" height="15" uuid="5bdac7f9-3664-4268-86dc-052e4cedd6c9"/>
-				<textElement verticalAlignment="Middle"/>
+				<reportElement x="0" y="5" width="46" height="15" uuid="5bdac7f9-3664-4268-86dc-052e4cedd6c9"/>
+				<textElement verticalAlignment="Top"/>
 				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
 			</textField>
 			<textField pattern="dd/MM/yyyy h.mm a">
-				<reportElement x="46" y="0" width="114" height="15" uuid="23137b45-e680-4b33-a7f8-8ba949c61f9f"/>
+				<reportElement x="46" y="5" width="114" height="15" uuid="23137b45-e680-4b33-a7f8-8ba949c61f9f"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="1137" y="0" width="59" height="15" uuid="e593b7d0-d2ee-4f91-ba91-c992a43d79c8"/>
+				<reportElement x="1137" y="5" width="59" height="15" uuid="e593b7d0-d2ee-4f91-ba91-c992a43d79c8"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement x="1196" y="0" width="34" height="15" uuid="54371416-7e51-43f8-91d4-b18ca640aafb"/>
+				<reportElement x="1196" y="5" width="34" height="15" uuid="54371416-7e51-43f8-91d4-b18ca640aafb"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
