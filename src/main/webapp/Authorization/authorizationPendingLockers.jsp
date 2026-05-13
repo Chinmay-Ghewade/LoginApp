@@ -84,6 +84,7 @@ function searchTable() {
 
     var filtered = filter ? allLockers.filter(function(l) {
         return l.customerId.toLowerCase().indexOf(filter) > -1 ||
+               l.scrollNumber.toLowerCase().indexOf(filter) > -1 ||
                l.nameOfHire.toLowerCase().indexOf(filter) > -1 ||
                l.lockerType.toLowerCase().indexOf(filter) > -1;
     }) : allLockers;
@@ -97,7 +98,7 @@ function displayLockers(lockers, page) {
     tbody.innerHTML = "";
 
     if (lockers.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='5' class='no-data'>No pending lockers found.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='6' class='no-data'>No pending lockers found.</td></tr>";
         updatePaginationControls(0, page);
         return;
     }
@@ -111,6 +112,7 @@ function displayLockers(lockers, page) {
         var row  = tbody.insertRow();
         row.innerHTML =
             "<td>" + srNo + "</td>" +
+            "<td>" + l.scrollNumber + "</td>" +
             "<td>" + l.customerId + "</td>" +
             "<td>" + l.nameOfHire + "</td>" +
             "<td>" + l.lockerType + "</td>" +
@@ -132,6 +134,7 @@ function previousPage() {
     var filter = document.getElementById("searchInput").value.toLowerCase().trim();
     var lockers = filter ? allLockers.filter(function(l) {
         return l.customerId.toLowerCase().indexOf(filter) > -1 ||
+               l.scrollNumber.toLowerCase().indexOf(filter) > -1 ||
                l.nameOfHire.toLowerCase().indexOf(filter) > -1 ||
                l.lockerType.toLowerCase().indexOf(filter) > -1;
     }) : allLockers;
@@ -143,6 +146,7 @@ function nextPage() {
     var filter = document.getElementById("searchInput").value.toLowerCase().trim();
     var lockers = filter ? allLockers.filter(function(l) {
         return l.customerId.toLowerCase().indexOf(filter) > -1 ||
+               l.scrollNumber.toLowerCase().indexOf(filter) > -1 ||
                l.nameOfHire.toLowerCase().indexOf(filter) > -1 ||
                l.lockerType.toLowerCase().indexOf(filter) > -1;
     }) : allLockers;
@@ -178,7 +182,7 @@ window.onload = function() {
 
 <div class="search-container">
     <input type="text" id="searchInput" onkeyup="searchTable()"
-           placeholder="🔍 Search by Customer ID, Name of Hire, Locker Type">
+           placeholder="🔍 Search by Scroll No, Customer ID, Name of Hire, Locker Type">
 </div>
 
 <div class="table-container">
@@ -186,6 +190,7 @@ window.onload = function() {
 <thead>
     <tr>
         <th>SR NO</th>
+        <th>SCROLL NO</th>
         <th>CUSTOMER ID</th>
         <th>NAME OF HIRE</th>
         <th>LOCKER TYPE</th>
@@ -213,8 +218,13 @@ try (Connection conn = DBConnection.getConnection()) {
         "SELECT " +
         "  l.CUSTOMER_ID, " +
         "  NVL(l.NAME_OF_HIRE, '') AS NAME_OF_HIRE, " +
-        "  NVL(l.LOCKER_TYPE, '') AS LOCKER_TYPE " +
+        "  NVL(l.LOCKER_TYPE, '') AS LOCKER_TYPE, " +
+        "  NVL(TO_CHAR(t.SCROLL_NUMBER), '') AS SCROLL_NUMBER " +
         "FROM ACCOUNT.LOCKERACCOUNT l " +
+        "LEFT JOIN TRANSACTION.LOCKERTRANSACTION t " +
+        "  ON  t.BRANCH_CODE   = l.BRANCH_CODE " +
+        "  AND t.LOCKER_TYPE   = l.LOCKER_TYPE " +
+        "  AND t.LOCKER_NUMBER = l.LOCKER_NUMBER " +
         "WHERE l.BRANCH_CODE = ? " +
         "  AND l.ACCOUNT_STATUS = 'E' " +
         "ORDER BY l.CUSTOMER_ID"
@@ -228,19 +238,21 @@ try (Connection conn = DBConnection.getConnection()) {
     while (rs.next()) {
         hasData = true;
 
-        String customerId = rs.getString("CUSTOMER_ID")  != null ? rs.getString("CUSTOMER_ID")  : "";
-        String nameOfHire = rs.getString("NAME_OF_HIRE") != null ? rs.getString("NAME_OF_HIRE") : "";
-        String lockerType = rs.getString("LOCKER_TYPE")  != null ? rs.getString("LOCKER_TYPE")  : "";
+        String customerId    = rs.getString("CUSTOMER_ID")    != null ? rs.getString("CUSTOMER_ID")    : "";
+        String nameOfHire    = rs.getString("NAME_OF_HIRE")   != null ? rs.getString("NAME_OF_HIRE")   : "";
+        String lockerType    = rs.getString("LOCKER_TYPE")    != null ? rs.getString("LOCKER_TYPE")    : "";
+        String scrollNumber  = rs.getString("SCROLL_NUMBER")  != null ? rs.getString("SCROLL_NUMBER")  : "";
 
         // Sanitize for JS string literals
         String safeNameOfHire = nameOfHire.replace("\\", "\\\\").replace("'", "\\'");
         String safeLockerType = lockerType.replace("\\", "\\\\").replace("'", "\\'");
 
         out.println("allLockers.push({");
-        out.println("  customerId: '" + customerId    + "',");
-        out.println("  nameOfHire: '" + safeNameOfHire + "',");
-        out.println("  lockerType: '" + safeLockerType + "'");
-        out.println("});");
+        out.println("  customerId:   '" + customerId    + "',");
+        out.println("  scrollNumber: '" + scrollNumber  + "',");
+        out.println("  nameOfHire:   '" + safeNameOfHire + "',");
+        out.println("  lockerType:   '" + safeLockerType + "'");
+        out.println("});");;
     }
 
     if (!hasData) {
