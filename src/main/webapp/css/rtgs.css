@@ -324,8 +324,7 @@ select.dd-loading {
 /* ════════════════════════════════════════════════════════════════ */
 input[readonly] {
   cursor: not-allowed;
-  background-color: #d6d3f0;
-  color: #555;
+  background-color: #f0f0f0;
 }
 /* ════════════════════════════════════════════════════════════════ */
 /* UTILITY CLASSES */
