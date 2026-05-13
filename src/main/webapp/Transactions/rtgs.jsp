@@ -607,7 +607,7 @@ window.onload = function() {
 // ACCOUNT LOOKUP
 // ──────────────────────────────────────────────────────────────────────
 function openAccountLookup() {
-    let url = "LookupForTransactions.jsp?type=account&accountCategory=saving";
+	let url = "LookupForTransactions.jsp?type=account&accountCategory=rtgs";;
     
     fetch(url)
         .then(function(response) { return response.text(); })

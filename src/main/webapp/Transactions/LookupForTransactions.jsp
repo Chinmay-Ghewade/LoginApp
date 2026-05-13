@@ -45,6 +45,9 @@
             case "cc":
                 productCodePattern = "3%";
                 break;
+            case "rtgs":                    
+                productCodePattern = "rtgs";
+                break;
             default:
                 productCodePattern = "%";
         }
@@ -59,7 +62,15 @@
                     "AND (SUBSTR(ACCOUNT_CODE, 5, 1) = '5' OR SUBSTR(ACCOUNT_CODE, 5, 1) = '7') " +
                     "AND ACCOUNT_STATUS = 'L' " +
                     "ORDER BY ACCOUNT_CODE";
-        } else {
+        }  else if ("rtgs".equals(accountCategory)) {    
+            query = "SELECT ACCOUNT_CODE, NAME, " +
+                    "FN_GET_PRODUCT_DESC(SUBSTR(ACCOUNT_CODE, 5, 3)) AS PRODUCT_DESC " +
+                    "FROM ACCOUNT.ACCOUNT " +
+                    "WHERE SUBSTR(ACCOUNT_CODE, 1, 4) = ? " +
+                    "AND SUBSTR(ACCOUNT_CODE, 5, 1) IN ('1', '2', '3') " +
+                    "AND ACCOUNT_STATUS = 'L' " +
+                    "ORDER BY ACCOUNT_CODE";
+        }  else {
             query = "SELECT ACCOUNT_CODE, NAME, " +
                     "FN_GET_PRODUCT_DESC(SUBSTR(ACCOUNT_CODE, 5, 3)) AS PRODUCT_DESC " +
                     "FROM ACCOUNT.ACCOUNT " +
@@ -88,7 +99,7 @@
             ps.setString(1, branchCode);
             
             // Set second parameter only for non-loan categories
-            if (!"loan".equals(accountCategory)) {
+            if (!"loan".equals(accountCategory) && !"rtgs".equals(accountCategory)) {
                 String productCodePattern = "";
                 switch(accountCategory) {
                     case "saving": productCodePattern = "2"; break;
