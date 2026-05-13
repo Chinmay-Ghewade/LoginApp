@@ -299,16 +299,11 @@
       </div>
 
       <div>
-        <label>Cheque Type</label>
-        <div style="display:flex; gap:4px; align-items:center;">
-          <select name="chequeType" id="chequeType" class="form-input">
-            <option value="">Select Cheque Type</option>
-          </select>
-          <button type="button" class="icon-btn" onclick="loadChequeData()"
-                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
-                         border-radius:8px; font-size:18px; cursor:pointer;">↻</button>
-        </div>
-      </div>
+	    <label>Cheque Type</label>
+	    <select name="chequeType" id="chequeType" class="form-input">
+	        <option value="">Select Cheque Type</option>
+	    </select>
+	  </div>
       
       <div>
         <label>Cheque Series</label>
@@ -522,8 +517,449 @@
   </div>
 
 </form>
-
+<!-- Validation Error Modal -->
+<div id="rtgsErrorModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+">
+    <div style="
+        background: white;
+        width: 480px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        text-align: center;
+    ">
+        <div style="color: #e53935; font-size: 48px; margin-bottom: 20px;">✕</div>
+        <div id="rtgsErrorMessage" style="
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        "></div>
+        <button onclick="closeRtgsErrorModal()" style="
+            background: #e53935;
+            color: white;
+            border: none;
+            padding: 12px 50px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        " onmouseover="this.style.background='#c62828'"
+           onmouseout="this.style.background='#e53935'">
+            OK
+        </button>
+    </div>
+</div>
 <script>
+window.APP_CONTEXT_PATH = '<%= contextPath %>';
+
+// ──────────────────────────────────────────────────────────────────────
+// ERROR MODAL FUNCTIONS
+// ──────────────────────────────────────────────────────────────────────
+function showRtgsError(message) {
+    document.getElementById('rtgsErrorMessage').textContent = message;
+    document.getElementById('rtgsErrorModal').style.display = 'flex';
+}
+
+function closeRtgsErrorModal() {
+    document.getElementById('rtgsErrorModal').style.display = 'none';
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// INITIALIZATION
+// ──────────────────────────────────────────────────────────────────────
+window.onload = function() {
+    if (window.parent && window.parent.updateParentBreadcrumb) {
+        window.parent.updateParentBreadcrumb(
+            window.buildBreadcrumbPath
+                ? window.buildBreadcrumbPath('Transactions/rtgs.jsp')
+                : 'Transactions > RTGS / NEFT > RTGS Outward'
+        );
+    }
+    
+    // Close success modal on backdrop click
+    document.getElementById('rtgsSuccessModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRtgsSuccessModal();
+    });
+
+    // Close lookup modal on backdrop click
+    document.getElementById('lookupModal').addEventListener('click', function(e) {
+        if (e.target === this) closeLookup();
+    });
+
+    // Close error modal on backdrop click
+    document.getElementById('rtgsErrorModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRtgsErrorModal();
+    });
+};
+
+// ──────────────────────────────────────────────────────────────────────
+// ACCOUNT LOOKUP
+// ──────────────────────────────────────────────────────────────────────
+function openAccountLookup() {
+    let url = "LookupForTransactions.jsp?type=account&accountCategory=saving";
+    
+    fetch(url)
+        .then(function(response) { return response.text(); })
+        .then(function(html) {
+            document.getElementById("lookupContent").innerHTML = html;
+            document.getElementById("lookupModal").style.display = "flex";
+            window.currentLookupType = 'account';
+            setTimeout(function() {
+                const searchBox = document.getElementById('searchBox');
+                if (searchBox) searchBox.focus();
+            }, 100);
+        })
+        .catch(function(error) {
+            showRtgsError('Failed to load account lookup.');
+            console.error('Lookup error:', error);
+        });
+}
+
+function closeLookup() {
+    document.getElementById("lookupModal").style.display = "none";
+    window.currentLookupType = null;
+}
+
+function sendBack(code, desc, type) {
+    setValueFromLookup(code, desc, type);
+}
+
+function setValueFromLookup(code, desc, type) {
+    if (type === 'account') {
+        document.getElementById("accountCode").value = code;
+        document.getElementById("accountName").value = desc;
+        
+        // Fetch account details
+        fetchAccountDetails(code);
+        
+        // Load cheque data for this account
+        setTimeout(function() {
+            loadChequeData();
+        }, 500);
+    }
+    
+    closeLookup();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// FETCH ACCOUNT DETAILS
+// ──────────────────────────────────────────────────────────────────────
+function fetchAccountDetails(accountCode) {
+    if (!accountCode || accountCode.trim() === '') {
+        showRtgsError('No account code provided.');
+        return;
+    }
+    
+    fetch('GetAccountDetails.jsp?accountCode=' + encodeURIComponent(accountCode))
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showRtgsError('Error: ' + data.error);
+            } else {
+                // Populate only balance fields
+                document.getElementById('ledgerBalance').value = data.ledgerBalance || '0.00';
+                document.getElementById('availableBalance').value = data.availableBalance || '0.00';
+                
+                // Set new ledger balance (same as current for RTGS)
+                document.getElementById('newLedgerBalance').value = data.ledgerBalance || '0.00';
+                
+                // Parse and populate address fields
+                if (data.customerAddress && data.customerAddress.trim() !== '') {
+                    populateAddressFields(data.customerAddress);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching account details:', error);
+            showRtgsError('Failed to fetch account details');
+        });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// PARSE AND POPULATE ADDRESS FIELDS
+// ──────────────────────────────────────────────────────────────────────
+function populateAddressFields(concatenatedAddress) {
+    if (!concatenatedAddress || concatenatedAddress.trim() === '') {
+        return;
+    }
+    
+    var fullAddress = concatenatedAddress.trim();
+    var words = fullAddress.split(/\s+/);
+    
+    if (words.length === 0) {
+        document.getElementById('address1').value = fullAddress;
+        document.getElementById('address2').value = '';
+        document.getElementById('address3').value = '';
+    } else if (words.length <= 3) {
+        document.getElementById('address1').value = words[0] || '';
+        document.getElementById('address2').value = words[1] || '';
+        document.getElementById('address3').value = words[2] || '';
+    } else if (words.length <= 6) {
+        var wordsPerField = Math.ceil(words.length / 3);
+        var address1 = words.slice(0, wordsPerField).join(' ');
+        var address2 = words.slice(wordsPerField, wordsPerField * 2).join(' ');
+        var address3 = words.slice(wordsPerField * 2).join(' ');
+        
+        document.getElementById('address1').value = address1 || '';
+        document.getElementById('address2').value = address2 || '';
+        document.getElementById('address3').value = address3 || '';
+    } else {
+        var itemsPerGroup = Math.ceil(words.length / 3);
+        var address1 = words.slice(0, itemsPerGroup).join(' ');
+        var address2 = words.slice(itemsPerGroup, itemsPerGroup * 2).join(' ');
+        var address3 = words.slice(itemsPerGroup * 2).join(' ');
+        
+        document.getElementById('address1').value = address1 || '';
+        document.getElementById('address2').value = address2 || '';
+        document.getElementById('address3').value = address3 || '';
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// LOAD CHEQUE DATA
+// ──────────────────────────────────────────────────────────────────────
+function loadChequeData() {
+    const accountCode = document.getElementById('accountCode').value.trim();
+    
+    if (!accountCode) {
+        showRtgsError('Please select an account first');
+        return;
+    }
+    
+    // Show loading state
+    document.getElementById('chequeType').innerHTML = '<option value="">Loading...</option>';
+    document.getElementById('chequeSeries').innerHTML = '<option value="">Loading...</option>';
+    document.getElementById('chequeNumber').innerHTML = '<option value="">Loading...</option>';
+    
+    fetch('GetChequeData.jsp?accountCode=' + encodeURIComponent(accountCode))
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                showRtgsError('Cheque data error: ' + (data.error || 'Unknown error'));
+                clearChequeDropdowns();
+                return;
+            }
+            
+            if (!data.cheques || data.cheques.length === 0) {
+                clearChequeDropdowns('No cheques available');
+                return;
+            }
+            
+            // Populate Cheque Type (unique CHEQUETYPE_CODE)
+            let chequeTypeSelect = document.getElementById('chequeType');
+            chequeTypeSelect.innerHTML = '<option value="">Select Cheque Type</option>';
+            
+            if (data.typeList && data.typeList.length > 0) {
+                data.typeList.forEach(function(type) {
+                    let opt = document.createElement('option');
+                    opt.value = type.trim();
+                    opt.textContent = type.trim();
+                    chequeTypeSelect.appendChild(opt);
+                });
+            }
+            
+            // Populate Cheque Series (unique CHEQUE_SERIES)
+            let chequeSeriesSelect = document.getElementById('chequeSeries');
+            chequeSeriesSelect.innerHTML = '<option value="">Select Cheque Series</option>';
+            
+            if (data.seriesList && data.seriesList.length > 0) {
+                data.seriesList.forEach(function(series) {
+                    let opt = document.createElement('option');
+                    opt.value = series.trim();
+                    opt.textContent = series.trim();
+                    chequeSeriesSelect.appendChild(opt);
+                });
+            }
+            
+            // Populate Cheque Number (all CHEQUE_NUMBER)
+            let chequeNoSelect = document.getElementById('chequeNumber');
+            chequeNoSelect.innerHTML = '<option value="">Select Cheque No</option>';
+            
+            data.cheques.forEach(function(cheque) {
+                let opt = document.createElement('option');
+                opt.value = cheque.chequeNumber.trim();
+                opt.textContent = cheque.chequeNumber.trim();
+                chequeNoSelect.appendChild(opt);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading cheque data:', error);
+            showRtgsError('Failed to load cheque data');
+            clearChequeDropdowns();
+        });
+}
+
+function clearChequeDropdowns(message = 'No cheques available') {
+    document.getElementById('chequeType').innerHTML = '<option value="">' + message + '</option>';
+    document.getElementById('chequeSeries').innerHTML = '<option value="">' + message + '</option>';
+    document.getElementById('chequeNumber').innerHTML = '<option value="">' + message + '</option>';
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// CALCULATE TOTAL AMOUNT
+// ──────────────────────────────────────────────────────────────────────
+function calculateTotal() {
+    var remitting = parseFloat(document.getElementById('remittingAmount').value) || 0;
+    var charges = parseFloat(document.getElementById('applicableCharges').value) || 0;
+    var tax = parseFloat(document.getElementById('serviceTax').value) || 0;
+    var total = remitting + charges + tax;
+    
+    document.getElementById('totalAmount').value = total.toFixed(2);
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// FORM SUBMISSION
+// ──────────────────────────────────────────────────────────────────────
+function submitRtgsForm(e) {
+    e.preventDefault();
+    
+    var btn = document.querySelector('button[type="submit"]');
+    if (btn.disabled) return;
+    
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    
+    var beneficiaryName = document.getElementById('beneficiaryName').value.trim();
+    var accountCode = document.getElementById('accountCode').value.trim();
+    var remittingAmount = document.getElementById('remittingAmount').value.trim();
+    
+    if (!beneficiaryName) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        showRtgsError('Please enter Beneficiary Name.');
+        return;
+    }
+    
+    if (!accountCode) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        showRtgsError('Please select Account Code.');
+        return;
+    }
+    
+    if (!remittingAmount || parseFloat(remittingAmount) <= 0) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        showRtgsError('Please enter a valid Remitting Amount.');
+        return;
+    }
+    
+    var formData = new FormData(document.getElementById('rtgsForm'));
+    
+    fetch(window.APP_CONTEXT_PATH + '/RtgsServlet', {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        
+        if (data.success) {
+            document.getElementById('successTransactionId').textContent = data.transactionId || '—';
+            document.getElementById('successBeneficiaryName').textContent = data.beneficiaryName || '—';
+            document.getElementById('successAmount').textContent = '₹ ' + (data.totalAmount || '0.00');
+            document.getElementById('rtgsSuccessModal').classList.add('open');
+            resetRtgsForm();
+        } else {
+            showRtgsError(data.message || 'Failed to submit RTGS request.');
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        showRtgsError('Network error: ' + err.message);
+    });
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ──────────────────────────────────────────────────────────────────────
+function closeRtgsSuccessModal() {
+    document.getElementById('rtgsSuccessModal').classList.remove('open');
+}
+
+function validateRtgsForm() {
+    var accountCode = document.getElementById('accountCode').value.trim();
+    var beneficiaryName = document.getElementById('beneficiaryName').value.trim();
+    var remittingAmount = document.getElementById('remittingAmount').value.trim();
+    
+    if (!accountCode) {
+        showRtgsError('Please select Account Code.');
+        return;
+    }
+    
+    if (!beneficiaryName) {
+        showRtgsError('Please enter Beneficiary Name.');
+        return;
+    }
+    
+    if (!remittingAmount || parseFloat(remittingAmount) <= 0) {
+        showRtgsError('Please enter a valid Remitting Amount.');
+        return;
+    }
+    
+    // Validation successful - just close if any modal was open
+    closeRtgsErrorModal();
+}
+
+function displayVouchers() {
+    showRtgsError('Vouchers feature - To be implemented');
+}
+
+function captureSignature() {
+    showRtgsError('Signature capture feature - To be implemented');
+}
+
+function resetRtgsForm() {
+    document.getElementById('rtgsForm').reset();
+    
+    ['accountName', 'ledgerBalance', 'availableBalance', 'newLedgerBalance',
+     'ifscBankName', 'ifscBranchName', 'totalAmount'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    clearChequeDropdowns();
+    
+    document.getElementById('remittingAmount').value = '0';
+    document.getElementById('applicableCharges').value = '0';
+    document.getElementById('serviceTax').value = '0';
+    document.getElementById('totalAmount').value = '0';
+}
+
+function openIfscLookup() {
+    showRtgsError('IFSC lookup - To be implemented');
+}
+
+function toggleModeSections(mode) {
+    // Transfer Details inputs → readonly when Cash is selected
+    document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
+        el.readOnly = (mode === 'Cash');
+    });
+
+    // Cash Details inputs → readonly when Transfer is selected
+    document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
+        el.readOnly = (mode === 'Transfer');
+    });
+}
+
+// Run once on load to apply default (Transfer is checked by default)
+document.addEventListener('DOMContentLoaded', function() {
+    toggleModeSections('Transfer');
+});
+</script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
 // ──────────────────────────────────────────────────────────────────────
