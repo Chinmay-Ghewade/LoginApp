@@ -18,43 +18,111 @@
     }
 
     String branchCode = (String) sess.getAttribute("branchCode");
-    String searchNumber = request.getParameter("searchNumber");
-    String category = request.getParameter("category");
-    
-    if (searchNumber == null || searchNumber.trim().isEmpty() || 
-        category == null || category.trim().isEmpty()) {
+    String searchTerm  = request.getParameter("searchNumber");   // reused for IFSC text too
+    String category    = request.getParameter("category");
+
+    if (searchTerm == null || searchTerm.trim().isEmpty() ||
+        category   == null || category.trim().isEmpty()) {
         out.print("{\"error\": \"Invalid parameters\", \"accounts\": []}");
         return;
     }
 
-    searchNumber = searchNumber.trim();
-    category = category.trim().toLowerCase();
+    searchTerm = searchTerm.trim();
+    category   = category.trim().toLowerCase();
 
-    if (!searchNumber.matches("\\d+")) {
+    // ─────────────────────────────────────────────────────────────────
+    // IFSC SEARCH  (separate branch — no branchCode / digit check)
+    // ─────────────────────────────────────────────────────────────────
+    if ("ifsc".equals(category)) {
+
+        if (searchTerm.length() < 3) {
+            out.print("{\"error\": \"Type at least 3 characters to search\", \"accounts\": []}");
+            return;
+        }
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            con = DBConnection.getConnection();
+
+            // Search from the START of IFSC code (first 3+ characters)
+            String query = "SELECT IFSC_CODE, BANK_NAME, BRANCH_NAME " +
+                           "FROM GLOBALCONFIG.BANK_BRANCH_IFC_CODE " +
+                           "WHERE UPPER(IFSC_CODE) LIKE UPPER(?) " +
+                           "AND ROWNUM <= 50 " +
+                           "ORDER BY IFSC_CODE";
+
+            ps = con.prepareStatement(query);
+            ps.setString(1, searchTerm + "%");   // prefix match from start
+            rs = ps.executeQuery();
+
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("success", true);
+
+            JSONArray accountsArray = new JSONArray();
+            int count = 0;
+
+            while (rs.next()) {
+                JSONObject item = new JSONObject();
+                item.put("code",        rs.getString("IFSC_CODE")   != null ? rs.getString("IFSC_CODE").trim()   : "");
+                item.put("name",        rs.getString("BANK_NAME")   != null ? rs.getString("BANK_NAME").trim()   : "");
+                item.put("branchName",  rs.getString("BRANCH_NAME") != null ? rs.getString("BRANCH_NAME").trim() : "");
+                item.put("productDesc", "");
+                accountsArray.put(item);
+                count++;
+            }
+
+            jsonResponse.put("count",        count);
+            jsonResponse.put("accounts",     accountsArray);
+            jsonResponse.put("searchNumber", searchTerm);
+            jsonResponse.put("category",     category);
+
+            out.print(jsonResponse.toString());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JSONObject err = new JSONObject();
+            err.put("success", false);
+            err.put("error",   "Database error: " + e.getMessage());
+            err.put("accounts", new JSONArray());
+            out.print(err.toString());
+
+        } finally {
+            if (rs  != null) try { rs.close();  } catch (SQLException e) { e.printStackTrace(); }
+            if (ps  != null) try { ps.close();  } catch (SQLException e) { e.printStackTrace(); }
+            if (con != null) try { con.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+        return;
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // ACCOUNT SEARCH  (original logic — digits only)
+    // ─────────────────────────────────────────────────────────────────
+    if (!searchTerm.matches("\\d+")) {
         out.print("{\"error\": \"Invalid search number\", \"accounts\": []}");
         return;
     }
 
-    if (searchNumber.length() < 3) {
+    if (searchTerm.length() < 3) {
         out.print("{\"error\": \"Search term too short\", \"accounts\": []}");
         return;
     }
 
     // PAD THE SEARCH NUMBER WITH LEADING ZEROS TO MAKE IT 7 DIGITS
-    String paddedSearchNumber = String.format("%07d", Integer.parseInt(searchNumber));
+    String paddedSearchNumber = String.format("%07d", Integer.parseInt(searchTerm));
 
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-    
+
     try {
         con = DBConnection.getConnection();
-        
+
         String query = "";
-        
+
         if ("loan".equals(category)) {
-            // Search from the END of account code (last 7 digits)
-            // Also get product description using function
             query = "SELECT ACCOUNT_CODE, NAME, " +
                     "FN_GET_PRODUCT_DESC(SUBSTR(ACCOUNT_CODE, 5, 3)) AS PRODUCT_DESC " +
                     "FROM ACCOUNT.ACCOUNT " +
@@ -63,21 +131,28 @@
                     "AND SUBSTR(ACCOUNT_CODE, -7) LIKE ? " +
                     "AND ACCOUNT_STATUS = 'L' " +
                     "ORDER BY ACCOUNT_CODE";
+        } else if ("rtgs".equals(category)) {
+            query = "SELECT ACCOUNT_CODE, NAME, " +
+                    "FN_GET_PRODUCT_DESC(SUBSTR(ACCOUNT_CODE, 5, 3)) AS PRODUCT_DESC " +
+                    "FROM ACCOUNT.ACCOUNT " +
+                    "WHERE SUBSTR(ACCOUNT_CODE, 1, 4) = ? " +
+                    "AND SUBSTR(ACCOUNT_CODE, 5, 1) IN ('1','2','3') " +
+                    "AND SUBSTR(ACCOUNT_CODE, -7) LIKE ? " +
+                    "AND ACCOUNT_STATUS = 'L' " +
+                    "ORDER BY ACCOUNT_CODE";
         } else {
             String productCodePattern = "";
-            switch(category) {
-                case "saving": productCodePattern = "2"; break;
+            switch (category) {
+                case "saving":  productCodePattern = "2"; break;
                 case "deposit": productCodePattern = "4"; break;
-                case "pigmy": productCodePattern = "6"; break;
+                case "pigmy":   productCodePattern = "6"; break;
                 case "current": productCodePattern = "1"; break;
-                case "cc": productCodePattern = "3"; break;
-                default: 
+                case "cc":      productCodePattern = "3"; break;
+                default:
                     out.print("{\"error\": \"Invalid category\", \"accounts\": []}");
                     return;
             }
-            
-            // Search from the END of account code (last 7 digits)
-            // Also get product description using function
+
             query = "SELECT ACCOUNT_CODE, NAME, " +
                     "FN_GET_PRODUCT_DESC(SUBSTR(ACCOUNT_CODE, 5, 3)) AS PRODUCT_DESC " +
                     "FROM ACCOUNT.ACCOUNT " +
@@ -87,76 +162,72 @@
                     "AND ACCOUNT_STATUS = 'L' " +
                     "ORDER BY ACCOUNT_CODE";
         }
-        
+
         ps = con.prepareStatement(query);
         ps.setString(1, branchCode);
-        
-        if ("loan".equals(category)) {
-            // Use padded number with wildcards for pattern matching
+
+        if ("loan".equals(category) || "rtgs".equals(category)) {
             ps.setString(2, "%" + paddedSearchNumber + "%");
         } else {
             String productCodePattern = "";
-            switch(category) {
-                case "saving": productCodePattern = "2"; break;
+            switch (category) {
+                case "saving":  productCodePattern = "2"; break;
                 case "deposit": productCodePattern = "4"; break;
-                case "pigmy": productCodePattern = "6"; break;
+                case "pigmy":   productCodePattern = "6"; break;
                 case "current": productCodePattern = "1"; break;
-                case "cc": productCodePattern = "3"; break;
+                case "cc":      productCodePattern = "3"; break;
             }
             ps.setString(2, productCodePattern);
-            // Use padded number with wildcards for pattern matching
             ps.setString(3, "%" + paddedSearchNumber + "%");
         }
-        
+
         rs = ps.executeQuery();
-        
+
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("success", true);
-        
+
         JSONArray accountsArray = new JSONArray();
         int count = 0;
-        
+
         while (rs.next()) {
             JSONObject account = new JSONObject();
             account.put("code", rs.getString("ACCOUNT_CODE"));
             account.put("name", rs.getString("NAME"));
-            
-            // Get product description (may be null or empty)
+
             String productDesc = rs.getString("PRODUCT_DESC");
             account.put("productDesc", productDesc != null ? productDesc : "");
-            
+
             accountsArray.put(account);
             count++;
         }
-        
-        jsonResponse.put("count", count);
-        jsonResponse.put("accounts", accountsArray);
-        jsonResponse.put("searchNumber", searchNumber);
+
+        jsonResponse.put("count",              count);
+        jsonResponse.put("accounts",           accountsArray);
+        jsonResponse.put("searchNumber",       searchTerm);
         jsonResponse.put("paddedSearchNumber", paddedSearchNumber);
-        jsonResponse.put("category", category);
-        
+        jsonResponse.put("category",           category);
+
         out.print(jsonResponse.toString());
-        
+
     } catch (NumberFormatException e) {
         JSONObject errorResponse = new JSONObject();
         errorResponse.put("success", false);
-        errorResponse.put("error", "Invalid number format");
+        errorResponse.put("error",   "Invalid number format");
         errorResponse.put("accounts", new JSONArray());
         out.print(errorResponse.toString());
-        
+
     } catch (SQLException e) {
         e.printStackTrace();
-        
+
         JSONObject errorResponse = new JSONObject();
         errorResponse.put("success", false);
-        errorResponse.put("error", "Database error: " + e.getMessage());
+        errorResponse.put("error",   "Database error: " + e.getMessage());
         errorResponse.put("accounts", new JSONArray());
-        
         out.print(errorResponse.toString());
-        
+
     } finally {
-        if (rs != null) try { rs.close(); } catch(SQLException e) { e.printStackTrace(); }
-        if (ps != null) try { ps.close(); } catch(SQLException e) { e.printStackTrace(); }
-        if (con != null) try { con.close(); } catch(SQLException e) { e.printStackTrace(); }
+        if (rs  != null) try { rs.close();  } catch (SQLException e) { e.printStackTrace(); }
+        if (ps  != null) try { ps.close();  } catch (SQLException e) { e.printStackTrace(); }
+        if (con != null) try { con.close(); } catch (SQLException e) { e.printStackTrace(); }
     }
 %>
