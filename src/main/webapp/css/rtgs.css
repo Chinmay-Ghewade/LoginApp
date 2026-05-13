@@ -61,7 +61,6 @@ input[type="text"],
 input[type="date"],
 input[type="email"],
 input[type="number"],
-select,
 textarea {
   padding: 4px 6px;
   width: 95%;
@@ -69,6 +68,12 @@ textarea {
  
 }
 
+select {
+  padding: 4px 6px;
+  width: 100%;
+  font-family: Arial, sans-serif;
+ 
+}
 
 input:disabled,
 select:disabled {

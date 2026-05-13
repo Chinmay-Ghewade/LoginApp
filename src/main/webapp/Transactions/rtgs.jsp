@@ -205,7 +205,7 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- LOOKUP MODAL                                                   -->
+<!-- LOOKUP MODAL  (shared for Account lookup AND IFSC lookup)       -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <div id="lookupModal" class="lookup-modal-wrap" style="display:none;">
     <div class="lookup-modal-box">
@@ -411,10 +411,14 @@
         <input type="text" name="beneficiaryAccountCode" id="beneficiaryAccountCode" required>
       </div>
 
+      <!-- ── IFSC Code field with lookup button ── -->
       <div>
         <label>IFSC Code</label>
         <div style="display:flex; gap:4px; align-items:center;">
-          <input type="text" name="ifscCode" id="ifscCode" class="form-input" required>
+          <input type="text" name="ifscCode" id="ifscCode" class="form-input"
+                 required autocomplete="off"
+                 oninput="onIfscCodeInput(this.value)"
+                 placeholder="Enter or search IFSC">
           <button type="button" class="icon-btn" onclick="openIfscLookup()"
                   style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
                          border-radius:8px; font-size:18px; cursor:pointer;">…</button>
@@ -519,6 +523,7 @@
   </div>
 
 </form>
+
 <!-- Validation Error Modal -->
 <div id="rtgsErrorModal" style="
     display: none;
@@ -562,17 +567,24 @@
         </button>
     </div>
 </div>
+
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
+// ── Which lookup is currently open: 'account' | 'ifsc'
+let _currentLookupTarget = null;
+
+// ── Row cache for fast client-side filtering
+let _filterTimer = null;
+let _rowCache    = null;
+
 // ──────────────────────────────────────────────────────────────────────
-// ERROR MODAL FUNCTIONS
+// ERROR MODAL
 // ──────────────────────────────────────────────────────────────────────
 function showRtgsError(message) {
     document.getElementById('rtgsErrorMessage').textContent = message;
     document.getElementById('rtgsErrorModal').style.display = 'flex';
 }
-
 function closeRtgsErrorModal() {
     document.getElementById('rtgsErrorModal').style.display = 'none';
 }
@@ -588,72 +600,118 @@ window.onload = function() {
                 : 'Transactions > RTGS / NEFT > RTGS Outward'
         );
     }
-    
-    // Close success modal on backdrop click
+
     document.getElementById('rtgsSuccessModal').addEventListener('click', function(e) {
         if (e.target === this) closeRtgsSuccessModal();
     });
-
-    // Close lookup modal on backdrop click
     document.getElementById('lookupModal').addEventListener('click', function(e) {
         if (e.target === this) closeLookup();
     });
-
-    // Close error modal on backdrop click
     document.getElementById('rtgsErrorModal').addEventListener('click', function(e) {
         if (e.target === this) closeRtgsErrorModal();
     });
+
+    toggleModeSections('Transfer');
 };
+
+// ──────────────────────────────────────────────────────────────────────
+// SHARED LOOKUP OPEN / CLOSE
+// ──────────────────────────────────────────────────────────────────────
+function _openLookup(type, extraParams) {
+    _currentLookupTarget = type;
+    _rowCache = null;
+
+    let url = 'LookupForTransactions.jsp?type=' + type;
+    if (extraParams) url += '&' + extraParams;
+
+    fetch(url)
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            document.getElementById('lookupContent').innerHTML = html;
+            _rowCache = null;
+            buildRowCache();
+            document.getElementById('lookupModal').style.display = 'flex';
+            setTimeout(function() {
+                const sb = document.getElementById('searchBox');
+                if (sb) sb.focus();
+            }, 100);
+        })
+        .catch(function(err) {
+            showRtgsError('Failed to load lookup data.');
+            console.error('Lookup error:', err);
+        });
+}
+
+function closeLookup() {
+    document.getElementById('lookupModal').style.display = 'none';
+    _currentLookupTarget = null;
+    _rowCache = null;
+}
 
 // ──────────────────────────────────────────────────────────────────────
 // ACCOUNT LOOKUP
 // ──────────────────────────────────────────────────────────────────────
 function openAccountLookup() {
-	let url = "LookupForTransactions.jsp?type=account&accountCategory=rtgs";;
-    
-    fetch(url)
-        .then(function(response) { return response.text(); })
-        .then(function(html) {
-    document.getElementById("lookupContent").innerHTML = html;
-    _rowCache = null;       
-    buildRowCache();        
-    document.getElementById("lookupModal").style.display = "flex";
-    window.currentLookupType = 'account';
-            setTimeout(function() {
-                const searchBox = document.getElementById('searchBox');
-                if (searchBox) searchBox.focus();
-            }, 100);
-        })
-        .catch(function(error) {
-            showRtgsError('Failed to load account lookup.');
-            console.error('Lookup error:', error);
-        });
+    _openLookup('account', 'accountCategory=rtgs');
 }
 
-function closeLookup() {
-    document.getElementById("lookupModal").style.display = "none";
-    window.currentLookupType = null;
+// ──────────────────────────────────────────────────────────────────────
+// IFSC LOOKUP
+// ──────────────────────────────────────────────────────────────────────
+function openIfscLookup() {
+    _openLookup('ifsc', '');
 }
 
-function sendBack(code, desc, type) {
-    setValueFromLookup(code, desc, type);
+// ──────────────────────────────────────────────────────────────────────
+// sendBack — called by rows in LookupForTransactions.jsp
+// Signature for account rows : sendBack(code, desc, type)
+// Signature for IFSC rows    : sendBack(ifscCode, bankName, branchName, type)
+// ──────────────────────────────────────────────────────────────────────
+function sendBack(a, b, c, d) {
+    // d is defined only for IFSC rows (4 args)
+    if (d === 'ifsc' || c === 'ifsc') {
+        // IFSC row: a=ifscCode, b=bankName, c=branchName  (d='ifsc')
+        var ifscCode   = a;
+        var bankName   = b;
+        var branchName = c;
+        setIfscFromLookup(ifscCode, bankName, branchName);
+    } else {
+        // Account row: a=code, b=desc, c=type
+        setValueFromLookup(a, b, c);
+    }
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// SET ACCOUNT FROM LOOKUP
+// ──────────────────────────────────────────────────────────────────────
 function setValueFromLookup(code, desc, type) {
     if (type === 'account') {
-        document.getElementById("accountCode").value = code;
-        document.getElementById("accountName").value = desc;
-        
-        // Fetch account details
+        document.getElementById('accountCode').value = code;
+        document.getElementById('accountName').value = desc;
         fetchAccountDetails(code);
-        
-        // Load cheque data for this account
-        setTimeout(function() {
-            loadChequeData();
-        }, 500);
+        setTimeout(function() { loadChequeData(); }, 500);
     }
-    
     closeLookup();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// SET IFSC FROM LOOKUP
+// ──────────────────────────────────────────────────────────────────────
+function setIfscFromLookup(ifscCode, bankName, branchName) {
+    document.getElementById('ifscCode').value      = ifscCode   || '';
+    document.getElementById('ifscBankName').value  = bankName   || '';
+    document.getElementById('ifscBranchName').value = branchName || '';
+    closeLookup();
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// IFSC CODE TYPED MANUALLY — clear bank/branch so stale data doesn't persist
+// ──────────────────────────────────────────────────────────────────────
+function onIfscCodeInput(value) {
+    if (!value || value.trim() === '') {
+        document.getElementById('ifscBankName').value   = '';
+        document.getElementById('ifscBranchName').value = '';
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -664,28 +722,24 @@ function fetchAccountDetails(accountCode) {
         showRtgsError('No account code provided.');
         return;
     }
-    
+
     fetch('GetAccountDetails.jsp?accountCode=' + encodeURIComponent(accountCode))
-        .then(response => response.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             if (data.error) {
                 showRtgsError('Error: ' + data.error);
             } else {
-                // Populate only balance fields
-                document.getElementById('ledgerBalance').value = data.ledgerBalance || '0.00';
+                document.getElementById('ledgerBalance').value    = data.ledgerBalance    || '0.00';
                 document.getElementById('availableBalance').value = data.availableBalance || '0.00';
-                
-                // Set new ledger balance (same as current for RTGS)
-                document.getElementById('newLedgerBalance').value = data.ledgerBalance || '0.00';
-                
-                // Parse and populate address fields
+                document.getElementById('newLedgerBalance').value = data.ledgerBalance    || '0.00';
+
                 if (data.customerAddress && data.customerAddress.trim() !== '') {
                     populateAddressFields(data.customerAddress);
                 }
             }
         })
-        .catch(error => {
-            console.error('Error fetching account details:', error);
+        .catch(function(err) {
+            console.error('Error fetching account details:', err);
             showRtgsError('Failed to fetch account details');
         });
 }
@@ -694,39 +748,19 @@ function fetchAccountDetails(accountCode) {
 // PARSE AND POPULATE ADDRESS FIELDS
 // ──────────────────────────────────────────────────────────────────────
 function populateAddressFields(concatenatedAddress) {
-    if (!concatenatedAddress || concatenatedAddress.trim() === '') {
-        return;
-    }
-    
-    var fullAddress = concatenatedAddress.trim();
-    var words = fullAddress.split(/\s+/);
-    
-    if (words.length === 0) {
-        document.getElementById('address1').value = fullAddress;
-        document.getElementById('address2').value = '';
-        document.getElementById('address3').value = '';
-    } else if (words.length <= 3) {
+    if (!concatenatedAddress || concatenatedAddress.trim() === '') return;
+
+    var words = concatenatedAddress.trim().split(/\s+/);
+
+    if (words.length <= 3) {
         document.getElementById('address1').value = words[0] || '';
         document.getElementById('address2').value = words[1] || '';
         document.getElementById('address3').value = words[2] || '';
-    } else if (words.length <= 6) {
-        var wordsPerField = Math.ceil(words.length / 3);
-        var address1 = words.slice(0, wordsPerField).join(' ');
-        var address2 = words.slice(wordsPerField, wordsPerField * 2).join(' ');
-        var address3 = words.slice(wordsPerField * 2).join(' ');
-        
-        document.getElementById('address1').value = address1 || '';
-        document.getElementById('address2').value = address2 || '';
-        document.getElementById('address3').value = address3 || '';
     } else {
-        var itemsPerGroup = Math.ceil(words.length / 3);
-        var address1 = words.slice(0, itemsPerGroup).join(' ');
-        var address2 = words.slice(itemsPerGroup, itemsPerGroup * 2).join(' ');
-        var address3 = words.slice(itemsPerGroup * 2).join(' ');
-        
-        document.getElementById('address1').value = address1 || '';
-        document.getElementById('address2').value = address2 || '';
-        document.getElementById('address3').value = address3 || '';
+        var g = Math.ceil(words.length / 3);
+        document.getElementById('address1').value = words.slice(0,   g  ).join(' ');
+        document.getElementById('address2').value = words.slice(g,   g*2).join(' ');
+        document.getElementById('address3').value = words.slice(g*2      ).join(' ');
     }
 }
 
@@ -734,78 +768,66 @@ function populateAddressFields(concatenatedAddress) {
 // LOAD CHEQUE DATA
 // ──────────────────────────────────────────────────────────────────────
 function loadChequeData() {
-    const accountCode = document.getElementById('accountCode').value.trim();
-    
+    var accountCode = document.getElementById('accountCode').value.trim();
     if (!accountCode) {
         showRtgsError('Please select an account first');
         return;
     }
-    
-    // Show loading state
-    document.getElementById('chequeType').innerHTML = '<option value="">Loading...</option>';
+
+    document.getElementById('chequeType').innerHTML   = '<option value="">Loading...</option>';
     document.getElementById('chequeSeries').innerHTML = '<option value="">Loading...</option>';
     document.getElementById('chequeNumber').innerHTML = '<option value="">Loading...</option>';
-    
+
     fetch('GetChequeData.jsp?accountCode=' + encodeURIComponent(accountCode))
-        .then(response => response.json())
-        .then(data => {
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
             if (!data.success) {
                 showRtgsError('Cheque data error: ' + (data.error || 'Unknown error'));
                 clearChequeDropdowns();
                 return;
             }
-            
+
             if (!data.cheques || data.cheques.length === 0) {
                 clearChequeDropdowns('No cheques available');
                 return;
             }
-            
-            // Populate Cheque Type (unique CHEQUETYPE_CODE)
-            let chequeTypeSelect = document.getElementById('chequeType');
-            chequeTypeSelect.innerHTML = '<option value="">Select Cheque Type</option>';
-            
-            if (data.typeList && data.typeList.length > 0) {
-                data.typeList.forEach(function(type) {
-                    let opt = document.createElement('option');
-                    opt.value = type.trim();
-                    opt.textContent = type.trim();
-                    chequeTypeSelect.appendChild(opt);
-                });
-            }
-            
-            // Populate Cheque Series (unique CHEQUE_SERIES)
-            let chequeSeriesSelect = document.getElementById('chequeSeries');
-            chequeSeriesSelect.innerHTML = '<option value="">Select Cheque Series</option>';
-            
-            if (data.seriesList && data.seriesList.length > 0) {
-                data.seriesList.forEach(function(series) {
-                    let opt = document.createElement('option');
-                    opt.value = series.trim();
-                    opt.textContent = series.trim();
-                    chequeSeriesSelect.appendChild(opt);
-                });
-            }
-            
-            // Populate Cheque Number (all CHEQUE_NUMBER)
-            let chequeNoSelect = document.getElementById('chequeNumber');
-            chequeNoSelect.innerHTML = '<option value="">Select Cheque No</option>';
-            
-            data.cheques.forEach(function(cheque) {
-                let opt = document.createElement('option');
-                opt.value = cheque.chequeNumber.trim();
-                opt.textContent = cheque.chequeNumber.trim();
-                chequeNoSelect.appendChild(opt);
+
+            var typeSelect   = document.getElementById('chequeType');
+            var seriesSelect = document.getElementById('chequeSeries');
+            var noSelect     = document.getElementById('chequeNumber');
+
+            typeSelect.innerHTML   = '<option value="">Select Cheque Type</option>';
+            seriesSelect.innerHTML = '<option value="">Select Cheque Series</option>';
+            noSelect.innerHTML     = '<option value="">Select Cheque No</option>';
+
+            (data.typeList || []).forEach(function(t) {
+                var o = document.createElement('option');
+                o.value = o.textContent = t.trim();
+                typeSelect.appendChild(o);
+            });
+
+            (data.seriesList || []).forEach(function(s) {
+                var o = document.createElement('option');
+                o.value = o.textContent = s.trim();
+                seriesSelect.appendChild(o);
+            });
+
+            data.cheques.forEach(function(c) {
+                var o = document.createElement('option');
+                o.value = o.textContent = c.chequeNumber.trim();
+                noSelect.appendChild(o);
             });
         })
-        .catch(error => {
-            console.error('Error loading cheque data:', error);
+        .catch(function(err) {
+            console.error('Error loading cheque data:', err);
             showRtgsError('Failed to load cheque data');
             clearChequeDropdowns();
         });
 }
 
-function clearChequeDropdowns(message = 'No cheques available') {
-    document.getElementById('chequeType').innerHTML = '<option value="">' + message + '</option>';
+function clearChequeDropdowns(message) {
+    message = message || 'No cheques available';
+    document.getElementById('chequeType').innerHTML   = '<option value="">' + message + '</option>';
     document.getElementById('chequeSeries').innerHTML = '<option value="">' + message + '</option>';
     document.getElementById('chequeNumber').innerHTML = '<option value="">' + message + '</option>';
 }
@@ -815,11 +837,9 @@ function clearChequeDropdowns(message = 'No cheques available') {
 // ──────────────────────────────────────────────────────────────────────
 function calculateTotal() {
     var remitting = parseFloat(document.getElementById('remittingAmount').value) || 0;
-    var charges = parseFloat(document.getElementById('applicableCharges').value) || 0;
-    var tax = parseFloat(document.getElementById('serviceTax').value) || 0;
-    var total = remitting + charges + tax;
-    
-    document.getElementById('totalAmount').value = total.toFixed(2);
+    var charges   = parseFloat(document.getElementById('applicableCharges').value) || 0;
+    var tax       = parseFloat(document.getElementById('serviceTax').value) || 0;
+    document.getElementById('totalAmount').value = (remitting + charges + tax).toFixed(2);
 }
 
 // ──────────────────────────────────────────────────────────────────────
@@ -827,40 +847,25 @@ function calculateTotal() {
 // ──────────────────────────────────────────────────────────────────────
 function submitRtgsForm(e) {
     e.preventDefault();
-    
+
     var btn = document.querySelector('button[type="submit"]');
     if (btn.disabled) return;
-    
     btn.disabled = true;
     btn.textContent = 'Submitting...';
-    
-    var beneficiaryName = document.getElementById('beneficiaryName').value.trim();
-    var accountCode = document.getElementById('accountCode').value.trim();
-    var remittingAmount = document.getElementById('remittingAmount').value.trim();
-    
-    if (!beneficiaryName) {
-        btn.disabled = false;
-        btn.textContent = 'Save';
-        showRtgsError('Please enter Beneficiary Name.');
-        return;
-    }
-    
-    if (!accountCode) {
-        btn.disabled = false;
-        btn.textContent = 'Save';
-        showRtgsError('Please select Account Code.');
-        return;
-    }
-    
+
+    var beneficiaryName   = document.getElementById('beneficiaryName').value.trim();
+    var accountCode       = document.getElementById('accountCode').value.trim();
+    var remittingAmount   = document.getElementById('remittingAmount').value.trim();
+
+    if (!beneficiaryName) { btn.disabled = false; btn.textContent = 'Save'; showRtgsError('Please enter Beneficiary Name.'); return; }
+    if (!accountCode)     { btn.disabled = false; btn.textContent = 'Save'; showRtgsError('Please select Account Code.'); return; }
     if (!remittingAmount || parseFloat(remittingAmount) <= 0) {
-        btn.disabled = false;
-        btn.textContent = 'Save';
-        showRtgsError('Please enter a valid Remitting Amount.');
-        return;
+        btn.disabled = false; btn.textContent = 'Save';
+        showRtgsError('Please enter a valid Remitting Amount.'); return;
     }
-    
+
     var formData = new FormData(document.getElementById('rtgsForm'));
-    
+
     fetch(window.APP_CONTEXT_PATH + '/RtgsServlet', {
         method: 'POST',
         body: formData
@@ -869,11 +874,10 @@ function submitRtgsForm(e) {
     .then(function(data) {
         btn.disabled = false;
         btn.textContent = 'Save';
-        
         if (data.success) {
-            document.getElementById('successTransactionId').textContent = data.transactionId || '—';
+            document.getElementById('successTransactionId').textContent  = data.transactionId   || '—';
             document.getElementById('successBeneficiaryName').textContent = data.beneficiaryName || '—';
-            document.getElementById('successAmount').textContent = '₹ ' + (data.totalAmount || '0.00');
+            document.getElementById('successAmount').textContent         = '₹ ' + (data.totalAmount || '0.00');
             document.getElementById('rtgsSuccessModal').classList.add('open');
             resetRtgsForm();
         } else {
@@ -895,95 +899,58 @@ function closeRtgsSuccessModal() {
 }
 
 function validateRtgsForm() {
-    var accountCode = document.getElementById('accountCode').value.trim();
+    var accountCode     = document.getElementById('accountCode').value.trim();
     var beneficiaryName = document.getElementById('beneficiaryName').value.trim();
     var remittingAmount = document.getElementById('remittingAmount').value.trim();
-    
-    if (!accountCode) {
-        showRtgsError('Please select Account Code.');
-        return;
-    }
-    
-    if (!beneficiaryName) {
-        showRtgsError('Please enter Beneficiary Name.');
-        return;
-    }
-    
+
+    if (!accountCode)     { showRtgsError('Please select Account Code.'); return; }
+    if (!beneficiaryName) { showRtgsError('Please enter Beneficiary Name.'); return; }
     if (!remittingAmount || parseFloat(remittingAmount) <= 0) {
-        showRtgsError('Please enter a valid Remitting Amount.');
-        return;
+        showRtgsError('Please enter a valid Remitting Amount.'); return;
     }
-    
-    // Validation successful - just close if any modal was open
     closeRtgsErrorModal();
 }
 
-function displayVouchers() {
-    showRtgsError('Vouchers feature - To be implemented');
-}
-
-function captureSignature() {
-    showRtgsError('Signature capture feature - To be implemented');
-}
+function displayVouchers()   { showRtgsError('Vouchers feature - To be implemented'); }
+function captureSignature()  { showRtgsError('Signature capture feature - To be implemented'); }
 
 function resetRtgsForm() {
     document.getElementById('rtgsForm').reset();
-    
-    ['accountName', 'ledgerBalance', 'availableBalance', 'newLedgerBalance',
-     'ifscBankName', 'ifscBranchName', 'totalAmount'].forEach(function(id) {
+    ['accountName','ledgerBalance','availableBalance','newLedgerBalance',
+     'ifscBankName','ifscBranchName','totalAmount'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
     });
-    
     clearChequeDropdowns();
-    
-    document.getElementById('remittingAmount').value = '0';
+    document.getElementById('remittingAmount').value   = '0';
     document.getElementById('applicableCharges').value = '0';
-    document.getElementById('serviceTax').value = '0';
-    document.getElementById('totalAmount').value = '0';
+    document.getElementById('serviceTax').value        = '0';
+    document.getElementById('totalAmount').value       = '0';
 }
 
-function openIfscLookup() {
-    showRtgsError('IFSC lookup - To be implemented');
-}
-
-
-//──────────────────────────────────────────────────────────────────────
-//for input tags makes readonly
-//──────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
+// TRANSFER / CASH MODE TOGGLE
+// ──────────────────────────────────────────────────────────────────────
 function toggleModeSections(mode) {
-    // Transfer Details inputs → readonly when Cash is selected
     document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
         el.readOnly = (mode === 'Cash');
     });
-
-    // Cash Details inputs → readonly when Transfer is selected
     document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
         el.readOnly = (mode === 'Transfer');
     });
 }
 
-// Run once on load to apply default (Transfer is checked by default)
-document.addEventListener('DOMContentLoaded', function() {
-    toggleModeSections('Transfer');
-});
-
-//──────────────────────────────────────────────────────────────────────
-//search  FUNCTIONS
-//──────────────────────────────────────────────────────────────────────
-
-let _filterTimer = null;
-let _rowCache    = null;
-
+// ──────────────────────────────────────────────────────────────────────
+// CLIENT-SIDE TABLE FILTER (used by filterTable() called from lookup HTML)
+// ──────────────────────────────────────────────────────────────────────
 function buildRowCache() {
     const table = document.getElementById('lookupTable');
     if (!table) { _rowCache = []; return; }
-    _rowCache = Array.from(table.getElementsByClassName('data-row')).map(row => {
-        const cells = row.querySelectorAll('td');
-        return {
-            el:   row,
-            text: (cells[0]?.textContent || '') + ' ' + (cells[1]?.textContent || '')
-        };
+    _rowCache = Array.from(table.getElementsByClassName('data-row')).map(function(row) {
+        var cells = row.querySelectorAll('td');
+        var text  = '';
+        cells.forEach(function(c) { text += ' ' + c.textContent; });
+        return { el: row, text: text.toLowerCase() };
     });
 }
 
@@ -999,22 +966,22 @@ function _applyFilter() {
 
     if (!_rowCache) buildRowCache();
 
-    let visible = 0;
-    const hide = q.length >= 2;
+    var visible = 0;
+    var hide = q.length >= 2;
 
-    _rowCache.forEach(({ el, text }) => {
-        const show = !hide || text.toLowerCase().includes(q);
-        el.classList.toggle('row-hidden', !show);
+    _rowCache.forEach(function(item) {
+        var show = !hide || item.text.includes(q);
+        item.el.classList.toggle('row-hidden', !show);
         if (show) visible++;
     });
 
-    let noResultsRow = document.getElementById('noResultsRow');
+    var noResultsRow = document.getElementById('noResultsRow');
     if (visible === 0) {
         if (!noResultsRow) {
-            const table = document.getElementById('lookupTable');
+            var table = document.getElementById('lookupTable');
             noResultsRow = table.insertRow(-1);
             noResultsRow.id = 'noResultsRow';
-            noResultsRow.innerHTML = '<td colspan="2" class="no-results">No accounts found</td>';
+            noResultsRow.innerHTML = '<td colspan="3" class="no-results">No records found</td>';
         }
         noResultsRow.classList.remove('row-hidden');
     } else if (noResultsRow) {
