@@ -165,6 +165,8 @@
       transition: opacity 0.2s;
     }
     .rtgs-success-ok-btn:hover { opacity: 0.88; }
+    
+    .row-hidden { display: none; }
   </style>
 </head>
 <body>
@@ -612,9 +614,11 @@ function openAccountLookup() {
     fetch(url)
         .then(function(response) { return response.text(); })
         .then(function(html) {
-            document.getElementById("lookupContent").innerHTML = html;
-            document.getElementById("lookupModal").style.display = "flex";
-            window.currentLookupType = 'account';
+    document.getElementById("lookupContent").innerHTML = html;
+    _rowCache = null;       
+    buildRowCache();        
+    document.getElementById("lookupModal").style.display = "flex";
+    window.currentLookupType = 'account';
             setTimeout(function() {
                 const searchBox = document.getElementById('searchBox');
                 if (searchBox) searchBox.focus();
@@ -968,41 +972,53 @@ document.addEventListener('DOMContentLoaded', function() {
 //search  FUNCTIONS
 //──────────────────────────────────────────────────────────────────────
 
+let _filterTimer = null;
+let _rowCache    = null;
+
+function buildRowCache() {
+    const table = document.getElementById('lookupTable');
+    if (!table) { _rowCache = []; return; }
+    _rowCache = Array.from(table.getElementsByClassName('data-row')).map(row => {
+        const cells = row.querySelectorAll('td');
+        return {
+            el:   row,
+            text: (cells[0]?.textContent || '') + ' ' + (cells[1]?.textContent || '')
+        };
+    });
+}
+
 function filterTable() {
+    clearTimeout(_filterTimer);
+    _filterTimer = setTimeout(_applyFilter, 180);
+}
+
+function _applyFilter() {
     const searchBox = document.getElementById('searchBox');
     if (!searchBox) return;
-    const searchValue = searchBox.value.toLowerCase().trim();
-    const table = document.getElementById('lookupTable');
-    if (!table) return;
-    const rows = table.getElementsByClassName('data-row');
+    const q = searchBox.value.toLowerCase().trim();
+
+    if (!_rowCache) buildRowCache();
+
+    let visible = 0;
+    const hide = q.length >= 2;
+
+    _rowCache.forEach(({ el, text }) => {
+        const show = !hide || text.toLowerCase().includes(q);
+        el.classList.toggle('row-hidden', !show);
+        if (show) visible++;
+    });
+
     let noResultsRow = document.getElementById('noResultsRow');
-    if (searchValue.length < 2) {
-        for (let i = 0; i < rows.length; i++) rows[i].style.display = '';
-        if (noResultsRow) noResultsRow.style.display = 'none';
-        return;
-    }
-    let visibleCount = 0;
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        if (cells.length < 2) continue;
-        const code = cells[0].textContent.toLowerCase();
-        const name = cells[1].textContent.toLowerCase();
-        if (code.includes(searchValue) || name.includes(searchValue)) {
-            rows[i].style.display = '';
-            visibleCount++;
-        } else {
-            rows[i].style.display = 'none';
-        }
-    }
-    if (visibleCount === 0) {
+    if (visible === 0) {
         if (!noResultsRow) {
+            const table = document.getElementById('lookupTable');
             noResultsRow = table.insertRow(-1);
             noResultsRow.id = 'noResultsRow';
             noResultsRow.innerHTML = '<td colspan="2" class="no-results">No accounts found</td>';
         }
-        noResultsRow.style.display = '';
-    } else {
-        if (noResultsRow) noResultsRow.style.display = 'none';
+        noResultsRow.classList.remove('row-hidden');
+    } else if (noResultsRow) {
+        noResultsRow.classList.add('row-hidden');
     }
 }
 </script>
