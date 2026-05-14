@@ -1065,12 +1065,37 @@ function resetRtgsForm() {
 // TRANSFER / CASH MODE TOGGLE
 // ──────────────────────────────────────────────────────────────────────
 function toggleModeSections(mode) {
-    document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
-        el.readOnly = (mode === 'Cash');
-    });
-    document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
-        el.readOnly = (mode === 'Transfer');
-    });
+    if (mode === 'Cash') {
+        // Make Transfer Details readonly and clear
+        document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
+            el.readOnly = true;
+            el.value = '';
+        });
+        document.querySelectorAll('fieldset:nth-of-type(2) select').forEach(function(el) {
+            el.disabled = true;
+            el.selectedIndex = 0;
+        });
+        clearChequeDropdowns();
+
+        // Make Cash Details editable
+        document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
+            el.readOnly = false;
+        });
+    } else {
+        // Make Cash Details readonly and clear
+        document.querySelectorAll('fieldset:nth-of-type(3) input').forEach(function(el) {
+            el.readOnly = true;
+            el.value = '';
+        });
+
+        // Make Transfer Details editable
+        document.querySelectorAll('fieldset:nth-of-type(2) input').forEach(function(el) {
+            el.readOnly = false;
+        });
+        document.querySelectorAll('fieldset:nth-of-type(2) select').forEach(function(el) {
+            el.disabled = false;
+        });
+    }
 }
 
 // ──────────────────────────────────────────────────────────────────────
