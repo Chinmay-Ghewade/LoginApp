@@ -252,8 +252,10 @@
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
                         value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
-                    } 
-                    else if ("pending_lockres".equals(cardId)) {
+                    }else {
+                        value = "N/A";
+                    }
+                }else if ("pending_lockres".equals(cardId)) {  // ✅ outside, at the same level
                         ps = conn.prepareStatement(
                             "SELECT COUNT(*) FROM ACCOUNT.LOCKERACCOUNT " +
                             "WHERE BRANCH_CODE = ? AND ACCOUNT_STATUS = 'E'"
@@ -261,10 +263,9 @@
                         ps.setString(1, branchCode);
                         rs = ps.executeQuery();
                         value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
-                    }else {
+                    } else {
                         value = "N/A";
                     }
-                }
                 break;
 
             default:
