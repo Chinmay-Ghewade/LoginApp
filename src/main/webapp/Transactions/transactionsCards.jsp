@@ -32,7 +32,7 @@
         </div>
 
         <!-- 2. Charges -->
-        <div class="card" onclick="openInParentFrame('Transactions/charges.jsp', 'Transactions > Charges')">
+        <div class="card" onclick="openInParentFrame('Transactions/Charges/chargesCards.jsp', 'Transactions > Charges')">
             <h3>Charges / INT Posting</h3>
             <p class="size-1">→</p>
         </div>
