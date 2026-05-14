@@ -15,9 +15,9 @@
 <head>
   <meta charset="UTF-8">
   <title>RTGS Outward Entry</title>
-  <link rel="stylesheet" href="../css/rtgs.css">
-  <link rel="stylesheet" href="../css/tabs-navigation.css">
-  <link rel="stylesheet" href="../css/lookup-modal.css">
+	<link rel="stylesheet" href="../../css/rtgs.css">
+	<link rel="stylesheet" href="../../css/tabs-navigation.css">
+	<link rel="stylesheet" href="../../css/lookup-modal.css">
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
@@ -276,12 +276,6 @@
           <label><input type="radio" name="transactionType" value="ThirdParty"> Third Party</label>
         </div>
       </div>
-
-      <div>
-        <label>Scroll Number</label>
-        <input type="text" name="scrollNumber" id="scrollNumber" readonly>
-      </div>
-
     </div>
   </fieldset>
 
@@ -652,7 +646,7 @@ function _openLookup(type, extraParams) {
     _currentLookupTarget = type;
     _rowCache = null;
 
-    let url = 'LookupForTransactions.jsp?type=' + type;
+    let url = '../LookupForTransactions.jsp?type=' + type;
     if (extraParams) url += '&' + extraParams;
 
     fetch(url)
@@ -769,7 +763,7 @@ function handleIfscLiveSearch(value) {
 function _doIfscSearch(searchTerm) {
     const resultsDiv = document.getElementById('ifscResults');
 
-    fetch('SearchAccounts.jsp', {
+    fetch('../SearchAccounts.jsp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'searchNumber=' + encodeURIComponent(searchTerm) + '&category=ifsc'
@@ -875,7 +869,7 @@ function fetchAccountDetails(accountCode) {
         return;
     }
 
-    fetch('GetAccountDetails.jsp?accountCode=' + encodeURIComponent(accountCode))
+    fetch('../GetAccountDetails.jsp?accountCode=' + encodeURIComponent(accountCode))
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (data.error) {
@@ -927,7 +921,7 @@ function loadChequeData() {
     document.getElementById('chequeSeries').innerHTML = '<option value="">Loading...</option>';
     document.getElementById('chequeNumber').innerHTML = '<option value="">Loading...</option>';
 
-    fetch('GetChequeData.jsp?accountCode=' + encodeURIComponent(accountCode))
+    fetch('../GetChequeData.jsp?accountCode=' + encodeURIComponent(accountCode))
         .then(function(r) { return r.json(); })
         .then(function(data) {
             if (!data.success) {
@@ -1192,7 +1186,7 @@ function handleAccLiveSearch(value) {
 function _doAccSearch(searchNum) {
     const resultsDiv = document.getElementById('accResults');
 
-    fetch('SearchAccounts.jsp', {
+    fetch('../SearchAccounts.jsp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'searchNumber=' + encodeURIComponent(searchNum) + '&category=rtgs'

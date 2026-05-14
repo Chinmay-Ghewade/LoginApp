@@ -33,12 +33,12 @@
 
         <!-- 2. Charges -->
         <div class="card" onclick="openInParentFrame('Transactions/charges.jsp', 'Transactions > Charges')">
-            <h3>Charges</h3>
+            <h3>Charges / INT Posting</h3>
             <p class="size-1">→</p>
         </div>
 
         <!-- 3. RTGS -->
-        <div class="card" onclick="openInParentFrame('Transactions/rtgsNeftCards.jsp', 'Transactions > RTGS / NEFT')">
+        <div class="card" onclick="openInParentFrame('Transactions/RTGS&NEFT/rtgsNeftCards.jsp', 'Transactions > RTGS / NEFT')">
             <h3>RTGS / NEFT</h3>
             <p class="size-1">→</p>
         </div>

@@ -8,7 +8,7 @@
     String branchCode = (String) session.getAttribute("branchCode");
 
     if (branchCode == null) {
-        response.sendRedirect("../login.jsp");
+        response.sendRedirect("../../login.jsp");
         return;
     }
 %>
@@ -18,7 +18,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RTGS / NEFT</title>
-    <link rel="stylesheet" href="../css/cardView.css">
+    <link rel="stylesheet" href="../../css/cardView.css">
 </head>
 <body>
 
@@ -26,14 +26,14 @@
     <div class="cards-wrapper">
 
         <!-- 1. RTGS Outward -->
-        <div class="card" onclick="openInParentFrame('Transactions/rtgs.jsp', 'Transactions > RTGS Outward')">
-            <h3>RTGS Outward</h3>
+        <div class="card" onclick="openInParentFrame('Transactions/RTGS&NEFT/rtgs.jsp', 'Transactions > RTGS Outward')">
+            <h3>RTGS / NEFT Outward</h3>
             <p class="size-1">→</p>
         </div>
 
         <!-- 2. RTGS Inward -->
-        <div class="card" onclick="openInParentFrame('Transactions/rtgsInward.jsp', 'Transactions > RTGS Inward')">
-            <h3>RTGS Inward</h3>
+        <div class="card" onclick="openInParentFrame('Transactions/RTGS&NEFT/rtgsInward.jsp', 'Transactions > RTGS Inward')">
+            <h3>RTGS / NEFT Inward</h3>
             <p class="size-1">→</p>
         </div>
 
