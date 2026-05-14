@@ -47,8 +47,8 @@
         try {
             con = DBConnection.getConnection();
 
-            // Search from the START of IFSC code (first 3+ characters)
-            String query = "SELECT IFSC_CODE, BANK_NAME, BRANCH_NAME " +
+            // ✅ MODIFIED: Added DISTRICT_NAME and STATE_NAME to query
+            String query = "SELECT IFSC_CODE, BANK_NAME, BRANCH_NAME, DISTRICT_NAME, STATE_NAME " +
                            "FROM GLOBALCONFIG.BANK_BRANCH_IFC_CODE " +
                            "WHERE UPPER(IFSC_CODE) LIKE UPPER(?) " +
                            "AND ROWNUM <= 50 " +
@@ -69,6 +69,9 @@
                 item.put("code",        rs.getString("IFSC_CODE")   != null ? rs.getString("IFSC_CODE").trim()   : "");
                 item.put("name",        rs.getString("BANK_NAME")   != null ? rs.getString("BANK_NAME").trim()   : "");
                 item.put("branchName",  rs.getString("BRANCH_NAME") != null ? rs.getString("BRANCH_NAME").trim() : "");
+                // ✅ ADDED: districtName and stateName
+                item.put("districtName", rs.getString("DISTRICT_NAME") != null ? rs.getString("DISTRICT_NAME").trim() : "");
+                item.put("stateName",    rs.getString("STATE_NAME")    != null ? rs.getString("STATE_NAME").trim()    : "");
                 item.put("productDesc", "");
                 accountsArray.put(item);
                 count++;

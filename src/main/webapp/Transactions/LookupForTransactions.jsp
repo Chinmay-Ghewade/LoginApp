@@ -24,7 +24,8 @@
         query = "SELECT PRODUCT_CODE, DESCRIPTION FROM HEADOFFICE.PRODUCT WHERE ACCOUNT_TYPE = ? ORDER BY PRODUCT_CODE";
     }
     else if ("ifsc".equals(type)) {
-        query = "SELECT IFSC_CODE, BANK_NAME, BRANCH_NAME FROM GLOBALCONFIG.BANK_BRANCH_IFC_CODE ORDER BY IFSC_CODE";
+        // ✅ UPDATED: Added DISTRICT_NAME and STATE_NAME to query
+        query = "SELECT IFSC_CODE, BANK_NAME, BRANCH_NAME, DISTRICT_NAME, STATE_NAME FROM GLOBALCONFIG.BANK_BRANCH_IFC_CODE ORDER BY IFSC_CODE";
     }
     else if ("account".equals(type) || "dynamicCredit".equals(type)) {
         // Map account categories to product code starting digits
@@ -184,6 +185,8 @@
         <% } %>
         <% if ("ifsc".equals(type)) { %>
             <th>Branch Name</th>
+            <th>District</th>
+            <th>State</th>
         <% } %>
     </tr>
 
@@ -194,6 +197,8 @@
             String desc = rs.getString(2);
             String productDesc = "";
             String branchName = "";
+            String districtName = "";
+            String stateName = "";
             
             // Get product description for account type
             if ("account".equals(type)) {
@@ -201,20 +206,30 @@
                 if (productDesc == null) productDesc = "";
             }
             
-            // Get branch name for IFSC type
+            // Get branch name, district, and state for IFSC type
             if ("ifsc".equals(type)) {
                 branchName = rs.getString(3);
                 if (branchName == null) branchName = "";
+                
+                // ✅ NEW: Get district and state for IFSC
+                districtName = rs.getString(4);
+                if (districtName == null) districtName = "";
+                
+                stateName = rs.getString(5);
+                if (stateName == null) stateName = "";
             }
             
             rowCount++;
 %>
 
     <% if ("ifsc".equals(type)) { %>
-    <tr class="data-row" onclick="sendBack('<%=code%>', '<%=desc%>', '<%=branchName%>', '<%=type%>')">
+    <!-- ✅ UPDATED: Pass districtName and stateName to sendBack() -->
+    <tr class="data-row" onclick="sendBack('<%=code%>', '<%=desc%>', '<%=branchName%>', '<%=type%>', '<%=districtName%>', '<%=stateName%>')">
         <td class="ifsc-col-code"><%=code%></td>
         <td class="ifsc-col-bank"><%=desc%></td>
         <td class="ifsc-col-branch"><%=branchName%></td>
+        <td><%=districtName%></td>
+        <td><%=stateName%></td>
     </tr>
     <% } else { %>
     <tr class="data-row" onclick="sendBack('<%=code%>', '<%=desc%>', '<%=type%>')">
@@ -232,7 +247,7 @@
         if (rowCount == 0) {
 %>
     <tr>
-        <td colspan="<%= "ifsc".equals(type) ? "3" : "2" %>" class="no-results">
+        <td colspan="<%= "ifsc".equals(type) ? "5" : "2" %>" class="no-results">
             <% if ("ifsc".equals(type)) { %>
                 No IFSC records found
             <% } else { %>

@@ -36,20 +36,6 @@
       background-color: #f9f9f9;
       font-style: italic;
     }
-    .dd-spinner {
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #373279;
-      margin-left: 4px;
-      animation: ddPulse 0.8s ease-in-out infinite alternate;
-      vertical-align: middle;
-    }
-    @keyframes ddPulse {
-      from { opacity: 0.2; transform: scale(0.8); }
-      to   { opacity: 1;   transform: scale(1.1); }
-    }
-    .dd-spinner.done { display: none; }
 
     .form-buttons { display: flex !important; }
     
@@ -189,21 +175,7 @@
     .ifsc-results::-webkit-scrollbar       { width: 7px; }
     .ifsc-results::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     .ifsc-results::-webkit-scrollbar-thumb { background: #8066E8; border-radius: 4px; }
-    
-    
-    select.dd-loading { color: #999; background-color: #f9f9f9; font-style: italic; }
-	.dd-spinner {
-	  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-	  background: #373279; margin-left: 4px;
-	  animation: ddPulse 0.8s ease-in-out infinite alternate; vertical-align: middle;
-	}
-	@keyframes ddPulse {
-	  from { opacity: 0.2; transform: scale(0.8); }
-	  to   { opacity: 1;   transform: scale(1.1); }
-	}
-	.dd-spinner.done { display: none; }
-	  </style>
-  
+  </style>
   
 </head>
 <body>
@@ -508,19 +480,16 @@
         <input type="text" name="beneficiaryAddress2" id="beneficiaryAddress2">
       </div>
 
+      <!-- ✅ CHANGED: City and State are now readonly text inputs -->
       <div>
-		  <label>City <span class="dd-spinner" id="citySpinner"></span></label>
-		  <select name="beneficiaryCity" id="beneficiaryCity" class="dd-loading form-input">
-		    <option value="">Loading...</option>
-		  </select>
-		</div>
-		
-		<div>
-		  <label>State <span class="dd-spinner" id="stateSpinner"></span></label>
-		  <select name="beneficiaryState" id="beneficiaryState" class="dd-loading form-input">
-		    <option value="">Loading...</option>
-		  </select>
-		</div>
+        <label>City</label>
+        <input type="text" name="beneficiaryCity" id="beneficiaryCity" readonly>
+      </div>
+
+      <div>
+        <label>State</label>
+        <input type="text" name="beneficiaryState" id="beneficiaryState" readonly>
+      </div>
 
       <div>
         <label>Sender To Receiver Info</label>
@@ -618,7 +587,6 @@ function closeRtgsErrorModal() {
 // ──────────────────────────────────────────────────────────────────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
-    	loadCityStateDropdowns();
         window.parent.updateParentBreadcrumb(
             window.buildBreadcrumbPath
                 ? window.buildBreadcrumbPath('Transactions/rtgs.jsp')
@@ -690,9 +658,9 @@ function openIfscLookup() {
 // ──────────────────────────────────────────────────────────────────────
 // sendBack — called by rows in LookupForTransactions.jsp
 // ──────────────────────────────────────────────────────────────────────
-function sendBack(a, b, c, d) {
+function sendBack(a, b, c, d, e, f) {
     if (d === 'ifsc' || c === 'ifsc') {
-        setIfscFromLookup(a, b, c);
+        setIfscFromLookup(a, b, c, e, f);
     } else {
         setValueFromLookup(a, b, c);
     }
@@ -715,10 +683,16 @@ function setValueFromLookup(code, desc, type) {
 // ──────────────────────────────────────────────────────────────────────
 // SET IFSC FROM LOOKUP (modal) or live-search selection
 // ──────────────────────────────────────────────────────────────────────
-function setIfscFromLookup(ifscCode, bankName, branchName) {
+// ✅ UPDATED: Now accepts districtName and stateName parameters
+function setIfscFromLookup(ifscCode, bankName, branchName, districtName, stateName) {
     document.getElementById('ifscCode').value       = ifscCode   || '';
     document.getElementById('ifscBankName').value   = bankName   || '';
     document.getElementById('ifscBranchName').value = branchName || '';
+    
+    // ✅ AUTO-POPULATE CITY AND STATE FROM IFSC
+    document.getElementById('beneficiaryCity').value = districtName || '';
+    document.getElementById('beneficiaryState').value = stateName || '';
+    
     // Close live-search dropdown if open
     const d = document.getElementById('ifscResults');
     if (d) d.classList.remove('active');
@@ -789,6 +763,7 @@ function _doIfscSearch(searchTerm) {
     });
 }
 
+// ✅ UPDATED: Include districtName and stateName in rendering
 function _renderIfscResults(accounts, searchTerm) {
     const resultsDiv = document.getElementById('ifscResults');
     let html = '';
@@ -798,11 +773,13 @@ function _renderIfscResults(accounts, searchTerm) {
         const safeCode   = (item.code       || '').replace(/'/g, "\\'");
         const safeName   = (item.name       || '').replace(/'/g, "\\'");
         const safeBranch = (item.branchName || '').replace(/'/g, "\\'");
+        const safeDistrict = (item.districtName || '').replace(/'/g, "\\'");  // ✅ NEW
+        const safeState  = (item.stateName  || '').replace(/'/g, "\\'");       // ✅ NEW
 
         const highlightedCode = _ifscHighlight(item.code || '', searchTerm);
 
         html += '<div class="ifsc-result-item" ' +
-                'onmousedown="_selectIfsc(\'' + safeCode + '\',\'' + safeName + '\',\'' + safeBranch + '\')">' +
+                'onmousedown="_selectIfsc(\'' + safeCode + '\',\'' + safeName + '\',\'' + safeBranch + '\',\'' + safeDistrict + '\',\'' + safeState + '\')">' +
                 '<span class="ifsc-col-code">'   + highlightedCode        + '</span>' +
                 '<span class="ifsc-col-bank">'   + (item.name       || '') + '</span>' +
                 '<span class="ifsc-col-branch">' + (item.branchName || '') + '</span>' +
@@ -821,11 +798,16 @@ function _ifscHighlight(text, search) {
            text.substring(idx + search.length);
 }
 
-// Called via onmousedown so it fires before the input's onblur
-function _selectIfsc(ifscCode, bankName, branchName) {
+// ✅ UPDATED: Called via onmousedown to accept districtName and stateName
+function _selectIfsc(ifscCode, bankName, branchName, districtName, stateName) {
     document.getElementById('ifscCode').value       = ifscCode;
     document.getElementById('ifscBankName').value   = bankName;
     document.getElementById('ifscBranchName').value = branchName;
+    
+    // ✅ AUTO-POPULATE CITY AND STATE FROM IFSC
+    document.getElementById('beneficiaryCity').value = districtName || '';
+    document.getElementById('beneficiaryState').value = stateName || '';
+    
     document.getElementById('ifscResults').classList.remove('active');
 }
 
@@ -1069,8 +1051,9 @@ function resetRtgsForm() {
     document.getElementById('applicableCharges').value = '0';
     document.getElementById('serviceTax').value        = '0';
     document.getElementById('totalAmount').value       = '0';
-    document.getElementById('beneficiaryCity').selectedIndex  = 0;
-    document.getElementById('beneficiaryState').selectedIndex = 0;
+    // ✅ UPDATED: Clear city/state text fields instead of dropdowns
+    document.getElementById('beneficiaryCity').value = '';
+    document.getElementById('beneficiaryState').value = '';
     // clear live-search dropdowns
     var di = document.getElementById('ifscResults');
     if (di) di.classList.remove('active');
@@ -1265,59 +1248,6 @@ function scheduleAccClose() {
     accCloseTimer = setTimeout(function() {
         document.getElementById('accResults').classList.remove('active');
     }, 200);
-}
-//══════════════════════════════════════════════════════════════════════
-// for city and state data load 
-//══════════════════════════════════════════════════════════════════════
-
-function loadCityStateDropdowns() {
-    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
-        .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-        .then(function(data) {
-            // City
-            var citySelect  = document.getElementById('beneficiaryCity');
-            var citySpinner = document.getElementById('citySpinner');
-            if (Array.isArray(data.city) && data.city.length > 0) {
-                citySelect.innerHTML = '<option value="">-- Select City --</option>';
-                data.city.forEach(function(item) {
-                    var opt = document.createElement('option');
-                    opt.value = item.v; opt.textContent = item.l;
-                    citySelect.appendChild(opt);
-                });
-            } else {
-                citySelect.innerHTML = '<option value="">-- Error loading --</option>';
-                citySelect.style.borderColor = '#f44336';
-            }
-            citySelect.classList.remove('dd-loading');
-            if (citySpinner) citySpinner.classList.add('done');
-
-            // State
-            var stateSelect  = document.getElementById('beneficiaryState');
-            var stateSpinner = document.getElementById('stateSpinner');
-            if (Array.isArray(data.state) && data.state.length > 0) {
-                stateSelect.innerHTML = '<option value="">-- Select State --</option>';
-                data.state.forEach(function(item) {
-                    var opt = document.createElement('option');
-                    opt.value = item.v; opt.textContent = item.l;
-                    stateSelect.appendChild(opt);
-                });
-            } else {
-                stateSelect.innerHTML = '<option value="">-- Error loading --</option>';
-                stateSelect.style.borderColor = '#f44336';
-            }
-            stateSelect.classList.remove('dd-loading');
-            if (stateSpinner) stateSpinner.classList.add('done');
-        })
-        .catch(function(err) {
-            ['beneficiaryCity','beneficiaryState'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) { el.innerHTML = '<option value="">-- Error: reload page --</option>'; el.style.borderColor = '#f44336'; el.classList.remove('dd-loading'); }
-            });
-            ['citySpinner','stateSpinner'].forEach(function(id) {
-                var sp = document.getElementById(id);
-                if (sp) { sp.style.background = '#f44336'; sp.classList.add('done'); }
-            });
-        });
 }
 </script>
 
