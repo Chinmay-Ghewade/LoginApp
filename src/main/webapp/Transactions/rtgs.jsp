@@ -476,7 +476,7 @@
         <div style="position:relative;">
           <div class="ifsc-results" id="ifscResults"></div>
         </div>
-        <div class="ifsc-hint">Type first 3+ letters to search (e.g. SBIN, HDFC…)</div>
+        <div class="ifsc-hint">Type first 3+ letters to search</div>
       </div>
 
       <div>
