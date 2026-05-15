@@ -443,7 +443,7 @@
 
       <div>
         <label>Beneficiary Name</label>
-        <input type="text" name="beneficiaryName" id="beneficiaryName" required>
+        <input type="text" name="beneficiaryName" id="beneficiaryName">
       </div>
 
       <div>
