@@ -186,30 +186,59 @@
 <!-- ════════════════════════════════════════════════════════════════ -->
 <!-- RTGS SUCCESS MODAL                                             -->
 <!-- ════════════════════════════════════════════════════════════════ -->
-<div id="rtgsSuccessModal" class="rtgs-success-modal">
-  <div class="rtgs-success-card">
-    <div class="rtgs-success-icon">✅</div>
-    <h2>RTGS Request Submitted Successfully!</h2>
-    <p>Your RTGS transaction has been registered.</p>
-    <div class="rtgs-success-detail-box">
-      <div class="rtgs-success-detail-row">
-        <span>Transaction ID</span>
-        <span id="successTransactionId">—</span>
-      </div>
-      <div class="rtgs-success-detail-row">
-        <span>Beneficiary Name</span>
-        <span id="successBeneficiaryName">—</span>
-      </div>
-      <div class="rtgs-success-detail-row">
-        <span>Amount</span>
-        <span id="successAmount">—</span>
-      </div>
-      <div class="rtgs-success-detail-row">
-        <span>Status</span>
-        <span id="successStatus">Submitted</span>
-      </div>
+<div id="rtgsSuccessModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;">
+  <div style="
+      background: white;
+      width: 500px;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;">
+    <div style="color: #2ecc71; font-size: 48px; margin-bottom: 20px;">✓</div>
+    <div id="successMessage" style="
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;">
+      RTGS Entry Saved Successfully!
     </div>
-    <button class="rtgs-success-ok-btn" onclick="closeRtgsSuccessModal()">OK</button>
+    <div id="successScrollNumber" style="
+        font-size: 25px;
+        color: #666;
+        margin-bottom: 10px;
+        font-weight: bold;">
+      Scroll Number: —
+    </div>
+    <div id="successBeneficiaryName" style="
+        font-size: 15px;
+        color: #555;
+        margin-bottom: 25px;">
+      Beneficiary: —
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button onclick="closeRtgsSuccessModal()" style="
+          background: #2ecc71;
+          color: white;
+          border: none;
+          padding: 12px 50px;
+          border-radius: 6px;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background 0.3s;"
+          onmouseover="this.style.background='#27ae60'"
+          onmouseout="this.style.background='#2ecc71'">
+        OK
+      </button>
+    </div>
   </div>
 </div>
 
@@ -594,9 +623,7 @@ window.onload = function() {
         );
     }
 
-    document.getElementById('rtgsSuccessModal').addEventListener('click', function(e) {
-        if (e.target === this) closeRtgsSuccessModal();
-    });
+   
     document.getElementById('lookupModal').addEventListener('click', function(e) {
         if (e.target === this) closeLookup();
     });
@@ -972,25 +999,26 @@ function calculateTotal() {
 // ──────────────────────────────────────────────────────────────────────
 function submitRtgsForm(e) {
     e.preventDefault();
-
+ 
     var btn = document.querySelector('button[type="submit"]');
     if (btn.disabled) return;
     btn.disabled = true;
     btn.textContent = 'Submitting…';
-
+ 
     var beneficiaryName = document.getElementById('beneficiaryName').value.trim();
-    var accountCode     = document.getElementById('accountCode').value.trim();
     var remittingAmount = document.getElementById('remittingAmount').value.trim();
-
-    if (!beneficiaryName) { btn.disabled=false; btn.textContent='Save'; showRtgsError('Please enter Beneficiary Name.'); return; }
-    if (!accountCode)     { btn.disabled=false; btn.textContent='Save'; showRtgsError('Please select Account Code.'); return; }
+ 
+    if (!beneficiaryName) {
+        btn.disabled = false; btn.textContent = 'Save';
+        showRtgsError('Please enter Beneficiary Name.'); return;
+    }
     if (!remittingAmount || parseFloat(remittingAmount) <= 0) {
-        btn.disabled=false; btn.textContent='Save';
+        btn.disabled = false; btn.textContent = 'Save';
         showRtgsError('Please enter a valid Remitting Amount.'); return;
     }
-
+ 
     var formData = new FormData(document.getElementById('rtgsForm'));
-
+ 
     fetch(window.APP_CONTEXT_PATH + '/RtgsServlet', {
         method: 'POST',
         body: formData
@@ -1000,10 +1028,7 @@ function submitRtgsForm(e) {
         btn.disabled = false;
         btn.textContent = 'Save';
         if (data.success) {
-            document.getElementById('successTransactionId').textContent   = data.transactionId   || '—';
-            document.getElementById('successBeneficiaryName').textContent = data.beneficiaryName || '—';
-            document.getElementById('successAmount').textContent          = '₹ ' + (data.totalAmount || '0.00');
-            document.getElementById('rtgsSuccessModal').classList.add('open');
+            showRtgsSuccessModal(data.scrollNumber, data.beneficiaryName, data.totalAmount);
             resetRtgsForm();
         } else {
             showRtgsError(data.message || 'Failed to submit RTGS request.');
@@ -1019,8 +1044,16 @@ function submitRtgsForm(e) {
 // ──────────────────────────────────────────────────────────────────────
 // HELPERS
 // ──────────────────────────────────────────────────────────────────────
+function showRtgsSuccessModal(scrollNumber, beneficiaryName, totalAmount) {
+    document.getElementById('successScrollNumber').textContent =
+        'Scroll Number: ' + (scrollNumber || '—');
+    document.getElementById('successBeneficiaryName').textContent =
+        'Beneficiary: ' + (beneficiaryName || '—');
+    document.getElementById('rtgsSuccessModal').style.display = 'flex';
+}
+ 
 function closeRtgsSuccessModal() {
-    document.getElementById('rtgsSuccessModal').classList.remove('open');
+    document.getElementById('rtgsSuccessModal').style.display = 'none';
 }
 
 function validateRtgsForm() {
