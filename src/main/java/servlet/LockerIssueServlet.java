@@ -118,6 +118,7 @@ public class LockerIssueServlet extends HttpServlet {
         Connection        conn      = null;
         PreparedStatement psCheck   = null;
         PreparedStatement psRent    = null;
+        PreparedStatement psExist   = null;
         PreparedStatement psInsert  = null;
         PreparedStatement psUpdate  = null;
         PreparedStatement psTxn     = null;
@@ -195,58 +196,136 @@ public class LockerIssueServlet extends HttpServlet {
                 rentToDate = new java.sql.Date(cal.getTimeInMillis());
             }
 
-            // ── 6e. INSERT into ACCOUNT.LOCKERACCOUNT ────────────────────────
-            psInsert = conn.prepareStatement(
-                "INSERT INTO ACCOUNT.LOCKERACCOUNT (" +
-                "  BRANCH_CODE, LOCKER_TYPE, LOCKER_NUMBER, DATE_OF_HIRE, KEY_NO, " +
-                "  CUSTOMER_ID, SAVINGACCOUNT_CODE, LESSOR_AGREEMENT, NAME_OF_HIRE, " +
-                "  ADDRESS_LINE1, ADDRESS_LINE2, ADDRESS_LINE3, CITY, PIN, " +
-                "  TELEPHONE_RES, TELEPHONE_OFFICE, RENT_PAID_TILL_DATE, " +
-                "  MODE_OF_OPERATION, CATEGORY, JOIN_OPERATION, NOMINEE, " +
-                "  USER_ID, OFFICER_ID, ACCOUNT_STATUS, MOBILE_NO, " +
-                "  CREATED_DATE, MODIFIED_DATE" +
-                ") VALUES (" +
-                "  ?,?,?,?,?, " +
-                "  ?,NULL,?,?, " +
-                "  ?,?,?,?,?, " +
-                "  ?,?,?, " +
-                "  ?,?,?,?, " +
-                "  ?,?,'E',?, " +
-                "  SYSDATE, SYSDATE" +
-                ")"
+            // ── 6e. Check if LOCKERACCOUNT record already exists (from previous tenant) ──
+            psExist = conn.prepareStatement(
+                "SELECT COUNT(1) FROM ACCOUNT.LOCKERACCOUNT " +
+                "WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
+                "AND   LOCKER_NUMBER     = ? " +
+                "AND   TRIM(LOCKER_TYPE) = TRIM(?)"
             );
-            int i = 1;
-            psInsert.setString(i++, branchCode.trim());
-            psInsert.setString(i++, lockerType.trim());
-            psInsert.setInt   (i++, lockerNumber);
-            psInsert.setDate  (i++, dateOfHire);
-            psInsert.setString(i++, keyNo.isEmpty()      ? null : keyNo);
-            psInsert.setString(i++, customerId.trim());
-            psInsert.setString(i++, lessorAgre.isEmpty() ? null : lessorAgre);
-            psInsert.setString(i++, nameOfHire.isEmpty() ? null : nameOfHire);
-            psInsert.setString(i++, address1.isEmpty()   ? null : address1);
-            psInsert.setString(i++, address2.isEmpty()   ? null : address2);
-            psInsert.setString(i++, address3.isEmpty()   ? null : address3);
-            psInsert.setString(i++, city.isEmpty()       ? null : city);
-            psInsert.setString(i++, pin.isEmpty()        ? null : pin);
-            psInsert.setString(i++, telRes.isEmpty()     ? null : telRes);
-            psInsert.setString(i++, telOffice.isEmpty()  ? null : telOffice);
-            if (rentDate != null) {
-                psInsert.setDate(i++, rentDate);
+            psExist.setString(1, branchCode.trim());
+            psExist.setInt   (2, lockerNumber);
+            psExist.setString(3, lockerType.trim());
+            rs = psExist.executeQuery();
+            boolean recordExists = rs.next() && rs.getInt(1) > 0;
+            rs.close();    rs      = null;
+            psExist.close(); psExist = null;
+
+            if (recordExists) {
+                // ── 6e-i. UPDATE existing record for the new tenant ──────────
+                psInsert = conn.prepareStatement(
+                    "UPDATE ACCOUNT.LOCKERACCOUNT SET " +
+                    "  CUSTOMER_ID          = ?, " +
+                    "  DATE_OF_HIRE         = ?, " +
+                    "  KEY_NO               = ?, " +
+                    "  LESSOR_AGREEMENT     = ?, " +
+                    "  NAME_OF_HIRE         = ?, " +
+                    "  ADDRESS_LINE1        = ?, " +
+                    "  ADDRESS_LINE2        = ?, " +
+                    "  ADDRESS_LINE3        = ?, " +
+                    "  CITY                 = ?, " +
+                    "  PIN                  = ?, " +
+                    "  TELEPHONE_RES        = ?, " +
+                    "  TELEPHONE_OFFICE     = ?, " +
+                    "  MOBILE_NO            = ?, " +
+                    "  RENT_PAID_TILL_DATE  = ?, " +
+                    "  MODE_OF_OPERATION    = ?, " +
+                    "  CATEGORY             = ?, " +
+                    "  JOIN_OPERATION       = ?, " +
+                    "  NOMINEE              = ?, " +
+                    "  USER_ID              = ?, " +
+                    "  OFFICER_ID           = ?, " +
+                    "  ACCOUNT_STATUS       = 'E', " +
+                    "  SAVINGACCOUNT_CODE   = NULL, " +
+                    "  MODIFIED_DATE        = SYSDATE " +
+                    "WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
+                    "AND   LOCKER_NUMBER     = ? " +
+                    "AND   TRIM(LOCKER_TYPE) = TRIM(?)"
+                );
+                int i = 1;
+                psInsert.setString(i++, customerId.trim());
+                psInsert.setDate  (i++, dateOfHire);
+                psInsert.setString(i++, keyNo.isEmpty()        ? null : keyNo);
+                psInsert.setString(i++, lessorAgre.isEmpty()   ? null : lessorAgre);
+                psInsert.setString(i++, nameOfHire.isEmpty()   ? null : nameOfHire);
+                psInsert.setString(i++, address1.isEmpty()     ? null : address1);
+                psInsert.setString(i++, address2.isEmpty()     ? null : address2);
+                psInsert.setString(i++, address3.isEmpty()     ? null : address3);
+                psInsert.setString(i++, city.isEmpty()         ? null : city);
+                psInsert.setString(i++, pin.isEmpty()          ? null : pin);
+                psInsert.setString(i++, telRes.isEmpty()       ? null : telRes);
+                psInsert.setString(i++, telOffice.isEmpty()    ? null : telOffice);
+                psInsert.setString(i++, mobileNo.isEmpty()     ? null : mobileNo);
+                if (rentDate != null) {
+                    psInsert.setDate(i++, rentDate);
+                } else {
+                    psInsert.setNull(i++, Types.DATE);
+                }
+                psInsert.setString(i++, modeOfOperation.isEmpty() ? null : modeOfOperation);
+                psInsert.setString(i++, category.isEmpty()         ? "PUBLIC" : category);
+                psInsert.setString(i++, joinOperChar);
+                psInsert.setString(i++, nomineeChar);
+                psInsert.setString(i++, userId != null ? userId.trim() : null);
+                psInsert.setString(i++, userId != null ? userId.trim() : null);
+                // WHERE clause params
+                psInsert.setString(i++, branchCode.trim());
+                psInsert.setInt   (i++, lockerNumber);
+                psInsert.setString(i++, lockerType.trim());
+
             } else {
-                psInsert.setNull(i++, Types.DATE);
+                // ── 6e-ii. INSERT fresh record ───────────────────────────────
+                psInsert = conn.prepareStatement(
+                    "INSERT INTO ACCOUNT.LOCKERACCOUNT (" +
+                    "  BRANCH_CODE, LOCKER_TYPE, LOCKER_NUMBER, DATE_OF_HIRE, KEY_NO, " +
+                    "  CUSTOMER_ID, SAVINGACCOUNT_CODE, LESSOR_AGREEMENT, NAME_OF_HIRE, " +
+                    "  ADDRESS_LINE1, ADDRESS_LINE2, ADDRESS_LINE3, CITY, PIN, " +
+                    "  TELEPHONE_RES, TELEPHONE_OFFICE, RENT_PAID_TILL_DATE, " +
+                    "  MODE_OF_OPERATION, CATEGORY, JOIN_OPERATION, NOMINEE, " +
+                    "  USER_ID, OFFICER_ID, ACCOUNT_STATUS, MOBILE_NO, " +
+                    "  CREATED_DATE, MODIFIED_DATE" +
+                    ") VALUES (" +
+                    "  ?,?,?,?,?, " +
+                    "  ?,NULL,?,?, " +
+                    "  ?,?,?,?,?, " +
+                    "  ?,?,?, " +
+                    "  ?,?,?,?, " +
+                    "  ?,?,'E',?, " +
+                    "  SYSDATE, SYSDATE" +
+                    ")"
+                );
+                int i = 1;
+                psInsert.setString(i++, branchCode.trim());
+                psInsert.setString(i++, lockerType.trim());
+                psInsert.setInt   (i++, lockerNumber);
+                psInsert.setDate  (i++, dateOfHire);
+                psInsert.setString(i++, keyNo.isEmpty()        ? null : keyNo);
+                psInsert.setString(i++, customerId.trim());
+                psInsert.setString(i++, lessorAgre.isEmpty()   ? null : lessorAgre);
+                psInsert.setString(i++, nameOfHire.isEmpty()   ? null : nameOfHire);
+                psInsert.setString(i++, address1.isEmpty()     ? null : address1);
+                psInsert.setString(i++, address2.isEmpty()     ? null : address2);
+                psInsert.setString(i++, address3.isEmpty()     ? null : address3);
+                psInsert.setString(i++, city.isEmpty()         ? null : city);
+                psInsert.setString(i++, pin.isEmpty()          ? null : pin);
+                psInsert.setString(i++, telRes.isEmpty()       ? null : telRes);
+                psInsert.setString(i++, telOffice.isEmpty()    ? null : telOffice);
+                if (rentDate != null) {
+                    psInsert.setDate(i++, rentDate);
+                } else {
+                    psInsert.setNull(i++, Types.DATE);
+                }
+                psInsert.setString(i++, modeOfOperation.isEmpty() ? null : modeOfOperation);
+                psInsert.setString(i++, category.isEmpty()         ? "PUBLIC" : category);
+                psInsert.setString(i++, joinOperChar);
+                psInsert.setString(i++, nomineeChar);
+                psInsert.setString(i++, userId != null ? userId.trim() : null);
+                psInsert.setString(i++, userId != null ? userId.trim() : null);
+                psInsert.setString(i++, mobileNo.isEmpty()     ? null : mobileNo);
             }
-            psInsert.setString(i++, modeOfOperation.isEmpty() ? null : modeOfOperation);
-            psInsert.setString(i++, category.isEmpty()        ? "PUBLIC" : category);
-            psInsert.setString(i++, joinOperChar);
-            psInsert.setString(i++, nomineeChar);
-            psInsert.setString(i++, userId != null ? userId.trim() : null);
-            psInsert.setString(i++, userId != null ? userId.trim() : null);
-            psInsert.setString(i++, mobileNo.isEmpty() ? null : mobileNo);
 
             if (psInsert.executeUpdate() == 0) {
                 conn.rollback();
-                out.print(errorJson("Failed to insert locker account record."));
+                out.print(errorJson("Failed to save locker account record."));
                 return;
             }
             psInsert.close(); psInsert = null;
@@ -283,34 +362,34 @@ public class LockerIssueServlet extends HttpServlet {
                 "  USER_ID, OFFICER_ID, TRN_TYPE, " +
                 "  SERVICE_TAX, CREATED_DATE, MODIFIED_DATE" +
                 ") VALUES (" +
-                "  ?,?,?, " +           // BRANCH_CODE, LOCKER_TYPE, LOCKER_NUMBER
-                "  ?,?, " +             // ISSUE_DATE, TXN_DATE
-                "  ?,?, " +             // RENT_FROMDATE, RENT_TODATE
-                "  0,?, " +             // TXN_NUMBER=0 (default), SCROLL_NUMBER
-                "  ?,?,?, " +           // RENT, PERIOD, AMOUNT
-                "  NULL,'E', " +        // GLACCOUNT_HEAD=null, TRANSACTION_STATUS='E'
-                "  ?,?,'T', " +         // USER_ID, OFFICER_ID, TRN_TYPE='T'
-                "  0, SYSDATE, SYSDATE" // SERVICE_TAX=0, CREATED_DATE, MODIFIED_DATE
-                + ")"
+                "  ?,?,?, " +
+                "  ?,?, " +
+                "  ?,?, " +
+                "  0,?, " +
+                "  ?,?,?, " +
+                "  NULL,'E', " +
+                "  ?,?,'T', " +
+                "  0, SYSDATE, SYSDATE" +
+                ")"
             );
             int j = 1;
             psTxn.setString    (j++, branchCode.trim());
             psTxn.setString    (j++, lockerType.trim());
             psTxn.setInt       (j++, lockerNumber);
-            psTxn.setDate      (j++, dateOfHire);        // ISSUE_DATE = workingDate
-            psTxn.setDate      (j++, dateOfHire);        // TXN_DATE   = workingDate
-            psTxn.setDate      (j++, rentFromDate);      // RENT_FROMDATE = dateOfHire
+            psTxn.setDate      (j++, dateOfHire);
+            psTxn.setDate      (j++, dateOfHire);
+            psTxn.setDate      (j++, rentFromDate);
             if (rentToDate != null) {
-                psTxn.setDate  (j++, rentToDate);        // RENT_TODATE = dateOfHire + period months
+                psTxn.setDate  (j++, rentToDate);
             } else {
                 psTxn.setNull  (j++, Types.DATE);
             }
-            psTxn.setLong      (j++, scrollNumber);      // SCROLL_NUMBER from NEXT_SCROLL_NO.NEXTVAL ✅
-            psTxn.setBigDecimal(j++, rent);              // RENT from BRANCHLOCKER_RENTS
-            psTxn.setInt       (j++, period);            // PERIOD from BRANCHLOCKER_RENTS
-            psTxn.setBigDecimal(j++, rent);              // AMOUNT = RENT
-            psTxn.setString    (j++, userId != null ? userId.trim() : null);  // USER_ID
-            psTxn.setString    (j++, userId != null ? userId.trim() : null);  // OFFICER_ID
+            psTxn.setLong      (j++, scrollNumber);
+            psTxn.setBigDecimal(j++, rent);
+            psTxn.setInt       (j++, period);
+            psTxn.setBigDecimal(j++, rent);
+            psTxn.setString    (j++, userId != null ? userId.trim() : null);
+            psTxn.setString    (j++, userId != null ? userId.trim() : null);
 
             if (psTxn.executeUpdate() == 0) {
                 conn.rollback();
@@ -345,6 +424,7 @@ public class LockerIssueServlet extends HttpServlet {
             try { if (rs       != null) rs.close();       } catch (Exception ignored) {}
             try { if (psCheck  != null) psCheck.close();  } catch (Exception ignored) {}
             try { if (psRent   != null) psRent.close();   } catch (Exception ignored) {}
+            try { if (psExist  != null) psExist.close();  } catch (Exception ignored) {}
             try { if (psInsert != null) psInsert.close(); } catch (Exception ignored) {}
             try { if (psUpdate != null) psUpdate.close(); } catch (Exception ignored) {}
             try { if (psTxn    != null) psTxn.close();    } catch (Exception ignored) {}
@@ -375,7 +455,6 @@ public class LockerIssueServlet extends HttpServlet {
     // ── Utility: build error JSON ────────────────────────────────────────────
     private String errorJson(String message) {
         if (message == null) message = "Unknown error";
-        // Sanitize special characters that break JSON string literals
         message = message.replace("\\", "\\\\")
                          .replace("\"", "\\\"")
                          .replace("\n", " ")

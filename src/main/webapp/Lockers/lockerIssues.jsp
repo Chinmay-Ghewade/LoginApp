@@ -629,6 +629,12 @@
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
+// ── Submission guard — prevents double-click / duplicate inserts ────
+var _isSubmitting = false;
+
+var _allLockerTypes   = [];
+var _allLockerNumbers = [];
+
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
         window.parent.updateParentBreadcrumb(
@@ -652,28 +658,30 @@ window.onload = function() {
 function submitLockerIssue(e) {
     e.preventDefault();
 
+    // ── Block if a submission is already in flight ──────────────────
+    if (_isSubmitting) return;
+
     var btn = document.getElementById('issueLockerBtn');
-    if (btn.disabled) return;          // ← block double/multiple clicks
-    btn.disabled    = true;
-    btn.textContent = 'Issuing...';
 
     var lockerType   = document.getElementById('lockerTypeSearch').value.trim();
     var lockerNumber = document.getElementById('lockerNumberSearch').value.trim();
     var customerId   = document.getElementById('customerIdLookup').value.trim();
 
-    // Client-side validation — re-enable button on failure
+    // Client-side validation — do NOT set _isSubmitting until all checks pass
     if (!lockerType) {
-        btn.disabled = false; btn.textContent = 'Issue Locker';
         showToast('Please select a Locker Type.', true); return;
     }
     if (!lockerNumber) {
-        btn.disabled = false; btn.textContent = 'Issue Locker';
         showToast('Please select a Locker Number.', true); return;
     }
     if (!customerId) {
-        btn.disabled = false; btn.textContent = 'Issue Locker';
         showToast('Please select a Customer.', true); return;
     }
+
+    // ── All validation passed — lock submission ─────────────────────
+    _isSubmitting   = true;
+    btn.disabled    = true;
+    btn.textContent = 'Issuing...';
 
     var formData = new FormData(document.getElementById('lockerIssueForm'));
 
@@ -683,6 +691,8 @@ function submitLockerIssue(e) {
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
+        // ── Always unlock after response ────────────────────────────
+        _isSubmitting   = false;
         btn.disabled    = false;
         btn.textContent = 'Issue Locker';
 
@@ -698,6 +708,8 @@ function submitLockerIssue(e) {
         }
     })
     .catch(function(err) {
+        // ── Unlock on network error too ─────────────────────────────
+        _isSubmitting   = false;
         btn.disabled    = false;
         btn.textContent = 'Issue Locker';
         showToast('Network error: ' + err.message, true);
@@ -764,9 +776,6 @@ function loadCityDropdown() {
 // ══════════════════════════════════════════════════════════════════════
 // LOCKER TYPE LOOKUP
 // ══════════════════════════════════════════════════════════════════════
-var _allLockerTypes   = [];
-var _allLockerNumbers = [];
-
 function openLockerTypeLookup() {
     document.getElementById('lockerTypeLookupModal').style.display = 'flex';
     document.getElementById('lockerTypeSearchInput').value = '';
@@ -997,6 +1006,9 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
 
 // ── Reset Form ──────────────────────────────────────────────────────
 function resetLockerForm() {
+    // ── Reset submission guard ──────────────────────────────────────
+    _isSubmitting = false;
+
     document.getElementById('lockerIssueForm').reset();
     ['keyNo','customerNameDisplay','dispAddress1','dispAddress2','dispAddress3',
      'dispMobile','dispTelRes','dispTelOffice','dispPin','rentPaidTillDate'].forEach(function(id) {

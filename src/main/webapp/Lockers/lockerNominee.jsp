@@ -129,6 +129,15 @@
       padding: 0 20px;
     }
 
+    /* ── input-icon-box for locker info fieldset ── */
+    .input-icon-box { position: relative; display: flex; align-items: center; }
+    .input-icon-box input { padding-right: 36px; }
+    .inside-icon-btn {
+      position: absolute; right: 4px;
+      background: none; border: none; font-size: 16px;
+      cursor: pointer; color: #373279; padding: 0 4px;
+    }
+
     /* ── Lookup table styling scoped to nominee lookup content ── */
     #nomineeCustomerLookupContent .lookup-title {
       font-size: 1.05rem;
@@ -243,14 +252,29 @@
     <legend>Locker Information</legend>
     <div class="form-grid">
 
+      <!-- ── NEW: Customer ID with lookup ── -->
+      <div>
+        <label>Customer ID</label>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <input type="text" name="lockerCustomerId" id="lockerCustomerId"
+                 class="form-input" readonly>
+          <button type="button" class="icon-btn"
+                  onclick="openLockerInfoCustomerLookup()"
+                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+                         border-radius:8px; font-size:18px; cursor:pointer;" title="Search Customer">…</button>
+        </div>
+      </div>
+
       <div>
         <label>Locker Number</label>
-        <input type="text" name="lockerNumber" id="lockerNumber" required>
+        <input type="text" name="lockerNumber" id="lockerNumber" readonly
+               style="background:#f4f2fc;">
       </div>
 
       <div>
         <label>Locker Type</label>
-        <input type="text" name="lockerType" id="lockerType" required>
+        <input type="text" name="lockerType" id="lockerType" readonly
+               style="background:#f4f2fc;">
       </div>
 
     </div>
@@ -406,7 +430,7 @@
 </form>
 
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- CUSTOMER LOOKUP MODAL — exact same structure as NewUser.jsp    -->
+<!-- CUSTOMER LOOKUP MODAL — shared for both locker info & nominees  -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <div id="nomineeCustomerLookupModal" class="customer-modal">
     <div style="background:#fff; border-radius:14px; width:85%; max-width:920px;
@@ -430,7 +454,7 @@
                   onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
         </div>
 
-        <!-- Loading indicator shown until content loads -->
+        <!-- Loading indicator -->
         <div id="nomineeCustomerLookupLoading"
              style="display:flex;align-items:center;justify-content:center;
                     gap:10px;padding:40px 20px;color:#8066E8;font-size:14px;">
@@ -449,6 +473,11 @@
 
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
+
+// ── Tracks which context opened the lookup modal ────────────────────
+// 'lockerInfo' = Fieldset 1 Customer ID
+// nominee card element = Fieldset 2 nominee card
+var _nomineeModalContext = null;
 
 // ═══════════════════════════════════════════════════════════════════════
 // AJAX DROPDOWN LOADER
@@ -509,10 +538,9 @@ function _fillNomineeBlock(block, data) {
             _nomineeDropdownCache = data;
             var firstBlock = document.querySelector('.nominee-block');
             if (firstBlock) _fillNomineeBlock(firstBlock, data);
-            console.log('✅ Nominee dropdowns loaded via AddCustomerDataLoader');
         })
         .catch(function(err) {
-            console.error('❌ Nominee dropdown error:', err);
+            console.error('Nominee dropdown error:', err);
             var firstBlock = document.querySelector('.nominee-block');
             if (!firstBlock) return;
             Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
@@ -557,7 +585,6 @@ function addNominee() {
     if (cidContainer) cidContainer.style.display = 'none';
 
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
-
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
     Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
@@ -605,14 +632,49 @@ function toggleNomineeCustomerID(radio) {
     if (input && radio.value !== 'yes') input.value = '';
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// CUSTOMER LOOKUP — same pattern as NewUser.jsp
-// ═══════════════════════════════════════════════════════════════════════
 
-var _activeNomineeCard = null;
+// ═══════════════════════════════════════════════════════════════════════
+// LOCKER INFO — Customer ID lookup (Fieldset 1)
+// Fetches LOCKERACCOUNT where CUSTOMER_ID = ? and ACCOUNT_STATUS = 'E'
+// (which corresponds to BRANCHLOCKER status 'H' = hired)
+// ═══════════════════════════════════════════════════════════════════════
+function openLockerInfoCustomerLookup() {
+    _nomineeModalContext = 'lockerInfo';
+    _openSharedCustomerLookup();
+}
 
+function _fetchLockerDetailsByCustomer(customerId) {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/LockerDetailsByCustomerLoader?customerId='
+            + encodeURIComponent(customerId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success && data.locker) {
+                document.getElementById('lockerNumber').value = data.locker.lockerNumber || '';
+                document.getElementById('lockerType').value   = data.locker.lockerType   || '';
+            } else {
+                document.getElementById('lockerNumber').value = '';
+                document.getElementById('lockerType').value   = '';
+                showToast(data.message || 'No active locker found for this customer.', true);
+            }
+        })
+        .catch(function(err) {
+            console.error('Locker detail fetch error:', err);
+            showToast('Failed to fetch locker details.', true);
+        });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// NOMINEE CARD — Customer ID lookup (Fieldset 2)
+// ═══════════════════════════════════════════════════════════════════════
 function openNomineeCustomerLookup(triggerEl) {
-    _activeNomineeCard = triggerEl.closest('.nominee-block');
+    _nomineeModalContext = triggerEl.closest('.nominee-block');
+    _openSharedCustomerLookup();
+}
+
+
+// ── Shared modal open ───────────────────────────────────────────────
+function _openSharedCustomerLookup() {
     document.getElementById('nomineeCustomerLookupModal').style.display = 'flex';
     document.getElementById('nomineeCustomerLookupLoading').style.display = 'flex';
     document.getElementById('nomineeCustomerLookupContent').innerHTML = '';
@@ -636,57 +698,77 @@ function closeNomineeCustomerLookup() {
     document.getElementById('nomineeCustomerLookupModal').style.display = 'none';
 }
 
-// Called by lookupForCustomerId.jsp when a row is clicked
+// ── Called by lookupForCustomerId.jsp when a row is clicked ─────────
 window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
-    if (!_activeNomineeCard) return;
 
-    var idInput = _activeNomineeCard.querySelector('.nomineeCustomerIDInput');
-    if (idInput) idInput.value = customerId;
+    if (_nomineeModalContext === 'lockerInfo') {
+        // ── Fieldset 1: fill Customer ID then fetch locker details ──
+        document.getElementById('lockerCustomerId').value = customerId;
+        closeNomineeCustomerLookup();
+        _fetchLockerDetailsByCustomer(customerId);
 
-    closeNomineeCustomerLookup();
+    } else if (_nomineeModalContext && _nomineeModalContext !== 'lockerInfo') {
+        // ── Fieldset 2: fill nominee card fields ────────────────────
+        var card = _nomineeModalContext;
+        var idInput = card.querySelector('.nomineeCustomerIDInput');
+        if (idInput) idInput.value = customerId;
 
-    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (!data.success || !data.customer) return;
-            var c = data.customer;
+        closeNomineeCustomerLookup();
 
-            var fieldMap = {
-                'nomineeName[]'     : c.customerName || '',
-                'nomineeMobile[]'   : c.mobileNo     || '',
-                'nomineeAddress1[]' : c.address1     || '',
-                'nomineeAddress2[]' : c.address2     || '',
-                'nomineeAddress3[]' : c.address3     || '',
-                'nomineeZip[]'      : c.zip ? String(c.zip) : '' 
-            };
+        fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId='
+                + encodeURIComponent(customerId))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success || !data.customer) return;
+                var c = data.customer;
 
-            Object.keys(fieldMap).forEach(function(name) {
-                var el = _activeNomineeCard.querySelector('[name="' + name + '"]');
-                if (el) el.value = fieldMap[name];
-            });
+                var fieldMap = {
+                    'nomineeName[]'     : c.customerName || '',
+                    'nomineeMobile[]'   : c.mobileNo     || '',
+                    'nomineeAddress1[]' : c.address1     || '',
+                    'nomineeAddress2[]' : c.address2     || '',
+                    'nomineeAddress3[]' : c.address3     || '',
+                    'nomineeZip[]'      : c.zip ? String(c.zip) : ''
+                };
+                Object.keys(fieldMap).forEach(function(name) {
+                    var el = card.querySelector('[name="' + name + '"]');
+                    if (el) el.value = fieldMap[name];
+                });
 
-            var ddMap = {
-                'nomineeCity[]'    : c.city    || '',
-                'nomineeState[]'   : c.state   || '',
-                'nomineeCountry[]' : c.country || ''
-            };
-
-            Object.keys(ddMap).forEach(function(name) {
-                var sel = _activeNomineeCard.querySelector('[name="' + name + '"]');
-                if (!sel || !ddMap[name]) return;
-                for (var i = 0; i < sel.options.length; i++) {
-                    if (sel.options[i].value === ddMap[name] ||
-                        sel.options[i].text  === ddMap[name]) {
-                        sel.selectedIndex = i;
-                        break;
+                var ddMap = {
+                    'nomineeCity[]'    : c.city    || '',
+                    'nomineeState[]'   : c.state   || '',
+                    'nomineeCountry[]' : c.country || ''
+                };
+                Object.keys(ddMap).forEach(function(name) {
+                    var sel = card.querySelector('[name="' + name + '"]');
+                    if (!sel || !ddMap[name]) return;
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === ddMap[name] ||
+                            sel.options[i].text  === ddMap[name]) {
+                            sel.selectedIndex = i; break;
+                        }
                     }
-                }
+                });
+            })
+            .catch(function(err) {
+                console.error('Failed to fetch nominee customer details:', err);
             });
-        })
-        .catch(function(err) {
-            console.error('Failed to fetch nominee customer details:', err);
-        });
+    }
 };
+
+// ── Toast helper ────────────────────────────────────────────────────
+function showToast(msg, isError) {
+    Toastify({
+        text: msg, duration: 3500, gravity: 'top', position: 'right', stopOnFocus: true,
+        style: {
+            background: isError
+                ? 'linear-gradient(to right,#e53935,#b71c1c)'
+                : 'linear-gradient(to right,#373279,#5a3ec8)',
+            borderRadius: '8px', fontFamily: 'Arial,sans-serif', fontSize: '14px'
+        }
+    }).showToast();
+}
 
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {

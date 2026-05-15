@@ -38,7 +38,6 @@
 
     // ─────────────────────────────────────────────
     // AJAX: Return ISSUED locker numbers as JSON
-    // Fetches ACCOUNT_STATUS = 'A' (authorized/active)
     // ─────────────────────────────────────────────
     if ("getIssuedLockers".equals(request.getParameter("action"))) {
         response.setContentType("application/json");
@@ -106,7 +105,6 @@
             conn = DBConnection.getConnection();
             if (conn == null) { out.print("{\"success\":false,\"message\":\"DB connection failed\"}"); return; }
 
-            // ── Fetch locker account details ──
             ps = conn.prepareStatement(
                 "SELECT LA.CUSTOMER_ID, LA.NAME_OF_HIRE, " +
                 "  TO_CHAR(LA.DATE_OF_HIRE,        'YYYY-MM-DD') AS DATE_OF_HIRE, " +
@@ -133,7 +131,6 @@
             String customerName    = rs.getString("CUSTOMER_NAME")       != null ? rs.getString("CUSTOMER_NAME")       : "";
             rs.close(); rs = null; ps.close(); ps = null;
 
-            // ── Fetch RENT and PERIOD from BRANCH.BRANCHLOCKER_RENTS ──
             double rent = 0; int period = 12;
             psRent = conn.prepareStatement(
                 "SELECT RENT, PERIOD_IN_MONTHS FROM BRANCH.BRANCHLOCKER_RENTS " +
@@ -145,7 +142,6 @@
             if (rsRent.next()) { rent = rsRent.getDouble("RENT"); period = rsRent.getInt("PERIOD_IN_MONTHS"); }
             rsRent.close(); rsRent = null; psRent.close(); psRent = null;
 
-            // ── Fetch scroll number from TRANSACTION.LOCKERTRANSACTION ──
             String scrollNumber = "";
             psScroll = conn.prepareStatement(
                 "SELECT TO_CHAR(SCROLL_NUMBER) AS SCROLL_NUMBER FROM TRANSACTION.LOCKERTRANSACTION " +
@@ -159,8 +155,6 @@
             if (rsScroll.next()) scrollNumber = rsScroll.getString("SCROLL_NUMBER") != null ? rsScroll.getString("SCROLL_NUMBER") : "";
             rsScroll.close(); rsScroll = null; psScroll.close(); psScroll = null;
 
-            // ── Calculate completed months & rent due ──
-            // MONTHS_BETWEEN(workingDate, DATE_OF_HIRE)
             double completedMonths = 0, rentPerMonth = 0, rentDue = 0;
             String rentToDateStr = "";
             if (!dateOfHireStr.isEmpty()) {
@@ -172,14 +166,11 @@
                 completedMonths = diff < 0 ? 0 : diff;
                 rentPerMonth    = period > 0 ? (rent / period) : 0;
                 rentDue         = completedMonths * rentPerMonth;
-
-                // RENT_TODATE = DATE_OF_HIRE + period months
                 java.util.Calendar calT = java.util.Calendar.getInstance(); calT.setTime(dateOfHire);
                 calT.add(java.util.Calendar.MONTH, period);
                 rentToDateStr = new java.sql.Date(calT.getTimeInMillis()).toString();
             }
 
-            // ── Build JSON ──
             JSONObject result = new JSONObject();
             result.put("success",               true);
             result.put("found",                 true);
@@ -266,7 +257,6 @@
     String branchCode = (String) session.getAttribute("branchCode");
     if (branchCode == null) { response.sendRedirect("../login.jsp"); return; }
 
-    // ✅ Working date from session
     java.sql.Date workingDate = (java.sql.Date) session.getAttribute("workingDate");
     String workingDateStr = workingDate != null ? workingDate.toString() : new java.sql.Date(System.currentTimeMillis()).toString();
     String contextPath = request.getContextPath();
@@ -297,11 +287,127 @@
     form { padding: 0 20px; }
     .simple-lookup-item { padding: 13px 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: #373279; border-bottom: 1px solid #ece8f8; border-left: 3px solid transparent; transition: all 0.15s ease; display: flex; align-items: center; justify-content: space-between; }
     .simple-lookup-item:hover { background: #f0eefb; border-left-color: #373279; }
+
+    /* ══════════════════════════════════════════
+       CONFIRMATION POPUP STYLES
+    ══════════════════════════════════════════ */
+    @keyframes toastSlideIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes popIn {
+      from { transform: scale(0.80); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    #surrenderSuccessModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 18, 60, 0.45);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    #surrenderSuccessModal .popup-card {
+      background: #ffffff;
+      border-radius: 16px;
+      width: 420px;
+      padding: 38px 36px 30px 36px;
+      text-align: center;
+      box-shadow: 0 12px 48px rgba(55, 50, 121, 0.22);
+      font-family: Arial, sans-serif;
+      animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    /* Green check icon */
+    #surrenderSuccessModal .check-icon {
+      font-size: 52px;
+      color: #22c55e;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+    #surrenderSuccessModal .popup-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+    }
+    #surrenderSuccessModal .popup-subtitle {
+      font-size: 0.92rem;
+      color: #555;
+      margin-bottom: 22px;
+    }
+    #surrenderSuccessModal .popup-subtitle strong {
+      color: #1a1a2e;
+    }
+    /* Details table */
+    #surrenderSuccessModal .popup-details {
+      background: #f6f7f9;
+      border-radius: 10px;
+      padding: 4px 0;
+      margin-bottom: 28px;
+      text-align: left;
+      border: 1px solid #e8e8ee;
+    }
+    #surrenderSuccessModal .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      padding: 11px 18px;
+    }
+    #surrenderSuccessModal .detail-row + .detail-row {
+      border-top: 1px solid #e8e8ee;
+    }
+    #surrenderSuccessModal .detail-label {
+      color: #444;
+      font-weight: 400;
+    }
+    #surrenderSuccessModal .detail-value {
+      font-weight: 700;
+      color: #373279;
+      font-size: 0.92rem;
+    }
+    /* Buttons */
+    #surrenderSuccessModal .popup-btn-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+    #surrenderSuccessModal .btn-cancel {
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 0;
+      width: 150px;
+      font-size: 0.97rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    #surrenderSuccessModal .btn-cancel:hover  { background: #cccccc; transform: translateY(-1px); }
+    #surrenderSuccessModal .btn-cancel:active { transform: translateY(1px); }
+    #surrenderSuccessModal .btn-ok {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 13px 0;
+      width: 150px;
+      font-size: 0.97rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.30);
+    }
+    #surrenderSuccessModal .btn-ok:hover  { background: #16a34a; transform: translateY(-1px); }
+    #surrenderSuccessModal .btn-ok:active { transform: translateY(1px); }
   </style>
 </head>
 <body>
 
-<form action="LockerSurrenderServlet" method="post" onsubmit="return validateSurrenderForm()">
+<form id="surrenderForm" onsubmit="submitSurrenderForm(event)">
 
   <!-- ══════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER TYPE DETAILS                   -->
@@ -326,9 +432,7 @@
         </div>
         <small id="lockerNumberHint" style="font-size:11px;color:#888;margin-top:2px;display:block;">Select locker type first</small>
       </div>
-      <div style="display:flex; align-items:flex-end;">
-        <button type="button" id="checkAvailabilityBtn" onclick="loadLockerDetails()">Check Availability</button>
-      </div>
+
     </div>
   </fieldset>
 
@@ -366,8 +470,6 @@
         <div class="txn-mode-row radio-group">
           <label><input type="radio" name="transactionMode" value="CASH" checked onchange="toggleDebitSection(this)"> Cash</label>
           <label><input type="radio" name="transactionMode" value="TRANSFER" onchange="toggleDebitSection(this)"> Transfer</label>
-          <label>Status</label>
-          <input type="text" name="transferStatus" id="transferStatus" style="width:80px;" readonly>
         </div>
       </div>
       <div id="debitACSection" style="display:none;">
@@ -393,6 +495,40 @@
   </div>
 
 </form>
+
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- CONFIRMATION POPUP MODAL                                       -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<div id="surrenderSuccessModal">
+  <div class="popup-card">
+
+    <!-- Green checkmark -->
+    <div class="check-icon">&#10003;</div>
+
+    <div class="popup-title">Confirm Locker Surrender?</div>
+    <div class="popup-subtitle">Are you sure you want to <strong>surrender</strong> this locker?</div>
+
+    <!-- Detail rows: Locker Type / Locker No. -->
+    <div class="popup-details">
+      <div class="detail-row">
+        <span class="detail-label">Locker Type</span>
+        <span class="detail-value" id="successLockerType">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Locker Number</span>
+        <span class="detail-value" id="successLockerNumber">—</span>
+      </div>
+    </div>
+
+    <!-- Cancel → closes popup, form stays | OK → calls servlet -->
+    <div class="popup-btn-row">
+      <button class="btn-cancel" onclick="closeSurrenderSuccessModal(false)">Cancel</button>
+      <button class="btn-ok"     onclick="closeSurrenderSuccessModal(true)">Yes, Surrender</button>
+    </div>
+
+  </div>
+</div>
 
 
 <!-- ════════════════════════════════════════════════════════════════ -->
@@ -463,7 +599,7 @@
 
 
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- DEBIT ACCOUNT LOOKUP MODAL — same style                        -->
+<!-- DEBIT ACCOUNT LOOKUP MODAL                                     -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <div id="debitACLookupModal" class="customer-modal">
     <div style="background:#fff; border-radius:14px; width:60%; max-width:700px; max-height:72vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 8px 32px rgba(55,50,121,0.18); font-family:Arial,sans-serif;">
@@ -502,7 +638,7 @@
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 var _allLockerTypes = [], _allLockerNumbers = [];
 
-// ✅ Set working date from session on load
+// Set working date from session on load
 window.onload = function() {
     document.getElementById('transactionDate').value = '<%= workingDateStr %>';
     if (window.parent && window.parent.updateParentBreadcrumb) {
@@ -599,6 +735,7 @@ function selectLockerNumber(lockerNumber, customerId, nameOfHire) {
     document.getElementById('customerId').value  = customerId  || '';
     document.getElementById('nameOfHire').value  = nameOfHire  || '';
     closeLockerNumberLookup();
+    loadLockerDetails(); // auto-fetch details immediately
 }
 function closeLockerNumberLookup() { document.getElementById('lockerNumberLookupModal').style.display = 'none'; }
 document.getElementById('lockerNumberLookupModal').addEventListener('click', function(e) { if (e.target === this) closeLockerNumberLookup(); });
@@ -609,22 +746,29 @@ document.getElementById('lockerNumberLookupModal').addEventListener('click', fun
 function openDebitACLookup() {
     document.getElementById('debitACLookupModal').style.display = 'flex';
     document.getElementById('debitACSearchInput').value = '';
-    document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:#888;">Type to search accounts...</td></tr>';
     document.getElementById('debitACCount').textContent = '0';
+    // Load first 50 accounts immediately on open
+    document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:#888;">Loading...</td></tr>';
+    fetch('lockerSurrender.jsp?action=getAccounts&search=')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success) renderDebitACRows(data.accounts || []);
+            else document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:red;">' + (data.message || 'Failed.') + '</td></tr>';
+        }).catch(function(err) {
+            document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:red;">Error: ' + err.message + '</td></tr>';
+        });
 }
 function searchDebitAccounts() {
     var query = document.getElementById('debitACSearchInput').value.trim();
-    if (query.length < 2) {
-        document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:#888;">Type at least 2 characters...</td></tr>';
-        document.getElementById('debitACCount').textContent = '0'; return;
-    }
     document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:#888;">Searching...</td></tr>';
     fetch('lockerSurrender.jsp?action=getAccounts&search=' + encodeURIComponent(query))
         .then(function(res) { return res.json(); })
         .then(function(data) {
             if (data.success) renderDebitACRows(data.accounts || []);
             else document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:red;">' + (data.message || 'Failed.') + '</td></tr>';
-        }).catch(function(err) { document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:red;">Error: ' + err.message + '</td></tr>'; });
+        }).catch(function(err) {
+            document.getElementById('debitACTableBody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:24px;color:red;">Error: ' + err.message + '</td></tr>';
+        });
 }
 function renderDebitACRows(items) {
     var tbody = document.getElementById('debitACTableBody');
@@ -697,11 +841,74 @@ function toggleDebitSection(radio) {
     }
 }
 
+
 // ── Toast ───────────────────────────────────────────────────────────
 function showToast(msg, isError) {
-    Toastify({ text: msg, duration: 3500, gravity: 'top', position: 'right', stopOnFocus: true,
-        style: { background: isError ? 'linear-gradient(to right,#e53935,#b71c1c)' : 'linear-gradient(to right,#373279,#5a3ec8)', borderRadius: '8px', fontFamily: 'Arial,sans-serif', fontSize: '14px' }
-    }).showToast();
+    var existing = document.getElementById('customToast');
+    if (existing) existing.remove();
+
+    var toast = document.createElement('div');
+    toast.id = 'customToast';
+    toast.style.cssText = [
+        'position:fixed',
+        'top:22px',
+        'left:50%',
+        'transform:translateX(-50%)',
+        'z-index:99999',
+        'background:#ffffff',
+        'color:#1a1a2e',
+        'font-family:Arial,sans-serif',
+        'font-size:14px',
+        'padding:14px 18px',
+        'border-radius:8px',
+        'box-shadow:0 4px 24px rgba(45,43,128,0.18)',
+        'display:flex',
+        'align-items:center',
+        'gap:12px',
+        'min-width:320px',
+        'max-width:540px',
+        'border:1px solid #e0daf5',
+        'border-left:4px solid ' + (isError ? '#e53935' : '#2D2B80'),
+        'animation:toastSlideIn 0.22s ease'
+    ].join(';');
+
+    // Info / Error icon circle
+    var icon = document.createElement('span');
+    icon.style.cssText = [
+        'width:26px',
+        'height:26px',
+        'border-radius:50%',
+        'background:' + (isError ? '#e53935' : '#2D2B80'),
+        'color:#fff',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'font-size:13px',
+        'font-weight:700',
+        'font-style:italic',
+        'flex-shrink:0'
+    ].join(';');
+    icon.textContent = 'i';
+
+    // Message text
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;line-height:1.45;color:#1a1a2e;font-size:13.5px;';
+    text.textContent = msg;
+
+    // Close ×
+    var close = document.createElement('span');
+    close.textContent = '×';
+    close.style.cssText = 'font-size:20px;cursor:pointer;color:#aaa;flex-shrink:0;line-height:1;padding:0 2px;';
+    close.onmouseover = function() { this.style.color = '#555'; };
+    close.onmouseout  = function() { this.style.color = '#aaa'; };
+    close.onclick     = function() { toast.remove(); };
+
+    toast.appendChild(icon);
+    toast.appendChild(text);
+    toast.appendChild(close);
+    document.body.appendChild(toast);
+
+    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3500);
 }
 
 // ── Reset ───────────────────────────────────────────────────────────
@@ -735,6 +942,80 @@ function validateSurrenderForm() {
         showToast('Please select a Debit Account for Transfer mode.', true); return false;
     }
     return true;
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 1: Surrender Locker button clicked
+// → validate form, then show confirmation popup only
+// → servlet is NOT called here
+// ══════════════════════════════════════════════════════════════
+function submitSurrenderForm(e) {
+    e.preventDefault();
+    if (!validateSurrenderForm()) return;
+
+    // Just show confirmation popup — servlet call happens only on OK
+    var lockerType   = document.getElementById('lockerTypeSearch').value.trim();
+    var lockerNumber = document.getElementById('lockerNumberSearch').value.trim();
+    showSurrenderConfirmPopup(lockerType, lockerNumber);
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 2: Show confirmation popup with locker details
+// ══════════════════════════════════════════════════════════════
+function showSurrenderConfirmPopup(lockerType, lockerNumber) {
+    document.getElementById('successLockerType').textContent   = lockerType   || '—';
+    document.getElementById('successLockerNumber').textContent = lockerNumber || '—';
+    document.getElementById('surrenderSuccessModal').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 3: OK → call servlet | Cancel → close popup, form stays
+// ══════════════════════════════════════════════════════════════
+function closeSurrenderSuccessModal(doConfirm) {
+    document.getElementById('surrenderSuccessModal').style.display = 'none';
+    if (doConfirm) {
+        // User clicked OK → now perform the actual surrender operation
+        performSurrenderOperation();
+    }
+    // User clicked Cancel → popup closes, form stays exactly as is, nothing happens
+}
+
+// Clicking the dark backdrop = same as Cancel
+document.getElementById('surrenderSuccessModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSurrenderSuccessModal(false);
+});
+
+// ══════════════════════════════════════════════════════════════
+// STEP 4: Actual servlet call — only after OK is clicked
+// ══════════════════════════════════════════════════════════════
+function performSurrenderOperation() {
+    var submitBtn = document.querySelector('.form-buttons button[type="submit"]');
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Processing...';
+
+    var formData = new FormData(document.getElementById('surrenderForm'));
+
+    fetch(window.APP_CONTEXT_PATH + '/LockerSurrenderServlet', {
+        method: 'POST',
+        body:   formData
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        submitBtn.disabled    = false;
+        submitBtn.textContent = 'Surrender Locker';
+
+        if (data.success) {
+            showToast('Locker surrendered successfully!', false);
+            resetSurrenderForm(); // reset form only after actual success
+        } else {
+            showToast(data.message || 'Failed to surrender locker.', true);
+        }
+    })
+    .catch(function(err) {
+        submitBtn.disabled    = false;
+        submitBtn.textContent = 'Surrender Locker';
+        showToast('Network error: ' + err.message, true);
+    });
 }
 </script>
 </body>

@@ -43,15 +43,12 @@
     }
     .dd-spinner.done { display: none; }
 
-    /* Nominee header: title left, remove button right */
     .nominee-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
     }
-
-    /* Customer ID row: radio + CID field on the same line */
     .nominee-cid-row {
       display: flex;
       align-items: flex-end;
@@ -64,13 +61,9 @@
       flex-direction: column;
       gap: 4px;
     }
-
-    /* Customer ID input + search button flush */
     .nominee-cid-row .input-icon-box {
       display: flex;
     }
-
-    /* Each joint holder block */
     .nominee-block {
       border: 1px solid #c9c5e8;
       border-radius: 6px;
@@ -80,16 +73,12 @@
     .nominee-block:last-of-type {
       margin-bottom: 4px;
     }
-
-    /* Form buttons centered */
     .form-buttons {
       display: flex;
       gap: 10px;
       justify-content: center;
       margin-top: 4px;
     }
-
-    /* Equal 3-column grid — overrides addCustomer.css for joint holder fields only */
     .nominee-block .personal-grid {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
@@ -97,8 +86,6 @@
       align-items: end !important;
       width: 100% !important;
     }
-
-    /* Every cell stacks label + field */
     .nominee-block .personal-grid > div {
       display: flex !important;
       flex-direction: column !important;
@@ -106,8 +93,6 @@
       min-width: 0 !important;
       width: 100% !important;
     }
-
-    /* ALL inputs AND selects same width */
     .nominee-block .personal-grid input,
     .nominee-block .personal-grid select {
       width: 100% !important;
@@ -116,8 +101,6 @@
       max-width: 100% !important;
       display: block !important;
     }
-
-    /* Declaration cell — spans all 3 cols, checkbox+text centered */
     .nominee-block .personal-grid .declaration-cell {
       grid-column: 1 / -1 !important;
       display: flex !important;
@@ -137,7 +120,16 @@
       padding: 0 20px;
     }
 
-    /* ── Lookup table styling scoped to joint holder customer lookup content ── */
+    /* ── input-icon-box for locker info fieldset ── */
+    .input-icon-box { position: relative; display: flex; align-items: center; }
+    .input-icon-box input { padding-right: 36px; }
+    .inside-icon-btn {
+      position: absolute; right: 4px;
+      background: none; border: none; font-size: 16px;
+      cursor: pointer; color: #373279; padding: 0 4px;
+    }
+
+    /* ── Lookup table styling scoped to joint holder lookup content ── */
     #jhCustomerLookupContent .lookup-title {
       font-size: 1.05rem;
       font-weight: 700;
@@ -251,22 +243,29 @@
     <legend>Locker Information</legend>
     <div class="form-grid">
 
+      <!-- ── Customer ID with lookup — auto-fills Locker Type & Number ── -->
+      <div>
+        <label>Customer ID</label>
+        <div style="display:flex; gap:4px; align-items:center;">
+          <input type="text" name="lockerCustomerId" id="lockerCustomerId"
+                 class="form-input" readonly>
+          <button type="button" class="icon-btn"
+                  onclick="openLockerInfoCustomerLookup()"
+                  style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
+                         border-radius:8px; font-size:18px; cursor:pointer;" title="Search Customer">…</button>
+        </div>
+      </div>
+
       <div>
         <label>Locker Type</label>
-        <input type="text" name="lockerType" id="lockerType" required>
+        <input type="text" name="lockerType" id="lockerType" readonly
+               style="background:#f4f2fc;">
       </div>
 
       <div>
         <label>Locker Number</label>
-        <input type="text" name="lockerNumber" id="lockerNumber" required>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:4px;">
-         <label>Customer ID</label>
-          <div class="input-icon-box">
-            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCustomerLookup(this)" readonly>
-            <button type="button" class="inside-icon-btn" onclick="openJHCustomerLookup(this)" title="Search Customer">🔍</button>
-          </div>
+        <input type="text" name="lockerNumber" id="lockerNumber" readonly
+               style="background:#f4f2fc;">
       </div>
 
     </div>
@@ -288,7 +287,6 @@
 
     <div class="nominee-card nominee-block">
 
-      <!-- Header: title left, remove button right -->
       <div class="nominee-header">
         <div class="nominee-title"
              style="font-weight:bold; font-size:15px; color:#373279;">
@@ -309,15 +307,14 @@
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
-            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCustomerLookup(this)" readonly>
-            <button type="button" class="inside-icon-btn" onclick="openJHCustomerLookup(this)" title="Search Customer">🔍</button>
+            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCardCustomerLookup(this)" readonly>
+            <button type="button" class="inside-icon-btn" onclick="openJHCardCustomerLookup(this)" title="Search Customer">🔍</button>
           </div>
         </div>
       </div>
 
       <div class="personal-grid">
 
-        <!-- ✅ AJAX — key "salutation" from AddCustomerDataLoader -->
         <div>
           <label>Salutation Code <span class="dd-spinner jh-sp-salutation"></span></label>
           <select name="nomineeSalutation[]" class="jh-dd-salutation dd-loading" required>
@@ -325,7 +322,6 @@
           </select>
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Name</label>
           <input type="text" name="nomineeName[]" required
@@ -337,7 +333,6 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
@@ -345,25 +340,21 @@
           <small class="zipError"></small>
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Address 1</label>
           <input type="text" name="nomineeAddress1[]" required>
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Address 2</label>
           <input type="text" name="nomineeAddress2[]">
         </div>
 
-        <!-- plain input — no DB -->
         <div>
           <label>Address 3</label>
           <input type="text" name="nomineeAddress3[]">
         </div>
 
-        <!-- ✅ AJAX — key "city" from AddCustomerDataLoader -->
         <div>
           <label>City <span class="dd-spinner jh-sp-city"></span></label>
           <select name="nomineeCity[]" class="jh-dd-city dd-loading" required>
@@ -371,7 +362,6 @@
           </select>
         </div>
 
-        <!-- ✅ AJAX — key "state" from AddCustomerDataLoader -->
         <div>
           <label>State <span class="dd-spinner jh-sp-state"></span></label>
           <select name="nomineeState[]" class="jh-dd-state dd-loading" required>
@@ -379,7 +369,6 @@
           </select>
         </div>
 
-        <!-- ✅ AJAX — key "relation" from AddCustomerDataLoader -->
         <div>
           <label>Relation with Nominee <span class="dd-spinner jh-sp-relation"></span></label>
           <select name="nomineeRelation[]" class="jh-dd-relation dd-loading" required>
@@ -387,7 +376,6 @@
           </select>
         </div>
 
-        <!-- Declaration: last cell, checkbox+text centered -->
         <div class="declaration-cell">
           <label>
             <input type="checkbox" class="nomineeDeclaration" name="nomineeDeclaration[]" required>
@@ -412,8 +400,7 @@
 </form>
 
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- CUSTOMER LOOKUP MODAL (Locker Information fieldset)            -->
-<!-- exact same structure as lockerNominee.jsp                      -->
+<!-- CUSTOMER LOOKUP MODAL — shared for locker info & joint holder cards -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <div id="jhCustomerLookupModal" class="customer-modal">
     <div style="background:#fff; border-radius:14px; width:85%; max-width:920px;
@@ -437,7 +424,7 @@
                   onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
         </div>
 
-        <!-- Loading indicator shown until content loads -->
+        <!-- Loading indicator -->
         <div id="jhCustomerLookupLoading"
              style="display:flex;align-items:center;justify-content:center;
                     gap:10px;padding:40px 20px;color:#8066E8;font-size:14px;">
@@ -456,6 +443,11 @@
 
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
+
+// ── Tracks which context opened the lookup modal ────────────────────
+// 'lockerInfo' = Fieldset 1 Customer ID
+// joint holder card element = Fieldset 2 card
+var _jhModalContext = null;
 
 // ═══════════════════════════════════════════════════════════════════════
 // AJAX DROPDOWN LOADER
@@ -515,10 +507,9 @@ function _fillJHBlock(block, data) {
             _jhDropdownCache = data;
             var firstBlock = document.querySelector('.nominee-block');
             if (firstBlock) _fillJHBlock(firstBlock, data);
-            console.log('✅ Joint holder dropdowns loaded via AddCustomerDataLoader');
         })
         .catch(function(err) {
-            console.error('❌ Joint holder dropdown error:', err);
+            console.error('Joint holder dropdown error:', err);
             var firstBlock = document.querySelector('.nominee-block');
             if (!firstBlock) return;
             Object.keys(JH_DD_MAP).forEach(function(key) {
@@ -547,7 +538,7 @@ function renumberNominees() {
     });
 }
 
-// ── Add joint holder card (clones the first card) ───────────────────
+// ── Add joint holder card ───────────────────────────────────────────
 function addNominee() {
     var fieldset  = document.getElementById('nomineeFieldset');
     var firstCard = fieldset.querySelector('.nominee-block');
@@ -563,7 +554,6 @@ function addNominee() {
     if (cidContainer) cidContainer.style.display = 'none';
 
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
-
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
 
     Object.keys(JH_DD_MAP).forEach(function(key) {
@@ -611,11 +601,49 @@ function toggleNomineeCustomerID(radio) {
     if (input && radio.value !== 'yes') input.value = '';
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// CUSTOMER LOOKUP (Locker Information fieldset) — same pattern as lockerNominee.jsp
-// ═══════════════════════════════════════════════════════════════════════
 
-function openCustomerLookup(triggerEl) {
+// ═══════════════════════════════════════════════════════════════════════
+// LOCKER INFO — Customer ID lookup (Fieldset 1)
+// Fetches LOCKERACCOUNT where CUSTOMER_ID = ? and ACCOUNT_STATUS = 'E'
+// (which corresponds to BRANCHLOCKER status 'H' = hired)
+// ═══════════════════════════════════════════════════════════════════════
+function openLockerInfoCustomerLookup() {
+    _jhModalContext = 'lockerInfo';
+    _openSharedJHLookup();
+}
+
+function _fetchLockerDetailsByCustomer(customerId) {
+    fetch(window.APP_CONTEXT_PATH + '/loaders/LockerDetailsByCustomerLoader?customerId='
+            + encodeURIComponent(customerId))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.success && data.locker) {
+                document.getElementById('lockerType').value   = data.locker.lockerType   || '';
+                document.getElementById('lockerNumber').value = data.locker.lockerNumber || '';
+            } else {
+                document.getElementById('lockerType').value   = '';
+                document.getElementById('lockerNumber').value = '';
+                showToast(data.message || 'No active locker found for this customer.', true);
+            }
+        })
+        .catch(function(err) {
+            console.error('Locker detail fetch error:', err);
+            showToast('Failed to fetch locker details.', true);
+        });
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════
+// JOINT HOLDER CARD — Customer ID lookup (Fieldset 2)
+// ═══════════════════════════════════════════════════════════════════════
+function openJHCardCustomerLookup(triggerEl) {
+    _jhModalContext = triggerEl.closest('.nominee-block');
+    _openSharedJHLookup();
+}
+
+
+// ── Shared modal open ───────────────────────────────────────────────
+function _openSharedJHLookup() {
     document.getElementById('jhCustomerLookupModal').style.display = 'flex';
     document.getElementById('jhCustomerLookupLoading').style.display = 'flex';
     document.getElementById('jhCustomerLookupContent').innerHTML = '';
@@ -639,93 +667,74 @@ function closeJHCustomerLookup() {
     document.getElementById('jhCustomerLookupModal').style.display = 'none';
 }
 
-// Called by lookupForCustomerId.jsp when a row is clicked (Locker Information fieldset)
+// ── Called by lookupForCustomerId.jsp when a row is clicked ─────────
 window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
-    document.getElementById('customerID').value = customerId;
 
-    closeJHCustomerLookup();
+    if (_jhModalContext === 'lockerInfo') {
+        // ── Fieldset 1: fill Customer ID then fetch locker details ──
+        document.getElementById('lockerCustomerId').value = customerId;
+        closeJHCustomerLookup();
+        _fetchLockerDetailsByCustomer(customerId);
+
+    } else if (_jhModalContext && _jhModalContext !== 'lockerInfo') {
+        // ── Fieldset 2: fill joint holder card fields ───────────────
+        var card = _jhModalContext;
+        var idInput = card.querySelector('.nomineeCustomerIDInput');
+        if (idInput) idInput.value = customerId;
+
+        closeJHCustomerLookup();
+
+        fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId='
+                + encodeURIComponent(customerId))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success || !data.customer) return;
+                var c = data.customer;
+
+                var fieldMap = {
+                    'nomineeName[]'     : c.customerName || '',
+                    'nomineeAddress1[]' : c.address1     || '',
+                    'nomineeAddress2[]' : c.address2     || '',
+                    'nomineeAddress3[]' : c.address3     || '',
+                    'nomineeZip[]'      : c.zip ? String(c.zip) : ''
+                };
+                Object.keys(fieldMap).forEach(function(name) {
+                    var el = card.querySelector('[name="' + name + '"]');
+                    if (el) el.value = fieldMap[name];
+                });
+
+                var ddMap = {
+                    'nomineeCity[]'  : c.city  || '',
+                    'nomineeState[]' : c.state || ''
+                };
+                Object.keys(ddMap).forEach(function(name) {
+                    var sel = card.querySelector('[name="' + name + '"]');
+                    if (!sel || !ddMap[name]) return;
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === ddMap[name] ||
+                            sel.options[i].text  === ddMap[name]) {
+                            sel.selectedIndex = i; break;
+                        }
+                    }
+                });
+            })
+            .catch(function(err) {
+                console.error('Failed to fetch joint holder customer details:', err);
+            });
+    }
 };
 
-// ═══════════════════════════════════════════════════════════════════════
-// JOINT HOLDER CARD — Customer Lookup (same pattern as lockerNominee.jsp)
-// ═══════════════════════════════════════════════════════════════════════
-
-var _activeJHCard = null;
-
-function openJHCustomerLookup(triggerEl) {
-    _activeJHCard = triggerEl.closest('.nominee-block');
-    document.getElementById('jhCustomerLookupModal').style.display = 'flex';
-    document.getElementById('jhCustomerLookupLoading').style.display = 'flex';
-    document.getElementById('jhCustomerLookupContent').innerHTML = '';
-
-    fetch(window.APP_CONTEXT_PATH + '/OpenAccount/lookupForCustomerId.jsp')
-        .then(function(res) { return res.text(); })
-        .then(function(html) {
-            document.getElementById('jhCustomerLookupLoading').style.display = 'none';
-            var content = document.getElementById('jhCustomerLookupContent');
-            content.innerHTML = html;
-            content.querySelectorAll('script').forEach(function(s) {
-                var ns = document.createElement('script');
-                ns.textContent = s.textContent;
-                document.body.appendChild(ns);
-                document.body.removeChild(ns);
-            });
-            // Switch setCustomerData to joint holder card mode
-            window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
-                if (!_activeJHCard) return;
-
-                var idInput = _activeJHCard.querySelector('.nomineeCustomerIDInput');
-                if (idInput) idInput.value = customerId;
-
-                closeJHCustomerLookup();
-
-                fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
-                    .then(function(res) { return res.json(); })
-                    .then(function(data) {
-                        if (!data.success || !data.customer) return;
-                        var c = data.customer;
-
-                        var fieldMap = {
-                            'nomineeName[]'     : c.customerName || '',
-                            'nomineeAddress1[]' : c.address1     || '',
-                            'nomineeAddress2[]' : c.address2     || '',
-                            'nomineeAddress3[]' : c.address3     || '',
-                            'nomineeZip[]'      : c.zip ? String(c.zip) : '' 
-                        };
-
-                        Object.keys(fieldMap).forEach(function(name) {
-                            var el = _activeJHCard.querySelector('[name="' + name + '"]');
-                            if (el) el.value = fieldMap[name];
-                        });
-
-                        var ddMap = {
-                            'nomineeCity[]'  : c.city  || '',
-                            'nomineeState[]' : c.state || ''
-                        };
-
-                        Object.keys(ddMap).forEach(function(name) {
-                            var sel = _activeJHCard.querySelector('[name="' + name + '"]');
-                            if (!sel || !ddMap[name]) return;
-                            for (var i = 0; i < sel.options.length; i++) {
-                                if (sel.options[i].value === ddMap[name] ||
-                                    sel.options[i].text  === ddMap[name]) {
-                                    sel.selectedIndex = i;
-                                    break;
-                                }
-                            }
-                        });
-                    })
-                    .catch(function(err) {
-                        console.error('Failed to fetch joint holder customer details:', err);
-                    });
-
-                // Restore base setCustomerData for the Locker Information fieldset
-                window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
-                    document.getElementById('customerID').value = customerId;
-                    closeJHCustomerLookup();
-                };
-            };
-        });
+// ── Toast helper ────────────────────────────────────────────────────
+function showToast(msg, isError) {
+    Toastify({
+        text: msg, duration: 3500, gravity: 'top', position: 'right', stopOnFocus: true,
+        style: {
+            background: isError
+                ? 'linear-gradient(to right,#e53935,#b71c1c)'
+                : 'linear-gradient(to right,#373279,#5a3ec8)',
+            borderRadius: '8px', fontFamily: 'Arial,sans-serif', fontSize: '14px'
+        }
+    }).showToast();
 }
 
 // ── Form validation ─────────────────────────────────────────────────
@@ -759,7 +768,9 @@ function validateForm() {
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
         window.parent.updateParentBreadcrumb(
-            window.buildBreadcrumbPath ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp') : 'Locker Joint Holder'
+            window.buildBreadcrumbPath
+                ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp')
+                : 'Locker Joint Holder'
         );
     }
 };
