@@ -47,7 +47,6 @@ public class RtgsServlet extends HttpServlet {
             // DEBUG PARAMETERS
             // =========================================================
 
-
             Enumeration<String> paramNames = request.getParameterNames();
 
             while (paramNames.hasMoreElements()) {
@@ -285,6 +284,14 @@ public class RtgsServlet extends HttpServlet {
             System.out.println("OUTWARD_DATE = " + workingDate);
 
             // =========================================================
+            // GENERATE TRN_REF_NO
+            // =========================================================
+
+            String trnRefNo = generateTrnRefNo(con, workingDate);
+
+            System.out.println("trnRefNo = " + trnRefNo);
+
+            // =========================================================
             // INSERT
             // =========================================================
 
@@ -293,6 +300,7 @@ public class RtgsServlet extends HttpServlet {
                     branchCode,
                     workingDate,
                     scrollNumber,
+                    trnRefNo,
                     remitterAccountCode,
                     remitterIfscCode,
                     remitterName,
@@ -331,6 +339,7 @@ public class RtgsServlet extends HttpServlet {
             jsonResponse.put("success", true);
             jsonResponse.put("message", "RTGS saved successfully");
             jsonResponse.put("scrollNumber", scrollNumber);
+            jsonResponse.put("trnRefNo", trnRefNo);
 
             out.print(jsonResponse.toString());
 
@@ -375,6 +384,7 @@ public class RtgsServlet extends HttpServlet {
             String branchCode,
             Date workingDate,
             long scrollNumber,
+            String trnRefNo,
             String remitterAccountCode,
             String remitterIfscCode,
             String remitterName,
@@ -424,7 +434,7 @@ public class RtgsServlet extends HttpServlet {
                             + "BENE_CONTACT_NUMBER_M, BENE_CONTACT_NUMBER_R, BENE_CONTACT_NUMBER_O, "
                             + "AMOUNT, CAHRGES, SERVICE_TAX, SENDER_TO_RECE_INFO, "
                             + "UPLOAD_DATE, OUTWARD_DATE, TRANSACTION_STATUS, IS_FILE_UPLOAD, "
-                            + "SCROLL_NUMBER, BENE_BANK_BRANCH_NAME, BRANCH_CODE, "
+                            + "SCROLL_NUMBER, TRN_REF_NO, BENE_BANK_BRANCH_NAME, BRANCH_CODE, "
                             + "USER_ID, CREATED_DATE, MODIFIED_DATE, "
                             + "MESSAGE_TYPE, TRN_TYPE, "
                             + "CHEQUE_TYPE, CHEQUESERIES, CHEQUENUMBER, CHEQUEDATE"
@@ -433,7 +443,7 @@ public class RtgsServlet extends HttpServlet {
                             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                             + "?, ?, ?, ?, "
                             + "SYSDATE, ?, 'E', 'N', "
-                            + "?, ?, ?, "
+                            + "?, ?, ?, ?, "
                             + "?, SYSDATE, SYSDATE, "
                             + "?, ?, "
                             + "?, ?, ?, ?"
@@ -502,6 +512,8 @@ public class RtgsServlet extends HttpServlet {
 
             ps.setLong(p++, scrollNumber);
 
+            ps.setString(p++, trnRefNo);
+
             ps.setString(p++, beneBankBranchName);
             ps.setString(p++, branchCode);
 
@@ -541,6 +553,48 @@ public class RtgsServlet extends HttpServlet {
                 } catch (Exception e) {
                 }
             }
+        }
+    }
+
+    // =========================================================
+    // GENERATE TRN_REF_NO
+    // =========================================================
+
+    private String generateTrnRefNo(Connection con, Date workingDate)
+            throws SQLException {
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+
+            // Format: DDMMYYYY (8 chars) + 6 digits sequence
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("ddMMyyyy");
+            String datePrefix = sdf.format(workingDate);
+
+            // Get max sequence for this working date
+            String query = 
+                "SELECT COALESCE(MAX(TO_NUMBER(SUBSTR(TRN_REF_NO, 9))), 0) + 1 as nextSeq "
+                + "FROM HISTORY.RTGS_OUTWARD "
+                + "WHERE SUBSTR(TRN_REF_NO, 1, 8) = ?";
+
+            ps = con.prepareStatement(query);
+            ps.setString(1, datePrefix);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                long nextSeq = rs.getLong("nextSeq");
+                String seqStr = String.format("%06d", nextSeq); // 6 digits with leading zeros
+                return datePrefix + seqStr;
+            }
+
+            throw new SQLException("Failed to generate TRN_REF_NO");
+
+        } finally {
+
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
         }
     }
 
