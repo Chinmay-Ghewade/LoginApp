@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CustomerAdharInfo" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c28891a0-ed98-499c-beff-43643f46cfe4">
+	<property name="ireport.zoom" value="1.9487171000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="months" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT SUBSTR(A.ACCOUNT_CODE, 1, 4) AS BRANCH_CODE, C.CUSTOMER_ID CUSTOMERID, MAX(A.NAME) AS NAME,
+          MAX(C.PANNO) AS PANCARD, MAX(C.AADHAR_CARD_NO) AS AADHARCARD FROM ACCOUNT.ACCOUNT A
+          JOIN CUSTOMER.CUSTOMER C ON A.CUSTOMER_ID = C.CUSTOMER_ID
+          WHERE SUBSTR(A.ACCOUNT_CODE, 5, 3)='201'  AND A.DATEACCOUNTCLOSE IS NULL
+          AND SUBSTR(A.ACCOUNT_CODE, 1, 4) = $P{branch_code}
+          AND EXISTS ( SELECT 1 FROM TRANSACTION.DAILYTXN T
+          WHERE T.ACCOUNT_CODE = A.ACCOUNT_CODE
+          AND T.TXN_DATE BETWEEN ADD_MONTHS(($P{as_on_date}), -12 * $P{months})
+          AND $P{as_on_date} )
+          GROUP BY SUBSTR(A.ACCOUNT_CODE, 1, 4), C.CUSTOMER_ID
+          ORDER BY C.CUSTOMER_ID]]>
+	</queryString>
+	<field name="BRANCH_CODE" class="java.lang.String"/>
+	<field name="CUSTOMERID" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="PANCARD" class="java.lang.String"/>
+	<field name="AADHARCARD" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="56" splitType="Stretch">
+			<subreport>
+				<reportElement x="9" y="0" width="364" height="56" uuid="dd51a888-839b-4ebd-8a53-5d505e00b919"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="38" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="0" width="555" height="1" uuid="6bc81450-aa44-48cd-875f-5378c8dab15b"/>
+			</line>
+			<line>
+				<reportElement x="0" y="36" width="555" height="1" uuid="8da2a4f2-8cb0-4560-8906-d6a21554556b"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="35" uuid="45095fb7-10bd-4874-88f6-116e4f957127"/>
+			</line>
+			<line>
+				<reportElement x="76" y="1" width="1" height="36" uuid="d4b86e4a-9140-4d4d-b868-a56d16e52d6f"/>
+			</line>
+			<line>
+				<reportElement x="194" y="1" width="1" height="35" uuid="a2ef3f86-815a-46e1-a999-8ef73f1de9ca"/>
+			</line>
+			<line>
+				<reportElement x="313" y="1" width="1" height="35" uuid="7b4a6511-a6b0-41aa-a93c-95e42e383fd9"/>
+			</line>
+			<line>
+				<reportElement x="437" y="1" width="1" height="36" uuid="5d02ca13-4a3c-4700-a230-57659cd40f3f"/>
+			</line>
+			<line>
+				<reportElement x="555" y="1" width="1" height="36" uuid="dfb0cfbe-f361-4d26-9c20-97d9100949f3"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="76" height="35" uuid="42273f63-83d9-493b-b6a2-6251bf7e3d23"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Branch Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="195" y="1" width="118" height="35" uuid="3a9e9e90-5d4e-4862-b0ed-b31d47e748aa"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="314" y="1" width="123" height="35" uuid="5b4b2dc4-2211-4d22-8156-876929c69c5e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pan Card]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="438" y="1" width="117" height="35" uuid="db05eaf5-4027-4d9e-ba91-f3be5c6009ac"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Aadhar Card]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="77" y="1" width="118" height="34" uuid="cb3e7380-abdf-45af-8945-de6dd04662cf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Customer ID]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="1" y="0" width="77" height="20" uuid="b6772223-09e0-482b-9278-ef7fc070cb53"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{BRANCH_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="77" y="0" width="117" height="20" uuid="4f940f84-4510-45ff-be23-c5f2f52f9a24"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CUSTOMERID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="195" y="0" width="118" height="20" uuid="30c285bd-c1da-4591-bc50-65ab9641f2c3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="314" y="0" width="123" height="20" uuid="fe8127ef-395b-4657-9c34-0df40ca9d4a6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{PANCARD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="437" y="0" width="118" height="20" uuid="1c5fd3c1-fb56-46c0-9786-656ef3f4282f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AADHARCARD}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-17" width="1" height="35" uuid="1cf9122a-8d60-4067-b88c-04ed28efb8c9"/>
+			</line>
+			<line>
+				<reportElement x="76" y="-17" width="1" height="36" uuid="917bb954-c36c-4e25-8e97-ee31a4a060b1"/>
+			</line>
+			<line>
+				<reportElement x="194" y="-17" width="1" height="35" uuid="35a2ae9d-c2d8-4e53-92a5-56f30cba486b"/>
+			</line>
+			<line>
+				<reportElement x="313" y="-17" width="1" height="35" uuid="68623dd6-42cf-4fef-80cd-42cf8ea855d3"/>
+			</line>
+			<line>
+				<reportElement x="437" y="-17" width="1" height="36" uuid="859327f5-4ed9-40c2-9ebc-c452dc49e8b7"/>
+			</line>
+			<line>
+				<reportElement x="555" y="-17" width="1" height="36" uuid="be24a03c-674d-4873-8696-8e06d0031642"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="27" splitType="Stretch">
+			<textField evaluationTime="Report">
+				<reportElement x="498" y="6" width="40" height="20" uuid="19a00bd4-e828-40c9-8153-11a1dd2c2dd1"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="417" y="6" width="80" height="20" uuid="a63b01b8-a365-4b26-988a-4841ee024a9e"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="10" y="5" width="89" height="20" uuid="f2c45a40-033d-409d-a6c9-3c4a4a75cdda"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="102" y="6" width="112" height="20" uuid="54e3dd9a-d022-4e78-aed9-d8cd7d8f44d0"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="0" width="555" height="1" uuid="4fc6e6cb-d210-475e-99c8-fddcc5482390"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="39" splitType="Stretch">
+			<line>
+				<reportElement x="1" y="-1" width="555" height="1" uuid="82b76d3b-aa96-4c6d-807a-a88f6e9dd484"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

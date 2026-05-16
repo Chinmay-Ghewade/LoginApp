@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GuarantorSubreport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d7cc3f8a-d397-40f5-907b-21f355aa9b18">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="account_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT ACCOUNT_CODE,
+       SERIAL_NUMBER,
+       NAME AS GUARANTOR_NAME,
+       (TRIM(ADDRESS1) || ' ' || TRIM(ADDRESS2) || ' ' || TRIM(ADDRESS3)) AS GUARANTOR_ADDRESS
+
+FROM ACCOUNT.ACCOUNTGUARANTOR
+
+WHERE ACCOUNT_CODE = $P{account_code}
+
+ORDER BY SERIAL_NUMBER]]>
+	</queryString>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="SERIAL_NUMBER" class="java.math.BigDecimal"/>
+	<field name="GUARANTOR_NAME" class="java.lang.String"/>
+	<field name="GUARANTOR_ADDRESS" class="java.lang.String"/>
+	<columnHeader>
+		<band height="20">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="20" uuid="9209240c-3b7d-48a3-9466-e80a0cfd142b"/>
+				<text><![CDATA[Guarantor :]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="53" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="4" width="50" height="20" uuid="2cd86c25-9cea-4194-9c9d-02523fbaf827"/>
+				<textFieldExpression><![CDATA[$F{SERIAL_NUMBER} + ") Name :"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="52" y="4" width="400" height="20" uuid="cd404109-19be-45b5-bbd5-f7d533cb7d84"/>
+				<textFieldExpression><![CDATA[$F{GUARANTOR_NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="29" width="50" height="20" uuid="9c2b129e-58a8-4900-9785-714e2c23de7e"/>
+				<text><![CDATA[Address :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="53" y="29" width="450" height="20" uuid="f7231ba4-3052-41d6-9976-e5542ec58a54"/>
+				<textFieldExpression><![CDATA[$F{GUARANTOR_ADDRESS}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

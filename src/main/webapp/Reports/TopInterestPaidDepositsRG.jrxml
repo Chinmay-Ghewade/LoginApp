@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TopInterestPaidDepositsRG" language="groovy" pageWidth="775" pageHeight="842" columnWidth="735" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f9737021-99d5-43f9-9969-f8186a0f1acd">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="from_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="to_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="no_of_accounts" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select ROWNUM SR_NO,account_code,name, ledgerbalance, int_paid FROM
+				    ( select * from
+				    (SELECT account_code, name,depositamount, int_payable,
+				    FN_GET_INT_TD_PAID_PAYBLE_TDS(account_code, $P{from_date}, $P{to_date}, 'I') int_paid,
+				    FN_GET_INT_TD_PAID_PAYBLE_TDS(account_code, $P{from_date}, $P{to_date}, 'Y') accured_int,
+				    FN_GET_BALANCE_ASON($P{from_date}, account_code) OP_BAL,
+				    FN_GET_BALANCE_ASON($P{to_date}, account_code) ASON_BAL,
+				    TO_CHAR(DATEACCOUNTCLOSE, 'DD/MM/YYYY') CL_D, 0 AS TDS, ledgerbalance
+				    from  (
+				    SELECT * from  (
+				    SELECT account_code, name, depositamount,interestrate, int_paid,int_payable,
+				    nvl(maxdate,'') as maxdate,  nvl(to_date($P{to_date})-maxdate,0) as days, DATEACCOUNTCLOSE, ledgerbalance,
+				    case when DATEACCOUNTCLOSE is not null then 0
+				    else
+				    (CASE WHEN round((depositamount + int_payable)*(to_date($P{to_date})-maxdate)*interestrate/36500) <0 THEN 0
+				    ELSE round((depositamount + int_payable)*(to_date($P{to_date})-maxdate)*interestrate/36500) END) end as accured_int
+				    from(select trim(a.name) as name,d.account_code,d.depositamount,d.interestrate,a.DATEACCOUNTCLOSE, p.depositrule_id,
+				    (SELECT NVL(SUM(INTERESTAMOUNT), 0) AS INTERESTAMOUNT FROM ACCOUNT.ACCOUNTDEPOSITDIARY DD
+				    WHERE DD.DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE AND DD.DEPOSITACCOUNT_CODE =  A.ACCOUNT_CODE
+				    AND A.ACCOUNT_STATUS = 'C' AND DD.DATEDUE BETWEEN $P{from_date} and $P{to_date}
+				    AND DD.APPLIEDFLAG ='N'   AND D.INTERESTPAYMENTFREQUENCY = 'O'   AND D.MATURITYDATE > $P{from_date}
+				    AND A.DATEACCOUNTCLOSE BETWEEN $P{from_date} AND $P{to_date}) INT_PAID,
+				    (SELECT NVL(SUM(INTERESTAMOUNT), 0) AS INTERESTAMOUNT FROM ACCOUNT.ACCOUNTDEPOSITDIARY DD
+				    WHERE DD.DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE  AND DD.DEPOSITACCOUNT_CODE =  A.ACCOUNT_CODE
+				    AND A.ACCOUNT_STATUS IN ('L','C','M') AND D.MATURITYDATE > $P{from_date}  AND  A.DATEACCOUNTOPEN <= $P{to_date}
+				    AND D.INTERESTPAYMENTFREQUENCY = 'O'  AND (A.DATEACCOUNTCLOSE > $P{to_date} OR A.DATEACCOUNTCLOSE IS NULL)
+				    AND DD.DATEDUE BETWEEN $P{from_date} and $P{to_date} AND DD.APPLIEDFLAG ='N' ) INT_PAYABLE,
+				    GREATEST(A.DATEACCOUNTOPEN, to_date($P{from_date}),     (SELECT MAX(DATEDUE)
+				    FROM ACCOUNT.ACCOUNTDEPOSITDIARY  WHERE DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE
+				    AND DATEDUE BETWEEN $P{from_date} and  $P{to_date} AND APPLIEDFLAG ='Y'),
+				    (SELECT MAX(DATEDUE) FROM ACCOUNT.ACCOUNTDEPOSITDIARY WHERE DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE
+				    AND DATEDUE BETWEEN $P{from_date} and  $P{to_date} AND APPLIEDFLAG ='N')  ) as maxdate, B.LEDGERBALANCE
+				    FROM ACCOUNT.ACCOUNT A, ACCOUNT.ACCOUNTDEPOSIT D, HEADOFFICE.PRODUCTPARAMETERDEPOSIT P, BALANCE.ACCOUNT B
+				    WHERE A.ACCOUNT_CODE = D.ACCOUNT_CODE  AND SUBSTR(D.ACCOUNT_CODE,5,3) = P.PRODUCT_CODE AND P.IS_TDS_APPLICABLE='Y'
+				    AND  A.DATEACCOUNTOPEN <= $P{to_date} AND (A.DATEACCOUNTCLOSE > $P{from_date} OR A.DATEACCOUNTCLOSE IS NULL)
+				    AND D.ACCOUNT_CODE = B.ACCOUNT_CODE AND P.DEPOSITRULE_ID = 1)
+				    union all
+				    (SELECT account_code, name, depositamount,interestrate, int_paid,int_payable,
+				    nvl(maxdate,'') as maxdate,   nvl(to_date($P{to_date})-maxdate,0) as days, DATEACCOUNTCLOSE, ledgerbalance,
+				    case when DATEACCOUNTCLOSE is not null then 0  else
+				    (CASE WHEN round(depositamount*(to_date($P{to_date})-maxdate)*interestrate/36500) <0 THEN 0
+				    ELSE round(depositamount*(to_date($P{to_date})-maxdate)*interestrate/36500) END) end as accured_int
+				    from (select trim(a.name) as name,d.account_code,d.depositamount,d.interestrate,a.DATEACCOUNTCLOSE ,
+				    nvl((CASE WHEN D.INTERESTPAYMENTFREQUENCY IN ('M','Q') THEN
+				    (SELECT NVL(SUM(INTERESTAMOUNT), 0) AS INTERESTAMOUNT   FROM ACCOUNT.ACCOUNTDEPOSITDIARY DD,
+				    HEADOFFICE.PRODUCTPARAMETERDEPOSIT P  WHERE DD.DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE
+				    AND DD.DEPOSITACCOUNT_CODE =  A.ACCOUNT_CODE AND SUBSTR(DD.DEPOSITACCOUNT_CODE,5,3) = P.PRODUCT_CODE  AND P.IS_TDS_APPLICABLE='Y'
+				    AND P.DEPOSITRULE_ID <> 1 AND A.ACCOUNT_STATUS = 'C'
+				    AND DD.DATEDUE BETWEEN $P{from_date} and $P{to_date}
+				    AND A.DATEACCOUNTCLOSE BETWEEN $P{from_date} AND $P{to_date} AND D.MATURITYDATE > $P{from_date} )
+				    ELSE ( nvl((SELECT SUM(H.INTERESTAMOUNT) INTERESTAMOUNT     FROM HISTORY.INTERESTPAID H,
+				    HEADOFFICE.PRODUCTPARAMETERDEPOSIT P WHERE H.ACCOUNT_CODE = D.ACCOUNT_CODE
+				    AND H.ACCOUNT_CODE =  A.ACCOUNT_CODE  AND SUBSTR(H.ACCOUNT_CODE,5,3) = P.PRODUCT_CODE  and P.IS_TDS_APPLICABLE='Y'
+				    AND P.DEPOSITRULE_ID <> 1 	 AND A.ACCOUNT_STATUS = 'C'
+				    AND H.INTERESTPAID_DATE  >= $P{from_date}     AND H.INTERESTPAID_DATE  <= $P{to_date}
+				    AND D.MATURITYDATE > $P{from_date}       AND A.DATEACCOUNTCLOSE BETWEEN $P{from_date} AND $P{to_date}
+				    AND D.INTERESTPAYMENTFREQUENCY = 'O'      GROUP BY H.ACCOUNT_CODE ),0) +
+				    ( SELECT SUM(DD.NEW_INTERESTPAYABLE) INTERESTAMOUNT FROM HISTORY.INTERESTPAYABLE DD
+				    WHERE DD.ACCOUNT_CODE = D.ACCOUNT_CODE AND DD.ACCOUNT_CODE =  A.ACCOUNT_CODE
+				    AND SUBSTR(DD.ACCOUNT_CODE,5,3) = P.PRODUCT_CODE AND P.DEPOSITRULE_ID <> 1
+				    AND A.ACCOUNT_STATUS = 'C' AND D.MATURITYDATE > $P{from_date}
+				    AND A.DATEACCOUNTCLOSE BETWEEN $P{from_date} AND $P{to_date}
+				    AND DD.PAYABLE_DATE >= $P{from_date} and DD.PAYABLE_DATE <=$P{to_date}
+				    AND D.INTERESTPAYMENTFREQUENCY = 'O'      GROUP BY DD.ACCOUNT_CODE))   END ),0 )INT_PAID,
+				    (CASE WHEN D.INTERESTPAYMENTFREQUENCY IN ('M','Q') THEN
+				    (SELECT NVL(SUM(INTERESTAMOUNT), 0) AS INTERESTAMOUNT FROM ACCOUNT.ACCOUNTDEPOSITDIARY DD
+				    WHERE DD.DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE AND DD.DEPOSITACCOUNT_CODE =  A.ACCOUNT_CODE
+				    AND A.ACCOUNT_STATUS IN ('L','M','C')   AND D.MATURITYDATE > $P{from_date}
+				    AND DD.DATEDUE BETWEEN $P{from_date} and $P{to_date}
+				    AND  A.DATEACCOUNTOPEN <= $P{to_date} AND (A.DATEACCOUNTCLOSE > $P{to_date} OR A.DATEACCOUNTCLOSE IS NULL))
+				    ELSE  (SELECT NVL(SUM(NEW_INTERESTPAYABLE), 0) AS INTERESTAMOUNT FROM HISTORY.INTERESTPAYABLE hh
+				    WHERE hh.ACCOUNT_CODE = D.ACCOUNT_CODE  AND hh.ACCOUNT_CODE =  A.ACCOUNT_CODE
+				    AND A.ACCOUNT_STATUS IN ('L','M','C')   AND D.MATURITYDATE > $P{from_date}
+				    AND D.INTERESTPAYMENTFREQUENCY = 'O'
+				    AND  A.DATEACCOUNTOPEN <= $P{to_date} AND (A.DATEACCOUNTCLOSE > $P{to_date} OR A.DATEACCOUNTCLOSE IS NULL)
+				    AND hh.PAYABLE_DATE BETWEEN $P{from_date} and $P{to_date})END) INT_PAYABLE,
+				    GREATEST(A.DATEACCOUNTOPEN, to_date($P{from_date}), (SELECT MAX(DATEDUE) FROM ACCOUNT.ACCOUNTDEPOSITDIARY
+				    WHERE DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE  AND DATEDUE BETWEEN $P{from_date} and  $P{to_date}
+				    AND APPLIEDFLAG ='Y'), (SELECT MAX(DATEDUE) FROM ACCOUNT.ACCOUNTDEPOSITDIARY WHERE DEPOSITACCOUNT_CODE = D.ACCOUNT_CODE
+				    AND DATEDUE BETWEEN $P{from_date} and  $P{to_date} AND APPLIEDFLAG ='N')  ) as maxdate, B.LEDGERBALANCE
+				    FROM ACCOUNT.ACCOUNT A, ACCOUNT.ACCOUNTDEPOSIT D, HEADOFFICE.PRODUCTPARAMETERDEPOSIT P, BALANCE.ACCOUNT B
+				    WHERE A.ACCOUNT_CODE = D.ACCOUNT_CODE  AND SUBSTR(D.ACCOUNT_CODE,5,3) = P.PRODUCT_CODE AND P.IS_TDS_APPLICABLE='Y'
+				    AND  A.DATEACCOUNTOPEN <= $P{to_date} AND (A.DATEACCOUNTCLOSE > $P{from_date} OR A.DATEACCOUNTCLOSE IS NULL)
+				    AND D.ACCOUNT_CODE = B.ACCOUNT_CODE AND P.DEPOSITRULE_ID <> 1))
+				    ) order by account_code)) where int_paid<>0  order by int_paid desc) where rownum<= $P{no_of_accounts}]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="LEDGERBALANCE" class="java.math.BigDecimal"/>
+	<field name="INT_PAID" class="java.math.BigDecimal"/>
+	<variable name="TOTAL_LEDGERBALANCE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{LEDGERBALANCE}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_INT_PAID" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{INT_PAID}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<subreport>
+				<reportElement x="68" y="0" width="389" height="79" uuid="fe261a09-14e4-4db2-9c7e-095a6abc8e68"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="45">
+			<line>
+				<reportElement x="0" y="0" width="735" height="1" uuid="32e157fe-2de5-4d9f-ac25-8297df73fd11"/>
+			</line>
+			<line>
+				<reportElement x="0" y="44" width="735" height="1" uuid="c09fdae7-4eab-4103-83ec-49c2a27deceb"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="40" height="43" uuid="7b6434ff-2fc4-4cb4-8108-42d537e4bc85"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="1" width="160" height="43" uuid="ceb413d0-038b-4104-a85b-cf530295ceec"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="1" width="270" height="43" uuid="18dfc039-ff2d-486d-a872-7ec843548719"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="471" y="1" width="127" height="43" uuid="a45566ef-e56f-43e9-ace3-a2103c875221"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Balance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="599" y="1" width="136" height="43" uuid="899316fe-09f3-4c58-9fce-b3b92fa54a23"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Interest Paid]]></text>
+			</staticText>
+			<line>
+				<reportElement x="200" y="1" width="1" height="43" uuid="1f76e817-2436-42f6-b12b-891bc5c27c0b"/>
+			</line>
+			<line>
+				<reportElement x="0" y="0" width="1" height="43" uuid="f900e64a-486c-4091-9034-18933f28ec1d"/>
+			</line>
+			<line>
+				<reportElement x="40" y="1" width="1" height="43" uuid="8a842fb0-eaaf-4de2-9ac0-83f8b79aa167"/>
+			</line>
+			<line>
+				<reportElement x="470" y="1" width="1" height="43" uuid="94f7a4b1-2fa2-4c5f-9efa-e035dbfd8f0c"/>
+			</line>
+			<line>
+				<reportElement x="598" y="0" width="1" height="43" uuid="c97b66d9-2c04-4d9e-ab1c-0cf8d500ee97"/>
+			</line>
+			<line>
+				<reportElement x="734" y="0" width="1" height="43" uuid="a4d87210-0eaa-49cd-beb7-9fb6be7bd2eb"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22">
+			<textField>
+				<reportElement x="0" y="0" width="40" height="22" uuid="ff175165-ace6-46c9-8054-8be2652177d7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SR_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="50" y="0" width="150" height="22" uuid="7aba49d8-f91c-445e-a8b5-1f799f4e316e"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="212" y="0" width="258" height="22" uuid="d162e288-f55b-4714-a0d6-5a5542237301"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="470" y="0" width="118" height="22" uuid="8e06f82e-8b78-445d-94b7-412b3c6bd2ee"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{LEDGERBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="599" y="0" width="127" height="22" uuid="7b27ad16-502c-4415-ba36-0ab521d30498"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{INT_PAID}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="200" y="-21" width="1" height="43" uuid="37828295-b39f-4789-a243-fa6761a987f8"/>
+			</line>
+			<line>
+				<reportElement x="0" y="-22" width="1" height="43" uuid="49b9a609-2e9d-4668-80a3-0917e1d78e3e"/>
+			</line>
+			<line>
+				<reportElement x="40" y="-21" width="1" height="43" uuid="902137eb-6aab-4ae3-81cd-d74e11e475e8"/>
+			</line>
+			<line>
+				<reportElement x="470" y="-21" width="1" height="43" uuid="c2c076b1-141c-4bf7-9ffc-c2fdf71ccb2c"/>
+			</line>
+			<line>
+				<reportElement x="598" y="-22" width="1" height="43" uuid="fb28f477-0b3f-44f9-b38d-1e7e159ba0b8"/>
+			</line>
+			<line>
+				<reportElement x="734" y="-22" width="1" height="43" uuid="3fa97261-4e74-48e2-bf29-65e1b6d904b8"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="18" y="7" width="89" height="20" uuid="096c2755-da16-4d24-b1b2-a4be2b4abcf3"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="110" y="8" width="112" height="20" uuid="944b8010-ab15-4a47-ab40-365eb2dd717c"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="579" y="8" width="80" height="20" uuid="27915824-d5c2-41ec-94ab-26a3f16cd423"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="660" y="8" width="40" height="20" uuid="0a9b8853-2aaf-40f1-ae5e-fb99edac2c2a"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="35">
+			<line>
+				<reportElement x="0" y="0" width="735" height="1" uuid="ac34c0e6-b108-4e3c-9ed4-586df35dffcb"/>
+			</line>
+			<staticText>
+				<reportElement x="320" y="8" width="150" height="20" uuid="c59dfb95-3149-4b42-8600-c891e35b1b0a"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL :]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="471" y="8" width="117" height="20" uuid="e1628c05-1fb9-4fb8-8dd4-4646fccc5b6c"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_LEDGERBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="599" y="8" width="127" height="20" uuid="e7c09e8f-a3ea-4ceb-8b16-144858952c1a"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_INT_PAID}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

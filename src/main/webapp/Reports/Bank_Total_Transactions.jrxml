@@ -56,7 +56,7 @@ FROM TRANSACTION.DAILYTXN T,HEADOFFICE.BRANCH B
 	<title>
 		<band height="63" splitType="Stretch">
 			<subreport>
-				<reportElement x="11" y="0" width="372" height="63" uuid="0fff9bcc-ce3b-4e92-a01f-35cf57f94134"/>
+				<reportElement x="3" y="0" width="352" height="63" uuid="0fff9bcc-ce3b-4e92-a01f-35cf57f94134"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>

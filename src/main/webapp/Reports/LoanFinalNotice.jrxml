@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LoanFinalNotice" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3fc2d4f6-89e4-4d1e-9b88-beb6fe7d3baa">
+	<property name="ireport.zoom" value="1.6105100000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="account_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="BANK_NAME" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="BRANCH_NAME" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT AL.DISBURESED_AMOUNT, AL.ACCOUNTREVIEWDATE, A.DATEACCOUNTOPEN, ABS(B.LEDGERBALANCE) AS BALANCE,
+		A.NAME, (C.ADDRESS1 || ' ' || C.ADDRESS2 ||' ' || C.ADDRESS3) AS ADDRESS, AL.ACCOUNT_CODE
+		FROM ACCOUNT.ACCOUNTLOAN AL, ACCOUNT.ACCOUNT A, BALANCE.ACCOUNT B, CUSTOMER.CUSTOMER C
+		WHERE SUBSTR(AL.ACCOUNT_CODE, 0, 4) = $P{branch_code}
+		AND AL.ACCOUNT_CODE = $P{account_code}
+		AND A.ACCOUNT_CODE = AL.ACCOUNT_CODE
+    AND AL.ACCOUNT_CODE = B.ACCOUNT_CODE
+		AND A.CUSTOMER_ID = C.CUSTOMER_ID]]>
+	</queryString>
+	<field name="DISBURESED_AMOUNT" class="java.math.BigDecimal"/>
+	<field name="ACCOUNTREVIEWDATE" class="java.sql.Timestamp"/>
+	<field name="DATEACCOUNTOPEN" class="java.sql.Timestamp"/>
+	<field name="BALANCE" class="java.math.BigDecimal"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRESS" class="java.lang.String"/>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="42" splitType="Stretch">
+			<staticText>
+				<reportElement x="18" y="0" width="100" height="20" uuid="3b342c17-9bae-41de-b4b3-8093d5a695ec"/>
+				<text><![CDATA[BRANCH :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="18" y="20" width="100" height="20" uuid="71395505-7274-49ef-8ddc-16c3ca9fbf97"/>
+				<text><![CDATA[Ref.No. :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="66" y="1" width="100" height="20" uuid="b4ff8c40-6c89-4636-bd68-648b2d244547"/>
+				<text><![CDATA[...................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="65" y="20" width="100" height="20" uuid="29ee4d4e-81fe-4f1d-a42f-9357b856ace7"/>
+				<text><![CDATA[..............................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="336" y="19" width="100" height="20" uuid="9fdbad2b-285f-4032-a0b7-3e754c87c7ae"/>
+				<text><![CDATA[Date :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="366" y="19" width="100" height="20" uuid="9f1bbdc2-80f6-408f-9ed1-af97deb2eca6"/>
+				<text><![CDATA[.......................]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="557">
+			<staticText>
+				<reportElement x="23" y="100" width="46" height="20" uuid="cad64488-28d8-4269-affd-090f42927442"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Address :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="47" width="66" height="20" uuid="aa6bfb7c-f98d-4d10-acca-0302b0898deb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[ Loan Acc No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="24" y="78" width="36" height="20" uuid="e8053842-418a-4434-b1ac-c7bdf2a20c17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Name : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="135" width="45" height="20" uuid="725f158c-5cb4-4bff-a5e1-4778f7391017"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Dear Sir,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="18" y="42" width="61" height="20" uuid="1da2e422-fabe-41d7-8129-bc7effbcee7d"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[To,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="39" y="170" width="157" height="20" uuid="a8cc761d-a00a-4e5b-a733-65113c000d57"/>
+				<text><![CDATA[ The subject was granted to you on]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="196" y="170" width="48" height="20" uuid="3ed605d5-06fa-4cf1-a719-c65911b13360"/>
+				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="244" y="170" width="306" height="20" uuid="3414560a-14d3-45c7-aa1c-913095e67a80"/>
+				<text><![CDATA[ You are not regular in repayment of the loan. The loan is overdue by ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="20" y="190" width="34" height="20" uuid="c06b03c0-6133-473e-944d-b41c1063795e"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA[$F{DISBURESED_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="39" y="190" width="193" height="20" uuid="bccb3390-460b-46d7-8f0a-55527ed5930c"/>
+				<text><![CDATA[ plus ineterest as on date __________.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="61" y="78" width="494" height="20" uuid="e9948b54-bba0-4099-86ef-2a6783237534"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="100" width="487" height="20" uuid="e614b8ef-08fd-4b8e-965f-f9121c69d318"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="436" y="47" width="100" height="20" uuid="0f6380b2-938d-4b51-84d2-7167d4127100"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="45" y="210" width="510" height="20" uuid="62ee5d3e-0c24-429c-aff3-4de0760a4519"/>
+				<text><![CDATA[ We have contacted you on various occasion and you had assured to regularize the account but no steps have been  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="230" width="303" height="20" uuid="6ee99589-c4a6-48ac-8536-932aa3e6fa2e"/>
+				<text><![CDATA[taken by you in this respect. We are unable to keep matter pending.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="250" width="176" height="20" uuid="46d8518c-01f3-4271-bbe7-5b076e62f9a1"/>
+				<text><![CDATA[We now call upon you to pay the entire balance of]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="221" y="250" width="29" height="20" uuid="7cd215d2-a9c1-4af4-96bb-4c58a06a5378"/>
+				<textFieldExpression><![CDATA[$F{DISBURESED_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="249" y="250" width="286" height="20" uuid="b8c78ed9-9adf-4801-994b-1f8883e78afd"/>
+				<text><![CDATA[ plus interest w.e.f. on or before __________. In case the]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="270" width="502" height="20" uuid="105620c6-3099-442d-a877-fc89d2082e08"/>
+				<text><![CDATA[amount is not paid we shall be proceeding against you by the filling criminal as well as civil suits against you and ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="19" y="290" width="303" height="20" uuid="71df4ddf-09f9-42c2-b750-fc67f038cf66"/>
+				<text><![CDATA[sureties entirely at your risk,cost and responsibility.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="45" y="310" width="510" height="20" uuid="f2d20eb3-f1fa-470f-a359-9c9338f719dc"/>
+				<text><![CDATA[No further reminders will be sent to you in this respect. We are sure that you will do the needful and cooperate.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="466" y="489" width="88" height="20" uuid="6362c2a5-1e4d-4e2e-9285-f6adc4bb3085"/>
+				<textElement textAlignment="Right" verticalAlignment="Top"/>
+				<text><![CDATA[Branch Manager]]></text>
+			</staticText>
+			<subreport>
+				<reportElement x="18" y="335" width="537" height="62" uuid="e1601e5a-0fc7-4e36-8b4b-0a3fbd20d307"/>
+				<subreportParameter name="account_code">
+					<subreportParameterExpression><![CDATA[$P{account_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "GuarantorSubreport.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="17" y="1" width="537" height="1" uuid="869131da-b63a-47f7-94b6-12ef565a37ac"/>
+			</line>
+			<line>
+				<reportElement x="17" y="40" width="537" height="1" uuid="b06da72f-37a8-44e1-afb0-f27718afc437"/>
+			</line>
+			<staticText>
+				<reportElement x="17" y="9" width="90" height="20" uuid="016255fa-aaa5-4dc1-b071-a4d0a8a29a44"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[OUTWARD NO :  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="216" y="9" width="100" height="20" uuid="e48c6f4a-d8fa-4a19-82f5-992ea69449b4"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[  RECALL LETTER]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="442" y="9" width="34" height="20" uuid="5490fd39-fd82-4e1d-aac0-d89f0bef2041"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[  Date:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="476" y="9" width="78" height="20" uuid="320e0ff9-3694-4362-a585-81c4bdce5065"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="58" y="510" width="499" height="20" uuid="d3b68206-7950-416a-97c3-01e2b6221e87"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{BANK_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="58" y="530" width="497" height="20" uuid="e972050c-d2b9-420a-914b-956a01b02bf0"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

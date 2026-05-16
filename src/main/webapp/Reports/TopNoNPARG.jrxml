@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TopNoNPARG" language="groovy" pageWidth="823" pageHeight="842" columnWidth="783" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8660894d-db69-4d02-bba7-3fd4b14f8a4e">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="report_title" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="user_id" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="no_of_accounts" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select rownum as sr_no,account_code,name,sanction_d,sanction_amt,balance,overdue
+ from (select h.ACCOUNT_CODE account_code,a.NAME name ,to_char(l.SANCTIONDATE,'DD/MM/YYYY')
+ sanction_d, l.SANCTIONAMOUNT sanction_amt,h.BALANCE_OUTSTANDING balance, o.PRINCIPAL_OVERDUE overdue
+ from bankdata.NPA_GSCB_GOA_HISTORY h,  account.account a, history.TLCCOVERDUEADVANCE o,account.accountloan l
+ where a.account_code=h.account_code
+ and h.account_code=o.account_code
+ and o.account_code=l.account_code and h.to_date= $P{as_on_date}
+ and o.OVD_ADV_DATE= $P{as_on_date}
+and (h.STD_ASSET + h.AGRIPRODUCT)=0 order by o.PRINCIPAL_OVERDUE  desc ) topnpa
+        where rownum <=$P{no_of_accounts}
+         order by sr_no, account_code]]>
+	</queryString>
+	<field name="SR_NO" class="java.math.BigDecimal"/>
+	<field name="ACCOUNT_CODE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="SANCTION_D" class="java.lang.String"/>
+	<field name="SANCTION_AMT" class="java.math.BigDecimal"/>
+	<field name="BALANCE" class="java.math.BigDecimal"/>
+	<field name="OVERDUE" class="java.math.BigDecimal"/>
+	<variable name="TOTAL_SANCTION_AMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{SANCTION_AMT}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_BALANCE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{BALANCE}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_OVERDUE" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{OVERDUE}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="64" splitType="Stretch">
+			<subreport>
+				<reportElement x="128" y="0" width="407" height="64" uuid="21ecf7dd-29e5-403e-8485-138d27169b74"/>
+				<subreportParameter name="branch_code">
+					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="as_on_date">
+					<subreportParameterExpression><![CDATA[$P{as_on_date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="report_title">
+					<subreportParameterExpression><![CDATA[$P{report_title}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "subReportHeader.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="45">
+			<line>
+				<reportElement x="0" y="0" width="802" height="1" uuid="2997341d-a4ea-4150-bb5e-24b4a3423cda"/>
+			</line>
+			<line>
+				<reportElement x="0" y="44" width="802" height="1" uuid="80ca9c6b-6401-40f6-8574-66f4eebc1060"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="40" height="43" uuid="5ddbdfba-472b-42af-8733-0a6d58c9a81f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="40" y="1" width="128" height="43" uuid="36db586a-a368-454f-9b9c-1d410f3a5e42"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account Code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="169" y="1" width="204" height="43" uuid="3ca2d5ac-77d3-445f-adce-f29f49be0d75"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="375" y="1" width="90" height="43" uuid="79e3d702-c515-44a6-ac81-ef75a8e5caad"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sanction Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="465" y="1" width="100" height="43" uuid="5f03e633-fde0-4961-b3b2-d2d404889b55"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sanction Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="565" y="1" width="104" height="43" uuid="f2cd0630-0886-4693-9ad9-b50cf3e492de"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Balance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="669" y="1" width="113" height="43" uuid="531c2c2d-30d8-4d2e-b010-57f794f3c530"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Overdue]]></text>
+			</staticText>
+			<line>
+				<reportElement x="168" y="1" width="1" height="43" uuid="20e4daa6-edbe-4079-b796-acf451a76fbb"/>
+			</line>
+			<line>
+				<reportElement x="0" y="1" width="1" height="43" uuid="d397934f-c3b8-4eea-819b-37183daf4a8e"/>
+			</line>
+			<line>
+				<reportElement x="39" y="1" width="1" height="43" uuid="51a033d6-bc50-4b3d-a8c1-ed5c5bf096f5"/>
+			</line>
+			<line>
+				<reportElement x="374" y="0" width="1" height="43" uuid="81252006-6fdb-440b-8845-6700a4fd322d"/>
+			</line>
+			<line>
+				<reportElement x="465" y="0" width="1" height="43" uuid="fb733447-d5f6-4587-b9e9-6655104cb7e1"/>
+			</line>
+			<line>
+				<reportElement x="565" y="0" width="1" height="43" uuid="403fa4a5-a323-4f28-82e8-e2a5e54210a9"/>
+			</line>
+			<line>
+				<reportElement x="668" y="0" width="1" height="43" uuid="02aafc95-d73e-40d9-b808-4af7ef9702e4"/>
+			</line>
+			<line>
+				<reportElement x="782" y="0" width="1" height="43" uuid="bc51745d-ff46-4e5f-9dc5-21ff1da80ddf"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22">
+			<textField>
+				<reportElement x="0" y="0" width="40" height="22" uuid="3df33f28-2711-4136-a8ff-cd9ce68d78c5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SR_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="40" y="0" width="125" height="22" uuid="321f6cca-d97f-44d3-9656-ebb15b84314b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="177" y="0" width="190" height="22" uuid="a0bed2fd-7f0a-46db-8c10-8b9d135e2328"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="376" y="0" width="90" height="22" uuid="74194f6a-61e0-429f-b584-a5919806305b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SANCTION_D}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="466" y="0" width="91" height="22" uuid="f9e57673-200b-4d02-b914-6498ba755e8f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SANCTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="565" y="0" width="95" height="22" uuid="bf2ac82b-2a94-4fee-9d5f-5331786e0ee4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="668" y="0" width="106" height="22" uuid="6e64acc9-c254-487a-a43d-06b54c9c23d2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OVERDUE}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="-22" width="1" height="43" uuid="385feab0-a62b-41cb-be18-e35bec00ce7e"/>
+			</line>
+			<line>
+				<reportElement x="39" y="-22" width="1" height="43" uuid="0d60e113-0fc7-4c49-a599-49029d8f60e3"/>
+			</line>
+			<line>
+				<reportElement x="168" y="-21" width="1" height="43" uuid="e7307176-afe7-4321-a985-d31510cc0324"/>
+			</line>
+			<line>
+				<reportElement x="374" y="-22" width="1" height="43" uuid="06612665-7a58-45ae-b124-747ce744c595"/>
+			</line>
+			<line>
+				<reportElement x="465" y="-23" width="1" height="43" uuid="82a067b6-8e89-4330-b9fc-7a532a498fdc"/>
+			</line>
+			<line>
+				<reportElement x="565" y="-23" width="1" height="43" uuid="479dad94-7fa1-4acf-91b0-17a9432b8301"/>
+			</line>
+			<line>
+				<reportElement x="668" y="-21" width="1" height="43" uuid="45a454ba-abfb-4ca7-bda3-9b90a162e95c"/>
+			</line>
+			<line>
+				<reportElement x="782" y="-21" width="1" height="43" uuid="942c8ec2-2bcc-4833-b765-5f56ce47c063"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="11" y="6" width="89" height="20" uuid="435f20b8-d773-45e8-a5da-cf79fe209b66"/>
+				<textFieldExpression><![CDATA[$P{user_id}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="103" y="7" width="112" height="20" uuid="0ee329ba-9bff-4ad7-9ff8-9c39327877c7"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="630" y="7" width="80" height="20" uuid="e699a3aa-bf26-4f65-9098-89f727bc48bc"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="711" y="7" width="40" height="20" uuid="bf7f41a4-80a6-4737-aa7f-b929892310a8"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="35">
+			<line>
+				<reportElement x="0" y="0" width="802" height="1" uuid="39ca30cb-3645-4bf8-8e5c-cb5808e3f968"/>
+			</line>
+			<staticText>
+				<reportElement x="282" y="8" width="180" height="20" uuid="c7323ced-a8b7-465c-a34d-37c1f906126a"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL :]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="462" y="8" width="95" height="20" uuid="04bc1c71-8445-4af4-8219-bb2e21fdb1a0"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_SANCTION_AMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="557" y="8" width="103" height="20" uuid="9c424cdf-0db4-4483-b554-94dd3c9f6ac0"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="660" y="8" width="114" height="20" uuid="7da575b3-4fa8-4232-b41c-014117a191fa"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_OVERDUE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
