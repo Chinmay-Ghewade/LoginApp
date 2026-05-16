@@ -1566,21 +1566,225 @@
 <% } %>
 	
 	<!-- Vehicle Fieldset - Conditional -->
-	<% if (showVehicle) { %>
-	<fieldset id="vehicleFieldset">
-	  <legend>
-	    Vehicle Details
-	    <button type="button" onclick="addVehicle()"
-	      style="border:none;background:#373279;color:white;padding:2px 10px;
-	        border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
-	      ➕
-	    </button>
-	  </legend>
-	  
-	  <!-- Add your fields here -->
-	  
-	</fieldset>
-	<% } %>
+<% if (showVehicle) { %>
+<fieldset id="vehicleFieldset">
+  <legend>
+    Vehicle Details
+    <button type="button" onclick="addVehicle()"
+      style="border:none;background:#373279;color:white;padding:2px 10px;
+        border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
+      ➕
+    </button>
+  </legend>
+  
+  <div class="nominee-card vehicle-block">
+    <button type="button" class="nominee-remove" onclick="removeVehicle(this)">✖</button>
+
+    <div class="nominee-title"
+         style="font-weight:bold; font-size:15px; margin-bottom:10px; color:#373279;">
+      Vehicle Details <span class="vehicle-serial">1</span>
+    </div>
+
+    <div class="form-grid">
+      <div>
+        <label>Type Of Vehicle</label>
+        <select name="vehicleType[]" required>
+          <option value="">-- Select --</option>
+          <option value="NOT APPLICABLE">NOT APPLICABLE</option>
+          <option value="TWO WHEELER">TWO WHEELER</option>
+          <option value="FOUR WHEELER">FOUR WHEELER</option>
+          <option value="COMMERCIAL">COMMERCIAL</option>
+          <option value="HEAVY VEHICLE">HEAVY VEHICLE</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Security Type Code</label>
+        <select name="vehicleSecurityType[]" required>
+          <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String code = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= code %>"><%= code %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
+        </select>
+      </div>
+
+      <div>
+        <label>Make Model</label>
+        <input type="text" name="vehicleMakeModel[]" maxlength="50" required>
+      </div>
+
+      <div>
+        <label>Model Year</label>
+        <input type="text" name="vehicleModelYear[]" maxlength="4" pattern="[0-9]{4}" required>
+      </div>
+
+      <div>
+        <label>RTO Location</label>
+        <input type="text" name="vehicleRTOLocation[]" id="vehicleRTOLocation" readonly style="background-color: #f0f0f0; cursor: not-allowed;" required>
+      </div>
+
+      <div>
+        <label>CC</label>
+        <input type="number" name="vehicleCC[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Engine No.</label>
+        <input type="text" name="vehicleEngineNo[]" maxlength="20" required>
+      </div>
+
+      <div>
+        <label>Is New Vehicle(Y/N)</label>
+        <select name="vehicleIsNewVehicle[]" required>
+          <option value="N" selected>N</option>
+          <option value="Y">Y</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Is Vehicle Insp(Y/N)</label>
+        <select name="vehicleIsVehicleInsp[]" required>
+          <option value="N" selected>N</option>
+          <option value="Y">Y</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Submission Date</label>
+        <input type="date" name="vehicleSubmissionDate[]" value="<%= workingDateStr %>" required>
+      </div>
+
+      <div>
+        <label>Manufacture Date</label>
+        <input type="date" name="vehicleManufactureDate[]" value="<%= workingDateStr %>" required>
+      </div>
+
+      <div>
+        <label>Acquisition Date</label>
+        <input type="date" name="vehicleAcquisitionDate[]" value="<%= workingDateStr %>" required>
+      </div>
+
+      <div>
+        <label>Registration Date</label>
+        <input type="date" name="vehicleRegistrationDate[]" value="<%= workingDateStr %>" required>
+      </div>
+
+      <div>
+        <label>Registration Number</label>
+        <input type="text" name="vehicleRegistrationNo[]" maxlength="20" required>
+      </div>
+
+      <div>
+        <label>Chasis No.</label>
+        <input type="text" name="vehicleChasisNo[]" maxlength="20" required>
+      </div>
+
+      <div>
+        <label>Margin%</label>
+        <input type="number" step="0.01" name="vehicleMargin[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Purchase Price</label>
+        <input type="number" step="0.01" name="vehiclePurchasePrice[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Supplier Name</label>
+        <input type="text" name="vehicleSupplierName[]" required>
+      </div>
+
+      <div>
+        <label>Seating Capacity</label>
+        <input type="number" name="vehicleSeatingCapacity[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Carrying Capacity</label>
+        <input type="number" step="0.01" name="vehicleCarryingCapacity[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Insurance Deelesed Value</label>
+        <input type="number" step="0.01" name="vehicleInsuranceValue[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Insurance Name</label>
+        <input type="text" name="vehicleInsuranceName[]" required>
+      </div>
+
+      <div>
+        <label>No Claim BOU%</label>
+        <input type="number" step="0.01" name="vehicleNoClaimBOU[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Premium Amount</label>
+        <input type="number" step="0.01" name="vehiclePremiumAmount[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Policy Number</label>
+        <input type="text" name="vehiclePolicyNo[]" maxlength="20" required>
+      </div>
+
+      <div>
+        <label>Total Insured Amount</label>
+        <input type="number" step="0.01" name="vehicleTotalInsured[]" value="0" required>
+      </div>
+
+      <div>
+        <label>Premium Frequency</label>
+        <select name="vehiclePremiumFreq[]" required>
+          <option value="">-- Select --</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Quarterly">Quarterly</option>
+          <option value="Half-Yearly">Half-Yearly</option>
+          <option value="Yearly">Yearly</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Policy Start Date</label>
+        <input type="date" name="vehiclePolicyStartDate[]" required>
+      </div>
+
+      <div>
+        <label>Policy End Date</label>
+        <input type="date" name="vehiclePolicyEndDate[]" required>
+      </div>
+
+      <div>
+        <label>Policy Type</label>
+        <input type="text" name="vehiclePolicyType[]" required>
+      </div>
+
+      <div>
+        <label>Particular</label>
+        <textarea name="vehicleParticular[]" rows="2" style="width: 97%; resize: vertical; font-size: 13px; padding: 4px 6px;"></textarea>
+      </div>
+    </div>
+  </div>
+</fieldset>
+<% } %>
 	
 <!-- Market Shares Fieldset - Conditional -->
 <% if (showMarketShares) { %>
@@ -3184,6 +3388,79 @@
 		    }
 		  });
 		}
+		
+		//==================== VEHICLE FUNCTIONS ====================
+		function addVehicle() {
+		  let fieldset = document.getElementById("vehicleFieldset");
+		  let original = fieldset.querySelector(".vehicle-block");
+		  let clone = original.cloneNode(true);
+
+		  clone.querySelectorAll('select[id]').forEach(function(sel) {
+		        sel.removeAttribute('id');
+		    });
+		  
+		  clone.querySelectorAll("input, select, textarea").forEach(el => {
+		    if (el.tagName === 'SELECT') {
+		      el.selectedIndex = 0;
+		    } else if (['vehicleCC[]', 'vehicleMargin[]', 'vehiclePurchasePrice[]', 'vehicleSeatingCapacity[]', 
+		                'vehicleCarryingCapacity[]', 'vehicleInsuranceValue[]', 'vehicleNoClaimBOU[]', 
+		                'vehiclePremiumAmount[]', 'vehicleTotalInsured[]'].includes(el.name)) {
+		      el.value = '0';
+		    } else if (['vehicleSubmissionDate[]', 'vehicleManufactureDate[]', 'vehicleAcquisitionDate[]', 'vehicleRegistrationDate[]'].includes(el.name)) {
+		      // These keep their default working date values, don't clear them
+		    } else {
+		      el.value = "";
+		    }
+		  });
+
+		  clone.querySelector(".nominee-remove").onclick = function() {
+		    removeVehicle(this);
+		  };
+
+		  fieldset.appendChild(clone);
+		  updateVehicleSerials();
+		}
+
+		function removeVehicle(btn) {
+		  let blocks = document.querySelectorAll(".vehicle-block");
+		  if (blocks.length <= 1) {
+		    showToast("⚠️ At least one vehicle entry is required.", "warning");
+		    return;
+		  }
+		  btn.parentNode.remove();
+		  updateVehicleSerials();
+		}
+
+		function updateVehicleSerials() {
+		  let blocks = document.querySelectorAll(".vehicle-block");
+		  blocks.forEach((block, index) => {
+		    let serial = block.querySelector(".vehicle-serial");
+		    if (serial) {
+		      serial.textContent = (index + 1);
+		    }
+		  });
+		}
+		
+		// ==================== UPDATE RTO LOCATION WHEN AREA CHANGES ====================
+
+		function updateVehicleRTOLocation() {
+		    const areaCodeSelect = document.getElementById('areaCode');
+		    const selectedAreaCode = areaCodeSelect.value;
+		    
+		    // Update all vehicle RTO Location fields
+		    const rtoLocationInputs = document.querySelectorAll('input[name="vehicleRTOLocation[]"]');
+		    rtoLocationInputs.forEach(input => {
+		        input.value = selectedAreaCode;
+		    });
+		}
+
+		// Add event listener to Area Code dropdown
+		document.addEventListener('DOMContentLoaded', function() {
+		    const areaCodeSelect = document.getElementById('areaCode');
+		    if (areaCodeSelect) {
+		        areaCodeSelect.addEventListener('change', updateVehicleRTOLocation);
+		    }
+		});
 
 		//==================== NON-MOTOR INSURANCE FUNCTIONS ====================
 		function addNonMotorInsurance() {
@@ -3535,57 +3812,63 @@
 		// ==================== AREA / SUB AREA DROPDOWN HANDLERS ====================
 
 		function handleAreaChange(select) {
-		    const selectedOption = select.options[select.selectedIndex];
-		    // Store area name in hidden field
-		    document.getElementById('areaName').value = selectedOption.getAttribute('data-name') || '';
+    const selectedOption = select.options[select.selectedIndex];
+    // Store area name in hidden field
+    document.getElementById('areaName').value = selectedOption.getAttribute('data-name') || '';
 
-		    // Reset sub area
-		    const subAreaSelect = document.getElementById('subAreaCode');
-		    subAreaSelect.innerHTML = '<option value="">Loading...</option>';
-		    document.getElementById('subAreaName').value = '';
+    // ✅ NEW: Update all vehicle RTO Location fields with selected area code
+    const areaCode = select.value;
+    const rtoLocationInputs = document.querySelectorAll('input[name="vehicleRTOLocation[]"]');
+    rtoLocationInputs.forEach(input => {
+        input.value = areaCode;
+    });
 
-		    const areaCode = select.value;
-		    if (!areaCode) {
-		        subAreaSelect.innerHTML = '<option value="">-- Select Area First --</option>';
-		        return;
-		    }
+    // Reset sub area
+    const subAreaSelect = document.getElementById('subAreaCode');
+    subAreaSelect.innerHTML = '<option value="">Loading...</option>';
+    document.getElementById('subAreaName').value = '';
 
-		    // Fetch sub areas for selected area via existing JSP
-		    fetch('lookupForLoan.jsp?type=subArea&areaCode=' + encodeURIComponent(areaCode))
-		        .then(response => response.text())
-		        .then(html => {
-		            // Parse the returned HTML table to extract options
-		            const parser = new DOMParser();
-		            const doc = parser.parseFromString(html, 'text/html');
-		            const rows = doc.querySelectorAll('table tr');
+    if (!areaCode) {
+        subAreaSelect.innerHTML = '<option value="">-- Select Area First --</option>';
+        return;
+    }
 
-		            subAreaSelect.innerHTML = '<option value="">-- Select --</option>';
+    // Fetch sub areas for selected area via existing JSP
+    fetch('lookupForLoan.jsp?type=subArea&areaCode=' + encodeURIComponent(areaCode))
+        .then(response => response.text())
+        .then(html => {
+            // Parse the returned HTML table to extract options
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const rows = doc.querySelectorAll('table tr');
 
-		            rows.forEach((row, index) => {
-		                if (index === 0) return; // skip header
-		                const cells = row.querySelectorAll('td');
-		                if (cells.length >= 2) {
-		                    const code = cells[0].textContent.trim();
-		                    const desc = cells[1].textContent.trim();
-		                    if (code) {
-		                        const opt = document.createElement('option');
-		                        opt.value = code;
-		                        opt.setAttribute('data-name', desc);
-		                        opt.textContent = code + ' — ' + desc;
-		                        subAreaSelect.appendChild(opt);
-		                    }
-		                }
-		            });
+            subAreaSelect.innerHTML = '<option value="">-- Select --</option>';
 
-		            if (subAreaSelect.options.length <= 1) {
-		                subAreaSelect.innerHTML = '<option value="">No sub areas found</option>';
-		            }
-		        })
-		        .catch(err => {
-		            console.error('Sub area load error:', err);
-		            subAreaSelect.innerHTML = '<option value="">Error loading sub areas</option>';
-		        });
-		}
+            rows.forEach((row, index) => {
+                if (index === 0) return; // skip header
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    const code = cells[0].textContent.trim();
+                    const desc = cells[1].textContent.trim();
+                    if (code) {
+                        const opt = document.createElement('option');
+                        opt.value = code;
+                        opt.setAttribute('data-name', desc);
+                        opt.textContent = code + ' — ' + desc;
+                        subAreaSelect.appendChild(opt);
+                    }
+                }
+            });
+
+            if (subAreaSelect.options.length <= 1) {
+                subAreaSelect.innerHTML = '<option value="">No sub areas found</option>';
+            }
+        })
+        .catch(err => {
+            console.error('Sub area load error:', err);
+            subAreaSelect.innerHTML = '<option value="">Error loading sub areas</option>';
+        });
+}
 
 		function handleSubAreaChange(select) {
 		    const selectedOption = select.options[select.selectedIndex];
