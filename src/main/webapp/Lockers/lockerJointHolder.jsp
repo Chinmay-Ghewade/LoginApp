@@ -1,7 +1,89 @@
-<%@ page import="java.sql.*, db.DBConnection" %>
+<%@ page import="java.sql.*, java.io.PrintWriter, db.DBConnection, org.json.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page buffer="8kb" autoFlush="true" %>
 
 <%
+    String _action = request.getParameter("action");
+
+    // ─────────────────────────────────────────────
+    // AJAX: Fetch locker details by Customer ID
+    // Source: ACCOUNT.LOCKERACCOUNT
+    // Conditions: ACCOUNT_STATUS = 'A', latest DATE_OF_HIRE
+    // ─────────────────────────────────────────────
+    if ("getLockerByCustomer".equals(_action)) {
+        out.clear();
+        response.reset();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        PrintWriter pw = response.getWriter();
+
+        String sessionBranch = (String) session.getAttribute("branchCode");
+        String customerId    = request.getParameter("customerId");
+
+        if (sessionBranch == null) {
+            pw.print("{\"success\":false,\"message\":\"Session expired\"}");
+            pw.flush(); return;
+        }
+        if (customerId == null || customerId.trim().isEmpty()) {
+            pw.print("{\"success\":false,\"message\":\"Customer ID is required\"}");
+            pw.flush(); return;
+        }
+
+        Connection conn = null; PreparedStatement ps = null; ResultSet rs = null;
+        try {
+            conn = DBConnection.getConnection();
+            if (conn == null) {
+                pw.print("{\"success\":false,\"message\":\"DB connection failed\"}");
+                pw.flush(); return;
+            }
+            // Fetch from ACCOUNT.LOCKERACCOUNT only
+            // ACCOUNT_STATUS = 'A' (active), pick most recent DATE_OF_HIRE
+            ps = conn.prepareStatement(
+                "SELECT LOCKER_TYPE, LOCKER_NUMBER, NAME_OF_HIRE FROM (" +
+                "  SELECT LOCKER_TYPE, LOCKER_NUMBER, NAME_OF_HIRE " +
+                "  FROM ACCOUNT.LOCKERACCOUNT " +
+                "  WHERE TRIM(BRANCH_CODE)    = TRIM(?) " +
+                "  AND   TRIM(CUSTOMER_ID)    = TRIM(?) " +
+                "  AND   TRIM(ACCOUNT_STATUS) = 'A' " +
+                "  ORDER BY DATE_OF_HIRE DESC" +
+                ") WHERE ROWNUM = 1"
+            );
+            ps.setString(1, sessionBranch.trim());
+            ps.setString(2, customerId.trim());
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String lockerType   = rs.getString("LOCKER_TYPE");
+                String lockerNumber = rs.getString("LOCKER_NUMBER");
+                String nameOfHire   = rs.getString("NAME_OF_HIRE");
+                JSONObject result = new JSONObject();
+                result.put("success",      true);
+                result.put("lockerType",   lockerType   != null ? lockerType.trim()   : "");
+                result.put("lockerNumber", lockerNumber != null ? lockerNumber.trim()  : "");
+                result.put("customerName", nameOfHire   != null ? nameOfHire.trim()   : "");
+                pw.print(result.toString());
+            } else {
+                pw.print("{\"success\":false,\"message\":\"No active locker found for this customer\"}");
+            }
+        } catch (Exception e) {
+            String raw  = (e.getMessage() != null) ? e.getMessage() : "Unknown DB error";
+            String safe = raw.replaceAll("[\\r\\n\\t]", " ")
+                             .replaceAll("\"", "\'")
+                             .replaceAll("\\\\", "/")
+                             .replaceAll("[^\\x20-\\x7E]", "");
+            pw.print("{\"success\":false,\"message\":\"" + safe + "\"}");
+        } finally {
+            try { if (rs!=null) rs.close(); } catch(Exception i){}
+            try { if (ps!=null) ps.close(); } catch(Exception i){}
+            try { if (conn!=null) conn.close(); } catch(Exception i){}
+        }
+        pw.flush(); return;
+    }
+
+    // ─────────────────────────────────────────────
+    // Normal page load — session check
+    // ─────────────────────────────────────────────
     String branchCode = (String) session.getAttribute("branchCode");
     if (branchCode == null) {
         response.sendRedirect("../login.jsp");
@@ -130,16 +212,6 @@
     }
 
     /* ── Lookup table styling scoped to joint holder lookup content ── */
-    #jhCustomerLookupContent .lookup-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--lk-primary);
-      padding: 16px 18px 12px 18px;
-      border-bottom: 1px solid var(--lk-border-light);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
     #jhCustomerLookupContent .search-box {
       padding: 14px 18px 8px 18px;
       background: var(--lk-primary-light);
@@ -237,13 +309,13 @@
 <form action="LockerJointHolderServlet" method="post" onsubmit="return validateForm()">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 1: LOCKER INFORMATION -->
+  <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset>
     <legend>Locker Information</legend>
     <div class="form-grid">
 
-      <!-- ── Customer ID with lookup — auto-fills Locker Type & Number ── -->
+      <!-- Customer ID lookup → auto-fills Locker Type, Number, Name -->
       <div>
         <label>Customer ID</label>
         <div style="display:flex; gap:4px; align-items:center;">
@@ -254,6 +326,12 @@
                   style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
                          border-radius:8px; font-size:18px; cursor:pointer;" title="Search Customer">…</button>
         </div>
+      </div>
+
+      <div>
+        <label>Customer Name</label>
+        <input type="text" name="customerName" id="customerName" readonly
+               style="background:#f4f2fc;">
       </div>
 
       <div>
@@ -370,7 +448,7 @@
         </div>
 
         <div>
-          <label>Relation with Nominee <span class="dd-spinner jh-sp-relation"></span></label>
+          <label>Relation with Joint Holder <span class="dd-spinner jh-sp-relation"></span></label>
           <select name="nomineeRelation[]" class="jh-dd-relation dd-loading" required>
             <option value="">Loading...</option>
           </select>
@@ -384,7 +462,6 @@
         </div>
 
       </div><!-- /.personal-grid -->
-
     </div><!-- /.nominee-block -->
   </fieldset>
 
@@ -399,15 +476,13 @@
 
 </form>
 
-<!-- ════════════════════════════════════════════════════════════════ -->
-<!-- CUSTOMER LOOKUP MODAL — shared for locker info & joint holder cards -->
-<!-- ════════════════════════════════════════════════════════════════ -->
+
+<!-- ════════ SHARED CUSTOMER LOOKUP MODAL ════════ -->
 <div id="jhCustomerLookupModal" class="customer-modal">
     <div style="background:#fff; border-radius:14px; width:85%; max-width:920px;
                 max-height:84vh; overflow:hidden; display:flex; flex-direction:column;
                 box-shadow:0 8px 32px rgba(55,50,121,0.18); font-family:Arial,sans-serif;">
 
-        <!-- Header -->
         <div style="display:flex; align-items:center; justify-content:space-between;
                     padding:14px 18px; background:linear-gradient(135deg,#373279,#2b0d73);
                     border-radius:14px 14px 0 0; flex-shrink:0;">
@@ -424,7 +499,6 @@
                   onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
         </div>
 
-        <!-- Loading indicator -->
         <div id="jhCustomerLookupLoading"
              style="display:flex;align-items:center;justify-content:center;
                     gap:10px;padding:40px 20px;color:#8066E8;font-size:14px;">
@@ -434,25 +508,22 @@
             Loading customers...
         </div>
 
-        <!-- Content loaded from lookupForCustomerId.jsp -->
         <div id="jhCustomerLookupContent"
              style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
-
     </div>
 </div>
+
 
 <script>
 window.APP_CONTEXT_PATH = '<%= contextPath %>';
 
-// ── Tracks which context opened the lookup modal ────────────────────
-// 'lockerInfo' = Fieldset 1 Customer ID
-// joint holder card element = Fieldset 2 card
+// 'lockerInfo' = Fieldset 1 Customer ID lookup
+// card element = Fieldset 2 joint holder card lookup
 var _jhModalContext = null;
 
-// ═══════════════════════════════════════════════════════════════════════
-// AJAX DROPDOWN LOADER
-// ═══════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════════════════════════════════
+// DROPDOWN LOADER
+// ══════════════════════════════════════════════════════════════════════
 var _jhDropdownCache = null;
 
 var JH_DD_MAP = {
@@ -465,18 +536,15 @@ var JH_DD_MAP = {
 function _fillJHSelect(selectEl, items) {
     selectEl.innerHTML = '';
     var blank = document.createElement('option');
-    blank.value = '';
-    blank.textContent = '-- Select --';
+    blank.value = ''; blank.textContent = '-- Select --';
     selectEl.appendChild(blank);
     items.forEach(function(item) {
         var opt = document.createElement('option');
-        opt.value = item.v;
-        opt.textContent = item.l;
+        opt.value = item.v; opt.textContent = item.l;
         selectEl.appendChild(opt);
     });
     selectEl.classList.remove('dd-loading');
-    selectEl.style.color = '';
-    selectEl.style.fontStyle = '';
+    selectEl.style.color = ''; selectEl.style.fontStyle = '';
 }
 
 function _fillJHBlock(block, data) {
@@ -498,10 +566,7 @@ function _fillJHBlock(block, data) {
 
 (function loadJHDropdowns() {
     fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
-        .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-        })
+        .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
         .then(function(data) {
             if (data._error) console.warn('Joint holder dropdown warning:', data._error);
             _jhDropdownCache = data;
@@ -513,21 +578,18 @@ function _fillJHBlock(block, data) {
             var firstBlock = document.querySelector('.nominee-block');
             if (!firstBlock) return;
             Object.keys(JH_DD_MAP).forEach(function(key) {
-                var cfg   = JH_DD_MAP[key];
-                var selEl = firstBlock.querySelector(cfg.sel);
-                var spEl  = firstBlock.querySelector(cfg.sp);
-                if (selEl) {
-                    selEl.innerHTML = '<option value="">-- Error: reload page --</option>';
-                    selEl.classList.remove('dd-loading');
-                    selEl.style.borderColor = '#f44336';
-                }
-                if (spEl) { spEl.style.background = '#f44336'; spEl.classList.add('done'); }
+                var selEl = firstBlock.querySelector(JH_DD_MAP[key].sel);
+                var spEl  = firstBlock.querySelector(JH_DD_MAP[key].sp);
+                if (selEl) { selEl.innerHTML = '<option value="">-- Error: reload page --</option>'; selEl.classList.remove('dd-loading'); selEl.style.borderColor = '#f44336'; }
+                if (spEl)  { spEl.style.background = '#f44336'; spEl.classList.add('done'); }
             });
         });
 })();
 
 
-// ── Joint holder serial renumbering ────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+// ADD / REMOVE / RENUMBER JOINT HOLDER CARDS
+// ══════════════════════════════════════════════════════════════════════
 function renumberNominees() {
     document.querySelectorAll('.nominee-block').forEach(function(card, idx) {
         var serial = card.querySelector('.nominee-serial');
@@ -538,60 +600,43 @@ function renumberNominees() {
     });
 }
 
-// ── Add joint holder card ───────────────────────────────────────────
 function addNominee() {
     var fieldset  = document.getElementById('nomineeFieldset');
     var firstCard = fieldset.querySelector('.nominee-block');
     var newCard   = firstCard.cloneNode(true);
-
     newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
         if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
         if (el.type === 'checkbox') { el.checked = false; return; }
         el.value = '';
     });
-
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
     if (cidContainer) cidContainer.style.display = 'none';
-
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
-
     Object.keys(JH_DD_MAP).forEach(function(key) {
         var selEl = newCard.querySelector(JH_DD_MAP[key].sel);
-        if (selEl) {
-            selEl.innerHTML = '<option value="">Loading...</option>';
-            selEl.classList.add('dd-loading');
-        }
+        if (selEl) { selEl.innerHTML = '<option value="">Loading...</option>'; selEl.classList.add('dd-loading'); }
     });
-
     var blocks = fieldset.querySelectorAll('.nominee-block');
     blocks[blocks.length - 1].insertAdjacentElement('afterend', newCard);
     renumberNominees();
-
     if (_jhDropdownCache) {
         _fillJHBlock(newCard, _jhDropdownCache);
     } else {
         fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
             .then(function(res) { return res.json(); })
-            .then(function(data) {
-                _jhDropdownCache = data;
-                _fillJHBlock(newCard, data);
-            });
+            .then(function(data) { _jhDropdownCache = data; _fillJHBlock(newCard, data); });
     }
 }
 
-// ── Remove joint holder card ────────────────────────────────────────
 function removeNominee(btn) {
-    var blocks = document.querySelectorAll('.nominee-block');
-    if (blocks.length <= 1) {
-        alert('At least one joint holder is required.');
-        return;
+    if (document.querySelectorAll('.nominee-block').length <= 1) {
+        alert('At least one joint holder is required.'); return;
     }
     btn.closest('.nominee-block').remove();
     renumberNominees();
 }
 
-// ── Toggle Customer ID container visibility ─────────────────────────
 function toggleNomineeCustomerID(radio) {
     var card      = radio.closest('.nominee-block');
     var container = card.querySelector('.nomineeCustomerIDContainer');
@@ -602,40 +647,60 @@ function toggleNomineeCustomerID(radio) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════
-// LOCKER INFO — Customer ID lookup (Fieldset 1)
-// Fetches LOCKERACCOUNT where CUSTOMER_ID = ? and ACCOUNT_STATUS = 'E'
-// (which corresponds to BRANCHLOCKER status 'H' = hired)
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// FIELDSET 1 — Customer ID lookup → fetch locker details
+// Calls lockerJointHolder.jsp?action=getLockerByCustomer
+// Source: ACCOUNT.LOCKERACCOUNT, ACCOUNT_STATUS='A', latest DATE_OF_HIRE
+// ══════════════════════════════════════════════════════════════════════
 function openLockerInfoCustomerLookup() {
     _jhModalContext = 'lockerInfo';
     _openSharedJHLookup();
 }
 
 function _fetchLockerDetailsByCustomer(customerId) {
-    fetch(window.APP_CONTEXT_PATH + '/loaders/LockerDetailsByCustomerLoader?customerId='
+    document.getElementById('lockerType').value   = 'Fetching...';
+    document.getElementById('lockerNumber').value = 'Fetching...';
+    document.getElementById('customerName').value = 'Fetching...';
+
+    fetch('lockerJointHolder.jsp?action=getLockerByCustomer&customerId='
             + encodeURIComponent(customerId))
-        .then(function(res) { return res.json(); })
+        .then(function(r) {
+            var contentType = r.headers.get('content-type') || '';
+            if (!r.ok || contentType.indexOf('application/json') === -1) {
+                document.getElementById('lockerType').value   = '';
+                document.getElementById('lockerNumber').value = '';
+                document.getElementById('customerName').value = '';
+                showToast('Server error (' + r.status + '). Could not fetch locker details.', true);
+                return null;
+            }
+            return r.json();
+        })
         .then(function(data) {
-            if (data.success && data.locker) {
-                document.getElementById('lockerType').value   = data.locker.lockerType   || '';
-                document.getElementById('lockerNumber').value = data.locker.lockerNumber || '';
+            if (!data) return;
+            if (data.success) {
+                // Fill locker type, number and customer name from LOCKERACCOUNT.NAME_OF_HIRE
+                document.getElementById('lockerType').value   = data.lockerType   || '';
+                document.getElementById('lockerNumber').value = data.lockerNumber || '';
+                document.getElementById('customerName').value = data.customerName || '';
             } else {
                 document.getElementById('lockerType').value   = '';
                 document.getElementById('lockerNumber').value = '';
+                document.getElementById('customerName').value = '';
                 showToast(data.message || 'No active locker found for this customer.', true);
             }
         })
         .catch(function(err) {
-            console.error('Locker detail fetch error:', err);
-            showToast('Failed to fetch locker details.', true);
+            document.getElementById('lockerType').value   = '';
+            document.getElementById('lockerNumber').value = '';
+            document.getElementById('customerName').value = '';
+            showToast('Failed to fetch locker details. Please try again.', true);
         });
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════
-// JOINT HOLDER CARD — Customer ID lookup (Fieldset 2)
-// ═══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// FIELDSET 2 — Joint holder card Customer ID lookup
+// ══════════════════════════════════════════════════════════════════════
 function openJHCardCustomerLookup(triggerEl) {
     _jhModalContext = triggerEl.closest('.nominee-block');
     _openSharedJHLookup();
@@ -647,7 +712,6 @@ function _openSharedJHLookup() {
     document.getElementById('jhCustomerLookupModal').style.display = 'flex';
     document.getElementById('jhCustomerLookupLoading').style.display = 'flex';
     document.getElementById('jhCustomerLookupContent').innerHTML = '';
-
     fetch(window.APP_CONTEXT_PATH + '/OpenAccount/lookupForCustomerId.jsp')
         .then(function(res) { return res.text(); })
         .then(function(html) {
@@ -671,26 +735,30 @@ function closeJHCustomerLookup() {
 window.setCustomerData = function(customerId, customerName, categoryCode, riskCategory) {
 
     if (_jhModalContext === 'lockerInfo') {
-        // ── Fieldset 1: fill Customer ID then fetch locker details ──
+        // Fieldset 1: fill Customer ID then fetch locker type + number + name
         document.getElementById('lockerCustomerId').value = customerId;
         closeJHCustomerLookup();
         _fetchLockerDetailsByCustomer(customerId);
 
     } else if (_jhModalContext && _jhModalContext !== 'lockerInfo') {
-        // ── Fieldset 2: fill joint holder card fields ───────────────
+        // Fieldset 2: fill joint holder card fields from customer details
         var card = _jhModalContext;
         var idInput = card.querySelector('.nomineeCustomerIDInput');
         if (idInput) idInput.value = customerId;
-
         closeJHCustomerLookup();
 
         fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId='
                 + encodeURIComponent(customerId))
-            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                var contentType = res.headers.get('content-type') || '';
+                if (!res.ok || contentType.indexOf('application/json') === -1) {
+                    throw new Error('Non-JSON response from getCustomerDetails');
+                }
+                return res.json();
+            })
             .then(function(data) {
                 if (!data.success || !data.customer) return;
                 var c = data.customer;
-
                 var fieldMap = {
                     'nomineeName[]'     : c.customerName || '',
                     'nomineeAddress1[]' : c.address1     || '',
@@ -702,7 +770,6 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
                     var el = card.querySelector('[name="' + name + '"]');
                     if (el) el.value = fieldMap[name];
                 });
-
                 var ddMap = {
                     'nomineeCity[]'  : c.city  || '',
                     'nomineeState[]' : c.state || ''
@@ -724,6 +791,7 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
     }
 };
 
+
 // ── Toast helper ────────────────────────────────────────────────────
 function showToast(msg, isError) {
     Toastify({
@@ -740,7 +808,6 @@ function showToast(msg, isError) {
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
     var valid = true;
-
     document.querySelectorAll('.zip-input').forEach(function(inp) {
         var errEl = inp.nextElementSibling;
         if (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value)) {
@@ -750,7 +817,6 @@ function validateForm() {
             if (errEl) errEl.textContent = '';
         }
     });
-
     if (valid) {
         var unchecked = false;
         document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
@@ -761,7 +827,6 @@ function validateForm() {
             valid = false;
         }
     }
-
     return valid;
 }
 
