@@ -243,35 +243,43 @@ public class LockerSurrenderServlet extends HttpServlet {
                 "  CUPBORD_NO, KEY_NO, LOCKER_STATUS, " +
                 "  DATEOFHIRE, DATEOFSURRENDOR, " +
                 "  USER_ID, OFFICER_ID, " +
-                "  CREATED_DATE, MODIFIED_DATE" +
+                "  CREATED_DATE, MODIFIED_DATE, NAME_OF_HIRE " +
                 ") VALUES (" +
-                "  ?,?,?," +
-                "  ?,?,'R'," +
+                "  ?, ?, ?, " +
+                "  ?, ?, 'E', " +
                 "  (SELECT DATE_OF_HIRE FROM ACCOUNT.LOCKERACCOUNT " +
                 "   WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
                 "   AND   TRIM(LOCKER_TYPE) = TRIM(?) " +
-                "   AND   LOCKER_NUMBER     = ? AND ROWNUM = 1)," +
-                "  ?,?,?," +
-                "  SYSDATE, SYSDATE" +
+                "   AND   LOCKER_NUMBER     = ? AND ROWNUM = 1), " +
+                "  ?, ?, ?, " +
+                "  SYSDATE, SYSDATE, " +
+                "  (SELECT NAME_OF_HIRE FROM ACCOUNT.LOCKERACCOUNT " +     // ← NEW
+                "   WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
+                "   AND   TRIM(LOCKER_TYPE) = TRIM(?) " +
+                "   AND   LOCKER_NUMBER     = ? AND ROWNUM = 1) " +
                 ")"
             );
+
             int s = 1;
-            psSurrender.setString(s++, branchCode.trim());
-            psSurrender.setString(s++, lockerType.trim());
-            psSurrender.setInt   (s++, lockerNumber);
+            psSurrender.setString(s++, branchCode.trim());   // 1  BRANCH_CODE
+            psSurrender.setString(s++, lockerType.trim());   // 2  LOCKER_TYPE
+            psSurrender.setInt   (s++, lockerNumber);         // 3  LOCKER_NUMBER
             if (cupbordNo > 0) {
-                psSurrender.setInt(s++, cupbordNo);
+                psSurrender.setInt(s++, cupbordNo);           // 4  CUPBORD_NO
             } else {
                 psSurrender.setNull(s++, Types.INTEGER);
             }
-            psSurrender.setString(s++, keyNo.isEmpty() ? null : keyNo);
-            psSurrender.setString(s++, branchCode.trim());
-            psSurrender.setString(s++, lockerType.trim());
-            psSurrender.setInt   (s++, lockerNumber);
-            psSurrender.setDate  (s++, surrenderDate);
-            psSurrender.setString(s++, userId != null ? userId.trim() : null);
-            psSurrender.setString(s++, userId != null ? userId.trim() : null);
-
+            psSurrender.setString(s++, keyNo.isEmpty() ? null : keyNo); // 5  KEY_NO
+            psSurrender.setString(s++, branchCode.trim());   // 6  subquery BRANCH_CODE
+            psSurrender.setString(s++, lockerType.trim());   // 7  subquery LOCKER_TYPE
+            psSurrender.setInt   (s++, lockerNumber);         // 8  subquery LOCKER_NUMBER
+            psSurrender.setDate  (s++, surrenderDate);        // 9  DATEOFSURRENDOR
+            psSurrender.setString(s++, userId != null ? userId.trim() : null); // 10 USER_ID
+            psSurrender.setString(s++, userId != null ? userId.trim() : null); // 11 OFFICER_ID
+            psSurrender.setString(s++, branchCode.trim());   // 12 NAME_OF_HIRE subquery BRANCH_CODE
+            psSurrender.setString(s++, lockerType.trim());   // 13 NAME_OF_HIRE subquery LOCKER_TYPE
+            psSurrender.setInt   (s++, lockerNumber);         // 14 NAME_OF_HIRE subquery LOCKER_NUMBER
+            
             if (psSurrender.executeUpdate() == 0) {
                 conn.rollback();
                 out.print(errorJson("Failed to insert surrender history record.")); return;

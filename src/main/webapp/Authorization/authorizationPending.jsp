@@ -66,6 +66,11 @@
                 <h3>Lockers</h3>
                 <p class="loading" id="pending-lockres-value">Loading...</p>
             </div>
+            
+             <div class="card" onclick="openInParentFrame('Authorization/authorizationPendingLockerSurrender.jsp', 'Authorization > Pending Lockers Surrrender')">
+                <h3>Lockers-Surrendar</h3>
+                <p class="loading" id="pending-lockres-surrender-value">Loading...</p>
+            </div>
 
         </div>
     </div>
