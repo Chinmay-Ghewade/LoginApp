@@ -140,6 +140,9 @@ public class LoanServlet extends HttpServlet {
         PreparedStatement psPlant 	   = null;
         PreparedStatement psVehicle    = null;
         PreparedStatement psInsurance  = null;
+        PreparedStatement psMarketShares = null;
+        PreparedStatement psStock        = null;
+        PreparedStatement psSalary       = null;
         String applicationNumber = null;
 
         try {
@@ -1225,6 +1228,325 @@ public class LoanServlet extends HttpServlet {
                  System.out.println("Insurance records inserted: " + validIns);
              }
          }
+         
+      // ================================================================
+      // 12. INSERT MARKET SHARES  →  APPLICATION.APPLICATIONSECURITYSHARE
+      // ================================================================
+      String[] msSecurityTypes   = request.getParameterValues("marketSharesSecurityType[]");
+      String[] msCompanyNames    = request.getParameterValues("marketSharesCompanyName[]");
+      String[] msMargins         = request.getParameterValues("marketSharesMargin[]");
+      String[] msSubmissionDates = request.getParameterValues("marketSharesSubmissionDate[]");
+      String[] msIssueDates      = request.getParameterValues("marketSharesIssueDate[]");
+      String[] msMarketValues    = request.getParameterValues("marketSharesMarketValue[]");
+      String[] msNoOfShares      = request.getParameterValues("marketSharesNoOfShares[]");
+      String[] msSecurityValues  = request.getParameterValues("marketSharesSecurityValue[]");
+      String[] msParticulars     = request.getParameterValues("marketSharesParticular[]");
+
+      if (msSecurityTypes != null && msSecurityTypes.length > 0) {
+          String msSQL =
+              "INSERT INTO APPLICATION.APPLICATIONSECURITYSHARE (" +
+              "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, COMPANYNAME, " +
+              "MARGINEPERCENTAGE, SUBMISSIONDATE, ISSUEDATE, MARKETVALUE, " +
+              "NOOFSHARES, SECURITYVALUE, PARTICULAR, " +
+              "DATETIMESTAMP, CREATED_DATE, MODIFIED_DATE" +
+              ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+          psMarketShares = conn.prepareStatement(msSQL);
+          int serial = 1;
+          int validMs = 0;
+
+          for (int i = 0; i < msSecurityTypes.length; i++) {
+              String secType = trimSafe(msSecurityTypes[i]);
+              if (secType == null || secType.isEmpty()) {
+                  System.out.println("⚠️ Skip market shares " + (i + 1) + " - empty security type");
+                  continue;
+              }
+
+              System.out.println("✅ Market Shares " + serial + ": " + secType);
+
+              int c = 1;
+              Timestamp msNow = new Timestamp(System.currentTimeMillis());
+
+              psMarketShares.setString(c++, applicationNumber);                                    // 1 APPLICATION_NUMBER
+              psMarketShares.setInt(c++, serial);                                                  // 2 SERIAL_NUMBER
+              psMarketShares.setString(c++, secType);                                              // 3 SECURITYTYPE_CODE
+
+              psMarketShares.setString(c++, msCompanyNames != null && i < msCompanyNames.length
+                                            ? trimSafe(msCompanyNames[i]) : null);                 // 4 COMPANYNAME
+
+              Double msMargin = msMargins != null && i < msMargins.length
+                                ? parseDouble(msMargins[i]) : null;
+              if (msMargin != null) psMarketShares.setDouble(c++, msMargin);
+              else psMarketShares.setNull(c++, Types.DECIMAL);                                     // 5 MARGINEPERCENTAGE
+
+              Date msSubDate = msSubmissionDates != null && i < msSubmissionDates.length
+                               ? parseDate(msSubmissionDates[i]) : null;
+              if (msSubDate != null) psMarketShares.setDate(c++, msSubDate);
+              else psMarketShares.setNull(c++, Types.DATE);                                        // 6 SUBMISSIONDATE
+
+              Date msIssueDate = msIssueDates != null && i < msIssueDates.length
+                                 ? parseDate(msIssueDates[i]) : null;
+              if (msIssueDate != null) psMarketShares.setDate(c++, msIssueDate);
+              else psMarketShares.setNull(c++, Types.DATE);                                        // 7 ISSUEDATE
+
+              Double msMarketVal = msMarketValues != null && i < msMarketValues.length
+                                   ? parseDouble(msMarketValues[i]) : null;
+              if (msMarketVal != null) psMarketShares.setDouble(c++, msMarketVal);
+              else psMarketShares.setNull(c++, Types.DECIMAL);                                     // 8 MARKETVALUE
+
+              Integer msShares = msNoOfShares != null && i < msNoOfShares.length
+                                 ? parseInt(msNoOfShares[i]) : null;
+              if (msShares != null) psMarketShares.setInt(c++, msShares);
+              else psMarketShares.setNull(c++, Types.INTEGER);                                     // 9 NOOFSHARES
+
+              Double msSecVal = msSecurityValues != null && i < msSecurityValues.length
+                                ? parseDouble(msSecurityValues[i]) : null;
+              if (msSecVal != null) psMarketShares.setDouble(c++, msSecVal);
+              else psMarketShares.setNull(c++, Types.DECIMAL);                                     // 10 SECURITYVALUE
+
+              String msPart = msParticulars != null && i < msParticulars.length
+                              ? trimSafe(msParticulars[i]) : null;
+              if (msPart != null && !msPart.isEmpty()) psMarketShares.setString(c++, msPart);
+              else psMarketShares.setNull(c++, Types.VARCHAR);                                     // 11 PARTICULAR
+
+              psMarketShares.setTimestamp(c++, msNow);                                             // 12 DATETIMESTAMP
+              psMarketShares.setTimestamp(c++, msNow);                                             // 13 CREATED_DATE
+              psMarketShares.setNull(c++, Types.TIMESTAMP);                                        // 14 MODIFIED_DATE
+
+              psMarketShares.addBatch();
+              validMs++;
+              serial++;
+          }
+          if (validMs > 0) {
+              psMarketShares.executeBatch();
+              System.out.println("Market Shares records inserted: " + validMs);
+          }
+      }
+
+      // ================================================================
+      // 13. INSERT STOCK STATEMENT  →  APPLICATION.APPLICATIONSECURITYSTOCKSTATEM
+      // ================================================================
+      // DB stores actual rupee values (RAWMATERIALSTOCKVALUE, WIPVALUE, FINISHGOODSTOCKVALUE),
+      // not margin percentages. The form captures margin % fields which are used to
+      // calculate security value client-side; store the margin % values in those columns
+      // as the closest available mapping until dedicated value fields are added to the form.
+      String[] stSecurityTypes    = request.getParameterValues("stockSecurityType[]");
+      String[] stSubmissionDates  = request.getParameterValues("stockSubmissionDate[]");
+      String[] stStatementDates   = request.getParameterValues("stockStatementDate[]");
+      String[] stRawMatMargins    = request.getParameterValues("stockRawMatMargin[]");
+      String[] stWipMargins       = request.getParameterValues("stockWorkInProMargin[]");
+      String[] stFiniGoodsMargins = request.getParameterValues("stockFiniGoodsMargin[]");
+      String[] stSecurityValues   = request.getParameterValues("stockSecurityValue[]");
+      String[] stParticulars      = request.getParameterValues("stockParticular[]");
+
+      if (stSecurityTypes != null && stSecurityTypes.length > 0) {
+          String stSQL =
+              "INSERT INTO APPLICATION.APPLICATIONSECURITYSTOCKSTATEM (" +
+              "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, SUBMISSIONDATE, " +
+              "DATEOFSTATEMENT, RAWMATERIALSTOCKVALUE, WIPVALUE, FINISHGOODSTOCKVALUE, " +
+              "RELEASEDATE, SECURITYVALUE, PARTICULAR, " +
+              "DATETIMESTAMP, CREATED_DATE, MODIFIED_DATE" +
+              ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+          psStock = conn.prepareStatement(stSQL);
+          int serial = 1;
+          int validSt = 0;
+
+          for (int i = 0; i < stSecurityTypes.length; i++) {
+              String secType = trimSafe(stSecurityTypes[i]);
+              if (secType == null || secType.isEmpty()) {
+                  System.out.println("⚠️ Skip stock statement " + (i + 1) + " - empty security type");
+                  continue;
+              }
+
+              System.out.println("✅ Stock Statement " + serial + ": " + secType);
+
+              int c = 1;
+              Timestamp stNow = new Timestamp(System.currentTimeMillis());
+
+              psStock.setString(c++, applicationNumber);                                           // 1 APPLICATION_NUMBER
+              psStock.setInt(c++, serial);                                                         // 2 SERIAL_NUMBER
+              psStock.setString(c++, secType);                                                     // 3 SECURITYTYPE_CODE
+
+              Date stSubDate = stSubmissionDates != null && i < stSubmissionDates.length
+                               ? parseDate(stSubmissionDates[i]) : null;
+              if (stSubDate != null) psStock.setDate(c++, stSubDate);
+              else psStock.setNull(c++, Types.DATE);                                               // 4 SUBMISSIONDATE
+
+              Date stStmtDate = stStatementDates != null && i < stStatementDates.length
+                                ? parseDate(stStatementDates[i]) : null;
+              if (stStmtDate != null) psStock.setDate(c++, stStmtDate);
+              else psStock.setNull(c++, Types.DATE);                                               // 5 DATEOFSTATEMENT
+
+              // Storing margin % values in stock value columns (form currently has no rupee fields)
+              Double stRawMat = stRawMatMargins != null && i < stRawMatMargins.length
+                                ? parseDouble(stRawMatMargins[i]) : null;
+              if (stRawMat != null) psStock.setDouble(c++, stRawMat);
+              else psStock.setNull(c++, Types.DECIMAL);                                            // 6 RAWMATERIALSTOCKVALUE
+
+              Double stWip = stWipMargins != null && i < stWipMargins.length
+                             ? parseDouble(stWipMargins[i]) : null;
+              if (stWip != null) psStock.setDouble(c++, stWip);
+              else psStock.setNull(c++, Types.DECIMAL);                                            // 7 WIPVALUE
+
+              Double stFiniGoods = stFiniGoodsMargins != null && i < stFiniGoodsMargins.length
+                                   ? parseDouble(stFiniGoodsMargins[i]) : null;
+              if (stFiniGoods != null) psStock.setDouble(c++, stFiniGoods);
+              else psStock.setNull(c++, Types.DECIMAL);                                            // 8 FINISHGOODSTOCKVALUE
+
+              // RELEASEDATE — not in form, store null
+              psStock.setNull(c++, Types.DATE);                                                    // 9 RELEASEDATE
+
+              Double stSecVal = stSecurityValues != null && i < stSecurityValues.length
+                                ? parseDouble(stSecurityValues[i]) : null;
+              if (stSecVal != null) psStock.setDouble(c++, stSecVal);
+              else psStock.setNull(c++, Types.DECIMAL);                                            // 10 SECURITYVALUE
+
+              String stPart = stParticulars != null && i < stParticulars.length
+                              ? trimSafe(stParticulars[i]) : null;
+              if (stPart != null && !stPart.isEmpty()) psStock.setString(c++, stPart);
+              else psStock.setNull(c++, Types.VARCHAR);                                            // 11 PARTICULAR
+
+              psStock.setTimestamp(c++, stNow);                                                    // 12 DATETIMESTAMP
+              psStock.setTimestamp(c++, stNow);                                                    // 13 CREATED_DATE
+              psStock.setNull(c++, Types.TIMESTAMP);                                               // 14 MODIFIED_DATE
+
+              psStock.addBatch();
+              validSt++;
+              serial++;
+          }
+          if (validSt > 0) {
+              psStock.executeBatch();
+              System.out.println("Stock Statement records inserted: " + validSt);
+          }
+      }
+
+      // ================================================================
+      // 14. INSERT SALARY  →  APPLICATION.APPLICATIONSECURITYSALARY
+      // ================================================================
+      // NOTE: This table has NO SERIAL_NUMBER column.
+      String[] salSecurityTypes = request.getParameterValues("salarySecurityType[]");
+      String[] salEmployeeNames = request.getParameterValues("salaryEmployeeName[]");
+      String[] salAddr1         = request.getParameterValues("salaryAddress1[]");
+      String[] salAddr2         = request.getParameterValues("salaryAddress2[]");
+      String[] salAddr3         = request.getParameterValues("salaryAddress3[]");
+      String[] salCities        = request.getParameterValues("salaryCity[]");
+      String[] salStates        = request.getParameterValues("salaryState[]");
+      String[] salCountries     = request.getParameterValues("salaryCountry[]");
+      String[] salZips          = request.getParameterValues("salaryZip[]");
+      String[] salPhones        = request.getParameterValues("salaryPhone[]");
+      String[] salMobiles       = request.getParameterValues("salaryMobile[]");
+      String[] salDepartments   = request.getParameterValues("salaryDepartment[]");
+      String[] salGrossSalaries = request.getParameterValues("salaryGross[]");
+      String[] salNetSalaries   = request.getParameterValues("salaryNet[]");
+      String[] salPFAccounts    = request.getParameterValues("salaryPFAccount[]");
+      String[] salPanNumbers    = request.getParameterValues("salaryPan[]");
+      String[] salParticulars   = request.getParameterValues("salaryParticular[]");
+
+      if (salSecurityTypes != null && salSecurityTypes.length > 0) {
+          String salSQL =
+              "INSERT INTO APPLICATION.APPLICATIONSECURITYSALARY (" +
+              "APPLICATION_NUMBER, SECURITYTYPE_CODE, NAME, ADDRESS1, ADDRESS2, ADDRESS3, " +
+              "CITY_CODE, STATE_CODE, COUNTRY_CODE, ZIP, PHONE, MOBILE, DEPARTMENT, " +
+              "GROSSSALARY, NETSALARY, PFACCOUNTNUMBER, PANNUMBER, IS_INCOME_TAX_PAYEE, " +
+              "PARTICULAR, DATETIMESTAMP, CREATED_DATE, MODIFIED_DATE" +
+              ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+          psSalary = conn.prepareStatement(salSQL);
+          int validSal = 0;
+
+          for (int i = 0; i < salSecurityTypes.length; i++) {
+              String secType = trimSafe(salSecurityTypes[i]);
+              if (secType == null || secType.isEmpty()) {
+                  System.out.println("⚠️ Skip salary " + (i + 1) + " - empty security type");
+                  continue;
+              }
+
+              System.out.println("✅ Salary " + (i + 1) + ": " + secType);
+
+              int c = 1;
+              Timestamp salNow = new Timestamp(System.currentTimeMillis());
+
+              psSalary.setString(c++, applicationNumber);                                          // 1 APPLICATION_NUMBER
+              psSalary.setString(c++, secType);                                                    // 2 SECURITYTYPE_CODE
+
+              psSalary.setString(c++, salEmployeeNames != null && i < salEmployeeNames.length
+                                      ? trimSafe(salEmployeeNames[i]) : null);                     // 3 NAME
+
+              psSalary.setString(c++, salAddr1 != null && i < salAddr1.length
+                                      ? trimSafe(salAddr1[i]) : null);                             // 4 ADDRESS1
+              psSalary.setString(c++, salAddr2 != null && i < salAddr2.length
+                                      ? trimSafe(salAddr2[i]) : null);                             // 5 ADDRESS2
+              psSalary.setString(c++, salAddr3 != null && i < salAddr3.length
+                                      ? trimSafe(salAddr3[i]) : null);                             // 6 ADDRESS3
+
+              // CITY_CODE is VARCHAR2(20) — NOT NULL
+              String salCity = salCities != null && i < salCities.length ? trimSafe(salCities[i]) : null;
+              if (salCity != null && !salCity.isEmpty()) psSalary.setString(c++, salCity);
+              else psSalary.setString(c++, "NA");                                                  // 7 CITY_CODE
+
+              // STATE_CODE is CHAR(20) — NOT NULL
+              String salState = salStates != null && i < salStates.length ? trimSafe(salStates[i]) : null;
+              if (salState != null && !salState.isEmpty()) psSalary.setString(c++, salState);
+              else psSalary.setString(c++, "NA");                                                  // 8 STATE_CODE
+
+              // COUNTRY_CODE is CHAR(2) — NOT NULL
+              String salCountry = salCountries != null && i < salCountries.length ? trimSafe(salCountries[i]) : null;
+              if (salCountry != null && salCountry.length() >= 2) psSalary.setString(c++, salCountry.substring(0, 2));
+              else psSalary.setString(c++, "IN");                                                  // 9 COUNTRY_CODE
+
+              Integer salZip = salZips != null && i < salZips.length ? parseInt(salZips[i]) : null;
+              if (salZip != null && salZip != 0) psSalary.setInt(c++, salZip);
+              else psSalary.setNull(c++, Types.INTEGER);                                           // 10 ZIP
+
+              psSalary.setString(c++, salPhones != null && i < salPhones.length
+                                      ? trimSafe(salPhones[i]) : null);                            // 11 PHONE
+              psSalary.setString(c++, salMobiles != null && i < salMobiles.length
+                                      ? trimSafe(salMobiles[i]) : null);                           // 12 MOBILE
+              psSalary.setString(c++, salDepartments != null && i < salDepartments.length
+                                      ? trimSafe(salDepartments[i]) : null);                       // 13 DEPARTMENT
+
+              Double grossSal = salGrossSalaries != null && i < salGrossSalaries.length
+                                ? parseDouble(salGrossSalaries[i]) : null;
+              if (grossSal != null) psSalary.setDouble(c++, grossSal);
+              else psSalary.setNull(c++, Types.DECIMAL);                                           // 14 GROSSSALARY
+
+              Double netSal = salNetSalaries != null && i < salNetSalaries.length
+                              ? parseDouble(salNetSalaries[i]) : null;
+              if (netSal != null) psSalary.setDouble(c++, netSal);
+              else psSalary.setNull(c++, Types.DECIMAL);                                           // 15 NETSALARY
+
+              psSalary.setString(c++, salPFAccounts != null && i < salPFAccounts.length
+                                      ? trimSafe(salPFAccounts[i]) : null);                        // 16 PFACCOUNTNUMBER
+              psSalary.setString(c++, salPanNumbers != null && i < salPanNumbers.length
+                                      ? trimSafe(salPanNumbers[i]) : null);                        // 17 PANNUMBER
+
+              // IS_INCOME_TAX_PAYEE: radio button named salaryIsTaxPayer_N, value "Yes"/"No" → store "Y"/"N"
+              // Since it uses indexed radio names (salaryIsTaxPayer_1, _2...), use a single param approach
+              String taxPayerParam = request.getParameter("salaryIsTaxPayer_" + (i + 1));
+              String isTaxPayee = "N";
+              if ("Yes".equalsIgnoreCase(trimSafe(taxPayerParam))) {
+                  isTaxPayee = "Y";
+              }
+              psSalary.setString(c++, isTaxPayee);                                                 // 18 IS_INCOME_TAX_PAYEE
+
+              String salPart = salParticulars != null && i < salParticulars.length
+                               ? trimSafe(salParticulars[i]) : null;
+              if (salPart != null && !salPart.isEmpty()) psSalary.setString(c++, salPart);
+              else psSalary.setNull(c++, Types.VARCHAR);                                           // 19 PARTICULAR
+
+              psSalary.setTimestamp(c++, salNow);                                                  // 20 DATETIMESTAMP
+              psSalary.setTimestamp(c++, salNow);                                                  // 21 CREATED_DATE
+              psSalary.setNull(c++, Types.TIMESTAMP);                                              // 22 MODIFIED_DATE
+
+              psSalary.addBatch();
+              validSal++;
+          }
+          if (validSal > 0) {
+              psSalary.executeBatch();
+              System.out.println("Salary records inserted: " + validSal);
+          }
+      }
 
             // ================================================================
             // COMMIT
@@ -1256,6 +1578,9 @@ public class LoanServlet extends HttpServlet {
             try { if (psPlant      != null) psPlant.close();      } catch (Exception ignored) {}
             try { if (psVehicle    != null) psVehicle.close();    } catch (Exception ignored) {}
             try { if (psInsurance  != null) psInsurance.close();  } catch (Exception ignored) {}
+            try { if (psMarketShares != null) psMarketShares.close(); } catch (Exception ignored) {}
+            try { if (psStock        != null) psStock.close();        } catch (Exception ignored) {}
+            try { if (psSalary       != null) psSalary.close();       } catch (Exception ignored) {}
             
             try {
                 if (conn != null) {
