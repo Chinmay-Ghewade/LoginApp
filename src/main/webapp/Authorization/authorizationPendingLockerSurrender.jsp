@@ -84,6 +84,7 @@ function searchTable() {
     var filtered = filter ? allLockers.filter(function(l) {
         return l.nameOfHire.toLowerCase().indexOf(filter)     > -1 ||
                l.lockerType.toLowerCase().indexOf(filter)     > -1 ||
+               l.lockerNumber.toLowerCase().indexOf(filter)   > -1 ||
                l.surrenderDate.toLowerCase().indexOf(filter)  > -1 ||
                l.branchCode.toLowerCase().indexOf(filter)     > -1;
     }) : allLockers;
@@ -97,7 +98,7 @@ function displayLockers(lockers, page) {
     tbody.innerHTML = "";
 
     if (lockers.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='5' class='no-data'>No pending surrender records found.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='6' class='no-data'>No pending surrender records found.</td></tr>";
         updatePaginationControls(0, page);
         return;
     }
@@ -110,10 +111,11 @@ function displayLockers(lockers, page) {
         var srNo = start + (i - start) + 1;
         var row  = tbody.insertRow();
         row.innerHTML =
-            "<td>" + srNo + "</td>" +
-            "<td>" + l.nameOfHire   + "</td>" +
-            "<td>" + l.lockerType   + "</td>" +
-            "<td>" + l.surrenderDate + "</td>" +
+            "<td>" + srNo              + "</td>" +
+            "<td>" + l.nameOfHire      + "</td>" +
+            "<td>" + l.lockerType      + "</td>" +
+            "<td>" + l.lockerNumber    + "</td>" +
+            "<td>" + l.surrenderDate   + "</td>" +
             "<td><button class='view-details-btn' onclick=\"viewLockerSurrender(" +
                 "'" + l.branchCode   + "'," +
                 "'" + l.lockerType   + "'," +
@@ -138,6 +140,7 @@ function previousPage() {
     var lockers = filter ? allLockers.filter(function(l) {
         return l.nameOfHire.toLowerCase().indexOf(filter)    > -1 ||
                l.lockerType.toLowerCase().indexOf(filter)    > -1 ||
+               l.lockerNumber.toLowerCase().indexOf(filter)  > -1 ||
                l.surrenderDate.toLowerCase().indexOf(filter) > -1 ||
                l.branchCode.toLowerCase().indexOf(filter)    > -1;
     }) : allLockers;
@@ -150,6 +153,7 @@ function nextPage() {
     var lockers = filter ? allLockers.filter(function(l) {
         return l.nameOfHire.toLowerCase().indexOf(filter)    > -1 ||
                l.lockerType.toLowerCase().indexOf(filter)    > -1 ||
+               l.lockerNumber.toLowerCase().indexOf(filter)  > -1 ||
                l.surrenderDate.toLowerCase().indexOf(filter) > -1 ||
                l.branchCode.toLowerCase().indexOf(filter)    > -1;
     }) : allLockers;
@@ -159,7 +163,10 @@ function nextPage() {
 }
 
 function viewLockerSurrender(branchCode, lockerType, lockerNumber) {
-    // Navigation to be wired up later
+    window.location.href = 'viewLocSurrender.jsp' +
+        '?branchCode='   + encodeURIComponent(branchCode) +
+        '&lockerType='   + encodeURIComponent(lockerType) +
+        '&lockerNumber=' + encodeURIComponent(lockerNumber);
 }
 
 window.onload = function() {
@@ -180,7 +187,7 @@ window.onload = function() {
 
 <div class="search-container">
     <input type="text" id="searchInput" onkeyup="searchTable()"
-           placeholder="🔍 Search by Name, Locker Type, Surrender Date">
+           placeholder="🔍 Search by Name, Locker Type, Locker Number, Surrender Date">
 </div>
 
 <div class="table-container">
@@ -190,6 +197,7 @@ window.onload = function() {
         <th>SR NO</th>
         <th>NAME OF HIRE</th>
         <th>LOCKER TYPE</th>
+        <th>LOCKER NUMBER</th>
         <th>SURRENDER DATE</th>
         <th>ACTION</th>
     </tr>

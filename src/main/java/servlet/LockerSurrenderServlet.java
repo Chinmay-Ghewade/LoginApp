@@ -243,7 +243,7 @@ public class LockerSurrenderServlet extends HttpServlet {
                 "  CUPBORD_NO, KEY_NO, LOCKER_STATUS, " +
                 "  DATEOFHIRE, DATEOFSURRENDOR, " +
                 "  USER_ID, OFFICER_ID, " +
-                "  CREATED_DATE, MODIFIED_DATE, NAME_OF_HIRE " +
+                "  CREATED_DATE, MODIFIED_DATE, NAME_OF_HIRE, CUSTOMER_ID " +
                 ") VALUES (" +
                 "  ?, ?, ?, " +
                 "  ?, ?, 'E', " +
@@ -256,7 +256,8 @@ public class LockerSurrenderServlet extends HttpServlet {
                 "  (SELECT NAME_OF_HIRE FROM ACCOUNT.LOCKERACCOUNT " +     // ← NEW
                 "   WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
                 "   AND   TRIM(LOCKER_TYPE) = TRIM(?) " +
-                "   AND   LOCKER_NUMBER     = ? AND ROWNUM = 1) " +
+                "   AND   LOCKER_NUMBER     = ? AND ROWNUM = 1), " +
+                "  ? " + 
                 ")"
             );
 
@@ -279,6 +280,7 @@ public class LockerSurrenderServlet extends HttpServlet {
             psSurrender.setString(s++, branchCode.trim());   // 12 NAME_OF_HIRE subquery BRANCH_CODE
             psSurrender.setString(s++, lockerType.trim());   // 13 NAME_OF_HIRE subquery LOCKER_TYPE
             psSurrender.setInt   (s++, lockerNumber);         // 14 NAME_OF_HIRE subquery LOCKER_NUMBER
+            psSurrender.setString(s++, customerId.trim());
             
             if (psSurrender.executeUpdate() == 0) {
                 conn.rollback();

@@ -51,12 +51,18 @@
             conn = DBConnection.getConnection();
             if (conn == null) { out.print("{\"success\":false,\"message\":\"DB connection failed\"}"); return; }
             String sql = "SELECT LA.LOCKER_NUMBER, LA.LOCKER_TYPE, LA.KEY_NO, " +
-                         "LA.CUSTOMER_ID, LA.NAME_OF_HIRE " +
-                         "FROM ACCOUNT.LOCKERACCOUNT LA " +
-                         "WHERE TRIM(LA.BRANCH_CODE) = TRIM(?) " +
-                         "AND LA.ACCOUNT_STATUS = 'A' ";
-            if (lockerType != null && !lockerType.trim().isEmpty()) sql += " AND TRIM(LA.LOCKER_TYPE) = TRIM(?)";
-            sql += " ORDER BY LA.LOCKER_NUMBER";
+                    "LA.CUSTOMER_ID, LA.NAME_OF_HIRE " +
+                    "FROM ACCOUNT.LOCKERACCOUNT LA " +
+                    "JOIN BRANCH.BRANCHLOCKER BL " +
+                    "  ON  TRIM(BL.BRANCH_CODE)   = TRIM(LA.BRANCH_CODE) " +
+                    "  AND TRIM(BL.LOCKER_TYPE)   = TRIM(LA.LOCKER_TYPE) " +
+                    "  AND BL.LOCKER_NUMBER       = LA.LOCKER_NUMBER " +
+                    "WHERE TRIM(LA.BRANCH_CODE)   = TRIM(?) " +
+                    "  AND LA.ACCOUNT_STATUS      = 'A' " +
+                    "  AND TRIM(BL.LOCKER_STATUS) = 'H' ";
+		       if (lockerType != null && !lockerType.trim().isEmpty())
+		           sql += "  AND TRIM(LA.LOCKER_TYPE) = TRIM(?) ";
+		       sql += "ORDER BY LA.LOCKER_NUMBER";
             ps = conn.prepareStatement(sql);
             ps.setString(1, sessionBranch.trim());
             if (lockerType != null && !lockerType.trim().isEmpty()) ps.setString(2, lockerType.trim());
