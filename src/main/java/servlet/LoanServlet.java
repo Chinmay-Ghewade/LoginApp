@@ -129,23 +129,24 @@ public class LoanServlet extends HttpServlet {
         }
 
         Connection conn = null;
-        PreparedStatement psApp        = null;
-        PreparedStatement psLoan       = null;
-        PreparedStatement psNominee    = null;
-        PreparedStatement psCoBorrower = null;
-        PreparedStatement psGuarantor  = null;
-        PreparedStatement psLandBuild  = null;
-        PreparedStatement psDeposit    = null;
-        PreparedStatement psGold       = null;
-        PreparedStatement psPlant 	   = null;
-        PreparedStatement psVehicle    = null;
-        PreparedStatement psInsurance  = null;
+        PreparedStatement psApp          = null;
+        PreparedStatement psLoan         = null;
+        PreparedStatement psNominee      = null;
+        PreparedStatement psCoBorrower   = null;
+        PreparedStatement psGuarantor    = null;
+        PreparedStatement psLandBuild    = null;
+        PreparedStatement psDeposit      = null;
+        PreparedStatement psGold         = null;
+        PreparedStatement psPlant 	     = null;
+        PreparedStatement psVehicle      = null;
+        PreparedStatement psInsurance    = null;
         PreparedStatement psMarketShares = null;
         PreparedStatement psStock        = null;
         PreparedStatement psSalary       = null;
-        PreparedStatement psMotor    = null;
-        PreparedStatement psOffice   = null;
-        PreparedStatement psNonMotor = null;
+        PreparedStatement psMotor        = null;
+        PreparedStatement psOffice       = null;
+        PreparedStatement psNonMotor     = null;
+        PreparedStatement psGovSec       = null;
         String applicationNumber = null;
 
         try {
@@ -1995,6 +1996,98 @@ if (nonmotorAddresses != null && nonmotorAddresses.length > 0) {
  }
 }
 
+//================================================================
+//18. INSERT GOVERNMENT SECURITY → APPLICATION.APPLICATIONGOVTCERTSECURITY
+//================================================================
+String[] govSecTerms         = request.getParameterValues("govSecTerms[]");
+String[] govSecCertNos       = request.getParameterValues("govSecCertNo[]");
+String[] govSecCertDates     = request.getParameterValues("govSecCertDate[]");
+String[] govSecMaturityDates = request.getParameterValues("govSecMaturityDate[]");
+String[] govSecMaturityAmts  = request.getParameterValues("govSecMaturityAmount[]");
+String[] govSecCertAmts      = request.getParameterValues("govSecCertAmount[]");
+String[] govSecNominees      = request.getParameterValues("govSecNominee[]");
+String[] govSecTransferables = request.getParameterValues("govSecTransferable[]");
+
+if (govSecTerms != null && govSecTerms.length > 0) {
+ String govSecSQL =
+     "INSERT INTO APPLICATION.APPLICATIONGOVTCERTSECURITY (" +
+     "APPLICATION_NUMBER, SERIAL_NUMBER, TERMS, CERTIFICATE_NUMBER, " +
+     "CERTIFICATE_DATE, CERTIFICATE_AMOUNT, MATURITY_DATE, MATURITY_AMOUNT, " +
+     "IS_TRANSFERABLE, NOMINEE" +
+     ") VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+ psGovSec = conn.prepareStatement(govSecSQL);
+ int serial = 1;
+ int validGovSec = 0;
+
+ for (int i = 0; i < govSecTerms.length; i++) {
+     String terms = trimSafe(govSecTerms[i]);
+     if (terms == null || terms.isEmpty()) {
+         System.out.println("⚠️ Skip gov security " + (i + 1) + " - empty terms");
+         continue;
+     }
+
+     System.out.println("✅ Gov Security " + serial + ": " + terms);
+
+     int c = 1;
+     psGovSec.setString(c++, applicationNumber);                                     // 1 APPLICATION_NUMBER
+     psGovSec.setInt(c++, serial);                                                   // 2 SERIAL_NUMBER
+
+     // TERMS is CHAR(40) NOT NULL — truncate if needed
+     psGovSec.setString(c++, terms.length() > 40 ? terms.substring(0, 40) : terms); // 3 TERMS
+
+     // CERTIFICATE_NUMBER is NUMBER(14,0) — parse as Long
+     String certNoStr = govSecCertNos != null && i < govSecCertNos.length
+                        ? trimSafe(govSecCertNos[i]) : null;
+     if (certNoStr != null && !certNoStr.isEmpty()) {
+         try { psGovSec.setLong(c++, Long.parseLong(certNoStr)); }
+         catch (NumberFormatException e) { psGovSec.setNull(c++, Types.NUMERIC); }
+     } else {
+         psGovSec.setNull(c++, Types.NUMERIC);                                       // 4 CERTIFICATE_NUMBER
+     }
+
+     Date gCertDate = govSecCertDates != null && i < govSecCertDates.length
+                      ? parseDate(govSecCertDates[i]) : null;
+     if (gCertDate != null) psGovSec.setDate(c++, gCertDate);
+     else psGovSec.setNull(c++, Types.DATE);                                         // 5 CERTIFICATE_DATE
+
+     Double certAmt = govSecCertAmts != null && i < govSecCertAmts.length
+                      ? parseDouble(govSecCertAmts[i]) : null;
+     if (certAmt != null) psGovSec.setDouble(c++, certAmt);
+     else psGovSec.setNull(c++, Types.DECIMAL);                                      // 6 CERTIFICATE_AMOUNT
+
+     Date gMatDate = govSecMaturityDates != null && i < govSecMaturityDates.length
+                     ? parseDate(govSecMaturityDates[i]) : null;
+     if (gMatDate != null) psGovSec.setDate(c++, gMatDate);
+     else psGovSec.setNull(c++, Types.DATE);                                         // 7 MATURITY_DATE
+
+     Double matAmt = govSecMaturityAmts != null && i < govSecMaturityAmts.length
+                     ? parseDouble(govSecMaturityAmts[i]) : null;
+     if (matAmt != null) psGovSec.setDouble(c++, matAmt);
+     else psGovSec.setNull(c++, Types.DECIMAL);                                      // 8 MATURITY_AMOUNT
+
+     // IS_TRANSFERABLE — checkbox sends "Y" when checked, nothing when unchecked
+     // govSecTransferables[] only contains values for checked boxes, so check by index
+     String isTransferable = govSecTransferables != null && i < govSecTransferables.length
+                             ? trimSafe(govSecTransferables[i]) : null;
+     if (isTransferable != null && !isTransferable.isEmpty()) psGovSec.setString(c++, "Y");
+     else psGovSec.setString(c++, "N");                                              // 9 IS_TRANSFERABLE
+
+     String nominee = govSecNominees != null && i < govSecNominees.length
+                      ? trimSafe(govSecNominees[i]) : null;
+     if (nominee != null && !nominee.isEmpty()) psGovSec.setString(c++, nominee);
+     else psGovSec.setNull(c++, Types.CHAR);                                         // 10 NOMINEE
+
+     psGovSec.addBatch();
+     validGovSec++;
+     serial++;
+ }
+ if (validGovSec > 0) {
+     psGovSec.executeBatch();
+     System.out.println("Gov Security records inserted: " + validGovSec);
+ }
+}
+
             // ================================================================
             // COMMIT
             // ================================================================
@@ -2014,23 +2107,24 @@ if (nonmotorAddresses != null && nonmotorAddresses.length > 0) {
                 "&productCode=" + (productCode != null ? productCode : ""));
 
         } finally {
-            try { if (psApp        != null) psApp.close();        } catch (Exception ignored) {}
-            try { if (psLoan       != null) psLoan.close();       } catch (Exception ignored) {}
-            try { if (psNominee    != null) psNominee.close();    } catch (Exception ignored) {}
-            try { if (psCoBorrower != null) psCoBorrower.close(); } catch (Exception ignored) {}
-            try { if (psGuarantor  != null) psGuarantor.close();  } catch (Exception ignored) {}
-            try { if (psLandBuild  != null) psLandBuild.close();  } catch (Exception ignored) {}
-            try { if (psDeposit    != null) psDeposit.close();    } catch (Exception ignored) {}
-            try { if (psGold       != null) psGold.close();       } catch (Exception ignored) {}
-            try { if (psPlant      != null) psPlant.close();      } catch (Exception ignored) {}
-            try { if (psVehicle    != null) psVehicle.close();    } catch (Exception ignored) {}
-            try { if (psInsurance  != null) psInsurance.close();  } catch (Exception ignored) {}
+            try { if (psApp          != null) psApp.close();          } catch (Exception ignored) {}
+            try { if (psLoan         != null) psLoan.close();         } catch (Exception ignored) {}
+            try { if (psNominee      != null) psNominee.close();      } catch (Exception ignored) {}
+            try { if (psCoBorrower   != null) psCoBorrower.close();   } catch (Exception ignored) {}
+            try { if (psGuarantor    != null) psGuarantor.close();    } catch (Exception ignored) {}
+            try { if (psLandBuild    != null) psLandBuild.close();    } catch (Exception ignored) {}
+            try { if (psDeposit      != null) psDeposit.close();      } catch (Exception ignored) {}
+            try { if (psGold         != null) psGold.close();         } catch (Exception ignored) {}
+            try { if (psPlant        != null) psPlant.close();        } catch (Exception ignored) {}
+            try { if (psVehicle      != null) psVehicle.close();      } catch (Exception ignored) {}
+            try { if (psInsurance    != null) psInsurance.close();    } catch (Exception ignored) {}
             try { if (psMarketShares != null) psMarketShares.close(); } catch (Exception ignored) {}
             try { if (psStock        != null) psStock.close();        } catch (Exception ignored) {}
             try { if (psSalary       != null) psSalary.close();       } catch (Exception ignored) {}
             try { if (psMotor        != null) psMotor.close();        } catch (Exception ignored) {}
             try { if (psOffice       != null) psOffice.close();       } catch (Exception ignored) {}
             try { if (psNonMotor     != null) psNonMotor.close();     } catch (Exception ignored) {}
+            try { if (psGovSec       != null) psGovSec.close();       } catch (Exception ignored) {}
             
             try {
                 if (conn != null) {

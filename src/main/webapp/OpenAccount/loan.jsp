@@ -2769,7 +2769,8 @@
 
       <div>
         <label>Transferable/Encashable</label>
-        <input type="checkbox" name="govSecTransferable[]" value="Y" style="width: auto; height: 20px;">
+		<input type="hidden" name="govSecTransferable[]" value="N">
+		<input type="checkbox" name="govSecTransferable[]" value="Y" style="width: auto; height: 20px;">
       </div>
     </div>
   </div>
