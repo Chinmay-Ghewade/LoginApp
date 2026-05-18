@@ -143,6 +143,9 @@ public class LoanServlet extends HttpServlet {
         PreparedStatement psMarketShares = null;
         PreparedStatement psStock        = null;
         PreparedStatement psSalary       = null;
+        PreparedStatement psMotor    = null;
+        PreparedStatement psOffice   = null;
+        PreparedStatement psNonMotor = null;
         String applicationNumber = null;
 
         try {
@@ -1547,6 +1550,450 @@ public class LoanServlet extends HttpServlet {
               System.out.println("Salary records inserted: " + validSal);
           }
       }
+      
+   // ================================================================
+   // 15. INSERT MOTOR INSURANCE → APPLICATION.APPLICATIONMOTORSECURITY
+   // ================================================================
+   String[] motorSecurityTypes    = request.getParameterValues("motorSecurityType[]");
+   String[] motorSubmissionDates  = request.getParameterValues("motorSubmissionDate[]");
+   String[] motorIsNewVehicles    = request.getParameterValues("motorIsNewVehicle[]");
+   String[] motorIsVehicleInsps   = request.getParameterValues("motorIsVehicleInsp[]");
+   String[] motorMakeModels       = request.getParameterValues("motorMakeModel[]");
+   String[] motorRegistrationNos  = request.getParameterValues("motorRegistrationNo[]");
+   String[] motorChasisNos        = request.getParameterValues("motorChasisNo[]");
+   String[] motorAcquisitionDates = request.getParameterValues("motorAcquisitionDate[]");
+   String[] motorSupplierNames    = request.getParameterValues("motorSupplierName[]");
+   String[] motorRegistrationDates= request.getParameterValues("motorRegistrationDate[]");
+   String[] motorPurchasePrices   = request.getParameterValues("motorPurchasePrice[]");
+   String[] motorMargins          = request.getParameterValues("motorMargin[]");
+   String[] motorRTOLocations     = request.getParameterValues("motorRTOLocation[]");
+   String[] motorCCs              = request.getParameterValues("motorCC[]");
+   String[] motorSeatingCaps      = request.getParameterValues("motorSeatingCapacity[]");
+   String[] motorCarryingCaps     = request.getParameterValues("motorCarryingCapacity[]");
+   String[] motorPolicyStartDates = request.getParameterValues("motorPolicyStartDate[]");
+   String[] motorPolicyEndDates   = request.getParameterValues("motorPolicyEndDate[]");
+   String[] motorInsuranceValues  = request.getParameterValues("motorInsuranceValue[]");
+   String[] motorNoClaimBOUs      = request.getParameterValues("motorNoClaimBOU[]");
+   String[] motorPolicyTypes      = request.getParameterValues("motorPolicyType[]");
+   String[] motorInsuranceNames   = request.getParameterValues("motorInsuranceName[]");
+   String[] motorPolicyNos        = request.getParameterValues("motorPolicyNo[]");
+   String[] motorPremiumAmounts   = request.getParameterValues("motorPremiumAmount[]");
+   String[] motorTotalInsureds    = request.getParameterValues("motorTotalInsured[]");
+   String[] motorPremiumFreqs     = request.getParameterValues("motorPremiumFreq[]");
+   String[] motorModelYears       = request.getParameterValues("motorModelYear[]");
+   String[] motorParticulars      = request.getParameterValues("motorParticular[]");
+
+   if (motorSecurityTypes != null && motorSecurityTypes.length > 0) {
+       String motorSQL =
+           "INSERT INTO APPLICATION.APPLICATIONMOTORSECURITY (" +
+           "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, SUBMISSIONDATE, " +
+           "IS_NEW_VEHICLE, IS_VEHICLE_INSPECTED, VEHICLEMAKEMODEL, REGISTRATION_NUMBER, " +
+           "CHASISNO, ACQUISITIONDATE, SUPPLIERNAME, REGISTRATIONDATE, " +
+           "PURCHASEPRICE, MARGINEPERCENTAGE, RTOLOCATION, VEHICLECC, " +
+           "SEATING_CAPACITY, CARRYING_CAPACITY, POLICY_STARTDATE, POLICY_ENDDATE, " +
+           "DELEEASEDVALUE, NO_CLAIM_BOU, POLICYTYPE, INSURANCENAME, " +
+           "POLICY_NUMBER, PREMIUMAMOUNT, INSUREDAMOUNT, PREMIUMFREQUENCY, " +
+           "MODEL_YEAR, PARTICULAR" +
+           ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+       psMotor = conn.prepareStatement(motorSQL);
+       int serial = 1;
+       int validMotor = 0;
+
+       for (int i = 0; i < motorSecurityTypes.length; i++) {
+           String secType = trimSafe(motorSecurityTypes[i]);
+           if (secType == null || secType.isEmpty()) {
+               System.out.println("⚠️ Skip motor insurance " + (i + 1) + " - empty security type");
+               continue;
+           }
+
+           System.out.println("✅ Motor Insurance " + serial + ": " + secType);
+
+           int c = 1;
+           psMotor.setString(c++, applicationNumber);                                      // 1 APPLICATION_NUMBER
+           psMotor.setInt(c++, serial);                                                    // 2 SERIAL_NUMBER
+           psMotor.setString(c++, secType);                                                // 3 SECURITYTYPE_CODE
+
+           Date mSubDate = motorSubmissionDates != null && i < motorSubmissionDates.length
+                           ? parseDate(motorSubmissionDates[i]) : null;
+           if (mSubDate != null) psMotor.setDate(c++, mSubDate);
+           else psMotor.setNull(c++, Types.DATE);                                          // 4 SUBMISSIONDATE
+
+           String isNewVehicle = motorIsNewVehicles != null && i < motorIsNewVehicles.length
+                                 ? trimSafe(motorIsNewVehicles[i]) : "N";
+           psMotor.setString(c++, (isNewVehicle != null && !isNewVehicle.isEmpty()) ? isNewVehicle : "N"); // 5 IS_NEW_VEHICLE
+
+           String isVehicleInsp = motorIsVehicleInsps != null && i < motorIsVehicleInsps.length
+                                  ? trimSafe(motorIsVehicleInsps[i]) : "N";
+           psMotor.setString(c++, (isVehicleInsp != null && !isVehicleInsp.isEmpty()) ? isVehicleInsp : "N"); // 6 IS_VEHICLE_INSPECTED
+
+           psMotor.setString(c++, motorMakeModels != null && i < motorMakeModels.length
+                                  ? trimSafe(motorMakeModels[i]) : null);                 // 7 VEHICLEMAKEMODEL
+
+           psMotor.setString(c++, motorRegistrationNos != null && i < motorRegistrationNos.length
+                                  ? trimSafe(motorRegistrationNos[i]) : null);            // 8 REGISTRATION_NUMBER
+
+           psMotor.setString(c++, motorChasisNos != null && i < motorChasisNos.length
+                                  ? trimSafe(motorChasisNos[i]) : null);                  // 9 CHASISNO
+
+           Date mAcqDate = motorAcquisitionDates != null && i < motorAcquisitionDates.length
+                           ? parseDate(motorAcquisitionDates[i]) : null;
+           if (mAcqDate != null) psMotor.setDate(c++, mAcqDate);
+           else psMotor.setNull(c++, Types.DATE);                                          // 10 ACQUISITIONDATE
+
+           psMotor.setString(c++, motorSupplierNames != null && i < motorSupplierNames.length
+                                  ? trimSafe(motorSupplierNames[i]) : null);              // 11 SUPPLIERNAME
+
+           Date mRegDate = motorRegistrationDates != null && i < motorRegistrationDates.length
+                           ? parseDate(motorRegistrationDates[i]) : null;
+           if (mRegDate != null) psMotor.setDate(c++, mRegDate);
+           else psMotor.setNull(c++, Types.DATE);                                          // 12 REGISTRATIONDATE
+
+           Double mPrice = motorPurchasePrices != null && i < motorPurchasePrices.length
+                           ? parseDouble(motorPurchasePrices[i]) : null;
+           if (mPrice != null) psMotor.setDouble(c++, mPrice);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 13 PURCHASEPRICE
+
+           Double mMargin = motorMargins != null && i < motorMargins.length
+                            ? parseDouble(motorMargins[i]) : null;
+           if (mMargin != null) psMotor.setDouble(c++, mMargin);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 14 MARGINEPERCENTAGE
+
+           psMotor.setString(c++, motorRTOLocations != null && i < motorRTOLocations.length
+                                  ? trimSafe(motorRTOLocations[i]) : null);               // 15 RTOLOCATION
+
+           Integer mCC = motorCCs != null && i < motorCCs.length
+                         ? parseInt(motorCCs[i]) : null;
+           if (mCC != null) psMotor.setInt(c++, mCC);
+           else psMotor.setNull(c++, Types.INTEGER);                                       // 16 VEHICLECC
+
+           Integer mSeating = motorSeatingCaps != null && i < motorSeatingCaps.length
+                              ? parseInt(motorSeatingCaps[i]) : null;
+           if (mSeating != null) psMotor.setInt(c++, mSeating);
+           else psMotor.setNull(c++, Types.INTEGER);                                       // 17 SEATING_CAPACITY
+
+           // CARRYING_CAPACITY is VARCHAR2(15) in the table
+           psMotor.setString(c++, motorCarryingCaps != null && i < motorCarryingCaps.length
+                                  ? trimSafe(motorCarryingCaps[i]) : null);               // 18 CARRYING_CAPACITY
+
+           Date mPolStart = motorPolicyStartDates != null && i < motorPolicyStartDates.length
+                            ? parseDate(motorPolicyStartDates[i]) : null;
+           if (mPolStart != null) psMotor.setDate(c++, mPolStart);
+           else psMotor.setNull(c++, Types.DATE);                                          // 19 POLICY_STARTDATE
+
+           Date mPolEnd = motorPolicyEndDates != null && i < motorPolicyEndDates.length
+                          ? parseDate(motorPolicyEndDates[i]) : null;
+           if (mPolEnd != null) psMotor.setDate(c++, mPolEnd);
+           else psMotor.setNull(c++, Types.DATE);                                          // 20 POLICY_ENDDATE
+
+           Double mDelesedVal = motorInsuranceValues != null && i < motorInsuranceValues.length
+                                ? parseDouble(motorInsuranceValues[i]) : null;
+           if (mDelesedVal != null) psMotor.setDouble(c++, mDelesedVal);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 21 DELEEASEDVALUE
+
+           Double mNoClaim = motorNoClaimBOUs != null && i < motorNoClaimBOUs.length
+                             ? parseDouble(motorNoClaimBOUs[i]) : null;
+           if (mNoClaim != null) psMotor.setDouble(c++, mNoClaim);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 22 NO_CLAIM_BOU
+
+           psMotor.setString(c++, motorPolicyTypes != null && i < motorPolicyTypes.length
+                                  ? trimSafe(motorPolicyTypes[i]) : null);                // 23 POLICYTYPE
+
+           psMotor.setString(c++, motorInsuranceNames != null && i < motorInsuranceNames.length
+                                  ? trimSafe(motorInsuranceNames[i]) : null);             // 24 INSURANCENAME
+
+           psMotor.setString(c++, motorPolicyNos != null && i < motorPolicyNos.length
+                                  ? trimSafe(motorPolicyNos[i]) : null);                  // 25 POLICY_NUMBER
+
+           Double mPremAmt = motorPremiumAmounts != null && i < motorPremiumAmounts.length
+                             ? parseDouble(motorPremiumAmounts[i]) : null;
+           if (mPremAmt != null) psMotor.setDouble(c++, mPremAmt);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 26 PREMIUMAMOUNT
+
+           Double mInsured = motorTotalInsureds != null && i < motorTotalInsureds.length
+                             ? parseDouble(motorTotalInsureds[i]) : null;
+           if (mInsured != null) psMotor.setDouble(c++, mInsured);
+           else psMotor.setNull(c++, Types.DECIMAL);                                       // 27 INSUREDAMOUNT
+
+           // PREMIUMFREQUENCY is CHAR(1) — map full word to single char
+           String mFreqFull = motorPremiumFreqs != null && i < motorPremiumFreqs.length
+                              ? trimSafe(motorPremiumFreqs[i]) : null;
+           String mFreqCode = null;
+           if (mFreqFull != null) {
+               switch (mFreqFull) {
+                   case "Monthly":     mFreqCode = "M"; break;
+                   case "Quarterly":   mFreqCode = "Q"; break;
+                   case "Half-Yearly": mFreqCode = "H"; break;
+                   case "Yearly":      mFreqCode = "Y"; break;
+                   default:            mFreqCode = mFreqFull.length() > 0
+                                                   ? String.valueOf(mFreqFull.charAt(0)) : null;
+               }
+           }
+           if (mFreqCode != null) psMotor.setString(c++, mFreqCode);
+           else psMotor.setNull(c++, Types.CHAR);                                          // 28 PREMIUMFREQUENCY
+
+           Integer mModelYear = motorModelYears != null && i < motorModelYears.length
+                                ? parseInt(motorModelYears[i]) : null;
+           if (mModelYear != null) psMotor.setInt(c++, mModelYear);
+           else psMotor.setNull(c++, Types.INTEGER);                                       // 29 MODEL_YEAR
+
+           String mParticular = motorParticulars != null && i < motorParticulars.length
+                                ? trimSafe(motorParticulars[i]) : null;
+           if (mParticular != null && !mParticular.isEmpty()) psMotor.setString(c++, mParticular);
+           else psMotor.setNull(c++, Types.VARCHAR);                                       // 30 PARTICULAR
+
+           psMotor.addBatch();
+           validMotor++;
+           serial++;
+       }
+       if (validMotor > 0) {
+           psMotor.executeBatch();
+           System.out.println("Motor Insurance records inserted: " + validMotor);
+       }
+   }
+   
+// ================================================================
+// 16. INSERT OFFICE EQUIPMENT → APPLICATION.APPLICATIONSECURITYOFFICEEQUIP
+// ================================================================
+String[] officeSecurityTypes   = request.getParameterValues("officeSecurityType[]");
+String[] officeIsNewArticles   = request.getParameterValues("officeIsNewArticle[]");
+String[] officeMakeSerials     = request.getParameterValues("officeMakeSerial[]");
+String[] officeMakeModels      = request.getParameterValues("officeMakeModel[]");
+String[] officeSubmissionDates = request.getParameterValues("officeSubmissionDate[]");
+String[] officeAcquisitionDates= request.getParameterValues("officeAcquisitionDate[]");
+String[] officeWarrentyCards   = request.getParameterValues("officeWarrentyCard[]");
+String[] officePurchasePrices  = request.getParameterValues("officePurchasePrice[]");
+String[] officeMargins         = request.getParameterValues("officeMargin[]");
+String[] officeArticleNames    = request.getParameterValues("officeArticleName[]");
+String[] officeWarrentyMonths  = request.getParameterValues("officeWarrentyMonths[]");
+String[] officeSecurityValues  = request.getParameterValues("officeSecurityValue[]");
+String[] officeSupplierNames   = request.getParameterValues("officeSupplierName[]");
+String[] officeParticulars     = request.getParameterValues("officeParticular[]");
+
+if (officeSecurityTypes != null && officeSecurityTypes.length > 0) {
+    String officeSQL =
+        "INSERT INTO APPLICATION.APPLICATIONSECURITYOFFICEEQUIP (" +
+        "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, SUBMISSIONDATE, " +
+        "NAMEOFARTICLE, MAKE, MAKESERIAL, DATEOFAQUISITION, " +
+        "IS_NEW_ARTICLE, WARRANTYCARDNUMBER, WARRANTYINMONTHS, SUPPLIERNAME, " +
+        "PURCHASEPRISE, MARGINPERCENTAGE, SECURITYVALUE, PARTICULAR, " +
+        "CREATED_DATE, MODIFIED_DATE" +
+        ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    psOffice = conn.prepareStatement(officeSQL);
+    int serial = 1;
+    int validOffice = 0;
+
+    for (int i = 0; i < officeSecurityTypes.length; i++) {
+        String secType = trimSafe(officeSecurityTypes[i]);
+        if (secType == null || secType.isEmpty()) {
+            System.out.println("⚠️ Skip office equipment " + (i + 1) + " - empty security type");
+            continue;
+        }
+
+        System.out.println("✅ Office Equipment " + serial + ": " + secType);
+
+        int c = 1;
+        Timestamp officeNow = new Timestamp(System.currentTimeMillis());
+
+        psOffice.setString(c++, applicationNumber);                                     // 1 APPLICATION_NUMBER
+        psOffice.setInt(c++, serial);                                                   // 2 SERIAL_NUMBER
+        psOffice.setString(c++, secType);                                               // 3 SECURITYTYPE_CODE
+
+        Date oSubDate = officeSubmissionDates != null && i < officeSubmissionDates.length
+                        ? parseDate(officeSubmissionDates[i]) : null;
+        if (oSubDate != null) psOffice.setDate(c++, oSubDate);
+        else psOffice.setNull(c++, Types.DATE);                                         // 4 SUBMISSIONDATE
+
+        // NAMEOFARTICLE is NOT NULL in DB
+        String articleName = officeArticleNames != null && i < officeArticleNames.length
+                             ? trimSafe(officeArticleNames[i]) : null;
+        psOffice.setString(c++, (articleName != null && !articleName.isEmpty()) ? articleName : "NA"); // 5 NAMEOFARTICLE
+
+        psOffice.setString(c++, officeMakeModels != null && i < officeMakeModels.length
+                               ? trimSafe(officeMakeModels[i]) : null);                // 6 MAKE
+
+        psOffice.setString(c++, officeMakeSerials != null && i < officeMakeSerials.length
+                               ? trimSafe(officeMakeSerials[i]) : null);               // 7 MAKESERIAL
+
+        Date oAcqDate = officeAcquisitionDates != null && i < officeAcquisitionDates.length
+                        ? parseDate(officeAcquisitionDates[i]) : null;
+        if (oAcqDate != null) psOffice.setDate(c++, oAcqDate);
+        else psOffice.setNull(c++, Types.DATE);                                         // 8 DATEOFAQUISITION
+
+        // IS_NEW_ARTICLE default 'N' in DB
+        String isNewArticle = officeIsNewArticles != null && i < officeIsNewArticles.length
+                              ? trimSafe(officeIsNewArticles[i]) : "N";
+        psOffice.setString(c++, (isNewArticle != null && !isNewArticle.isEmpty()) ? isNewArticle : "N"); // 9 IS_NEW_ARTICLE
+
+        psOffice.setString(c++, officeWarrentyCards != null && i < officeWarrentyCards.length
+                               ? trimSafe(officeWarrentyCards[i]) : null);             // 10 WARRANTYCARDNUMBER
+
+        Integer oWarMonths = officeWarrentyMonths != null && i < officeWarrentyMonths.length
+                             ? parseInt(officeWarrentyMonths[i]) : null;
+        if (oWarMonths != null) psOffice.setInt(c++, oWarMonths);
+        else psOffice.setNull(c++, Types.INTEGER);                                      // 11 WARRANTYINMONTHS
+
+        psOffice.setString(c++, officeSupplierNames != null && i < officeSupplierNames.length
+                               ? trimSafe(officeSupplierNames[i]) : null);             // 12 SUPPLIERNAME
+
+        Double oPrice = officePurchasePrices != null && i < officePurchasePrices.length
+                        ? parseDouble(officePurchasePrices[i]) : null;
+        if (oPrice != null) psOffice.setDouble(c++, oPrice);
+        else psOffice.setNull(c++, Types.DECIMAL);                                      // 13 PURCHASEPRISE
+
+        Double oMargin = officeMargins != null && i < officeMargins.length
+                         ? parseDouble(officeMargins[i]) : null;
+        if (oMargin != null) psOffice.setDouble(c++, oMargin);
+        else psOffice.setNull(c++, Types.DECIMAL);                                      // 14 MARGINPERCENTAGE
+
+        Double oSecVal = officeSecurityValues != null && i < officeSecurityValues.length
+                         ? parseDouble(officeSecurityValues[i]) : null;
+        if (oSecVal != null) psOffice.setDouble(c++, oSecVal);
+        else psOffice.setNull(c++, Types.DECIMAL);                                      // 15 SECURITYVALUE
+
+        String oPart = officeParticulars != null && i < officeParticulars.length
+                       ? trimSafe(officeParticulars[i]) : null;
+        if (oPart != null && !oPart.isEmpty()) psOffice.setString(c++, oPart);
+        else psOffice.setNull(c++, Types.VARCHAR);                                      // 16 PARTICULAR
+
+        psOffice.setTimestamp(c++, officeNow);                                          // 17 CREATED_DATE
+        psOffice.setNull(c++, Types.TIMESTAMP);                                         // 18 MODIFIED_DATE
+
+        psOffice.addBatch();
+        validOffice++;
+        serial++;
+    }
+    if (validOffice > 0) {
+        psOffice.executeBatch();
+        System.out.println("Office Equipment records inserted: " + validOffice);
+    }
+}
+
+//================================================================
+//17. INSERT NON-MOTOR INSURANCE → APPLICATION.APPLICATIONNONMOTORSECURITY
+//================================================================
+String[] nonmotorAddresses        = request.getParameterValues("nonmotorAddress[]");
+String[] nonmotorRiskLocations    = request.getParameterValues("nonmotorRiskLocation[]");
+String[] nonmotorPinCodes         = request.getParameterValues("nonmotorPinCode[]");
+String[] nonmotorCities           = request.getParameterValues("nonmotorCity[]");
+String[] nonmotorVillages         = request.getParameterValues("nonmotorVillage[]");
+String[] nonmotorLandmarks        = request.getParameterValues("nonmotorLandmark[]");
+String[] nonmotorPolicyStartDates = request.getParameterValues("nonmotorPolicyStartDate[]");
+String[] nonmotorPolicyEndDates   = request.getParameterValues("nonmotorPolicyEndDate[]");
+String[] nonmotorPropertyVals     = request.getParameterValues("nonmotorPropertyValuation[]");
+String[] nonmotorInsCompanies     = request.getParameterValues("nonmotorInsuranceCompany[]");
+String[] nonmotorExPolStarts      = request.getParameterValues("nonmotorExistingPolicyStart[]");
+String[] nonmotorExPolEnds        = request.getParameterValues("nonmotorExistingPolicyEnd[]");
+String[] nonmotorPremiumAmounts   = request.getParameterValues("nonmotorPremiumAmount[]");
+String[] nonmotorMortgageTypes    = request.getParameterValues("nonmotorMortgageType[]");
+String[] nonmotorMortgageDetails  = request.getParameterValues("nonmotorMortgageDetails[]");
+String[] nonmotorMortgageVals     = request.getParameterValues("nonmotorMortgageValuation[]");
+
+if (nonmotorAddresses != null && nonmotorAddresses.length > 0) {
+ String nonMotorSQL =
+     "INSERT INTO APPLICATION.APPLICATIONNONMOTORSECURITY (" +
+     "APPLICATION_NUMBER, SERIAL_NUMBER, CORRESPONDANCE_ADDRESS, RISK_LOCATION, " +
+     "PIN_CODE, CITY, VILLAGE, LANDMARK, " +
+     "POLICY_STARTDATE, POLICY_ENDDATE, VALUATION_OF_PROPERTY, EX_INSURANCE_NAME, " +
+     "EX_POLICY_START_DATE, EX_POLICY_END_DATE, PREMIUM_AMOUNT, TYPE_OF_MORTAGAGE, " +
+     "MORTAGAGE_DETAILS, VALUATION_OF_MORTAGAGE, PURCHASE_DATE, NUMBEROFITEM, " +
+     "POLICY_NUMBER, SUM_OF_INSURED" +
+     ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+ psNonMotor = conn.prepareStatement(nonMotorSQL);
+ int serial = 1;
+ int validNonMotor = 0;
+
+ for (int i = 0; i < nonmotorAddresses.length; i++) {
+     String address = trimSafe(nonmotorAddresses[i]);
+     if (address == null || address.isEmpty()) {
+         System.out.println("⚠️ Skip non-motor insurance " + (i + 1) + " - empty address");
+         continue;
+     }
+
+     System.out.println("✅ Non-Motor Insurance " + serial);
+
+     int c = 1;
+     psNonMotor.setString(c++, applicationNumber);                                   // 1 APPLICATION_NUMBER
+     psNonMotor.setInt(c++, serial);                                                 // 2 SERIAL_NUMBER
+     psNonMotor.setString(c++, address);                                             // 3 CORRESPONDANCE_ADDRESS
+
+     psNonMotor.setString(c++, nonmotorRiskLocations != null && i < nonmotorRiskLocations.length
+                               ? trimSafe(nonmotorRiskLocations[i]) : null);         // 4 RISK_LOCATION
+
+     Integer nmPinCode = nonmotorPinCodes != null && i < nonmotorPinCodes.length
+                         ? parseInt(nonmotorPinCodes[i]) : null;
+     if (nmPinCode != null) psNonMotor.setInt(c++, nmPinCode);
+     else psNonMotor.setNull(c++, Types.INTEGER);                                    // 5 PIN_CODE
+
+     psNonMotor.setString(c++, nonmotorCities != null && i < nonmotorCities.length
+                               ? trimSafe(nonmotorCities[i]) : null);                // 6 CITY
+
+     psNonMotor.setString(c++, nonmotorVillages != null && i < nonmotorVillages.length
+                               ? trimSafe(nonmotorVillages[i]) : null);              // 7 VILLAGE
+
+     psNonMotor.setString(c++, nonmotorLandmarks != null && i < nonmotorLandmarks.length
+                               ? trimSafe(nonmotorLandmarks[i]) : null);             // 8 LANDMARK
+
+     Date nmPolStart = nonmotorPolicyStartDates != null && i < nonmotorPolicyStartDates.length
+                       ? parseDate(nonmotorPolicyStartDates[i]) : null;
+     if (nmPolStart != null) psNonMotor.setDate(c++, nmPolStart);
+     else psNonMotor.setNull(c++, Types.DATE);                                       // 9 POLICY_STARTDATE
+
+     Date nmPolEnd = nonmotorPolicyEndDates != null && i < nonmotorPolicyEndDates.length
+                     ? parseDate(nonmotorPolicyEndDates[i]) : null;
+     if (nmPolEnd != null) psNonMotor.setDate(c++, nmPolEnd);
+     else psNonMotor.setNull(c++, Types.DATE);                                       // 10 POLICY_ENDDATE
+
+     Double nmPropVal = nonmotorPropertyVals != null && i < nonmotorPropertyVals.length
+                        ? parseDouble(nonmotorPropertyVals[i]) : null;
+     if (nmPropVal != null) psNonMotor.setDouble(c++, nmPropVal);
+     else psNonMotor.setNull(c++, Types.DECIMAL);                                    // 11 VALUATION_OF_PROPERTY
+
+     psNonMotor.setString(c++, nonmotorInsCompanies != null && i < nonmotorInsCompanies.length
+                               ? trimSafe(nonmotorInsCompanies[i]) : null);          // 12 EX_INSURANCE_NAME
+
+     Date nmExPolStart = nonmotorExPolStarts != null && i < nonmotorExPolStarts.length
+                         ? parseDate(nonmotorExPolStarts[i]) : null;
+     if (nmExPolStart != null) psNonMotor.setDate(c++, nmExPolStart);
+     else psNonMotor.setNull(c++, Types.DATE);                                       // 13 EX_POLICY_START_DATE
+
+     Date nmExPolEnd = nonmotorExPolEnds != null && i < nonmotorExPolEnds.length
+                       ? parseDate(nonmotorExPolEnds[i]) : null;
+     if (nmExPolEnd != null) psNonMotor.setDate(c++, nmExPolEnd);
+     else psNonMotor.setNull(c++, Types.DATE);                                       // 14 EX_POLICY_END_DATE
+
+     Double nmPremAmt = nonmotorPremiumAmounts != null && i < nonmotorPremiumAmounts.length
+                        ? parseDouble(nonmotorPremiumAmounts[i]) : null;
+     if (nmPremAmt != null) psNonMotor.setDouble(c++, nmPremAmt);
+     else psNonMotor.setNull(c++, Types.DECIMAL);                                    // 15 PREMIUM_AMOUNT
+
+     psNonMotor.setString(c++, nonmotorMortgageTypes != null && i < nonmotorMortgageTypes.length
+                               ? trimSafe(nonmotorMortgageTypes[i]) : null);         // 16 TYPE_OF_MORTAGAGE
+
+     psNonMotor.setString(c++, nonmotorMortgageDetails != null && i < nonmotorMortgageDetails.length
+                               ? trimSafe(nonmotorMortgageDetails[i]) : null);       // 17 MORTAGAGE_DETAILS
+
+     Double nmMortgageVal = nonmotorMortgageVals != null && i < nonmotorMortgageVals.length
+                            ? parseDouble(nonmotorMortgageVals[i]) : null;
+     if (nmMortgageVal != null) psNonMotor.setDouble(c++, nmMortgageVal);
+     else psNonMotor.setNull(c++, Types.DECIMAL);                                    // 18 VALUATION_OF_MORTAGAGE
+
+     psNonMotor.setNull(c++, Types.DATE);                                            // 19 PURCHASE_DATE (no JSP field)
+     psNonMotor.setNull(c++, Types.INTEGER);                                         // 20 NUMBEROFITEM (no JSP field)
+     psNonMotor.setNull(c++, Types.VARCHAR);                                         // 21 POLICY_NUMBER (no JSP field)
+     psNonMotor.setNull(c++, Types.DECIMAL);                                         // 22 SUM_OF_INSURED (no JSP field)
+
+     psNonMotor.addBatch();
+     validNonMotor++;
+     serial++;
+ }
+ if (validNonMotor > 0) {
+     psNonMotor.executeBatch();
+     System.out.println("Non-Motor Insurance records inserted: " + validNonMotor);
+ }
+}
 
             // ================================================================
             // COMMIT
@@ -1581,6 +2028,9 @@ public class LoanServlet extends HttpServlet {
             try { if (psMarketShares != null) psMarketShares.close(); } catch (Exception ignored) {}
             try { if (psStock        != null) psStock.close();        } catch (Exception ignored) {}
             try { if (psSalary       != null) psSalary.close();       } catch (Exception ignored) {}
+            try { if (psMotor        != null) psMotor.close();        } catch (Exception ignored) {}
+            try { if (psOffice       != null) psOffice.close();       } catch (Exception ignored) {}
+            try { if (psNonMotor     != null) psNonMotor.close();     } catch (Exception ignored) {}
             
             try {
                 if (conn != null) {
