@@ -241,6 +241,10 @@ fieldset {
 
 /* Hide original form buttons until last tab */
 .form-buttons {
+  display: flex;
+}
+
+.app-tab-navigation ~ .form-buttons:not(.show) {
   display: none;
 }
 

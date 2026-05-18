@@ -11,23 +11,30 @@
     const enabledTabs = new Set([1]); // Tab 1 starts enabled
     let TABS = [];
 
-    // Initialize tabs on page load
-    function initializeTabs() {
-        detectFieldsets();
-        
-        if (TABS.length <= 1) {
-            console.log('⚠️ Only one fieldset found, tab navigation not needed');
-            return;
-        }
+	// Initialize tabs on page load
+	function initializeTabs() {
+	    detectFieldsets();
+	    
+	    if (TABS.length <= 1) {
+	        console.log('⚠️ Only one fieldset found, tab navigation not needed');
+	        
+	        // ✅ NEW: Ensure form buttons are visible when no tabs
+	        const formButtons = document.querySelector('.form-buttons');
+	        if (formButtons) {
+	            formButtons.classList.add('show');
+	            formButtons.style.display = 'flex';
+	        }
+	        return;
+	    }
 
-        createTabNavigation();
-        wrapFieldsetsInTabContent();
-        hideOriginalButtons();
-        createNavigationButtons();
-        updateTabState();
-        
-        console.log('✅ Application tab navigation initialized with', TABS.length, 'tabs');
-    }
+	    createTabNavigation();
+	    wrapFieldsetsInTabContent();
+	    hideOriginalButtons();
+	    createNavigationButtons();
+	    updateTabState();
+	    
+	    console.log('✅ Application tab navigation initialized with', TABS.length, 'tabs');
+	}
 
     // Auto-detect fieldsets and create tab configuration
     function detectFieldsets() {
