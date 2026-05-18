@@ -137,6 +137,9 @@ public class LoanServlet extends HttpServlet {
         PreparedStatement psLandBuild  = null;
         PreparedStatement psDeposit    = null;
         PreparedStatement psGold       = null;
+        PreparedStatement psPlant 	   = null;
+        PreparedStatement psVehicle    = null;
+        PreparedStatement psInsurance  = null;
         String applicationNumber = null;
 
         try {
@@ -897,6 +900,331 @@ public class LoanServlet extends HttpServlet {
                     System.out.println("Gold/Silver records inserted: " + validGs);
                 }
             }
+            
+         // ================================================================
+         // 9. INSERT PLANT & MACHINERY  →  APPLICATION.APPLICATIONSECURITYPLAN
+         // ================================================================
+         String[] plantSecurityTypes   = request.getParameterValues("plantSecurityType[]");
+         String[] plantIsNewEquips     = request.getParameterValues("plantIsNewEquip[]");
+         String[] plantSubmissionDates = request.getParameterValues("plantSubmissionDate[]");
+         String[] plantMachineTypes    = request.getParameterValues("plantMachineType[]");
+         String[] plantMachineNames    = request.getParameterValues("plantMachineName[]");
+         String[] plantDistinctiveNos  = request.getParameterValues("plantDistinctiveNo[]");
+         String[] plantSpecifications  = request.getParameterValues("plantSpecification[]");
+         String[] plantAquisitionDates = request.getParameterValues("plantAquisitionDate[]");
+         String[] plantSupplierNames   = request.getParameterValues("plantSupplierName[]");
+         String[] plantPurchasePrices  = request.getParameterValues("plantPurchasePrice[]");
+         String[] plantMargins         = request.getParameterValues("plantMargin[]");
+         String[] plantSecurityValues  = request.getParameterValues("plantSecurityValue[]");
+         String[] plantParticulars     = request.getParameterValues("plantParticular[]");
+
+         if (plantSecurityTypes != null && plantSecurityTypes.length > 0) {
+             String plantSQL =
+                 "INSERT INTO APPLICATION.APPLICATIONSECURITYPLAN (" +
+                 "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, IS_NEW_EQUIPMENT, " +
+                 "SUBMISSIONDATE, MACHINETYPE, MACHINENAME, DISTINCTIVENUMBER, " +
+                 "SPECIFICATION, AQUISITIONDATE, SUPPLIERNAME, PURCHASEPRICE, " +
+                 "MARGINPERCENTAGE, RELEASEDDATE, SECURITYVALUE, PARTICULAR, " +
+                 "DATETIMESTAMP, CREATED_DATE, MODIFIED_DATE" +
+                 ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+             psPlant = conn.prepareStatement(plantSQL);
+             int serial = 1;
+             int validPlant = 0;
+
+             for (int i = 0; i < plantSecurityTypes.length; i++) {
+                 String secType = trimSafe(plantSecurityTypes[i]);
+                 if (secType == null || secType.isEmpty()) {
+                     System.out.println("⚠️ Skip plant & machinery " + (i + 1) + " - empty security type");
+                     continue;
+                 }
+
+                 System.out.println("✅ Plant & Machinery " + serial + ": " + secType);
+
+                 int c = 1;
+                 Timestamp plantNow = new Timestamp(System.currentTimeMillis());
+
+                 psPlant.setString(c++, applicationNumber);                          // 1 APPLICATION_NUMBER
+                 psPlant.setInt(c++, serial);                                        // 2 SERIAL_NUMBER
+                 psPlant.setString(c++, secType);                                    // 3 SECURITYTYPE_CODE
+
+                 String isNewEquip = plantIsNewEquips != null && i < plantIsNewEquips.length
+                                     ? trimSafe(plantIsNewEquips[i]) : "N";
+                 psPlant.setString(c++, (isNewEquip != null && !isNewEquip.isEmpty()) ? isNewEquip : "N"); // 4 IS_NEW_EQUIPMENT
+
+                 Date plantSubDate = plantSubmissionDates != null && i < plantSubmissionDates.length
+                                     ? parseDate(plantSubmissionDates[i]) : null;
+                 if (plantSubDate != null) psPlant.setDate(c++, plantSubDate);
+                 else psPlant.setNull(c++, Types.DATE);                              // 5 SUBMISSIONDATE
+
+                 psPlant.setString(c++, plantMachineTypes != null && i < plantMachineTypes.length
+                                        ? trimSafe(plantMachineTypes[i]) : null);   // 6 MACHINETYPE
+
+                 psPlant.setString(c++, plantMachineNames != null && i < plantMachineNames.length
+                                        ? trimSafe(plantMachineNames[i]) : null);   // 7 MACHINENAME
+
+                 psPlant.setString(c++, plantDistinctiveNos != null && i < plantDistinctiveNos.length
+                                        ? trimSafe(plantDistinctiveNos[i]) : null); // 8 DISTINCTIVENUMBER
+
+                 psPlant.setString(c++, plantSpecifications != null && i < plantSpecifications.length
+                                        ? trimSafe(plantSpecifications[i]) : null); // 9 SPECIFICATION
+
+                 Date plantAcqDate = plantAquisitionDates != null && i < plantAquisitionDates.length
+                                     ? parseDate(plantAquisitionDates[i]) : null;
+                 if (plantAcqDate != null) psPlant.setDate(c++, plantAcqDate);
+                 else psPlant.setNull(c++, Types.DATE);                              // 10 AQUISITIONDATE
+
+                 psPlant.setString(c++, plantSupplierNames != null && i < plantSupplierNames.length
+                                        ? trimSafe(plantSupplierNames[i]) : null);  // 11 SUPPLIERNAME
+
+                 Double plantPrice = plantPurchasePrices != null && i < plantPurchasePrices.length
+                                     ? parseDouble(plantPurchasePrices[i]) : null;
+                 if (plantPrice != null) psPlant.setDouble(c++, plantPrice);
+                 else psPlant.setNull(c++, Types.DECIMAL);                          // 12 PURCHASEPRICE
+
+                 Double plantMargin = plantMargins != null && i < plantMargins.length
+                                      ? parseDouble(plantMargins[i]) : null;
+                 if (plantMargin != null) psPlant.setDouble(c++, plantMargin);
+                 else psPlant.setNull(c++, Types.DECIMAL);                          // 13 MARGINPERCENTAGE
+
+                 // RELEASEDDATE — not in the form, store null
+                 psPlant.setNull(c++, Types.DATE);                                  // 14 RELEASEDDATE
+
+                 Double plantSecVal = plantSecurityValues != null && i < plantSecurityValues.length
+                                      ? parseDouble(plantSecurityValues[i]) : null;
+                 if (plantSecVal != null) psPlant.setDouble(c++, plantSecVal);
+                 else psPlant.setNull(c++, Types.DECIMAL);                          // 15 SECURITYVALUE
+
+                 String plantParticular = plantParticulars != null && i < plantParticulars.length
+                                          ? trimSafe(plantParticulars[i]) : null;
+                 if (plantParticular != null && !plantParticular.isEmpty()) psPlant.setString(c++, plantParticular);
+                 else psPlant.setNull(c++, Types.VARCHAR);                          // 16 PARTICULAR
+
+                 psPlant.setTimestamp(c++, plantNow);                               // 17 DATETIMESTAMP
+                 psPlant.setTimestamp(c++, plantNow);                               // 18 CREATED_DATE
+                 psPlant.setNull(c++, Types.TIMESTAMP);                             // 19 MODIFIED_DATE
+
+                 psPlant.addBatch();
+                 validPlant++;
+                 serial++;
+             }
+             if (validPlant > 0) {
+                 psPlant.executeBatch();
+                 System.out.println("Plant & Machinery records inserted: " + validPlant);
+             }
+         }
+
+         // ================================================================
+         // 10. INSERT VEHICLE  →  APPLICATION.APPLICATIONSECURITYVEHICLE
+         // ================================================================
+         String[] vehicleSecurityTypes    = request.getParameterValues("vehicleSecurityType[]");
+         String[] vehicleSubmissionDates  = request.getParameterValues("vehicleSubmissionDate[]");
+         String[] vehicleIsNewVehicles    = request.getParameterValues("vehicleIsNewVehicle[]");
+         String[] vehicleIsVehicleInsps   = request.getParameterValues("vehicleIsVehicleInsp[]");
+         String[] vehicleMakeModels       = request.getParameterValues("vehicleMakeModel[]");
+         String[] vehicleRegistrationNos  = request.getParameterValues("vehicleRegistrationNo[]");
+         String[] vehicleChasisNos        = request.getParameterValues("vehicleChasisNo[]");
+         String[] vehicleAcquisitionDates = request.getParameterValues("vehicleAcquisitionDate[]");
+         String[] vehicleSupplierNames    = request.getParameterValues("vehicleSupplierName[]");
+         String[] vehicleRegistrationDates= request.getParameterValues("vehicleRegistrationDate[]");
+         String[] vehiclePurchasePrices   = request.getParameterValues("vehiclePurchasePrice[]");
+         String[] vehicleMargins          = request.getParameterValues("vehicleMargin[]");
+         String[] vehicleRTOLocations     = request.getParameterValues("vehicleRTOLocation[]");
+
+         if (vehicleSecurityTypes != null && vehicleSecurityTypes.length > 0) {
+             String vehicleSQL =
+                 "INSERT INTO APPLICATION.APPLICATIONSECURITYVEHICLE (" +
+                 "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, SUBMISSIONDATE, " +
+                 "IS_NEW_VEHICLE, IS_VEHICLE_INSPECTED, VEHICLEMAKEMODEL, VEHICLENO, " +
+                 "CHASISNO, ACQUISITIONDATE, SUPPLIERNAME, RTOREGISTRATIONDATE, " +
+                 "PURCHASEPRICE, MARGINEPERCENTAGE, DATETIMESTAMP, CREATED_DATE, MODIFIED_DATE" +
+                 ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+             psVehicle = conn.prepareStatement(vehicleSQL);
+             int serial = 1;
+             int validVehicle = 0;
+
+             for (int i = 0; i < vehicleSecurityTypes.length; i++) {
+                 String secType = trimSafe(vehicleSecurityTypes[i]);
+                 if (secType == null || secType.isEmpty()) {
+                     System.out.println("⚠️ Skip vehicle " + (i + 1) + " - empty security type");
+                     continue;
+                 }
+
+                 System.out.println("✅ Vehicle " + serial + ": " + secType);
+
+                 int c = 1;
+                 Timestamp vehicleNow = new Timestamp(System.currentTimeMillis());
+
+                 psVehicle.setString(c++, applicationNumber);                               // 1 APPLICATION_NUMBER
+                 psVehicle.setInt(c++, serial);                                             // 2 SERIAL_NUMBER
+                 psVehicle.setString(c++, secType);                                         // 3 SECURITYTYPE_CODE
+
+                 Date vSubDate = vehicleSubmissionDates != null && i < vehicleSubmissionDates.length
+                                 ? parseDate(vehicleSubmissionDates[i]) : null;
+                 if (vSubDate != null) psVehicle.setDate(c++, vSubDate);
+                 else psVehicle.setNull(c++, Types.DATE);                                   // 4 SUBMISSIONDATE
+
+                 String isNewVehicle = vehicleIsNewVehicles != null && i < vehicleIsNewVehicles.length
+                                       ? trimSafe(vehicleIsNewVehicles[i]) : "Y";
+                 psVehicle.setString(c++, (isNewVehicle != null && !isNewVehicle.isEmpty()) ? isNewVehicle : "Y"); // 5 IS_NEW_VEHICLE
+
+                 String isVehicleInsp = vehicleIsVehicleInsps != null && i < vehicleIsVehicleInsps.length
+                                        ? trimSafe(vehicleIsVehicleInsps[i]) : "Y";
+                 psVehicle.setString(c++, (isVehicleInsp != null && !isVehicleInsp.isEmpty()) ? isVehicleInsp : "Y"); // 6 IS_VEHICLE_INSPECTED
+
+                 psVehicle.setString(c++, vehicleMakeModels != null && i < vehicleMakeModels.length
+                                          ? trimSafe(vehicleMakeModels[i]) : null);         // 7 VEHICLEMAKEMODEL
+
+                 // VEHICLENO maps to vehicleRegistrationNo (vehicle number plate)
+                 psVehicle.setString(c++, vehicleRegistrationNos != null && i < vehicleRegistrationNos.length
+                                          ? trimSafe(vehicleRegistrationNos[i]) : null);    // 8 VEHICLENO
+
+                 psVehicle.setString(c++, vehicleChasisNos != null && i < vehicleChasisNos.length
+                                          ? trimSafe(vehicleChasisNos[i]) : null);          // 9 CHASISNO
+
+                 Date vAcqDate = vehicleAcquisitionDates != null && i < vehicleAcquisitionDates.length
+                                 ? parseDate(vehicleAcquisitionDates[i]) : null;
+                 if (vAcqDate != null) psVehicle.setDate(c++, vAcqDate);
+                 else psVehicle.setNull(c++, Types.DATE);                                   // 10 ACQUISITIONDATE
+
+                 psVehicle.setString(c++, vehicleSupplierNames != null && i < vehicleSupplierNames.length
+                                          ? trimSafe(vehicleSupplierNames[i]) : null);      // 11 SUPPLIERNAME
+
+                 // RTOREGISTRATIONDATE maps to vehicleRegistrationDate
+                 Date vRegDate = vehicleRegistrationDates != null && i < vehicleRegistrationDates.length
+                                 ? parseDate(vehicleRegistrationDates[i]) : null;
+                 if (vRegDate != null) psVehicle.setDate(c++, vRegDate);
+                 else psVehicle.setNull(c++, Types.DATE);                                   // 12 RTOREGISTRATIONDATE
+
+                 Double vPrice = vehiclePurchasePrices != null && i < vehiclePurchasePrices.length
+                                 ? parseDouble(vehiclePurchasePrices[i]) : null;
+                 if (vPrice != null) psVehicle.setDouble(c++, vPrice);
+                 else psVehicle.setNull(c++, Types.DECIMAL);                                // 13 PURCHASEPRICE
+
+                 Double vMargin = vehicleMargins != null && i < vehicleMargins.length
+                                  ? parseDouble(vehicleMargins[i]) : null;
+                 if (vMargin != null) psVehicle.setDouble(c++, vMargin);
+                 else psVehicle.setNull(c++, Types.DECIMAL);                                // 14 MARGINEPERCENTAGE
+
+                 psVehicle.setTimestamp(c++, vehicleNow);                                   // 15 DATETIMESTAMP
+                 psVehicle.setTimestamp(c++, vehicleNow);                                   // 16 CREATED_DATE
+                 psVehicle.setTimestamp(c++, vehicleNow);                                   // 17 MODIFIED_DATE
+
+                 psVehicle.addBatch();
+                 validVehicle++;
+                 serial++;
+             }
+             if (validVehicle > 0) {
+                 psVehicle.executeBatch();
+                 System.out.println("Vehicle records inserted: " + validVehicle);
+             }
+         }
+
+         // ================================================================
+         // 11. INSERT INSURANCE (LIC)  →  APPLICATION.APPLICATIONSECURITYINSURANCE
+         // ================================================================
+         String[] insSecurityTypes  = request.getParameterValues("insSecurityType[]");
+         String[] insPolicyNos      = request.getParameterValues("insPolicyNo[]");
+         String[] insPolicyAmounts  = request.getParameterValues("insPolicyAmount[]");
+         String[] insNames          = request.getParameterValues("insName[]");
+         String[] insPremiumPeriods = request.getParameterValues("insPremiumPeriod[]");
+         String[] insSecurityValues = request.getParameterValues("insSecurityValue[]");
+         String[] insParticulars    = request.getParameterValues("insParticular[]");
+         String[] insPremiumAmounts = request.getParameterValues("insPremiumAmount[]");
+         String[] insAssuredAmounts = request.getParameterValues("insAssuredAmount[]");
+
+         if (insSecurityTypes != null && insSecurityTypes.length > 0) {
+             String insSQL =
+                 "INSERT INTO APPLICATION.APPLICATIONSECURITYINSURANCE (" +
+                 "APPLICATION_NUMBER, SERIAL_NUMBER, SECURITYTYPE_CODE, POLICYNUMBER, " +
+                 "POLICYAMOUNT, INSURANCENAME, PREMIUMPERIOD, SECURITYVALUE, " +
+                 "PARTICULAR, DATETIMESTAMP, PREMIUMAMOUNT, ASSUREDAMOUNT, " +
+                 "CREATED_DATE, MODIFIED_DATE" +
+                 ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+             psInsurance = conn.prepareStatement(insSQL);
+             int serial = 1;
+             int validIns = 0;
+
+             for (int i = 0; i < insSecurityTypes.length; i++) {
+                 String secType = trimSafe(insSecurityTypes[i]);
+                 if (secType == null || secType.isEmpty()) {
+                     System.out.println("⚠️ Skip insurance " + (i + 1) + " - empty security type");
+                     continue;
+                 }
+
+                 System.out.println("✅ Insurance " + serial + ": " + secType);
+
+                 int c = 1;
+                 Timestamp insNow = new Timestamp(System.currentTimeMillis());
+
+                 psInsurance.setString(c++, applicationNumber);                             // 1 APPLICATION_NUMBER
+                 psInsurance.setInt(c++, serial);                                           // 2 SERIAL_NUMBER
+                 psInsurance.setString(c++, secType);                                       // 3 SECURITYTYPE_CODE
+
+                 psInsurance.setString(c++, insPolicyNos != null && i < insPolicyNos.length
+                                            ? trimSafe(insPolicyNos[i]) : null);            // 4 POLICYNUMBER
+
+                 Double policyAmt = insPolicyAmounts != null && i < insPolicyAmounts.length
+                                    ? parseDouble(insPolicyAmounts[i]) : null;
+                 if (policyAmt != null) psInsurance.setDouble(c++, policyAmt);
+                 else psInsurance.setNull(c++, Types.DECIMAL);                              // 5 POLICYAMOUNT
+
+                 psInsurance.setString(c++, insNames != null && i < insNames.length
+                                            ? trimSafe(insNames[i]) : null);                // 6 INSURANCENAME
+
+                 // PREMIUMPERIOD is CHAR(1 BYTE) — map Monthly→M, Quarterly→Q, etc.
+                 String premPeriodFull = insPremiumPeriods != null && i < insPremiumPeriods.length
+                                         ? trimSafe(insPremiumPeriods[i]) : null;
+                 String premPeriodCode = null;
+                 if (premPeriodFull != null) {
+                     switch (premPeriodFull) {
+                         case "Monthly":     premPeriodCode = "M"; break;
+                         case "Quarterly":   premPeriodCode = "Q"; break;
+                         case "Half-Yearly": premPeriodCode = "H"; break;
+                         case "Yearly":      premPeriodCode = "Y"; break;
+                         default:            premPeriodCode = premPeriodFull.length() > 0
+                                                              ? String.valueOf(premPeriodFull.charAt(0)) : null;
+                     }
+                 }
+                 if (premPeriodCode != null) psInsurance.setString(c++, premPeriodCode);
+                 else psInsurance.setNull(c++, Types.CHAR);                                 // 7 PREMIUMPERIOD
+
+                 Double secVal = insSecurityValues != null && i < insSecurityValues.length
+                                 ? parseDouble(insSecurityValues[i]) : null;
+                 if (secVal != null) psInsurance.setDouble(c++, secVal);
+                 else psInsurance.setNull(c++, Types.DECIMAL);                              // 8 SECURITYVALUE
+
+                 String particular = insParticulars != null && i < insParticulars.length
+                                     ? trimSafe(insParticulars[i]) : null;
+                 if (particular != null && !particular.isEmpty()) psInsurance.setString(c++, particular);
+                 else psInsurance.setNull(c++, Types.VARCHAR);                              // 9 PARTICULAR
+
+                 psInsurance.setTimestamp(c++, insNow);                                     // 10 DATETIMESTAMP
+
+                 Double premAmt = insPremiumAmounts != null && i < insPremiumAmounts.length
+                                  ? parseDouble(insPremiumAmounts[i]) : null;
+                 if (premAmt != null) psInsurance.setDouble(c++, premAmt);
+                 else psInsurance.setNull(c++, Types.DECIMAL);                              // 11 PREMIUMAMOUNT
+
+                 Double assuredAmt = insAssuredAmounts != null && i < insAssuredAmounts.length
+                                     ? parseDouble(insAssuredAmounts[i]) : null;
+                 if (assuredAmt != null) psInsurance.setDouble(c++, assuredAmt);
+                 else psInsurance.setNull(c++, Types.DECIMAL);                              // 12 ASSUREDAMOUNT
+
+                 psInsurance.setTimestamp(c++, insNow);                                     // 13 CREATED_DATE
+                 psInsurance.setNull(c++, Types.VARCHAR);                                   // 14 MODIFIED_DATE (VARCHAR2 in schema)
+
+                 psInsurance.addBatch();
+                 validIns++;
+                 serial++;
+             }
+             if (validIns > 0) {
+                 psInsurance.executeBatch();
+                 System.out.println("Insurance records inserted: " + validIns);
+             }
+         }
 
             // ================================================================
             // COMMIT
@@ -925,6 +1253,10 @@ public class LoanServlet extends HttpServlet {
             try { if (psLandBuild  != null) psLandBuild.close();  } catch (Exception ignored) {}
             try { if (psDeposit    != null) psDeposit.close();    } catch (Exception ignored) {}
             try { if (psGold       != null) psGold.close();       } catch (Exception ignored) {}
+            try { if (psPlant      != null) psPlant.close();      } catch (Exception ignored) {}
+            try { if (psVehicle    != null) psVehicle.close();    } catch (Exception ignored) {}
+            try { if (psInsurance  != null) psInsurance.close();  } catch (Exception ignored) {}
+            
             try {
                 if (conn != null) {
                     conn.setAutoCommit(true);
