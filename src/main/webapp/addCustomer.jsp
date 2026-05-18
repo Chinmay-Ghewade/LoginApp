@@ -235,7 +235,7 @@
 
       <div>
         <label>Member Number</label>
-        <input type="text" name="memberNumber" maxlength="2"
+        <input type="text" name="memberNumber"
                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
       </div>
 

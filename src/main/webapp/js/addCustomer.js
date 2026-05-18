@@ -89,13 +89,23 @@ document.addEventListener("DOMContentLoaded", function() {
   document.querySelectorAll(".kyc-section table tr").forEach(row => {
     const checkbox = row.querySelector('input[type="checkbox"]');
     const inputs = row.querySelectorAll('input[id="date"], input[type="text"]');
+    
+    // Fields that should NOT have date picker enabled
+    const noExpiryDocuments = ['telephone_check', 'bank_check', 'electricity_check'];
 
     if (checkbox) {
       inputs.forEach(input => input.disabled = true);
       checkbox.addEventListener("change", () => {
         if (checkbox.checked) {
           // Enable inputs when checkbox is checked
-          inputs.forEach(input => input.disabled = false);
+          inputs.forEach(input => {
+            // Keep date picker disabled for specific documents
+            if (noExpiryDocuments.includes(checkbox.name) && input.type === 'date') {
+              input.disabled = true; // Keep date disabled
+            } else {
+              input.disabled = false; // Enable other inputs
+            }
+          });
         } else {
           // Disable AND CLEAR inputs when checkbox is unchecked
           inputs.forEach(input => {
@@ -383,6 +393,12 @@ function clearError(field) {
 // Form validation before submit
 function validateForm() {
     let isValid = true;
+    
+    // Validate KYC dates
+    if (!validateKYCDates()) {
+        isValid = false;
+    }
+	    
 
     // GSTIN validation
     const gstinField = document.querySelector('input[name="gstinNo"]');
@@ -1238,7 +1254,8 @@ function checkAadharExists(aadharNo) {
     fetch(window.APP_CONTEXT_PATH + '/CheckAadharServlet?aadhar=' + aadharNo)
         .then(response => response.json())
         .then(data => {
-            if (data.exists) {
+            // Only show error if status is 'A'
+            if (data.exists && data.status === 'A') {
                 aadharStatus.style.color = '#d32f2f';
                 aadharStatus.textContent = '❌ Customer already exists - ID: ' + data.customerId;
                 showPopup('⚠️ Customer Already Exists\n\nAadhar: ' + aadharNo + 
@@ -1263,4 +1280,38 @@ function clearAadharStatus() {
     const aadharField = document.getElementById('aadharNo');
     aadharStatus.textContent = '';
     aadharField.style.borderColor = '';
+}
+
+// ========== KYC DATE VALIDATION ==========
+function validateKYCDates() {
+    const today = new Date().toISOString().split('T')[0];
+    let isValid = true;
+    let invalidDateFields = [];
+    
+    const kycDateFields = [
+        'passport_expiry', 'pan_expiry', 'voterid_expiry', 'dl_expiry', 
+        'aadhar_expiry', 'nrega_expiry', 'telephone_expiry', 'bank_expiry',
+        'govt_expiry', 'electricity_expiry', 'ration_expiry', 'rent_expiry',
+        'cert_expiry', 'tax_expiry', 'cst_expiry', 'reg_expiry',
+        'inc_expiry', 'board_expiry', 'poa_expiry'
+    ];
+    
+    kycDateFields.forEach(fieldName => {
+        const field = document.querySelector(`input[name="${fieldName}"]`);
+        if (field && field.value && field.value < today) {
+            field.style.borderColor = '#d32f2f';
+            field.style.backgroundColor = '#ffe6e6';
+            invalidDateFields.push(fieldName.replace(/_/g, ' '));
+            isValid = false;
+        } else if (field) {
+            field.style.borderColor = '';
+            field.style.backgroundColor = '';
+        }
+    });
+    
+    if (!isValid) {
+        showPopup('⚠️ Invalid KYC Date(s)\n\nThe following date field(s) cannot be before today:\n\n' + invalidDateFields.join('\n'), 'error');
+    }
+    
+    return isValid;
 }

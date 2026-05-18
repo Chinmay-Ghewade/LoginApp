@@ -36,7 +36,8 @@ public class CheckAadharServlet extends HttpServlet {
         try {
             conn = DBConnection.getConnection();
             
-            String sql = "SELECT CUSTOMER_ID FROM CUSTOMERS WHERE AADHAR = ?";
+            // Updated query to fetch STATUS column as well
+            String sql = "SELECT CUSTOMER_ID, STATUS FROM CUSTOMERS WHERE AADHAR = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, aadhar.trim());
             
@@ -44,7 +45,10 @@ public class CheckAadharServlet extends HttpServlet {
             
             if (rs.next()) {
                 String customerId = rs.getString("CUSTOMER_ID");
-                out.print("{\"exists\": true, \"customerId\": \"" + customerId + "\"}");
+                String status = rs.getString("STATUS");
+                
+                // Return both customerId and status
+                out.print("{\"exists\": true, \"customerId\": \"" + customerId + "\", \"status\": \"" + status + "\"}");
             } else {
                 out.print("{\"exists\": false}");
             }

@@ -243,6 +243,65 @@
         }
     }
 
+    // ========== ADDRESS PROOF VALIDATION ==========
+    function validateAddressProof() {
+        // Address Proof documents that need at least one to be filled
+        const addressProofFields = [
+            { checkbox: 'telephone_check', textInput: 'telephone' },
+            { checkbox: 'bank_check', textInput: 'bank_statement' },
+            { checkbox: 'govt_check', textInput: 'govt_doc' },
+            { checkbox: 'electricity_check', textInput: 'electricity' },
+            { checkbox: 'ration_check', textInput: 'ration' }
+        ];
+        
+        let atleastOneSelected = false;
+        let selectedButEmpty = [];
+        
+        addressProofFields.forEach(field => {
+            const checkbox = document.querySelector(`input[name="${field.checkbox}"]`);
+            const textInput = document.querySelector(`input[name="${field.textInput}"]`);
+            
+            if (checkbox && checkbox.checked) {
+                if (textInput && textInput.value.trim() === '') {
+                    // Checkbox selected but document number is empty
+                    selectedButEmpty.push(field.textInput.replace(/_/g, ' '));
+                    textInput.style.borderColor = '#d32f2f';
+                    textInput.style.backgroundColor = '#ffe6e6';
+                } else {
+                    atleastOneSelected = true;
+                    if (textInput) {
+                        textInput.style.borderColor = '';
+                        textInput.style.backgroundColor = '';
+                    }
+                }
+            } else {
+                if (textInput) {
+                    textInput.style.borderColor = '';
+                    textInput.style.backgroundColor = '';
+                }
+            }
+        });
+        
+        // Check if at least one Address Proof is selected and filled
+        if (!atleastOneSelected) {
+            if (selectedButEmpty.length > 0) {
+                // Some selected but not filled
+                return {
+                    valid: false,
+                    message: '⚠️ Address Proof Incomplete\n\nPlease fill the document number for:\n\n' + selectedButEmpty.join('\n')
+                };
+            } else {
+                // None selected
+                return {
+                    valid: false,
+                    message: '⚠️ Address Proof Required\n\nAt least one Address Proof document must be selected and filled:\n\n• Telephone Bill\n• Bank Statement\n• Govt. Documents\n• Electricity Bill\n• Ration Card'
+                };
+            }
+        }
+        
+        return { valid: true };
+    }
+
     // Validate current tab
     async function validateCurrentTab() {
         const tabContent = document.querySelector(`[data-tab-content="${currentTab}"]`);
@@ -321,43 +380,11 @@
                 }
             }
 
-            // Check Address Proof documents
-            const addressProofCheckboxes = [
-                'telephone_check', 'bank_check', 'govt_check', 
-                'electricity_check', 'ration_check'
-            ];
-            
-            const addressProofFilled = 
-                (document.querySelector('input[name="telephone_check"]').checked && 
-                 document.querySelector('input[name="telephone_expiry"]').value && 
-                 document.querySelector('input[name="telephone"]').value.trim()) ||
-                (document.querySelector('input[name="bank_check"]').checked && 
-                 document.querySelector('input[name="bank_expiry"]').value && 
-                 document.querySelector('input[name="bank_statement"]').value.trim()) ||
-                (document.querySelector('input[name="govt_check"]').checked && 
-                 document.querySelector('input[name="govt_expiry"]').value && 
-                 document.querySelector('input[name="govt_doc"]').value.trim()) ||
-                (document.querySelector('input[name="electricity_check"]').checked && 
-                 document.querySelector('input[name="electricity_expiry"]').value && 
-                 document.querySelector('input[name="electricity"]').value.trim()) ||
-                (document.querySelector('input[name="ration_check"]').checked && 
-                 document.getElementById('ration').value.trim());
-
-            if (!addressProofFilled) {
+            // Check Address Proof documents using new function
+            const addressProofValidation = validateAddressProof();
+            if (!addressProofValidation.valid) {
                 isValid = false;
-                errors.push('At least one Address Proof document must be selected and filled');
-                // Mark only checkboxes as error in Address Proof section
-                const addressProofSections = document.querySelectorAll('.kyc-section');
-                if (addressProofSections[1]) {
-                    addressProofSections[1].classList.add('field-error');
-                    // Mark individual checkboxes
-                    addressProofCheckboxes.forEach(name => {
-                        const checkbox = document.querySelector(`input[name="${name}"]`);
-                        if (checkbox && !checkbox.checked) {
-                            checkbox.classList.add('field-error');
-                        }
-                    });
-                }
+                errors.push(addressProofValidation.message);
             }
 
 			// Show specific KYC validation popup if errors exist
