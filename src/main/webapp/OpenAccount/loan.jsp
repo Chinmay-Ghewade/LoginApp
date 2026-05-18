@@ -1063,195 +1063,203 @@
 	  <!-- Land & Building Fieldset - Conditional -->
 	  <% if (showLandBuilding) { %>
 	<fieldset id="landBuildingFieldset">
-		<legend>
-	    	Land & Building
-	    	<button type="button" onclick="addLandBuilding()"
-	      		style="border:none;background:#373279;color:white;padding:2px 10px;
-	        	border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
-	      		➕
-	    	</button>
-	  	</legend>
-	
-		<div class="nominee-card lb-block">
-	    	<button type="button" class="nominee-remove" onclick="removeLandBuilding(this)">✖</button>
-	
-	    	<div class="nominee-title"
-	         	style="font-weight:bold; font-size:15px; margin-bottom:10px; color:#373279;">
-	      		Land & Building <span class="lb-serial">1</span>
-	    	</div>
-	
-		<div class="form-grid">
-			<div>
-	  			<label>Security Type Code</label>
-	  			<select name="securityTypeCode[]" required>
-	    		<option value="">-- Select --</option>
-	    <%
-	      PreparedStatement psSecType = null;
-	      ResultSet rsSecType = null;
-	      try (Connection connSecType = DBConnection.getConnection()) {
-	        String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
-	        psSecType = connSecType.prepareStatement(sql);
-	        rsSecType = psSecType.executeQuery();
-	        
-	        while (rsSecType.next()) {
-	          String securityType = rsSecType.getString("SECURITYTYPE_CODE");
-	    %>
-	          <option value="<%= securityType %>"><%= securityType %></option>
-	    <%
-	        }
-	      } catch (Exception e) {
-	        out.println("<option disabled>Error loading Security Types</option>");
-	        e.printStackTrace();
-	      } finally {
-	        if (rsSecType != null) rsSecType.close();
-	        if (psSecType != null) psSecType.close();
-	      }
-	    %>
-	  			</select>
-			</div>
-	
-			<div>
-	        	<label>Submi. Date</label>
-	        	<input type="date" name="lbSubmiDate[]" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Amt. Valued</label>
-	        	<input type="number" step="0.01" name="lbAmtValued[]" value="0" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Margin %</label>
-	        	<input type="number" step="0.01" name="lbMargin[]" value="0" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Area</label>
-	        	<input type="number" step="0.01" name="lbArea[]" value="0" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Unit Of Area</label>
-	        	<input type="text" name="lbUnitOfArea[]" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Location</label>
-	        	<input type="text" name="lbLocation[]" required>
-	      	</div>
-	
-	      	<div>
-	        	<label>Security Value</label>
-	        	<input type="number" step="0.01" name="lbSecurityValue[]" value="0" required>
-	      	</div> 
-	
-	      	<div>
-	        	<label>Remark</label>
-	        	<input type="text" name="lbRemark[]" required>
-	      	</div>
-	      
-	      	<div>
-	        	<label>Particular</label>
-	        	<textarea name="lbParticular[]" rows="3" style="width: 95%; resize: vertical; font-size: 13px; padding: 4px 6px;"></textarea>
-	      	</div>
-	    </div>
-	  </div>
-	</fieldset>
-	
-	  <% } %>
+	<legend>
+    	Land & Building
+    	<button type="button" onclick="addLandBuilding()"
+      		style="border:none;background:#373279;color:white;padding:2px 10px;
+        	border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
+      		➕
+    	</button>
+  	</legend>
+ 
+	<div class="nominee-card lb-block">
+    	<button type="button" class="nominee-remove" onclick="removeLandBuilding(this)">✖</button>
+ 
+    	<div class="nominee-title"
+         	style="font-weight:bold; font-size:15px; margin-bottom:10px; color:#373279;">
+      		Land & Building <span class="lb-serial">1</span>
+    	</div>
+ 
+	<div class="form-grid">
+		<div>
+  			<label>Security Type Code</label>
+  			<!-- ✅ FIXED: was securityTypeCode[] -->
+  			<select name="lbSecurityTypeCode[]" required>
+    		<option value="">-- Select --</option>
+    <%
+      PreparedStatement psSecType = null;
+      ResultSet rsSecType = null;
+      try (Connection connSecType = DBConnection.getConnection()) {
+        String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+        psSecType = connSecType.prepareStatement(sql);
+        rsSecType = psSecType.executeQuery();
+        while (rsSecType.next()) {
+          String securityType = rsSecType.getString("SECURITYTYPE_CODE");
+    %>
+          <option value="<%= securityType %>"><%= securityType %></option>
+    <%
+        }
+      } catch (Exception e) {
+        out.println("<option disabled>Error loading Security Types</option>");
+        e.printStackTrace();
+      } finally {
+        if (rsSecType != null) rsSecType.close();
+        if (psSecType != null) psSecType.close();
+      }
+    %>
+  			</select>
+		</div>
+ 
+		<div>
+        	<label>Submi. Date</label>
+        	<input type="date" name="lbSubmiDate[]" required>
+      	</div>
+ 
+      	<div>
+        	<label>Amt. Valued</label>
+        	<input type="number" step="0.01" name="lbAmtValued[]" value="0" required>
+      	</div>
+ 
+      	<div>
+        	<label>Margin %</label>
+        	<input type="number" step="0.01" name="lbMargin[]" value="0" required>
+      	</div>
+ 
+      	<div>
+        	<label>Area</label>
+        	<input type="number" step="0.01" name="lbArea[]" value="0" required>
+      	</div>
+ 
+      	<div>
+        	<label>Unit Of Area</label>
+        	<input type="text" name="lbUnitOfArea[]" required>
+      	</div>
+ 
+      	<div>
+        	<label>Location</label>
+        	<input type="text" name="lbLocation[]" required>
+      	</div>
+ 
+      	<div>
+        	<label>Security Value</label>
+        	<input type="number" step="0.01" name="lbSecurityValue[]" value="0" required>
+      	</div>
+ 
+      	<div>
+        	<label>Remark</label>
+        	<input type="text" name="lbRemark[]" required>
+      	</div>
+ 
+      	<div>
+        	<label>Particular</label>
+        	<textarea name="lbParticular[]" rows="3" style="width: 95%; resize: vertical; font-size: 13px; padding: 4px 6px;"></textarea>
+      	</div>
+    </div>
+  </div>
+</fieldset>
+  <% } %>
 	
 	  <!-- Deposit Details Fieldset - Conditional -->
 	  <% if (showDeposit) { %>
-	<fieldset id="depositDetailsFieldset">
-	  <legend>
-	    Deposit Details
-	    <button type="button" onclick="addDepositDetails()"
-	      style="border:none;background:#373279;color:white;padding:2px 10px;
-	        border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
-	      ➕
-	    </button>
-	  </legend>
-	
-	  <div class="nominee-card deposit-block">
-	    <button type="button" class="nominee-remove" onclick="removeDepositDetails(this)">✖</button>
-	
-	    <div class="nominee-title"
-	         style="font-weight:bold; font-size:15px; margin-bottom:10px; color:#373279;">
-	      Deposit Details <span class="deposit-serial">1</span>
-	    </div>
-	
-	    <div class="form-grid">
-	
-	      <div>
-	  <label>Security Type Code</label>
-	  <select name="securityTypeCode[]" required>
-	    <option value="">-- Select --</option>
-	    <%
-	      PreparedStatement psSecType = null;
-	      ResultSet rsSecType = null;
-	      try (Connection connSecType = DBConnection.getConnection()) {
-	        String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
-	        psSecType = connSecType.prepareStatement(sql);
-	        rsSecType = psSecType.executeQuery();
-	        
-	        while (rsSecType.next()) {
-	          String securityType = rsSecType.getString("SECURITYTYPE_CODE");
-	    %>
-	          <option value="<%= securityType %>"><%= securityType %></option>
-	    <%
-	        }
-	      } catch (Exception e) {
-	        out.println("<option disabled>Error loading Security Types</option>");
-	        e.printStackTrace();
-	      } finally {
-	        if (rsSecType != null) rsSecType.close();
-	        if (psSecType != null) psSecType.close();
-	      }
-	    %>
-	  </select>
-	</div>
-	
-	      <div>
-	        <label>Submission Date</label>
-	        <input type="date" name="submissionDate[]" required>
-	      </div>
-	
-	      <div>
-	  		<label>Margin %</label>
-	  		<input type="number" name="marginPercent[]" step="0.01" min="0" max="100" required>
-	</div>
-	
-	      <div>
-	  		<label>Deposit A/c Code</label>
-	  		<input type="text" name="depositAccCode[]" inputmode="numeric" pattern="[0-9]{14}" maxlength="14" minlength="14" required
-	         oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,14);"
-	         title="Enter exactly 14 digits" required>
-	</div>
-	
-	      <div>
-	        <label>Maturity Date</label>
-	        <input type="date" name="maturityDate[]" required>
-	      </div>
-	
-	      <div>
-	        <label>Security Value</label>
-	        <input type="number" step="0.01" name="securityValue[]" required>
-	      </div>
-	
-	      <div>
-	        <label>TD Value</label>
-	        <input type="number" step="0.01" name="tdValue[]" value="0" readonly style="background-color: #f0f0f0;">
-	      </div>
-	
-	      <div>
-	  		<label>Particular</label>
-	  		<input type="text" name="particular[]" maxlength="50" required>
-		  </div>
-	    </div>
-	  </div>
-	</fieldset>
-	
-	  <% } %>
+<fieldset id="depositDetailsFieldset">
+  <legend>
+    Deposit Details
+    <button type="button" onclick="addDepositDetails()"
+      style="border:none;background:#373279;color:white;padding:2px 10px;
+        border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
+      ➕
+    </button>
+  </legend>
+ 
+  <div class="nominee-card deposit-block">
+    <button type="button" class="nominee-remove" onclick="removeDepositDetails(this)">✖</button>
+ 
+    <div class="nominee-title"
+         style="font-weight:bold; font-size:15px; margin-bottom:10px; color:#373279;">
+      Deposit Details <span class="deposit-serial">1</span>
+    </div>
+ 
+    <div class="form-grid">
+ 
+      <div>
+        <label>Security Type Code</label>
+        <!-- ✅ FIXED: was securityTypeCode[] -->
+        <select name="depSecurityTypeCode[]" required>
+          <option value="">-- Select --</option>
+          <%
+            PreparedStatement psSecType = null;
+            ResultSet rsSecType = null;
+            try (Connection connSecType = DBConnection.getConnection()) {
+              String sql = "SELECT SECURITYTYPE_CODE FROM GLOBALCONFIG.SECURITYTYPE ORDER BY SECURITYTYPE_CODE";
+              psSecType = connSecType.prepareStatement(sql);
+              rsSecType = psSecType.executeQuery();
+              while (rsSecType.next()) {
+                String securityType = rsSecType.getString("SECURITYTYPE_CODE");
+          %>
+                <option value="<%= securityType %>"><%= securityType %></option>
+          <%
+              }
+            } catch (Exception e) {
+              out.println("<option disabled>Error loading Security Types</option>");
+              e.printStackTrace();
+            } finally {
+              if (rsSecType != null) rsSecType.close();
+              if (psSecType != null) psSecType.close();
+            }
+          %>
+        </select>
+      </div>
+ 
+      <div>
+        <label>Submission Date</label>
+        <!-- ✅ FIXED: was submissionDate[] (collided with main loan submissionDate) -->
+        <input type="date" name="depSubmissionDate[]" required>
+      </div>
+ 
+      <div>
+        <label>Margin %</label>
+        <!-- ✅ FIXED: was marginPercent[] -->
+        <input type="number" name="depMarginPercent[]" step="0.01" min="0" max="100" required>
+      </div>
+ 
+      <div>
+        <label>Deposit A/c Code</label>
+        <!-- ✅ FIXED: was depositAccCode[] -->
+        <input type="text" name="depAccCode[]" inputmode="numeric" pattern="[0-9]{14}"
+               maxlength="14" minlength="14" required
+               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,14);"
+               title="Enter exactly 14 digits">
+      </div>
+ 
+      <div>
+        <label>Maturity Date</label>
+        <!-- ✅ FIXED: was maturityDate[] -->
+        <input type="date" name="depMaturityDate[]" required>
+      </div>
+ 
+      <div>
+        <label>Security Value</label>
+        <!-- ✅ FIXED: was securityValue[] -->
+        <input type="number" step="0.01" name="depSecurityValue[]" required>
+      </div>
+ 
+      <div>
+        <label>TD Value</label>
+        <!-- ✅ FIXED: was tdValue[] -->
+        <input type="number" step="0.01" name="depTdValue[]" value="0" readonly
+               style="background-color: #f0f0f0;">
+      </div>
+ 
+      <div>
+        <label>Particular</label>
+        <!-- ✅ FIXED: was particular[] -->
+        <input type="text" name="depParticular[]" maxlength="50" required>
+      </div>
+ 
+    </div>
+  </div>
+</fieldset>
+  <% } %>
 	
 	  <!-- Gold Details Fieldset - Conditional -->
 	  <% if (showGold) { %>
@@ -2971,32 +2979,31 @@
 	//==================== LAND & BUILDING FUNCTIONS ====================
 	
 	function addLandBuilding() {
-	  let fieldset = document.getElementById("landBuildingFieldset");
-	  let original = fieldset.querySelector(".lb-block");
-	  let clone = original.cloneNode(true);
-	  
-	  clone.querySelectorAll('select[id]').forEach(function(sel) {
-	        sel.removeAttribute('id');
-	    });
-	  
-	  // Clear all inputs in cloned block
-	  clone.querySelectorAll("input, select, textarea").forEach(el => {
-	      if (el.tagName === 'SELECT') {
-	          el.selectedIndex = 0;
-	      } else if (['lbAmtValued[]', 'lbMargin[]', 'lbArea[]', 'lbSecurityValue[]'].includes(el.name)) {
-	          el.value = '0';
-	      } else {
-	          el.value = "";
-	      }
-	  });
-	
-	  clone.querySelector(".nominee-remove").onclick = function() {
-	      removeLandBuilding(this);
-	  };
-	
-	  fieldset.appendChild(clone);
-	  updateLBSerials();
-	}
+  let fieldset = document.getElementById("landBuildingFieldset");
+  let original = fieldset.querySelector(".lb-block");
+  let clone = original.cloneNode(true);
+ 
+  clone.querySelectorAll('select[id]').forEach(function(sel) {
+    sel.removeAttribute('id');
+  });
+ 
+  clone.querySelectorAll("input, select, textarea").forEach(el => {
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    } else if (['lbAmtValued[]', 'lbMargin[]', 'lbArea[]', 'lbSecurityValue[]'].includes(el.name)) {
+      el.value = '0';
+    } else {
+      el.value = "";
+    }
+  });
+ 
+  clone.querySelector(".nominee-remove").onclick = function() {
+    removeLandBuilding(this);
+  };
+ 
+  fieldset.appendChild(clone);
+  updateLBSerials();
+}
 	
 	function removeLandBuilding(btn) {
 	  let blocks = document.querySelectorAll(".lb-block");
@@ -3207,34 +3214,29 @@
 		  let fieldset = document.getElementById("depositDetailsFieldset");
 		  let original = fieldset.querySelector(".deposit-block");
 		  let clone = original.cloneNode(true);
-	
+		 
 		  clone.querySelectorAll('select[id]').forEach(function(sel) {
-		        sel.removeAttribute('id');
-		    });
-		  
-		  // Clear all inputs in the cloned block
+		    sel.removeAttribute('id');
+		  });
+		 
 		  clone.querySelectorAll("input, select").forEach(el => {
 		    if (el.tagName === 'SELECT') {
 		      el.selectedIndex = 0;
-		    } else if (el.name === 'depositSrNo[]') {
-		      // Sr No will be updated by updateDepositSerials()
-		      el.value = '';
-		    } else if (el.name === 'marginPercent[]' || el.name === 'securityValue[]' || el.name === 'tdValue[]') {
+		    } else if (['depMarginPercent[]', 'depSecurityValue[]', 'depTdValue[]'].includes(el.name)) {
 		      el.value = '0';
 		    } else {
 		      el.value = '';
 		    }
 		  });
-	
-		  // Update remove button onclick
+		 
 		  clone.querySelector(".nominee-remove").onclick = function() {
 		    removeDepositDetails(this);
 		  };
-	
+		 
 		  fieldset.appendChild(clone);
 		  updateDepositSerials();
-		  
-		  // Auto-calculate TD Value for new block
+		 
+		  // Re-attach TD Value auto-calculation for new block
 		  setupTDValueCalculation(clone);
 		}
 	
@@ -3266,30 +3268,31 @@
 	
 		// Auto-calculate TD Value based on Security Value and Margin %
 		function calculateTDValue(block) {
-		  const securityValue = parseFloat(block.querySelector('input[name="securityValue[]"]').value) || 0;
-		  const marginPercent = parseFloat(block.querySelector('input[name="marginPercent[]"]').value) || 0;
-		  const tdValueInput = block.querySelector('input[name="tdValue[]"]');
-		  
-		  // TD Value = Security Value × (Margin % / 100)
-		  const tdValue = securityValue * (marginPercent / 100);
-		  tdValueInput.value = tdValue.toFixed(2);
-		}
+  const secVal  = parseFloat(block.querySelector('input[name="depSecurityValue[]"]').value)  || 0;
+  const margin  = parseFloat(block.querySelector('input[name="depMarginPercent[]"]').value)  || 0;
+  const tdInput = block.querySelector('input[name="depTdValue[]"]');
+  if (tdInput) {
+    tdInput.value = (secVal * (margin / 100)).toFixed(2);
+  }
+}
 	
 		function setupTDValueCalculation(block) {
-		  const securityValueInput = block.querySelector('input[name="securityValue[]"]');
-		  const marginPercentInput = block.querySelector('input[name="marginPercent[]"]');
-		  
-		  securityValueInput.addEventListener('input', () => calculateTDValue(block));
-		  marginPercentInput.addEventListener('input', () => calculateTDValue(block));
-		}
+			  const securityValueInput = block.querySelector('input[name="depSecurityValue[]"]');
+			  const marginPercentInput = block.querySelector('input[name="depMarginPercent[]"]');
+			 
+			  if (securityValueInput && marginPercentInput) {
+			    securityValueInput.addEventListener('input', () => calculateTDValue(block));
+			    marginPercentInput.addEventListener('input', () => calculateTDValue(block));
+			  }
+			}
 	
 		// Initialize TD Value calculation for the first deposit block on page load
 		document.addEventListener('DOMContentLoaded', function() {
-		  const firstDepositBlock = document.querySelector('.deposit-block');
-		  if (firstDepositBlock) {
-		    setupTDValueCalculation(firstDepositBlock);
-		  }
-		});
+  const firstDepositBlock = document.querySelector('.deposit-block');
+  if (firstDepositBlock) {
+    setupTDValueCalculation(firstDepositBlock);
+  }
+});
 		
 		//==================== INSURANCE FUNCTIONS ====================
 		function addInsurance() {
