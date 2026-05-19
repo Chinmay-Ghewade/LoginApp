@@ -1,13 +1,32 @@
 <%@ page import="java.sql.*, java.io.PrintWriter, db.DBConnection, org.json.*" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page buffer="8kb" autoFlush="true" %>
+<%!
+    // Helper: runs a SELECT returning columns 'v' and 'l', builds JSON array [{v,l},...]
+    private String nomineeQueryToArray(Connection conn, String sql) throws SQLException {
+        StringBuilder arr = new StringBuilder("[");
+        boolean first = true;
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                if (!first) arr.append(",");
+                first = false;
+                String v = rs.getString("v"); if (v == null) v = "";
+                String l = rs.getString("l"); if (l == null) l = "";
+                v = v.replace("\\","\\\\").replace("\"","\\\"");
+                l = l.replace("\\","\\\\").replace("\"","\\\"");
+                arr.append("{\"v\":\"").append(v).append("\",\"l\":\"").append(l).append("\"}");
+            }
+        }
+        return arr.append("]").toString();
+    }
+%>
 
 <%
     String _action = request.getParameter("action");
 
     // ─────────────────────────────────────────────
     // AJAX: Return ALL locker types from HEADOFFICE.LOCKERTYPE
-    // (No status column in LOCKERTYPE — fetch all)
     // ─────────────────────────────────────────────
     if ("getHiredLockerTypes".equals(_action)) {
         out.clear();
@@ -25,7 +44,6 @@
         try {
             conn = DBConnection.getConnection();
             if (conn == null) { pw.print("{\"success\":false,\"message\":\"DB connection failed\"}"); pw.flush(); return; }
-            // HEADOFFICE.LOCKERTYPE has no status column — fetch all types
             ps = conn.prepareStatement(
                 "SELECT TRIM(LOCKER_TYPE) AS LOCKER_TYPE " +
                 "FROM HEADOFFICE.LOCKERTYPE " +
@@ -75,7 +93,6 @@
         try {
             conn = DBConnection.getConnection();
             if (conn == null) { pw.print("{\"success\":false,\"message\":\"DB connection failed\"}"); pw.flush(); return; }
-            // Filter by LOCKER_STATUS = 'H' in BRANCH.BRANCHLOCKER
             String sql = "SELECT LOCKER_NUMBER, LOCKER_TYPE, CUPBORD_NO, KEY_NO " +
                          "FROM BRANCH.BRANCHLOCKER " +
                          "WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
@@ -116,9 +133,6 @@
 
     // ─────────────────────────────────────────────
     // AJAX: Return customer by locker
-    // Source: ACCOUNT.LOCKERACCOUNT
-    // Conditions: ACCOUNT_STATUS = 'A', latest DATE_OF_HIRE
-    // Customer name column: NAME_OF_HIRE (no join needed)
     // ─────────────────────────────────────────────
     if ("getCustomerByLocker".equals(_action)) {
         out.clear();
@@ -148,8 +162,6 @@
                 pw.print("{\"success\":false,\"message\":\"DB connection failed\"}");
                 pw.flush(); return;
             }
-            // Fetch from ACCOUNT.LOCKERACCOUNT only — no join needed
-            // ACCOUNT_STATUS = 'A' (active), pick most recent DATE_OF_HIRE
             ps = conn.prepareStatement(
                 "SELECT CUSTOMER_ID, NAME_OF_HIRE FROM (" +
                 "  SELECT CUSTOMER_ID, NAME_OF_HIRE " +
@@ -188,6 +200,70 @@
             try { if (rs!=null) rs.close(); } catch(Exception i){}
             try { if (ps!=null) ps.close(); } catch(Exception i){}
             try { if (conn!=null) conn.close(); } catch(Exception i){}
+        }
+        pw.flush(); return;
+    }
+
+    // ─────────────────────────────────────────────
+    // AJAX: Return dropdown data for nominee form
+    // Replaces dependency on AddCustomerDataLoader
+    // Returns: salutation, relation, city, state, country
+    // ─────────────────────────────────────────────
+    if ("getNomineeDropdowns".equals(_action)) {
+        out.clear();
+        response.reset();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        PrintWriter pw = response.getWriter();
+
+        String sessionBranch = (String) session.getAttribute("branchCode");
+        if (sessionBranch == null) {
+            pw.print("{\"success\":false,\"message\":\"Session expired\"}"); pw.flush(); return;
+        }
+
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            if (conn == null) {
+                pw.print("{\"success\":false,\"message\":\"DB connection failed\"}"); pw.flush(); return;
+            }
+
+            StringBuilder json = new StringBuilder("{\"success\":true");
+
+            // salutation
+            json.append(",\"salutation\":");
+            json.append(nomineeQueryToArray(conn,
+                "SELECT SALUTATION_CODE AS v, SALUTATION_CODE AS l FROM GLOBALCONFIG.SALUTATION ORDER BY SALUTATION_CODE"));
+
+            // relation
+            json.append(",\"relation\":");
+            json.append(nomineeQueryToArray(conn,
+                "SELECT TO_CHAR(RELATION_ID) AS v, DESCRIPTION AS l FROM GLOBALCONFIG.RELATION ORDER BY RELATION_ID"));
+
+            // city
+            json.append(",\"city\":");
+            json.append(nomineeQueryToArray(conn,
+                "SELECT CITY_CODE AS v, NAME AS l FROM GLOBALCONFIG.CITY ORDER BY UPPER(NAME)"));
+
+            // state
+            json.append(",\"state\":");
+            json.append(nomineeQueryToArray(conn,
+                "SELECT STATE_CODE AS v, NAME AS l FROM GLOBALCONFIG.STATE ORDER BY NAME"));
+
+            // country
+            json.append(",\"country\":");
+            json.append(nomineeQueryToArray(conn,
+                "SELECT COUNTRY_CODE AS v, NAME AS l FROM GLOBALCONFIG.COUNTRY ORDER BY NAME"));
+
+            json.append("}");
+            pw.print(json.toString());
+
+        } catch (Exception e) {
+            String msg = e.getMessage() != null ? e.getMessage().replace("\"","\\\"") : "Unknown error";
+            pw.print("{\"success\":false,\"message\":\"" + msg + "\"}");
+        } finally {
+            try { if (conn != null) conn.close(); } catch(Exception i){}
         }
         pw.flush(); return;
     }
@@ -310,7 +386,7 @@
 </head>
 <body>
 
-<form action="LockerNomineeServlet" method="post" onsubmit="return validateForm()">
+<form action="<%= request.getContextPath() %>/LockerNomineeServlet" method="post" onsubmit="return validateForm()">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
@@ -390,7 +466,8 @@
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
-            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openNomineeCustomerLookup(this)" readonly>
+            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]"
+                   onclick="openNomineeCustomerLookup(this)" readonly disabled>
             <button type="button" class="inside-icon-btn" onclick="openNomineeCustomerLookup(this)" title="Search Customer">🔍</button>
           </div>
         </div>
@@ -463,10 +540,14 @@
                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
         </div>
 
+        <!-- ZIP: allows 5 or 6 digits -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
-                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" required>
+                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+                          this.nextElementSibling.textContent = '';"
+                 onblur="this.nextElementSibling.textContent = (this.value.length > 0 && this.value.length < 5) ? 'Must be 5 or 6 digits' : '';"
+                 required>
           <small class="zipError"></small>
         </div>
 
@@ -586,7 +667,6 @@ var _allLockerNumbers = [];
 
 // ══════════════════════════════════════════════════════════════════════
 // LOCKER TYPE LOOKUP
-// Source: HEADOFFICE.LOCKERTYPE (all types, no status filter)
 // ══════════════════════════════════════════════════════════════════════
 function openLockerTypeLookup() {
     document.getElementById('lockerTypeLookupModal').style.display = 'flex';
@@ -658,7 +738,6 @@ document.getElementById('lockerTypeLookupModal').addEventListener('click', funct
 
 // ══════════════════════════════════════════════════════════════════════
 // LOCKER NUMBER LOOKUP
-// Source: BRANCH.BRANCHLOCKER where LOCKER_STATUS = 'H'
 // ══════════════════════════════════════════════════════════════════════
 function openLockerNumberLookup() {
     var lockerType = document.getElementById('lockerType').value.trim();
@@ -736,8 +815,6 @@ function selectLockerNumber(lockerNumber, lockerType) {
     document.getElementById('customerId').value   = '';
     document.getElementById('customerName').value = 'Fetching...';
 
-    // Fetch customer from ACCOUNT.LOCKERACCOUNT
-    // where ACCOUNT_STATUS = 'A' and latest DATE_OF_HIRE
     fetch('lockerNominee.jsp?action=getCustomerByLocker'
             + '&lockerType='   + encodeURIComponent(lockerType)
             + '&lockerNumber=' + encodeURIComponent(lockerNumber))
@@ -816,10 +893,10 @@ function _fillNomineeBlock(block, data) {
 }
 
 (function loadNomineeDropdowns() {
-    fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+    fetch('lockerNominee.jsp?action=getNomineeDropdowns')
         .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function(data) {
-            if (data._error) console.warn('Nominee dropdown warning:', data._error);
+            if (!data.success) throw new Error(data.message || 'Failed to load dropdowns');
             _nomineeDropdownCache = data;
             var firstBlock = document.querySelector('.nominee-block');
             if (firstBlock) _fillNomineeBlock(firstBlock, data);
@@ -855,7 +932,11 @@ function addNominee() {
         el.value = '';
     });
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
-    if (cidContainer) cidContainer.style.display = 'none';
+    if (cidContainer) {
+        cidContainer.style.display = 'none';
+        var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
+        if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
+    }
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
     Object.keys(NOMINEE_DD_MAP).forEach(function(key) {
@@ -867,7 +948,7 @@ function addNominee() {
     renumberNominees();
     if (_nomineeDropdownCache) { _fillNomineeBlock(newCard, _nomineeDropdownCache); }
     else {
-        fetch(window.APP_CONTEXT_PATH + '/loaders/AddCustomerDataLoader')
+        fetch('lockerNominee.jsp?action=getNomineeDropdowns')
             .then(function(r) { return r.json(); })
             .then(function(data) { _nomineeDropdownCache = data; _fillNomineeBlock(newCard, data); });
     }
@@ -883,9 +964,17 @@ function toggleNomineeCustomerID(radio) {
     var card = radio.closest('.nominee-block');
     var container = card.querySelector('.nomineeCustomerIDContainer');
     if (!container) return;
-    container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
     var input = container.querySelector('.nomineeCustomerIDInput');
-    if (input && radio.value !== 'yes') input.value = '';
+    if (radio.value === 'yes') {
+        container.style.display = 'flex';
+        if (input) input.disabled = false;
+    } else {
+        container.style.display = 'none';
+        if (input) {
+            input.value = '';
+            input.disabled = true;
+        }
+    }
 }
 
 
@@ -985,27 +1074,26 @@ function resetLockerInfo() {
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
     var valid = true;
-    var shareInputs = document.querySelectorAll('input[name="nomineePercentageShare[]"]');
-    var totalShare = 0;
-    shareInputs.forEach(function(inp) {
-        var val = parseFloat(inp.value);
-        if (isNaN(val) || val < 0 || val > 100) { alert('Each Percentage Share must be between 0 and 100.'); valid = false; }
-        totalShare += (isNaN(val) ? 0 : val);
+
+    // Zip validation — accepts 5 or 6 digits
+    document.querySelectorAll('.zip-input').forEach(function(inp) {
+        var errEl = inp.nextElementSibling;
+        if (inp.value.length < 5 || !/^\d{5,6}$/.test(inp.value)) {
+            if (errEl) errEl.textContent = 'Must be 5 or 6 digits';
+            valid = false;
+        } else {
+            if (errEl) errEl.textContent = '';
+        }
     });
-    if (valid && shareInputs.length > 0 && Math.round(totalShare) !== 100) {
-        alert('Total Percentage Share must equal 100. Current: ' + totalShare.toFixed(2)); valid = false;
-    }
+
+    // Declaration checkbox validation
     if (valid) {
-        document.querySelectorAll('.zip-input').forEach(function(inp) {
-            var errEl = inp.nextElementSibling;
-            if (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value)) { if (errEl) errEl.textContent = 'Must be exactly 6 digits'; valid = false; }
-            else { if (errEl) errEl.textContent = ''; }
+        document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
+            if (!cb.checked) valid = false;
         });
-    }
-    if (valid) {
-        document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) { if (!cb.checked) valid = false; });
         if (!valid) alert('Please accept the declaration for all nominees.');
     }
+
     return valid;
 }
 

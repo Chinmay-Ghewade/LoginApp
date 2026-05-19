@@ -7,7 +7,6 @@
 
     // ─────────────────────────────────────────────
     // AJAX: Return ALL locker types from HEADOFFICE.LOCKERTYPE
-    // (No status column in LOCKERTYPE — fetch all)
     // ─────────────────────────────────────────────
     if ("getHiredLockerTypes".equals(_action)) {
         out.clear();
@@ -25,7 +24,6 @@
         try {
             conn = DBConnection.getConnection();
             if (conn == null) { pw.print("{\"success\":false,\"message\":\"DB connection failed\"}"); pw.flush(); return; }
-            // HEADOFFICE.LOCKERTYPE has no status column — fetch all types
             ps = conn.prepareStatement(
                 "SELECT TRIM(LOCKER_TYPE) AS LOCKER_TYPE " +
                 "FROM HEADOFFICE.LOCKERTYPE " +
@@ -75,7 +73,6 @@
         try {
             conn = DBConnection.getConnection();
             if (conn == null) { pw.print("{\"success\":false,\"message\":\"DB connection failed\"}"); pw.flush(); return; }
-            // Filter by LOCKER_STATUS = 'H' in BRANCH.BRANCHLOCKER
             String sql = "SELECT LOCKER_NUMBER, LOCKER_TYPE, CUPBORD_NO, KEY_NO " +
                          "FROM BRANCH.BRANCHLOCKER " +
                          "WHERE TRIM(BRANCH_CODE) = TRIM(?) " +
@@ -116,9 +113,6 @@
 
     // ─────────────────────────────────────────────
     // AJAX: Return customer by locker
-    // Source: ACCOUNT.LOCKERACCOUNT
-    // Conditions: ACCOUNT_STATUS = 'A', latest DATE_OF_HIRE
-    // Customer name column: NAME_OF_HIRE (no join needed)
     // ─────────────────────────────────────────────
     if ("getCustomerByLocker".equals(_action)) {
         out.clear();
@@ -148,8 +142,6 @@
                 pw.print("{\"success\":false,\"message\":\"DB connection failed\"}");
                 pw.flush(); return;
             }
-            // Fetch from ACCOUNT.LOCKERACCOUNT only — no join needed
-            // ACCOUNT_STATUS = 'A' (active), pick most recent DATE_OF_HIRE
             ps = conn.prepareStatement(
                 "SELECT CUSTOMER_ID, NAME_OF_HIRE FROM (" +
                 "  SELECT CUSTOMER_ID, NAME_OF_HIRE " +
@@ -262,7 +254,6 @@
     }
     form { padding: 0 20px; }
 
-    /* locker lookup inputs */
     .input-icon-box { position: relative; width: 90%; }
     .input-icon-box input { width: 100%; padding-right: 40px; height: 30px; cursor: pointer; box-sizing: border-box; }
     .input-icon-box .inside-icon-btn {
@@ -278,7 +269,6 @@
     }
     .simple-lookup-item:hover { background: #f0eefb; border-left-color: #373279; }
 
-    /* joint holder card customer lookup table */
     #jhCardCustomerLookupContent .search-box { padding: 14px 18px 8px 18px; background: var(--lk-primary-light); border-bottom: 1px solid var(--lk-border-light); }
     #jhCardCustomerLookupContent #customerSearch {
       width: 100%; height: 40px; padding: 0 14px 0 42px;
@@ -310,10 +300,12 @@
 </head>
 <body>
 
-<form action="LockerJointHolderServlet" method="post" onsubmit="return validateForm()">
+<form action="<%= request.getContextPath() %>/LockerJointHolderServlet" method="post" onsubmit="return validateForm()">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
+  <!-- Only lockerType + lockerNumber are submitted & saved.          -->
+  <!-- customerId / customerName are display-only (readonly).         -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset>
     <legend>Locker Information</legend>
@@ -343,14 +335,15 @@
         </small>
       </div>
 
+      <!-- display-only — NOT submitted to servlet -->
       <div>
         <label>Customer ID</label>
-        <input type="text" name="customerId" id="customerId" readonly style="background:#f4f2fc;">
+        <input type="text" id="customerId" readonly style="background:#f4f2fc;">
       </div>
 
       <div>
         <label>Customer Name</label>
-        <input type="text" name="customerName" id="customerName" readonly style="background:#f4f2fc;">
+        <input type="text" id="customerName" readonly style="background:#f4f2fc;">
       </div>
 
     </div>
@@ -373,14 +366,12 @@
     <div class="nominee-card nominee-block">
 
       <div class="nominee-header">
-        <div class="nominee-title"
-             style="font-weight:bold; font-size:15px; color:#373279;">
+        <div class="nominee-title" style="font-weight:bold; font-size:15px; color:#373279;">
           Joint Holder <span class="nominee-serial">1</span>
         </div>
         <button type="button" class="nominee-remove" onclick="removeNominee(this)">✖</button>
       </div>
 
-      <!-- Has Customer ID row -->
       <div class="nominee-cid-row">
         <div>
           <label>Has Customer ID ?</label>
@@ -389,10 +380,12 @@
             <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="no"  onchange="toggleNomineeCustomerID(this)" checked> No</label>
           </div>
         </div>
+        <!-- disabled by default — not submitted until user selects "Yes" -->
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
-            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]" onclick="openJHCardCustomerLookup(this)" readonly>
+            <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]"
+                   onclick="openJHCardCustomerLookup(this)" readonly disabled>
             <button type="button" class="inside-icon-btn" onclick="openJHCardCustomerLookup(this)" title="Search Customer">🔍</button>
           </div>
         </div>
@@ -418,10 +411,14 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
+        <!-- ZIP: accepts 5 or 6 digits -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
-                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" required>
+                 oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+                          this.nextElementSibling.textContent = '';"
+                 onblur="this.nextElementSibling.textContent = (this.value.length > 0 && this.value.length < 5) ? 'Must be 5 or 6 digits' : '';"
+                 required>
           <small class="zipError"></small>
         </div>
 
@@ -468,14 +465,10 @@
           </label>
         </div>
 
-      </div><!-- /.personal-grid -->
-    </div><!-- /.nominee-block -->
+      </div>
+    </div>
   </fieldset>
 
-
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- BUTTON SECTION -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
   <div class="form-buttons">
     <button type="reset" onclick="resetLockerInfo()" style="background:#dc3545;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Cancel</button>
     <button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save</button>
@@ -574,17 +567,13 @@ var _allLockerNumbers = [];
 
 // ══════════════════════════════════════════════════════════════════════
 // LOCKER TYPE LOOKUP
-// Source: HEADOFFICE.LOCKERTYPE (all types, no status filter)
 // ══════════════════════════════════════════════════════════════════════
 function openLockerTypeLookup() {
     document.getElementById('lockerTypeLookupModal').style.display = 'flex';
     document.getElementById('lockerTypeSearchInput').value = '';
-
     if (_allLockerTypes.length > 0) { renderLockerTypeList(_allLockerTypes); return; }
-
     document.getElementById('lockerTypeList').innerHTML =
         '<div style="text-align:center;padding:24px;color:#888;">Loading...</div>';
-
     fetch('lockerJointHolder.jsp?action=getHiredLockerTypes')
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -605,10 +594,7 @@ function openLockerTypeLookup() {
 function renderLockerTypeList(items) {
     document.getElementById('lockerTypeCount').textContent = items.length;
     var list = document.getElementById('lockerTypeList');
-    if (!items.length) {
-        list.innerHTML = '<div style="text-align:center;padding:24px;color:#888;">No locker types found.</div>';
-        return;
-    }
+    if (!items.length) { list.innerHTML = '<div style="text-align:center;padding:24px;color:#888;">No locker types found.</div>'; return; }
     var html = '';
     items.forEach(function(lt) {
         html += '<div class="simple-lookup-item" onclick="selectLockerType(\'' + lt.lockerType + '\')">'
@@ -646,22 +632,16 @@ document.getElementById('lockerTypeLookupModal').addEventListener('click', funct
 
 // ══════════════════════════════════════════════════════════════════════
 // LOCKER NUMBER LOOKUP
-// Source: BRANCH.BRANCHLOCKER where LOCKER_STATUS = 'H'
 // ══════════════════════════════════════════════════════════════════════
 function openLockerNumberLookup() {
     var lockerType = document.getElementById('lockerType').value.trim();
     if (!lockerType) { showToast('Please select a Locker Type first.', true); return; }
-
     document.getElementById('lockerNumberLookupModal').style.display = 'flex';
     document.getElementById('lockerNumberSearchInput').value = '';
-    document.getElementById('lockerNumberModalSubtitle').textContent =
-        'Type: ' + lockerType + '  •  Status: Hired';
-
+    document.getElementById('lockerNumberModalSubtitle').textContent = 'Type: ' + lockerType + '  •  Status: Hired';
     if (_allLockerNumbers.length > 0) { renderLockerNumberRows(_allLockerNumbers); return; }
-
     document.getElementById('lockerNumberTableBody').innerHTML =
         '<tr><td colspan="4" style="text-align:center;padding:24px;color:#888;">Loading...</td></tr>';
-
     fetch('lockerJointHolder.jsp?action=getHiredLockerNumbers&lockerType=' + encodeURIComponent(lockerType))
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -723,9 +703,6 @@ function selectLockerNumber(lockerNumber, lockerType) {
     closeLockerNumberLookup();
     document.getElementById('customerId').value   = '';
     document.getElementById('customerName').value = 'Fetching...';
-
-    // Fetch customer from ACCOUNT.LOCKERACCOUNT
-    // where ACCOUNT_STATUS = 'A' and latest DATE_OF_HIRE
     fetch('lockerJointHolder.jsp?action=getCustomerByLocker'
             + '&lockerType='   + encodeURIComponent(lockerType)
             + '&lockerNumber=' + encodeURIComponent(lockerNumber))
@@ -733,11 +710,8 @@ function selectLockerNumber(lockerNumber, lockerType) {
             var contentType = r.headers.get('content-type') || '';
             if (!r.ok || contentType.indexOf('application/json') === -1) {
                 document.getElementById('customerName').value = '';
-                if (r.redirected) {
-                    showToast('Session expired. Please log in again.', true);
-                } else {
-                    showToast('Server error (' + r.status + '). Could not fetch customer.', true);
-                }
+                if (r.redirected) showToast('Session expired. Please log in again.', true);
+                else showToast('Server error (' + r.status + '). Could not fetch customer.', true);
                 return null;
             }
             return r.json();
@@ -753,7 +727,7 @@ function selectLockerNumber(lockerNumber, lockerType) {
                 showToast(data.message || 'No active customer found for this locker.', false);
             }
         })
-        .catch(function(err) {
+        .catch(function() {
             document.getElementById('customerName').value = '';
             document.getElementById('customerId').value  = '';
             showToast('Unable to fetch customer details. Please try again.', true);
@@ -833,16 +807,21 @@ function renumberNominees() {
 }
 
 function addNominee() {
-    var fieldset = document.getElementById('nomineeFieldset');
+    var fieldset  = document.getElementById('nomineeFieldset');
     var firstCard = fieldset.querySelector('.nominee-block');
-    var newCard = firstCard.cloneNode(true);
+    var newCard   = firstCard.cloneNode(true);
     newCard.querySelectorAll('input, select, textarea').forEach(function(el) {
         if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
         if (el.type === 'checkbox') { el.checked = false; return; }
         el.value = '';
     });
+    // hide & disable customer ID input on cloned card
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
-    if (cidContainer) cidContainer.style.display = 'none';
+    if (cidContainer) {
+        cidContainer.style.display = 'none';
+        var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
+        if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
+    }
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
     Object.keys(JH_DD_MAP).forEach(function(key) {
@@ -861,18 +840,26 @@ function addNominee() {
 }
 
 function removeNominee(btn) {
-    if (document.querySelectorAll('.nominee-block').length <= 1) { alert('At least one joint holder is required.'); return; }
+    if (document.querySelectorAll('.nominee-block').length <= 1) {
+        alert('At least one joint holder is required.'); return;
+    }
     btn.closest('.nominee-block').remove();
     renumberNominees();
 }
 
+// Toggle display AND disabled — keeps array lengths aligned on submit
 function toggleNomineeCustomerID(radio) {
-    var card = radio.closest('.nominee-block');
+    var card      = radio.closest('.nominee-block');
     var container = card.querySelector('.nomineeCustomerIDContainer');
     if (!container) return;
-    container.style.display = (radio.value === 'yes') ? 'flex' : 'none';
     var input = container.querySelector('.nomineeCustomerIDInput');
-    if (input && radio.value !== 'yes') input.value = '';
+    if (radio.value === 'yes') {
+        container.style.display = 'flex';
+        if (input) input.disabled = false;
+    } else {
+        container.style.display = 'none';
+        if (input) { input.value = ''; input.disabled = true; }
+    }
 }
 
 
@@ -911,9 +898,8 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
     fetch(window.APP_CONTEXT_PATH + '/OpenAccount/getCustomerDetails.jsp?customerId=' + encodeURIComponent(customerId))
         .then(function(r) {
             var contentType = r.headers.get('content-type') || '';
-            if (!r.ok || contentType.indexOf('application/json') === -1) {
+            if (!r.ok || contentType.indexOf('application/json') === -1)
                 throw new Error('Non-JSON response from getCustomerDetails');
-            }
             return r.json();
         })
         .then(function(data) {
@@ -930,18 +916,39 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
                 var el = _activeJHCard.querySelector('[name="' + name + '"]');
                 if (el) el.value = fieldMap[name];
             });
+
+            // ── FIX: 2-pass dropdown matching (exact first, then partial) ──
+            // Handles cases where API returns "MH" but dropdown shows "Maharashtra"
             var ddMap = { 'nomineeCity[]': c.city || '', 'nomineeState[]': c.state || '' };
             Object.keys(ddMap).forEach(function(name) {
                 var sel = _activeJHCard.querySelector('[name="' + name + '"]');
                 if (!sel || !ddMap[name]) return;
+                var target  = ddMap[name].trim().toUpperCase();
+                var matched = false;
+                // Pass 1: exact match on value or display text
                 for (var i = 0; i < sel.options.length; i++) {
-                    if (sel.options[i].value === ddMap[name] || sel.options[i].text === ddMap[name]) { sel.selectedIndex = i; break; }
+                    var optVal  = (sel.options[i].value || '').trim().toUpperCase();
+                    var optText = (sel.options[i].text  || '').trim().toUpperCase();
+                    if (optVal === target || optText === target) {
+                        sel.selectedIndex = i; matched = true; break;
+                    }
+                }
+                // Pass 2: partial/contains match
+                // e.g. target "MH" matches option text "MAHARASHTRA (MH)"
+                // or   target "KOLHAPUR" matches option text "KOLHAPUR"
+                if (!matched) {
+                    for (var j = 0; j < sel.options.length; j++) {
+                        var oVal  = (sel.options[j].value || '').trim().toUpperCase();
+                        var oText = (sel.options[j].text  || '').trim().toUpperCase();
+                        if (oVal.indexOf(target)  !== -1 || oText.indexOf(target)  !== -1 ||
+                            target.indexOf(oVal)  !== -1 || target.indexOf(oText)  !== -1) {
+                            sel.selectedIndex = j; break;
+                        }
+                    }
                 }
             });
         })
-        .catch(function(err) {
-            console.error('Failed to fetch joint holder customer details:', err);
-        });
+        .catch(function(err) { console.error('Failed to fetch joint holder customer details:', err); });
 };
 
 
@@ -971,15 +978,19 @@ function resetLockerInfo() {
 // ── Form validation ─────────────────────────────────────────────────
 function validateForm() {
     var valid = true;
+
+    // Zip — accepts 5 or 6 digits
     document.querySelectorAll('.zip-input').forEach(function(inp) {
         var errEl = inp.nextElementSibling;
-        if (inp.value.length !== 6 || !/^\d{6}$/.test(inp.value)) {
-            if (errEl) errEl.textContent = 'Must be exactly 6 digits';
+        if (inp.value.length < 5 || !/^\d{5,6}$/.test(inp.value)) {
+            if (errEl) errEl.textContent = 'Must be 5 or 6 digits';
             valid = false;
         } else {
             if (errEl) errEl.textContent = '';
         }
     });
+
+    // Declaration checkbox
     if (valid) {
         var unchecked = false;
         document.querySelectorAll('.nomineeDeclaration').forEach(function(cb) {
@@ -987,9 +998,11 @@ function validateForm() {
         });
         if (unchecked) { alert('Please accept the declaration for all joint holders.'); valid = false; }
     }
+
     return valid;
 }
 
+// ── Show toast on redirect from servlet (success / error) ───────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
         window.parent.updateParentBreadcrumb(
@@ -997,6 +1010,12 @@ window.onload = function() {
                 ? window.buildBreadcrumbPath('Lockers/lockerJointHolder.jsp')
                 : 'Locker Joint Holder'
         );
+    }
+    var params  = new URLSearchParams(window.location.search);
+    var status  = params.get('status');
+    var message = params.get('message');
+    if (status && message) {
+        showToast(message, status === 'error');
     }
 };
 </script>
