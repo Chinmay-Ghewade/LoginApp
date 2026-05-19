@@ -382,11 +382,14 @@
     #nomineeCustomerLookupContent #customerTable tbody td { padding: 11px 16px; font-size: 0.875rem; color: var(--lk-text); vertical-align: middle; border-right: 1px solid var(--lk-border-light); }
     #nomineeCustomerLookupContent #customerTable tbody td:last-child { border-right: none; }
     #nomineeCustomerLookupContent #customerTable tbody td:first-child { font-weight: 700; color: var(--lk-primary); font-size: 0.84rem; white-space: nowrap; }
+    
+    @keyframes popIn { from { transform:scale(0.85);opacity:0; } to { transform:scale(1);opacity:1; } }
+    
   </style>
 </head>
 <body>
 
-<form action="<%= request.getContextPath() %>/LockerNomineeServlet" method="post" onsubmit="return validateForm()">
+<form action="<%= request.getContextPath() %>/LockerNomineeServlet" method="post" onsubmit="return false;">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
@@ -571,7 +574,7 @@
 
   <div class="form-buttons">
     <button type="reset" onclick="resetLockerInfo()">Reset</button>
-    <button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save Nominee</button>
+    <button type="button" onclick="openSaveConfirm()" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save Nominee</button>
   </div>
 
 </form>
@@ -656,6 +659,33 @@
         </div>
         <div id="nomineeCustomerLookupContent" style="display:flex;flex-direction:column;flex:1;overflow:hidden;"></div>
     </div>
+</div>
+
+<!-- ════════ SAVE CONFIRMATION MODAL ════════ -->
+<div id="saveConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(80,70,160,0.18);backdrop-filter:blur(3px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:90%;max-width:460px;padding:36px 32px 28px;box-shadow:0 16px 48px rgba(55,50,121,0.22);font-family:'Segoe UI',Arial,sans-serif;text-align:center;animation:popIn 0.22s cubic-bezier(.34,1.56,.64,1);">
+    <div style="width:60px;height:60px;background:#e8f8ef;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;color:#28a745;">✔</div>
+    <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#1a1a3e;">Confirm Save Nominee?</h2>
+    <p style="margin:0 0 22px;font-size:0.92rem;color:#666;">Are you sure you want to <strong>save</strong> this nominee?</p>
+    <div style="background:#f7f6fd;border-radius:10px;overflow:hidden;margin-bottom:24px;border:1px solid #e0daf5;">
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #e0daf5;">
+        <span style="color:#555;font-size:0.9rem;">Customer Name</span>
+        <span id="scm-custName" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #e0daf5;">
+        <span style="color:#555;font-size:0.9rem;">Locker Type</span>
+        <span id="scm-lockerType" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;">
+        <span style="color:#555;font-size:0.9rem;">Locker Number</span>
+        <span id="scm-lockerNum" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="closeSaveConfirm()" style="padding:11px 32px;border-radius:10px;border:none;background:#e8e6f0;color:#444;font-size:0.95rem;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="doFormSubmit()" style="padding:11px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#28a745,#1e8c36);color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(40,167,69,0.35);">Yes, Save</button>
+    </div>
+  </div>
 </div>
 
 
@@ -1104,6 +1134,92 @@ window.onload = function() {
         );
     }
 };
+
+//── Save Confirmation Modal ──────────────────────────────────────────
+function openSaveConfirm() {
+    if (!validateForm()) return;
+    document.getElementById('scm-custName').textContent   = document.getElementById('customerName').value || '—';
+    document.getElementById('scm-lockerType').textContent = document.getElementById('lockerType').value   || '—';
+    document.getElementById('scm-lockerNum').textContent  = document.getElementById('lockerNumber').value  || '—';
+    document.getElementById('saveConfirmModal').style.display = 'flex';
+}
+function closeSaveConfirm() {
+    document.getElementById('saveConfirmModal').style.display = 'none';
+}
+function doFormSubmit() {
+    closeSaveConfirm();
+
+    // Create hidden iframe
+    var iframe = document.createElement('iframe');
+    iframe.name = 'submitTarget';
+    iframe.style.cssText = 'display:none;width:0;height:0;border:0;';
+    document.body.appendChild(iframe);
+
+    iframe.onload = function() {
+        try {
+            var iframeUrl = iframe.contentWindow.location.href;
+            document.body.removeChild(iframe);
+            document.querySelector('form').target = '';
+
+            if (iframeUrl.indexOf('status=success') !== -1) {
+                showToast('Nominee saved successfully!', false);
+
+                // reset locker info
+                document.getElementById('lockerType').value   = '';
+                document.getElementById('lockerNumber').value = '';
+                document.getElementById('customerId').value   = '';
+                document.getElementById('customerName').value = '';
+                document.getElementById('lockerNumberBtn').disabled     = true;
+                document.getElementById('lockerNumberBtn').title        = 'Select Locker Type first';
+                document.getElementById('lockerNumberHint').textContent = 'Select locker type first';
+                _allLockerTypes   = [];
+                _allLockerNumbers = [];
+
+                // remove extra cards, reset first card
+                var fieldset = document.getElementById('nomineeFieldset');
+                var cards    = fieldset.querySelectorAll('.nominee-block');
+                cards.forEach(function(card, idx) {
+                    if (idx === 0) {
+                        card.querySelectorAll('input, select, textarea').forEach(function(el) {
+                            if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
+                            if (el.type === 'checkbox') { el.checked = false; return; }
+                            el.value = '';
+                        });
+                        var cidContainer = card.querySelector('.nomineeCustomerIDContainer');
+                        if (cidContainer) {
+                            cidContainer.style.display = 'none';
+                            var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
+                            if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
+                        }
+                        card.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
+                    } else {
+                        card.remove();
+                    }
+                });
+                renumberNominees();
+
+            } else if (iframeUrl.indexOf('status=error') !== -1) {
+                // extract message from URL
+                var match = iframeUrl.match(/message=([^&]*)/);
+                var msg   = match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : 'Save failed.';
+                showToast('Error: ' + msg, true);
+
+            } else {
+                showToast('Unexpected response. Please check and retry.', true);
+            }
+
+        } catch(e) {
+            // cross-origin or other error
+            document.body.removeChild(iframe);
+            document.querySelector('form').target = '';
+            showToast('Could not verify save status. Please check the record.', true);
+        }
+    };
+
+    var form = document.querySelector('form');
+    form.target = 'submitTarget';
+    form.submit();
+}
 </script>
 
 </body>

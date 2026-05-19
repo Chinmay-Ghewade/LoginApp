@@ -296,16 +296,18 @@
     #jhCardCustomerLookupContent #customerTable tbody td { padding: 11px 16px; font-size: 0.875rem; color: var(--lk-text); vertical-align: middle; border-right: 1px solid var(--lk-border-light); }
     #jhCardCustomerLookupContent #customerTable tbody td:last-child { border-right: none; }
     #jhCardCustomerLookupContent #customerTable tbody td:first-child { font-weight: 700; color: var(--lk-primary); font-size: 0.84rem; white-space: nowrap; }
+
+    /* ── Save Confirmation Modal animation ── */
+    @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
 
-<form action="<%= request.getContextPath() %>/LockerJointHolderServlet" method="post" onsubmit="return validateForm()">
+<!-- CHANGE 1: onsubmit="return false;" to prevent page navigation -->
+<form action="<%= request.getContextPath() %>/LockerJointHolderServlet" method="post" onsubmit="return false;">
 
   <!-- ════════════════════════════════════════════════════════════════ -->
   <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
-  <!-- Only lockerType + lockerNumber are submitted & saved.          -->
-  <!-- customerId / customerName are display-only (readonly).         -->
   <!-- ════════════════════════════════════════════════════════════════ -->
   <fieldset>
     <legend>Locker Information</legend>
@@ -380,7 +382,6 @@
             <label><input type="radio" name="nomineeHasCustomerID_1" class="nomineeHasCustomerRadio" value="no"  onchange="toggleNomineeCustomerID(this)" checked> No</label>
           </div>
         </div>
-        <!-- disabled by default — not submitted until user selects "Yes" -->
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
@@ -411,7 +412,6 @@
                    .replace(/\b\w/g, c => c.toUpperCase());">
         </div>
 
-        <!-- ZIP: accepts 5 or 6 digits -->
         <div>
           <label>Zip</label>
           <input type="text" name="nomineeZip[]" class="zip-input" maxlength="6"
@@ -471,10 +471,40 @@
 
   <div class="form-buttons">
     <button type="reset" onclick="resetLockerInfo()" style="background:#dc3545;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Cancel</button>
-    <button type="submit" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save</button>
+    <!-- CHANGE 2: type="button" + onclick="openSaveConfirm()" -->
+    <button type="button" onclick="openSaveConfirm()" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save</button>
   </div>
 
 </form>
+
+
+<!-- ════════ SAVE CONFIRMATION MODAL ════════ -->
+<!-- CHANGE 3: New modal added here, above the other modals -->
+<div id="saveConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(80,70,160,0.18);backdrop-filter:blur(3px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:90%;max-width:460px;padding:36px 32px 28px;box-shadow:0 16px 48px rgba(55,50,121,0.22);font-family:'Segoe UI',Arial,sans-serif;text-align:center;animation:popIn 0.22s cubic-bezier(.34,1.56,.64,1);">
+    <div style="width:60px;height:60px;background:#e8f8ef;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;color:#28a745;">✔</div>
+    <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#1a1a3e;">Confirm Save Joint Holder?</h2>
+    <p style="margin:0 0 22px;font-size:0.92rem;color:#666;">Are you sure you want to <strong>save</strong> this joint holder?</p>
+    <div style="background:#f7f6fd;border-radius:10px;overflow:hidden;margin-bottom:24px;border:1px solid #e0daf5;">
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #e0daf5;">
+        <span style="color:#555;font-size:0.9rem;">Customer Name</span>
+        <span id="scm-custName" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #e0daf5;">
+        <span style="color:#555;font-size:0.9rem;">Locker Type</span>
+        <span id="scm-lockerType" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:13px 20px;">
+        <span style="color:#555;font-size:0.9rem;">Locker Number</span>
+        <span id="scm-lockerNum" style="color:#373279;font-weight:700;font-size:0.9rem;"></span>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="closeSaveConfirm()" style="padding:11px 32px;border-radius:10px;border:none;background:#e8e6f0;color:#444;font-size:0.95rem;font-weight:600;cursor:pointer;">Cancel</button>
+      <button onclick="doFormSubmit()" style="padding:11px 32px;border-radius:10px;border:none;background:linear-gradient(135deg,#28a745,#1e8c36);color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(40,167,69,0.35);">Yes, Save</button>
+    </div>
+  </div>
+</div>
 
 
 <!-- ════════ LOCKER TYPE LOOKUP MODAL ════════ -->
@@ -815,7 +845,6 @@ function addNominee() {
         if (el.type === 'checkbox') { el.checked = false; return; }
         el.value = '';
     });
-    // hide & disable customer ID input on cloned card
     var cidContainer = newCard.querySelector('.nomineeCustomerIDContainer');
     if (cidContainer) {
         cidContainer.style.display = 'none';
@@ -847,7 +876,6 @@ function removeNominee(btn) {
     renumberNominees();
 }
 
-// Toggle display AND disabled — keeps array lengths aligned on submit
 function toggleNomineeCustomerID(radio) {
     var card      = radio.closest('.nominee-block');
     var container = card.querySelector('.nomineeCustomerIDContainer');
@@ -916,16 +944,12 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
                 var el = _activeJHCard.querySelector('[name="' + name + '"]');
                 if (el) el.value = fieldMap[name];
             });
-
-            // ── FIX: 2-pass dropdown matching (exact first, then partial) ──
-            // Handles cases where API returns "MH" but dropdown shows "Maharashtra"
             var ddMap = { 'nomineeCity[]': c.city || '', 'nomineeState[]': c.state || '' };
             Object.keys(ddMap).forEach(function(name) {
                 var sel = _activeJHCard.querySelector('[name="' + name + '"]');
                 if (!sel || !ddMap[name]) return;
                 var target  = ddMap[name].trim().toUpperCase();
                 var matched = false;
-                // Pass 1: exact match on value or display text
                 for (var i = 0; i < sel.options.length; i++) {
                     var optVal  = (sel.options[i].value || '').trim().toUpperCase();
                     var optText = (sel.options[i].text  || '').trim().toUpperCase();
@@ -933,9 +957,6 @@ window.setCustomerData = function(customerId, customerName, categoryCode, riskCa
                         sel.selectedIndex = i; matched = true; break;
                     }
                 }
-                // Pass 2: partial/contains match
-                // e.g. target "MH" matches option text "MAHARASHTRA (MH)"
-                // or   target "KOLHAPUR" matches option text "KOLHAPUR"
                 if (!matched) {
                     for (var j = 0; j < sel.options.length; j++) {
                         var oVal  = (sel.options[j].value || '').trim().toUpperCase();
@@ -1002,6 +1023,77 @@ function validateForm() {
     return valid;
 }
 
+// ── Save Confirmation Modal ──────────────────────────────────────────
+// CHANGE 4: New functions — open modal, close modal, AJAX submit + form reset
+function openSaveConfirm() {
+    if (!validateForm()) return;
+    document.getElementById('scm-custName').textContent   = document.getElementById('customerName').value || '—';
+    document.getElementById('scm-lockerType').textContent = document.getElementById('lockerType').value   || '—';
+    document.getElementById('scm-lockerNum').textContent  = document.getElementById('lockerNumber').value  || '—';
+    document.getElementById('saveConfirmModal').style.display = 'flex';
+}
+
+function closeSaveConfirm() {
+    document.getElementById('saveConfirmModal').style.display = 'none';
+}
+
+function doFormSubmit() {
+    closeSaveConfirm();
+
+    // Create hidden iframe to absorb the servlet redirect
+    var iframe = document.createElement('iframe');
+    iframe.name = 'submitTarget';
+    iframe.style.cssText = 'display:none;width:0;height:0;border:0;';
+    document.body.appendChild(iframe);
+
+    var form = document.querySelector('form');
+    form.target = 'submitTarget';
+    form.submit();
+
+    // After servlet has time to process, reset the form
+    setTimeout(function() {
+        // Remove iframe
+        document.body.removeChild(iframe);
+        // Reset form target back to default
+        form.target = '';
+
+        showToast('Joint holder saved successfully!', false);
+
+        // Reset locker info
+        document.getElementById('lockerType').value   = '';
+        document.getElementById('lockerNumber').value = '';
+        document.getElementById('customerId').value   = '';
+        document.getElementById('customerName').value = '';
+        document.getElementById('lockerNumberBtn').disabled     = true;
+        document.getElementById('lockerNumberBtn').title        = 'Select Locker Type first';
+        document.getElementById('lockerNumberHint').textContent = 'Select locker type first';
+        _allLockerTypes   = [];
+        _allLockerNumbers = [];
+
+        // Remove extra cards, reset first card
+        var fieldset = document.getElementById('nomineeFieldset');
+        var cards    = fieldset.querySelectorAll('.nominee-block');
+        cards.forEach(function(card, idx) {
+            if (idx === 0) {
+                card.querySelectorAll('input, select, textarea').forEach(function(el) {
+                    if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
+                    if (el.type === 'checkbox') { el.checked = false; return; }
+                    el.value = '';
+                });
+                var cidContainer = card.querySelector('.nomineeCustomerIDContainer');
+                if (cidContainer) {
+                    cidContainer.style.display = 'none';
+                    var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
+                    if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
+                }
+                card.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
+            } else {
+                card.remove();
+            }
+        });
+        renumberNominees();
+    }, 2000);
+}
 // ── Show toast on redirect from servlet (success / error) ───────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
