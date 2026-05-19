@@ -339,84 +339,84 @@
             }
         }
 
-        // Tab 4: Validate KYC Documents (at least one ID proof and one Address proof)
-        if (currentTab === 4) {
-            // Check ID Proof documents
-            const idProofCheckboxes = [
-                'passport_check', 'pan_check', 'voterid_check', 
-                'dl_check', 'aadhar_check', 'nrega_check'
-            ];
-            
-            const idProofFilled = 
-                (document.querySelector('input[name="passport_check"]').checked && 
-                 document.querySelector('input[name="passport_expiry"]').value && 
-                 document.querySelector('input[name="passportNumber"]').value.trim()) ||
-                (document.querySelector('input[name="pan_check"]').checked && 
-                 document.getElementById('pan').value.trim()) ||
-                (document.querySelector('input[name="voterid_check"]').checked && 
-                 document.getElementById('voterid').value.trim()) ||
-                (document.querySelector('input[name="dl_check"]').checked && 
-                 document.querySelector('input[name="dl_expiry"]').value && 
-                 document.getElementById('dl').value.trim()) ||
-                (document.querySelector('input[name="aadhar_check"]').checked && 
-                 document.querySelector('input[name="aadhar"]').value.trim()) ||
-                (document.querySelector('input[name="nrega_check"]').checked && 
-                 document.getElementById('nrega').value.trim());
+		// Tab 4: Validate KYC Documents (at least one ID proof and one Address proof)
+		        if (currentTab === 4) {
+		            // Check ID Proof documents
+		            const idProofCheckboxes = [
+		                'passport_check', 'pan_check', 'voterid_check', 
+		                'dl_check', 'aadhar_check', 'nrega_check'
+		            ];
+		            
+		            const idProofFilled = 
+		                (document.querySelector('input[name="passport_check"]').checked && 
+		                 document.querySelector('input[name="passport_expiry"]').value && 
+		                 document.querySelector('input[name="passportNumber"]').value.trim()) ||
+		                (document.querySelector('input[name="pan_check"]').checked && 
+		                 document.getElementById('pan').value.trim()) ||
+		                (document.querySelector('input[name="voterid_check"]').checked && 
+		                 document.getElementById('voterid').value.trim()) ||
+		                (document.querySelector('input[name="dl_check"]').checked && 
+		                 document.querySelector('input[name="dl_expiry"]').value && 
+		                 document.getElementById('dl').value.trim()) ||
+		                (document.querySelector('input[name="aadhar_check"]').checked && 
+		                 document.querySelector('input[name="aadhar"]').value.trim()) ||
+		                (document.querySelector('input[name="nrega_check"]').checked && 
+		                 document.getElementById('nrega').value.trim());
 
-            if (!idProofFilled) {
-                isValid = false;
-                errors.push('At least one ID Proof document must be selected and filled');
-                // Mark only checkboxes as error in ID Proof section
-                const idProofSection = document.querySelector('.kyc-section:first-child');
-                if (idProofSection) {
-                    idProofSection.classList.add('field-error');
-                    // Mark individual checkboxes
-                    idProofCheckboxes.forEach(name => {
-                        const checkbox = document.querySelector(`input[name="${name}"]`);
-                        if (checkbox && !checkbox.checked) {
-                            checkbox.classList.add('field-error');
-                        }
-                    });
-                }
-            }
+		            if (!idProofFilled) {
+		                isValid = false;
+		                errors.push('At least one ID Proof document must be selected and filled');
+		                // Mark only checkboxes as error in ID Proof section
+		                const idProofSection = document.querySelector('.kyc-section:first-child');
+		                if (idProofSection) {
+		                    idProofSection.classList.add('field-error');
+		                    // Mark individual checkboxes
+		                    idProofCheckboxes.forEach(name => {
+		                        const checkbox = document.querySelector(`input[name="${name}"]`);
+		                        if (checkbox && !checkbox.checked) {
+		                            checkbox.classList.add('field-error');
+		                        }
+		                    });
+		                }
+		            }
 
-            // Check Address Proof documents using new function
-            const addressProofValidation = validateAddressProof();
-            if (!addressProofValidation.valid) {
-                isValid = false;
-                errors.push(addressProofValidation.message);
-            }
+		            // Check Address Proof documents using new function
+		            const addressProofValidation = validateAddressProof();
+		            if (!addressProofValidation.valid) {
+		                isValid = false;
+		                errors.push(addressProofValidation.message);
+		            }
 
-			// Show specific KYC validation popup if errors exist
-			if (!isValid && errors.length > 0) {
-			    showPopup('📋 KYC Document Validation:\n\n• ' + errors.join('\n• '), 'error');
-			}
-        }
+					// ✅ REPLACEMENT 1: Use PopupMsg.error instead of showPopup
+					if (!isValid && errors.length > 0) {
+					    PopupMsg.error('📋 KYC Document Validation', errors.join('\n'));
+					}
+		        }
 
-        // Tab 5: Validate photo and signature uploads
-        if (currentTab === 5) {
-            const photoData = document.getElementById('photoData');
-            const signatureData = document.getElementById('signatureData');
+				// Tab 5: Validate photo and signature uploads
+				        if (currentTab === 5) {
+				            const photoData = document.getElementById('photoData');
+				            const signatureData = document.getElementById('signatureData');
 
-            if (!photoData || !photoData.value) {
-                isValid = false;
-                errors.push('Customer photo is required');
-                const photoCard = document.querySelector('.upload-card:first-child');
-                if (photoCard) photoCard.classList.add('field-error');
-            }
+				            if (!photoData || !photoData.value) {
+				                isValid = false;
+				                errors.push('Customer photo is required');
+				                const photoCard = document.querySelector('.upload-card:first-child');
+				                if (photoCard) photoCard.classList.add('field-error');
+				            }
 
-            if (!signatureData || !signatureData.value) {
-                isValid = false;
-                errors.push('Customer signature is required');
-                const signatureCard = document.querySelector('.upload-card:last-child');
-                if (signatureCard) signatureCard.classList.add('field-error');
-            }
+				            if (!signatureData || !signatureData.value) {
+				                isValid = false;
+				                errors.push('Customer signature is required');
+				                const signatureCard = document.querySelector('.upload-card:last-child');
+				                if (signatureCard) signatureCard.classList.add('field-error');
+				            }
 
-			// Show specific Photo/Signature validation popup if errors exist
-			if (!isValid && errors.length > 0) {
-			    showPopup('📸 Photo & Signature Required:\n\n• ' + errors.join('\n• '), 'error');
-			}
-        }
+							// ✅ REPLACEMENT 2: Use PopupMsg.error instead of showPopup
+							if (!isValid && errors.length > 0) {
+							    PopupMsg.error('📸 Photo & Signature Required', errors.join('\n'));
+							}
+				        }
 
         // Validate radio button groups
         const radioGroups = getRadioGroups(tabContent);

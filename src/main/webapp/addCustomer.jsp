@@ -11,6 +11,7 @@
     // NOTE: No DB calls on page load — all dropdowns load via AJAX after render.
 %>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,9 @@
   <script src="<%= request.getContextPath() %>/js/breadcrumb-auto.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <%@ include file="/loadingOverlay.jsp" %>
+  <%@ include file="/popupMessages.jsp" %>
 
   <style>
     /* ── Loading spinner shown inside dropdowns while AJAX runs ── */
@@ -49,7 +53,8 @@
 </head>
 <body>
 
-<form action="AddCustomerServlet" method="post" onsubmit="return validateForm()">
+<form action="AddCustomerServlet" method="post" 
+      onsubmit="return validateFormAndShowLoading()">
 
   <!----------------------------------------------------------------------- Main customer details -------------------------------------------------------------------->
   <fieldset>
@@ -375,34 +380,43 @@
         <span id="zipError" style="color:red;"></span>
       </div>
       
-      	<%@ include file="/loadingOverlay.jsp" %>
-		<%@ include file="/popupMessages.jsp" %>
+      	
 		
       <script>
-	      const zipField = document.querySelector('input[name="zip"]');
-	      if (zipField) {
-	        zipField.maxLength = 6;
-	        zipField.addEventListener('input', function () {
-	          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
-	          if (this.value.length > 0) {
-	            const fd = this.value.charAt(0);
-	            if (fd !== '4' && fd !== '5') {
-	              showError(this, 'ZIP must start with 4 (MH/Goa) or 5 (Karnataka)');
-	            } else { clearError(this); }
-	          }
-	        });
-	        zipField.addEventListener('blur', function () {
-	          if (this.value === '') { clearError(this); return; }
-	          if (!/^(4\d{5}|5\d{5})$/.test(this.value)) {
-	            showError(this, 'Invalid ZIP. Allowed states: Maharashtra, Goa, Karnataka');
-	          } else { clearError(this); }
-	        });
-	      }
-	      
-	      document.addEventListener('DOMContentLoaded', function () {
-	    	    PopupMsg.fromCustomerUrlParams();
-	    	});
-      </script>
+  const zipField = document.querySelector('input[name="zip"]');
+  if (zipField) {
+    zipField.maxLength = 6;
+    zipField.addEventListener('input', function () {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+      if (this.value.length > 0) {
+        const fd = this.value.charAt(0);
+        if (fd !== '4' && fd !== '5') {
+          showError(this, 'ZIP must start with 4 (MH/Goa) or 5 (Karnataka)');
+        } else { clearError(this); }
+      }
+    });
+    zipField.addEventListener('blur', function () {
+      if (this.value === '') { clearError(this); return; }
+      if (!/^(4\d{5}|5\d{5})$/.test(this.value)) {
+        showError(this, 'Invalid ZIP. Allowed states: Maharashtra, Goa, Karnataka');
+      } else { clearError(this); }
+    });
+  }
+</script>
+
+<!-- Initialize popup messages AFTER page fully loads -->
+<script>
+  // Ensure PopupMsg is available before calling it
+  window.addEventListener('load', function () {
+    // Hide loading overlay if still visible
+    LoadingOverlay.hide();
+    
+    // Show success/error popup based on URL parameters
+    if (window.PopupMsg && typeof PopupMsg.fromCustomerUrlParams === 'function') {
+      PopupMsg.fromCustomerUrlParams();
+    }
+  });
+</script>
 
       <div>
         <label>Mobile No</label>
@@ -636,6 +650,19 @@
      One fetch → DropdownDataServlet → all 11 dropdowns.
      ═══════════════════════════════════════════════════ -->
 <script>
+
+function validateFormAndShowLoading() {
+    // Run existing validation
+    if (!validateForm()) {
+        return false;
+    }
+    
+    // Show loading overlay
+    LoadingOverlay.show('Saving Customer', 'Processing form submission...');
+    
+    return true;  // Allow form to submit
+}
+
 (function loadAllDropdowns() {
 
     /* ── Map: servletKey → { selectId, spinnerId, hasCodeLabel } ── */

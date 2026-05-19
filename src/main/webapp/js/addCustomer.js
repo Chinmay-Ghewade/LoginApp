@@ -825,7 +825,7 @@ function openSignatureCamera() {
         video.srcObject = stream;
     })
     .catch(function(err) {
-        showPopup('❌ Error accessing camera:\n' + err.message, 'error');
+        PopupMsg.error('❌ Error accessing camera:\n' + err.message, 'error');
         closeSignatureCamera();
     });
 }
