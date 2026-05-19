@@ -374,26 +374,34 @@
                oninput="validateZipLive(this)" required>
         <span id="zipError" style="color:red;"></span>
       </div>
+      
+      	<%@ include file="/loadingOverlay.jsp" %>
+		<%@ include file="/popupMessages.jsp" %>
+		
       <script>
-      const zipField = document.querySelector('input[name="zip"]');
-      if (zipField) {
-        zipField.maxLength = 6;
-        zipField.addEventListener('input', function () {
-          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
-          if (this.value.length > 0) {
-            const fd = this.value.charAt(0);
-            if (fd !== '4' && fd !== '5') {
-              showError(this, 'ZIP must start with 4 (MH/Goa) or 5 (Karnataka)');
-            } else { clearError(this); }
-          }
-        });
-        zipField.addEventListener('blur', function () {
-          if (this.value === '') { clearError(this); return; }
-          if (!/^(4\d{5}|5\d{5})$/.test(this.value)) {
-            showError(this, 'Invalid ZIP. Allowed states: Maharashtra, Goa, Karnataka');
-          } else { clearError(this); }
-        });
-      }
+	      const zipField = document.querySelector('input[name="zip"]');
+	      if (zipField) {
+	        zipField.maxLength = 6;
+	        zipField.addEventListener('input', function () {
+	          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+	          if (this.value.length > 0) {
+	            const fd = this.value.charAt(0);
+	            if (fd !== '4' && fd !== '5') {
+	              showError(this, 'ZIP must start with 4 (MH/Goa) or 5 (Karnataka)');
+	            } else { clearError(this); }
+	          }
+	        });
+	        zipField.addEventListener('blur', function () {
+	          if (this.value === '') { clearError(this); return; }
+	          if (!/^(4\d{5}|5\d{5})$/.test(this.value)) {
+	            showError(this, 'Invalid ZIP. Allowed states: Maharashtra, Goa, Karnataka');
+	          } else { clearError(this); }
+	        });
+	      }
+	      
+	      document.addEventListener('DOMContentLoaded', function () {
+	    	    PopupMsg.fromCustomerUrlParams();
+	    	});
       </script>
 
       <div>
@@ -863,7 +871,7 @@ function resetFormWithUploads() {
             f.style.backgroundColor = '';
         });
         if (typeof showInfoToast === 'function') {
-        	showPopup('✓ Form has been reset including photo and signature', 'success');
+        	PopupMsg.success('Form Reset', 'All fields, photo and signature have been cleared.');
         }
     }, 10);
 }

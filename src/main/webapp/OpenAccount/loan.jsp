@@ -2778,7 +2778,7 @@
 <% } %>
 	
 	  <div class="form-buttons">
-	    <button type="submit">Save</button>
+	    <button type="submit" onclick="LoadingOverlay.show('Saving Loan Application...', 'Please wait')">Save</button>
 	    <button type="reset">Reset</button>
 	  </div>
 	</form>
@@ -2808,6 +2808,9 @@
 
     </div>
 </div>
+
+	<%@ include file="/loadingOverlay.jsp" %>
+	<%@ include file="/popupMessages.jsp" %>
 	
 	<script src="js/application.js"></script>
 	<script src="js/savingAcc.js"></script>
@@ -2827,67 +2830,14 @@
 	    return true;
 	}
 	
-	// Check URL parameters for success/error messages
-	window.addEventListener('DOMContentLoaded', function() {
-	    const urlParams = new URLSearchParams(window.location.search);
-	    const status = urlParams.get('status');
-	    const applicationNumber = urlParams.get('applicationNumber');
-	    const message = urlParams.get('message');
-	    
-	    if (status === 'success' && applicationNumber) {
-	        Toastify({
-	            text: "✅ Application saved successfully!\nApplication Number: " + applicationNumber,
-	            duration: 6000,
-	            close: true,
-	            gravity: "top",
-	            position: "center",
-	            style: {
-	                background: "#fff",
-	                color: "#333",
-	                borderRadius: "8px",
-	                fontSize: "14px",
-	                padding: "16px 24px",
-	                boxShadow: "0 3px 10px rgba(0,0,0,0.2)",
-	                borderLeft: "5px solid #4caf50",
-	                marginTop: "20px",
-	                whiteSpace: "pre-line"
-	            },
-	            stopOnFocus: true
-	        }).showToast();
-	        
-	        // Clear URL parameters after showing toast
-	        setTimeout(function() {
-	            const cleanUrl = window.location.pathname + window.location.search.replace(/[?&](status|applicationNumber|message)=[^&]*/g, '').replace(/^&/, '?').replace(/\?$/, '');
-	            window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
-	        }, 100);
-	        
-	    } else if (status === 'error') {
-	        Toastify({
-	            text: "❌ Error: " + (message || "Failed to save application"),
-	            duration: 6000,
-	            close: true,
-	            gravity: "top",
-	            position: "center",
-	            style: {
-	                background: "#fff",
-	                color: "#333",
-	                borderRadius: "8px",
-	                fontSize: "14px",
-	                padding: "16px 24px",
-	                boxShadow: "0 3px 10px rgba(0,0,0,0.2)",
-	                borderLeft: "5px solid #f44336",
-	                marginTop: "20px"
-	            },
-	            stopOnFocus: true
-	        }).showToast();
-	        
-	        // Clear URL parameters after showing toast
-	        setTimeout(function() {
-	            const cleanUrl = window.location.pathname + window.location.search.replace(/[?&](status|applicationNumber|message)=[^&]*/g, '').replace(/^&/, '?').replace(/\?$/, '');
-	            window.history.replaceState({}, document.title, cleanUrl || window.location.pathname);
-	        }, 100);
-	    }
+	document.addEventListener('DOMContentLoaded', function () {
+	    PopupMsg.fromUrlParams(
+	        'Loan Application Saved',
+	        'Failed to Save Application'
+	    );
 	});
+	
+	
 	//==================== CUSTOMER LOOKUP FUNCTIONS ====================
 	
 	//Helper function to set select value with multiple matching strategies

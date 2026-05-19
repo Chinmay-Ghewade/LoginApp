@@ -397,56 +397,8 @@
 
     <!-- 🔽 IFRAME for loading dynamic pages -->
     <iframe id="resultFrame" name="resultFrame"
-         onload="if(typeof hideLoader === 'function') hideLoader();"
-        style="width:100%; height:800px; border:1px solid #ccc; margin-top:20px;">
-</iframe>
-<!-- LOADING OVERLAY -->
-<div id="pageLoader" style="
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(232, 228, 252, 0.85);
-    z-index: 9998;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-">
-    <div style="
-        background: white;
-        border-radius: 16px;
-        padding: 40px 60px;
-        box-shadow: 0 10px 40px rgba(55,50,121,0.15);
-        text-align: center;
-    ">
-        <!-- Spinner -->
-        <div style="
-            width: 52px; height: 52px;
-            border: 5px solid #e8e4fc;
-            border-top: 5px solid #373279;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
-        "></div>
-        <div id="loaderText" style="
-            font-size: 16px;
-            font-weight: 600;
-            color: #373279;
-            margin-bottom: 6px;
-        ">Loading Application Form...</div>
-        <div id="loaderSub" style="
-            font-size: 13px;
-            color: #888;
-        ">Fetching product configuration</div>
-    </div>
-</div>
-
-<style>
-@keyframes spin {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-</style>
+    	style="width:100%; height:800px; border:1px solid #ccc; margin-top:20px;">
+	</iframe>
 </div>
 
 <!-- Unified Lookup Modal -->
@@ -533,7 +485,8 @@
     </div>
   </div>
 </div>
-
+<%@ include file="/loadingOverlay.jsp" %>
+<%@ include file="/popupMessages.jsp" %>
 <script>
 var _newAppModalCallback = null;
 var _newAppModalRows = [];
@@ -943,31 +896,16 @@ function autoSubmitForm() {
 }
 
 function showLoader(accType, prodCode) {
-    const loader = document.getElementById('pageLoader');
-    const loaderText = document.getElementById('loaderText');
-    const loaderSub = document.getElementById('loaderSub');
-
-    const typeNames = {
-        "SB": "Saving Account",
-        "CA": "Current Account",
-        "TD": "Term Deposit",
-        "CC": "Cash Credit Loan",
-        "TL": "Term Loan",
-        "PG": "Pigmy",
-        "SH": "Shares",
-        "FA": "Fixed Asset"
-    };
-
-    const typeName = typeNames[accType] || accType;
-    loaderText.textContent = 'Loading ' + typeName + ' Form...';
-    loaderSub.textContent  = 'Product Code: ' + prodCode + ' — fetching configuration';
-
-    loader.style.display = 'flex';
+    LoadingOverlay.showForAccountType(accType, prodCode);
 }
 
 function hideLoader() {
-    document.getElementById('pageLoader').style.display = 'none';
+    LoadingOverlay.hide();
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    LoadingOverlay.autoHideOnIframeLoad('resultFrame');
+});
 </script>
 
 </body>

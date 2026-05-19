@@ -527,7 +527,7 @@ function resetFormWithUploads() {
       field.style.backgroundColor = '';
     });
     
-    showPopup('✓ Form has been reset including photo and signature', 'success');
+    PopupMsg.success('Form Reset', 'Photo, signature and all fields have been cleared.');
   }, 10);
 }
 
@@ -743,7 +743,7 @@ function openPhotoCamera() {
         video.srcObject = stream;
     })
     .catch(function(err) {
-        showPopup('❌ Error accessing camera:\n' + err.message, 'error');
+        PopupMsg.error('Camera Error', err.message);
         closePhotoCamera();
     });
 }
@@ -787,7 +787,7 @@ function capturePhoto() {
             const finalSize = Math.round((compressedImage.length * 3) / 4);
         })
         .catch(error => {
-            showPopup('❌ Failed to process photo:\n' + error.message, 'error');
+            PopupMsg.error('Photo Processing Failed', error.message);
         });
 }
 
@@ -870,7 +870,7 @@ function captureSignature() {
             
         })
         .catch(error => {
-            showPopup('❌ Failed to process signature:\n' + error.message, 'error');
+            PopupMsg.error('Signature Processing Failed', error.message);
         });
 }
 
@@ -929,76 +929,6 @@ window.addEventListener('click', function(event) {
     }
 });
 
-// Unified popup notification function
-function showPopup(message, type = 'info') {
-    const colors = {
-        success: { bg: '#d4edda', border: '#28a745', text: '#155724', icon: '✓' },
-        error: { bg: '#f8d7da', border: '#f5c6cb', text: '#721c24', icon: '✕' },
-        info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460', icon: 'ℹ' }
-    };
-    
-    const style = colors[type] || colors.info;
-    
-    const modal = document.createElement('div');
-    modal.className = 'popup-modal-overlay';
-    modal.style.cssText = `
-        display: flex;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6);
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: white;
-            width: 400px;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            text-align: center;
-            
-        ">
-            <div style="
-                color: ${style.text};
-                font-size: 32px;
-                margin-bottom: 15px;
-                font-weight: bold;
-            ">${style.icon}</div>
-            
-            <div style="
-                color: ${style.text};
-                font-size: 14px;
-                line-height: 1.6;
-                margin-bottom: 25px;
-                white-space: pre-line;
-            ">${message}</div>
-            
-            <button onclick="this.closest('.popup-modal-overlay').remove();" style="
-                background:rgb(229, 57, 53);
-                color: white;
-                border: none;
-                padding: 10px 40px;
-                border-radius: 6px;
-                font-size: 14px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: background 0.3s;
-            " onmouseover="this.style.opacity='0.8'" 
-               onmouseout="this.style.opacity='1'">
-                OK
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-}
-
 // Add visual indicator for successful upload
 function markFieldAsComplete(fieldId) {
     const container = document.getElementById(fieldId).closest('.upload-card');
@@ -1028,107 +958,6 @@ function markFieldAsComplete(fieldId) {
             container.appendChild(badge);
         }
     }
-}
-
-// Check URL parameters for success/error messages
-window.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get('status');
-    const customerId = urlParams.get('customerId');
-    const message = urlParams.get('message');
-    
-    if (status === 'success') {
-        showCustomerSuccessModal(customerId);
-        setTimeout(function() {
-            window.history.replaceState({}, document.title, "addCustomer.jsp");
-        }, 100);
-    } else if (status === 'error') {
-        showPopup("❌ Error:\n" + (message || "Failed to add customer"), 'error');
-        setTimeout(function() {
-            window.history.replaceState({}, document.title, "addCustomer.jsp");
-        }, 100);
-    }
-    
-    console.log('✅ Image upload handlers initialized');
-});
-
-// Show success modal for customer
-function showCustomerSuccessModal(customerId) {
-    const modal = document.createElement('div');
-    modal.id = 'customerSuccessModal';
-    modal.style.cssText = `
-        display: flex;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: white;
-            width: 500px;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            text-align: center;
-        ">
-            <div style="
-                color: #2ecc71;
-                font-size: 48px;
-                margin-bottom: 20px;
-            ">✓</div>
-            
-            <div style="
-                font-size: 20px;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 15px;
-            ">
-                Customer added successfully!
-            </div>
-            
-            <div style="
-                font-size: 25px;
-                color: #666;
-                margin-bottom: 30px;
-                font-weight: bold;
-            ">
-                Customer ID: ${customerId}
-            </div>
-            
-            <button onclick="closeCustomerModal()" style="
-                background: #2ecc71;
-                color: white;
-                border: none;
-                padding: 12px 50px;
-                border-radius: 6px;
-                font-size: 16px;
-                font-weight: bold;
-                cursor: pointer;
-                transition: background 0.3s;
-            " onmouseover="this.style.background='#27ae60'" 
-               onmouseout="this.style.background='#2ecc71'">
-                OK
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-}
-
-function closeCustomerModal() {
-    const modal = document.getElementById('customerSuccessModal');
-    if (modal) {
-        modal.remove();
-    }
-    // Optionally reset the form
-    document.querySelector('form').reset();
 }
 
 // ========== AADHAR EXISTENCE CHECK ==========
@@ -1163,9 +992,7 @@ function checkAadharExists(aadharNo) {
             if (data.exists) {
                 aadharStatus.style.color = '#d32f2f';
                 aadharStatus.textContent = '❌ Customer already exists - ID: ' + data.customerId;
-                showPopup('⚠️ Customer Already Exists\n\nAadhar: ' + aadharNo + 
-                         '\nCustomer ID: ' + data.customerId + 
-                         '\n\nCannot add duplicate customer.', 'error');
+                PopupMsg.error('Customer Already Exists', 'Aadhar: ' + aadharNo + '\nCustomer ID: ' + data.customerId + '\n\nCannot add duplicate customer.');
                 document.getElementById('aadharNo').style.borderColor = '#d32f2f';
             } else {
                 aadharStatus.style.color = '#4caf50';
@@ -1258,9 +1085,7 @@ function checkAadharExists(aadharNo) {
             if (data.exists && data.status === 'A') {
                 aadharStatus.style.color = '#d32f2f';
                 aadharStatus.textContent = '❌ Customer already exists - ID: ' + data.customerId;
-                showPopup('⚠️ Customer Already Exists\n\nAadhar: ' + aadharNo + 
-                         '\nCustomer ID: ' + data.customerId + 
-                         '\n\nCannot add duplicate customer.', 'error');
+				PopupMsg.error('Customer Already Exists', 'Aadhar: ' + aadharNo + '\nCustomer ID: ' + data.customerId + '\n\nCannot add duplicate customer.');
                 document.getElementById('aadharNo').style.borderColor = '#d32f2f';
             } else {
                 aadharStatus.style.color = '#4caf50';
@@ -1310,7 +1135,10 @@ function validateKYCDates() {
     });
     
     if (!isValid) {
-        showPopup('⚠️ Invalid KYC Date(s)\n\nThe following date field(s) cannot be before today:\n\n' + invalidDateFields.join('\n'), 'error');
+		PopupMsg.warning(
+		    'Invalid KYC Dates',
+		    'The following fields cannot be before today:\n\n' + invalidDateFields.join('\n')
+		);
     }
     
     return isValid;
