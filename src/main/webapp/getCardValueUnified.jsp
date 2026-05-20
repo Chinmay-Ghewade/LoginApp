@@ -1,4 +1,4 @@
- <%@ page import="java.sql.*, db.DBConnection" %>
+<%@ page import="java.sql.*, db.DBConnection" %>
 <%@ page contentType="application/json; charset=UTF-8" %>
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -219,7 +219,6 @@
                     value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
 
                 } else if ("pending_shares_modes".equals(cardId)) {
-                    // ✅ FIXED: exact same WHERE as authorizationSharesMode.jsp list page
                     if (workingDate != null) {
                         ps = conn.prepareStatement(
                             "SELECT COUNT(*) FROM TRANSACTION.DAILYSCROLL d " +
@@ -252,20 +251,40 @@
                         ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
                         value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
-                    }else {
+                    } else {
                         value = "N/A";
                     }
-                }else if ("pending_lockres".equals(cardId)) {  // ✅ outside, at the same level
+
+                } else if ("pending_lockres".equals(cardId)) {
+                    ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM ACCOUNT.LOCKERACCOUNT " +
+                        "WHERE BRANCH_CODE = ? AND ACCOUNT_STATUS = 'E'"
+                    );
+                    ps.setString(1, branchCode);
+                    rs = ps.executeQuery();
+                    value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
+
+                } else if ("pending_lockres_surrender".equals(cardId)) {
+                    // ✅ FIXED: correct table = HISTORY.LOCKERSURRENDER,
+                    //           correct date col = DATEOFSURRENDOR,
+                    //           correct status col = LOCKER_STATUS
+                    if (workingDate != null) {
                         ps = conn.prepareStatement(
-                            "SELECT COUNT(*) FROM ACCOUNT.LOCKERACCOUNT " +
-                            "WHERE BRANCH_CODE = ? AND ACCOUNT_STATUS = 'E'"
+                            "SELECT COUNT(*) FROM HISTORY.LOCKERSURRENDER " +
+                            "WHERE BRANCH_CODE = ? AND LOCKER_STATUS = 'E' " +
+                            "AND TRUNC(DATEOFSURRENDOR) = TRUNC(?)"
                         );
                         ps.setString(1, branchCode);
+                        ps.setDate(2, workingDate);
                         rs = ps.executeQuery();
                         value = rs.next() ? String.valueOf(rs.getInt(1)) : "0";
                     } else {
                         value = "N/A";
                     }
+
+                } else {
+                    value = "N/A";
+                }
                 break;
 
             default:

@@ -95,7 +95,8 @@
             loadCard('pending_txn_transfer', 'pending-txn-transfer-value', 'auth'),
             loadCard('pending_shares',       'pending-shares-value',       'auth'),
             loadCard('pending_shares_modes', 'pending-shares-mode-value',  'auth'),
-            loadCard('pending_lockres',      'pending-lockres-value',      'auth')
+            loadCard('pending_lockres',      'pending-lockres-value',      'auth'),
+            loadCard('pending_lockres_surrender', 'pending-lockres-surrender-value', 'auth')
         ]);
     }
 
