@@ -34,7 +34,7 @@
     		 UNION ALL
  SELECT SUBSTR(T.ACCOUNT_CODE,1,4) BRANCH , SUBSTR(T.ACCOUNT_CODE,5,3) PRODUCT , SUM(DECODE(SUBSTR(t.TRANSACTIONINDICATOR_CODE,3,2),'DR', NVL(t.AMOUNT,0),-1*NVL(t.AMOUNT,0))) BALANCE , T.ACCOUNT_CODE
  FROM TRANSACTION.TRANSACTION_HT_VIEW T, ACCOUNT.ACCOUNT AA
-    		 WHERE
+   WHERE
   t.account_code = aa.account_code
  AND aa.dateaccountopen <= $P{as_on_date}
  AND (aa.dateaccountclose IS NULL or aa.dateaccountclose > $P{as_on_date})
@@ -117,12 +117,12 @@
 					<textFieldExpression><![CDATA[$V{NOOFACC}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="419" y="19" width="127" height="20" uuid="1e68303e-9402-4b7f-b2ec-cfd2bea4a506"/>
+					<reportElement x="419" y="16" width="127" height="20" uuid="1e68303e-9402-4b7f-b2ec-cfd2bea4a506"/>
 					<textElement textAlignment="Right" verticalAlignment="Middle"/>
 					<textFieldExpression><![CDATA[$V{BALANCE}]]></textFieldExpression>
 				</textField>
 				<textField>
-					<reportElement x="243" y="43" width="167" height="20" uuid="357d78cb-a66e-4614-a094-faa57db8fd2c"/>
+					<reportElement x="243" y="44" width="167" height="20" uuid="357d78cb-a66e-4614-a094-faa57db8fd2c"/>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font isBold="true"/>
 					</textElement>

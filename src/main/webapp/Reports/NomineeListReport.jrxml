@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="NomineeListReport" language="groovy" pageWidth="720" pageHeight="864" columnWidth="720" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="e208aa58-0ca8-4c8d-af47-3234c04ee51d">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="branch_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="product_code" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="agent_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="as_on_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT rownum SrNo,BRANCH_NAME,PRODUCT_CODE,PRODUCT_NAME,
+ACCOUNT_CODE,AC_NAME,NOMINEE_NAME,RELATION FROM (
+SELECT fn_get_br_name(SUBSTR(N.ACCOUNT_CODE,1,4)) BRANCH_NAME,
+SUBSTR(N.ACCOUNT_CODE,5,3) PRODUCT_CODE,
+fn_get_product_name(SUBSTR(N.ACCOUNT_CODE,5,3)) PRODUCT_NAME,
+TO_NUMBER(SUBSTR(N.ACCOUNT_CODE,8,7)) ACCOUNT_CODE,
+INITCAP(N.NAME) AC_NAME,
+INITCAP(N.NOMINEE_NAME) NOMINEE_NAME,
+INITCAP(N.RELATION_NAME) RELATION
+ FROM BANKDATA.ACCOUNTNOMINEE_LIST N
+where SUBSTR(N.ACCOUNT_CODE,1,4)=$P{branch_code}
+AND SUBSTR(N.ACCOUNT_CODE,5,3)=$P{product_code}
+ORDER BY N.ACCOUNT_CODE)]]>
+	</queryString>
+	<field name="SRNO" class="java.math.BigDecimal"/>
+	<field name="BRANCH_NAME" class="java.lang.String"/>
+	<field name="PRODUCT_CODE" class="java.lang.String"/>
+	<field name="PRODUCT_NAME" class="java.lang.String"/>
+	<field name="ACCOUNT_CODE" class="java.math.BigDecimal"/>
+	<field name="AC_NAME" class="java.lang.String"/>
+	<field name="NOMINEE_NAME" class="java.lang.String"/>
+	<field name="RELATION" class="java.lang.String"/>
+	<group name="PRODUCT_CODE">
+		<groupExpression><![CDATA[$F{PRODUCT_CODE}]]></groupExpression>
+		<groupHeader>
+			<band height="26">
+				<textField>
+					<reportElement uuid="b6958dbc-30a4-4d19-aa73-fc3684f56346" x="86" y="2" width="28" height="20"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_CODE}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="49b08ffe-448a-4eea-9c70-9658657c659f" x="119" y="2" width="176" height="20"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PRODUCT_NAME}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="f1372630-dac1-4026-8f20-95de887a9d75" x="23" y="2" width="54" height="20"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Scheme :]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="4"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="44" splitType="Stretch">
+			<textField>
+				<reportElement uuid="325ad4d0-479a-4a61-ab6a-138f5fb399d7" x="14" y="16" width="646" height="28"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{agent_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="34" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="3a0f095d-1e2a-47ee-a0de-b437f665d38c" x="237" y="10" width="186" height="21"/>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nominee  List As On Date]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="87bdf77c-1bb1-4cd2-ba9e-5b65a9f2150e" x="422" y="12" width="99" height="21"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{as_on_date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="67511c38-7647-49d4-a650-af09d7ddb0a3" x="14" y="14" width="45" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Branch :]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="5bf79097-4ea7-40bc-b7af-6b793519385e" x="70" y="14" width="106" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BRANCH_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="32" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="fdb3416d-04e0-47a8-95f8-d6ea6a36f5b5" x="23" y="7" width="36" height="20"/>
+				<textElement>
+					<font fontName="SansSerif" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sr.No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="64c148a0-79a2-4a3f-9f9b-23b5f803dcd2" x="74" y="7" width="48" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[A/c. No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c76fdc66-3554-43ea-bd5d-309896a55b1b" x="318" y="7" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nominee Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9531af04-ae71-4929-b651-72bd76a472dc" x="534" y="7" width="55" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Relation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0b73e951-8d09-4169-b2f4-ef665182e583" x="130" y="7" width="100" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Account Name]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="7f9c4008-97b1-4dcf-ac87-bdd0f1fb1655" x="6" y="31" width="654" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="90194c49-ac15-44c9-b1fa-24bd5acce5b8" x="6" y="3" width="654" height="1"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement uuid="e09ef6b9-1ef0-4e45-ac62-8d89e0331c91" x="23" y="2" width="24" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{SRNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3465e585-a033-4c07-9c94-10fee5fdfdd8" x="318" y="2" width="188" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{NOMINEE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2cefef38-2859-472d-b7d0-a6ca1eff709f" x="534" y="2" width="126" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{RELATION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="dfb59a2b-023e-443a-b9be-834376ef6b63" x="130" y="2" width="167" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{AC_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="24b6e881-afa3-4207-b97b-2f78781a8db3" x="74" y="2" width="40" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_CODE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="2" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="28" splitType="Stretch">
+			<line>
+				<reportElement uuid="f5d193d0-cf5c-456a-baf6-a7770623f791" x="8" y="5" width="652" height="1"/>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

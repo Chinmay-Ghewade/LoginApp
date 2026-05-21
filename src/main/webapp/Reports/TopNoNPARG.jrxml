@@ -16,7 +16,7 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="no_of_accounts" class="java.lang.String">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>

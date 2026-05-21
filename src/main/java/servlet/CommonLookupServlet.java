@@ -123,6 +123,8 @@ public class CommonLookupServlet extends HttpServlet {
                     query = "SELECT DESCRIPTION FROM HEADOFFICE.CASE_CODE WHERE CASE_CODE=?";
                 } else if ("agent".equalsIgnoreCase(type)) {
                     query = "SELECT NAME FROM BRANCH.AGENT WHERE AGENT_ID=?";
+                } else if ("month".equalsIgnoreCase(type)) {
+                    query = "SELECT MONTH_NAME FROM PAYROLL.MONTH_YEAR WHERE MONTH_NO=?";
                 } else {
                     out.print("");
                     return;
@@ -176,7 +178,9 @@ public class CommonLookupServlet extends HttpServlet {
             } else if ("caseType".equalsIgnoreCase(type)) {
                 listCaseType(conn, out);
             } else if ("agent".equalsIgnoreCase(type)) {
-                listAgent(conn, out, request);    
+                listAgent(conn, out, request);  
+            } else if ("month".equalsIgnoreCase(type)) {
+            	listMonth(conn, out);    
             } else {
                 out.println("<h3 style='color:red;'>Invalid type</h3>");
             }
@@ -911,6 +915,54 @@ private void listAgent(Connection conn,PrintWriter out,HttpServletRequest reques
  rs.close();
  ps.close();
 }
+//===============================
+//🔹 MONTH
+//===============================
 
+private void listMonth( Connection conn,PrintWriter out) throws Exception {
+
+	    String sql =
+
+	    "SELECT MONTH_NAME, MONTH_NO " +
+	    "FROM PAYROLL.MONTH_YEAR " +
+	    "ORDER BY MONTH_NO";
+
+	    PreparedStatement ps = conn.prepareStatement(sql);
+
+	    ResultSet rs = ps.executeQuery();
+
+	    printTableHeader(
+	        out,
+	        "Select Month",
+	        "Month No",
+	        "Month Name",
+	        false
+	    );
+
+	    while(rs.next()){
+
+	        String code = rs.getString("MONTH_NO");
+
+	        String name = rs.getString("MONTH_NAME");
+
+	        if(code == null) code = "";
+	        if(name == null) name = "";
+
+	        code = code.replace("'", "\\'");
+	        name = name.replace("'", "\\'");
+
+	        out.println(
+
+	        "<tr class='lookup-row' " + "onclick=\"selectMonth('"
+	        + code + "','" + name + "')\">"
+	        + "<td>" + code + "</td>" + "<td>" + name + "</td>"
+	        + "</tr>");
+	    }
+
+	    printTableFooter(out);
+
+	    rs.close();
+	    ps.close();
+	}
 }
 

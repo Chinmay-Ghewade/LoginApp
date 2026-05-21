@@ -201,14 +201,14 @@
 				<text><![CDATA[  RECALL LETTER]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="442" y="9" width="34" height="20" uuid="5490fd39-fd82-4e1d-aac0-d89f0bef2041"/>
+				<reportElement x="434" y="9" width="34" height="20" uuid="5490fd39-fd82-4e1d-aac0-d89f0bef2041"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
 				<text><![CDATA[  Date:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="476" y="9" width="78" height="20" uuid="320e0ff9-3694-4362-a585-81c4bdce5065"/>
+				<reportElement x="468" y="9" width="87" height="20" uuid="320e0ff9-3694-4362-a585-81c4bdce5065"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{DATEACCOUNTOPEN}]]></textFieldExpression>
 			</textField>

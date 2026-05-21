@@ -36,6 +36,7 @@ if (sessionDate == null || sessionDate.isEmpty()) {
 String displayDate = "";
 
 try {
+
     java.util.Date d =
         new SimpleDateFormat("yyyy-MM-dd").parse(sessionDate);
 
@@ -43,14 +44,18 @@ try {
         new SimpleDateFormat("dd/MM/yyyy").format(d);
 
 } catch(Exception e) {
+
     displayDate = "";
 }
 
-String isSupportUser = (String) session.getAttribute("isSupportUser");
-String sessionBranchCode = (String) session.getAttribute("branchCode");
+String isSupportUser =
+        (String) session.getAttribute("isSupportUser");
 
-if (isSupportUser == null) isSupportUser = "N";
-if (sessionBranchCode == null) sessionBranchCode = "";
+String sessionBranchCode =
+        (String) session.getAttribute("branchCode");
+
+if(isSupportUser == null) isSupportUser = "N";
+if(sessionBranchCode == null) sessionBranchCode = "";
 %>
 
 <%
@@ -66,27 +71,32 @@ if ("download".equals(action)) {
     String singleAll   = request.getParameter("single_all");
     String asOnDate    = request.getParameter("as_on_date");
 
-    if (branchCode == null || branchCode.trim().isEmpty()) {
+    if(branchCode == null || branchCode.trim().isEmpty()) {
         branchCode = sessionBranchCode;
     }
 
-    /* 🔒 SECURITY */
-    if (!"Y".equalsIgnoreCase(isSupportUser)) {
+    /* SECURITY */
+
+    if(!"Y".equalsIgnoreCase(isSupportUser)) {
         branchCode = sessionBranchCode;
     }
 
-    if(productCode == null) productCode = "";
+    if(productCode == null)
+        productCode = "";
+
     productCode = productCode.trim();
 
-    /* ================= VALIDATION ================= */
+    /* VALIDATION */
 
-    if("S".equals(singleAll) && productCode.equals("")){
-        out.println("<h3 style='color:red'>Please enter Product Code</h3>");
+    if("S".equals(singleAll) && productCode.equals("")) {
+
+        out.println("<h3 style='color:red'>Please Enter Product Code</h3>");
         return;
     }
 
-    if(asOnDate == null || asOnDate.trim().equals("")){
-        out.println("<h3 style='color:red'>Please select As On Date</h3>");
+    if(asOnDate == null || asOnDate.trim().equals("")) {
+
+        out.println("<h3 style='color:red'>Please Select As On Date</h3>");
         return;
     }
 
@@ -95,14 +105,16 @@ if ("download".equals(action)) {
     String oracleDateStr = "";
 
     try {
+
     	java.util.Date d =
     		    new SimpleDateFormat("yyyy-MM-dd").parse(asOnDate);
 
     		oracleDateStr =
     		    new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
     		            .format(d).toUpperCase();
+    		
+    } catch(Exception e) {
 
-    } catch(Exception e){
         out.println("<h3 style='color:red'>Invalid Date Format</h3>");
         return;
     }
@@ -111,9 +123,12 @@ if ("download".equals(action)) {
 
     String finalProductCode = "";
 
-    if("A".equals(singleAll)){
+    if("A".equals(singleAll)) {
+
         finalProductCode = branchCode + "4%";
-    }else{
+
+    } else {
+
         finalProductCode = branchCode + productCode + "%";
     }
 
@@ -129,12 +144,15 @@ if ("download".equals(action)) {
         /* LOAD REPORT */
 
         String jasperPath =
-            application.getRealPath("/Reports/TDRegisterRG.jasper");
+            application.getRealPath(
+                "/Reports/DepositIntProvision.jasper");
 
         File file = new File(jasperPath);
 
-        if (!file.exists()) {
-            throw new RuntimeException("Jasper file not found: " + jasperPath);
+        if(!file.exists()) {
+
+            throw new RuntimeException(
+                "Jasper file not found : " + jasperPath);
         }
 
         JasperReport jasperReport =
@@ -142,75 +160,101 @@ if ("download".equals(action)) {
 
         /* PARAMETERS */
 
-        Map<String,Object> parameters = new HashMap<>();
+        Map<String,Object> parameters = new HashMap<String,Object>();
 
         parameters.put("branch_code", branchCode);
         parameters.put("as_on_date", oracleDateStr);
-        parameters.put("report_title","TERM DEPOSIT REGISTER");
-        parameters.put("finalProductCode", finalProductCode);
+        parameters.put("product_code", finalProductCode);
+        
+        parameters.put(
+            "report_title",
+            "DEPOSIT INTEREST PROVISION REPORT");
 
-        String userId = (String) session.getAttribute("userId");
-        if(userId == null) userId = "admin";
+        String userId =
+            (String) session.getAttribute("userId");
+
+        if(userId == null)
+            userId = "admin";
 
         parameters.put("user_id", userId);
 
-        parameters.put("SUBREPORT_DIR",
+        parameters.put(
+            "SUBREPORT_DIR",
             application.getRealPath("/Reports/"));
 
-        parameters.put(JRParameter.REPORT_CONNECTION, conn);
+        parameters.put(
+            JRParameter.REPORT_CONNECTION,
+            conn);
 
         /* FILL REPORT */
 
         JasperPrint jasperPrint =
-            JasperFillManager.fillReport(jasperReport, parameters, conn);
+            JasperFillManager.fillReport(
+                jasperReport,
+                parameters,
+                conn);
 
-        if (jasperPrint.getPages().isEmpty()) {
+        if(jasperPrint.getPages().isEmpty()) {
 
             response.reset();
             response.setContentType("text/html");
 
-            out.println("<h2 style='color:red;text-align:center;margin-top:50px;'>");
+            out.println(
+                "<h2 style='color:red;text-align:center;margin-top:50px;'>");
+
             out.println("No Records Found!");
+
             out.println("</h2>");
 
             return;
         }
 
-        /* ================= EXPORT ================= */
+        /* EXPORT PDF */
 
-        if("pdf".equalsIgnoreCase(reporttype)){
+        if("pdf".equalsIgnoreCase(reporttype)) {
 
             response.setContentType("application/pdf");
 
-            response.setHeader("Content-Disposition",
-                "inline; filename=\"TD_Register_Report.pdf\"");
+            response.setHeader(
+                "Content-Disposition",
+                "inline; filename=\"Deposit_Int_Provision.pdf\"");
 
-            ServletOutputStream outStream = response.getOutputStream();
+            ServletOutputStream outStream =
+                response.getOutputStream();
 
             JasperExportManager.exportReportToPdfStream(
-                jasperPrint, outStream);
+                    jasperPrint,
+                    outStream);
 
             outStream.flush();
             outStream.close();
             return;
         }
 
-        else if("xls".equalsIgnoreCase(reporttype)){
+        /* EXPORT EXCEL */
 
-            response.setContentType("application/vnd.ms-excel");
+        else if("xls".equalsIgnoreCase(reporttype)) {
 
-            response.setHeader("Content-Disposition",
-                "attachment; filename=\"TD_Register_Report.xls\"");
+            response.setContentType(
+                "application/vnd.ms-excel");
 
-            ServletOutputStream outStream = response.getOutputStream();
+            response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"Deposit_Int_Provision.xls\"");
 
-            JRXlsExporter exporter = new JRXlsExporter();
+            ServletOutputStream outStream =
+                response.getOutputStream();
+
+            JRXlsExporter exporter =
+                new JRXlsExporter();
 
             exporter.setParameter(
-                JRXlsExporterParameter.JASPER_PRINT, jasperPrint);
+                JRXlsExporterParameter.JASPER_PRINT,
+                jasperPrint);
 
             exporter.setParameter(
-                JRXlsExporterParameter.OUTPUT_STREAM, outStream);
+                JRXlsExporterParameter.OUTPUT_STREAM,
+                outStream);
 
             exporter.exportReport();
 
@@ -219,28 +263,35 @@ if ("download".equals(action)) {
             return;
         }
 
-    } catch(Exception e){
+    } catch(Exception e) {
 
-        out.println("<h3 style='color:red'>Error Generating Report</h3>");
+        out.println(
+            "<h3 style='color:red'>Error Generating Report</h3>");
+
         e.printStackTrace(new PrintWriter(out));
 
     } finally {
 
-        if(conn!=null){
-            try{conn.close();}catch(Exception ex){}
+        if(conn != null) {
+
+            try {
+                conn.close();
+            } catch(Exception ex) {}
         }
     }
 }
 %>
-
 <!DOCTYPE html>
 <html>
 <head>
 
-<title>Term Deposit Register</title>
+<title>Deposit Interest Provision Report</title>
 
-<link rel="stylesheet" href="<%=request.getContextPath()%>/css/common-report.css">
-<link rel="stylesheet" href="<%=request.getContextPath()%>/css/lookup.css">
+<link rel="stylesheet"
+href="<%=request.getContextPath()%>/css/common-report.css">
+
+<link rel="stylesheet"
+href="<%=request.getContextPath()%>/css/lookup.css">
 
 <script>
 var contextPath = "<%=request.getContextPath()%>";
@@ -297,11 +348,11 @@ var contextPath = "<%=request.getContextPath()%>";
 <div class="report-container">
 
 <h1 class="report-title">
-TERM DEPOSIT REGISTER
+DEPOSIT INTEREST PROVISION REPORT
 </h1>
 
 <form method="post"
-      action="<%=request.getContextPath()%>/Reports/jspFiles/TDRegisterRG.jsp"
+      action="<%=request.getContextPath()%>/Reports/jspFiles/DepositIntProvision.jsp"
       target="_blank"
       autocomplete="off">
 
@@ -309,74 +360,145 @@ TERM DEPOSIT REGISTER
 
 <div class="parameter-section">
 
-<!-- Branch -->
+<!-- BRANCH -->
 
 <div class="parameter-group">
-<div class="parameter-label">Branch Code</div>
+
+<div class="parameter-label">
+Branch Code
+</div>
 
 <div class="input-box">
+
 <input type="text"
        name="branch_code"
        class="input-field"
        value="<%= sessionBranchCode %>"
-       <%= !"Y".equalsIgnoreCase(isSupportUser) ? "readonly" : "" %>
+       <%= !"Y".equalsIgnoreCase(isSupportUser)
+           ? "readonly"
+           : "" %>
        required>
 
-<% if ("Y".equalsIgnoreCase(isSupportUser)) { %>
-<button type="button" class="icon-btn"
-onclick="openLookup('branch')">…</button>
+<% if("Y".equalsIgnoreCase(isSupportUser)){ %>
+
+<button type="button"
+        class="icon-btn"
+        onclick="openLookup('branch')">
+
+...
+</button>
+
 <% } %>
-</div>
+
 </div>
 
-<!-- Product -->
+</div>
+
+<!-- PRODUCT -->
 
 <div class="parameter-group">
-<div class="parameter-label">Product Code</div>
+
+<div class="parameter-label">
+Product Code
+</div>
 
 <div class="input-box">
+
 <input type="text"
        name="product_code"
        class="input-field">
 
 <button type="button"
-onclick="openLookup('product')"
-class="icon-btn">…</button>
+        class="icon-btn"
+        onclick="openLookup('product')">
+
+...
+</button>
+
 </div>
 
 <div class="radio-container">
-<label><input type="radio" name="single_all" value="S" checked onclick="toggleProduct()">Single</label>
-<label><input type="radio" name="single_all" value="A" onclick="toggleProduct()">All</label>
-</div>
+
+<label>
+<input type="radio"
+       name="single_all"
+       value="S"
+       checked
+       onclick="toggleProduct()">
+
+Single
+</label>
+
+<label>
+<input type="radio"
+       name="single_all"
+       value="A"
+       onclick="toggleProduct()">
+
+All
+</label>
+
 </div>
 
-<!-- Date -->
+</div>
+
+<!-- DATE -->
 
 <div class="parameter-group">
-<div class="parameter-label">As On Date</div>
+
+<div class="parameter-label">
+As On Date
+</div>
+
 <input type="date"
        name="as_on_date"
        class="input-field"
        value="<%=sessionDate%>"
        required>
+
 </div>
 
 </div>
+
+<!-- REPORT FORMAT -->
 
 <div class="format-section">
-<div class="parameter-label">Report Type</div>
 
-<label><input type="radio" name="reporttype" value="pdf" checked> PDF</label>
-<label><input type="radio" name="reporttype" value="xls"> Excel</label>
+<div class="parameter-label">
+Report Type
 </div>
 
-<button type="submit" class="download-button">
+<label>
+<input type="radio"
+       name="reporttype"
+       value="pdf"
+       checked>
+
+PDF
+</label>
+
+<label>
+<input type="radio"
+       name="reporttype"
+       value="xls">
+
+Excel
+</label>
+
+</div>
+
+<!-- BUTTON -->
+
+<button type="submit"
+        class="download-button">
+
 Generate Report
+
 </button>
 
 </form>
 
-</div>
+<!-- LOOKUP POPUP -->
 
 <div id="lookupModal" class="modal">
     <div class="modal-content">
@@ -385,6 +507,22 @@ Generate Report
     </div>
 </div>
 
+<!-- ERROR MESSAGE -->
+
+<div class="error-box">
+
+<%
+String err =
+    request.getParameter("error");
+
+if(err != null){
+    out.print(err);
+}
+%>
+
+</div>
+
+</div>
 <script>
 function toggleProduct(){
     var single =

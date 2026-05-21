@@ -45,7 +45,7 @@
 	<title>
 		<band height="56" splitType="Stretch">
 			<subreport>
-				<reportElement x="9" y="0" width="364" height="56" uuid="dd51a888-839b-4ebd-8a53-5d505e00b919"/>
+				<reportElement x="-1" y="0" width="232" height="56" uuid="dd51a888-839b-4ebd-8a53-5d505e00b919"/>
 				<subreportParameter name="branch_code">
 					<subreportParameterExpression><![CDATA[$P{branch_code}]]></subreportParameterExpression>
 				</subreportParameter>

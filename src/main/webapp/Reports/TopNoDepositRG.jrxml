@@ -19,7 +19,7 @@
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["C:\\Users\\prajk\\eclipse-workspace\\LoginApp\\src\\main\\webapp\\Reports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[select rownum as sr_no,account_code,name,balance,deposit_amt from

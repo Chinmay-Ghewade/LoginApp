@@ -775,6 +775,75 @@ function initSingleAgentAutoFetch() {
     });
 }
 // ===============================
+// 🔹 SELECT MONTH 
+// ===============================
+function selectMonth(code,name){
+
+    let field =
+        document.getElementById("month_no");
+
+    if(field){
+
+        field.value = code;
+    }
+
+    let nameField =
+        document.getElementById("month_nm");
+
+    if(nameField){
+
+        nameField.value = name;
+    }
+
+    closeLookup();
+}
+// ===============================
+// 🔹 AUTO FETCH MONTH NAME
+// ===============================
+
+function initMonthAutoFetch() {
+
+    let field =
+        document.getElementById("month_no");
+
+    if (!field) return;
+
+    field.addEventListener("blur", function () {
+
+        let code = this.value;
+
+        if (!code ||
+            code.trim() === "") {
+
+            return;
+        }
+
+        fetch(
+            contextPath +
+            "/CommonLookupServlet?type=month&action=getName&code=" +
+            encodeURIComponent(code)
+        )
+        .then(res => res.text())
+        .then(name => {
+
+            let desc =
+                document.getElementById("month_nm");
+
+            if (desc) {
+
+                desc.value =
+                    name || "Not Found";
+            }
+        })
+        .catch(err =>
+            console.error(
+                "Month Fetch Error:",
+                err
+            )
+        );
+    });
+}
+// ===============================
 // 🔹 AUTO INIT
 // ===============================
 window.addEventListener("DOMContentLoaded", function () {
@@ -791,6 +860,7 @@ window.addEventListener("DOMContentLoaded", function () {
 	initDeductionTypeAutoFetch();
 	initCaseTypeAutoFetch(); 
 	initAgentAutoFetch();
-	initSingleAgentAutoFetch();  // ✅ ADD NEW
+	initSingleAgentAutoFetch(); 
+	initMonthAutoFetch(); // ✅ ADD NEW
 
 });
