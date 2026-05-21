@@ -5,9 +5,6 @@
 <%
     String _action = request.getParameter("action");
 
-    // ─────────────────────────────────────────────
-    // AJAX: Return ALL locker types from HEADOFFICE.LOCKERTYPE
-    // ─────────────────────────────────────────────
     if ("getHiredLockerTypes".equals(_action)) {
         out.clear();
         response.reset();
@@ -52,10 +49,6 @@
         pw.flush(); return;
     }
 
-    // ─────────────────────────────────────────────
-    // AJAX: Return locker numbers from BRANCH.BRANCHLOCKER
-    // where LOCKER_STATUS = 'H' (Hired) for given type
-    // ─────────────────────────────────────────────
     if ("getHiredLockerNumbers".equals(_action)) {
         out.clear();
         response.reset();
@@ -111,9 +104,6 @@
         pw.flush(); return;
     }
 
-    // ─────────────────────────────────────────────
-    // AJAX: Return customer by locker
-    // ─────────────────────────────────────────────
     if ("getCustomerByLocker".equals(_action)) {
         out.clear();
         response.reset();
@@ -184,9 +174,7 @@
         pw.flush(); return;
     }
 
-    // ─────────────────────────────────────────────
     // Normal page load — session check
-    // ─────────────────────────────────────────────
     String branchCode = (String) session.getAttribute("branchCode");
     if (branchCode == null) {
         response.sendRedirect("../login.jsp");
@@ -297,18 +285,14 @@
     #jhCardCustomerLookupContent #customerTable tbody td:last-child { border-right: none; }
     #jhCardCustomerLookupContent #customerTable tbody td:first-child { font-weight: 700; color: var(--lk-primary); font-size: 0.84rem; white-space: nowrap; }
 
-    /* ── Save Confirmation Modal animation ── */
     @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
 
-<!-- CHANGE 1: onsubmit="return false;" to prevent page navigation -->
 <form action="<%= request.getContextPath() %>/LockerJointHolderServlet" method="post" onsubmit="return false;">
 
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 1: LOCKER INFORMATION                                 -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════ FIELDSET 1: LOCKER INFORMATION ════════════════ -->
   <fieldset>
     <legend>Locker Information</legend>
     <div class="form-grid">
@@ -318,7 +302,7 @@
         <div class="input-icon-box">
           <input type="text" name="lockerType" id="lockerType" readonly>
           <button type="button" class="inside-icon-btn"
-                  onclick="openLockerTypeLookup()" title="Search Locker Type">🔍</button>
+                  onclick="openLockerTypeLookup()" title="Search Locker Type">&#128269;</button>
         </div>
       </div>
 
@@ -330,7 +314,7 @@
                   onclick="openLockerNumberLookup()" disabled
                   title="Select Locker Type first"
                   style="background-color:#2D2B80; color:white; border:none; width:35px; height:35px;
-                         border-radius:8px; font-size:18px; cursor:pointer;">…</button>
+                         border-radius:8px; font-size:18px; cursor:pointer;">&#8230;</button>
         </div>
         <small id="lockerNumberHint" style="font-size:11px;color:#888;margin-top:2px;display:block;">
           Select locker type first
@@ -352,16 +336,14 @@
   </fieldset>
 
 
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- FIELDSET 2: JOINT HOLDER                                       -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════ FIELDSET 2: JOINT HOLDER ════════════════ -->
   <fieldset id="nomineeFieldset">
     <legend>
       Joint Holder
       <button type="button" onclick="addNominee()"
         style="border:none;background:#373279;color:white;padding:2px 10px;
         border-radius:5px;cursor:pointer;font-size:12px;margin-left:10px;">
-        ➕
+        &#10133;
       </button>
     </legend>
 
@@ -371,7 +353,7 @@
         <div class="nominee-title" style="font-weight:bold; font-size:15px; color:#373279;">
           Joint Holder <span class="nominee-serial">1</span>
         </div>
-        <button type="button" class="nominee-remove" onclick="removeNominee(this)">✖</button>
+        <button type="button" class="nominee-remove" onclick="removeNominee(this)">&#10006;</button>
       </div>
 
       <div class="nominee-cid-row">
@@ -385,9 +367,14 @@
         <div class="nomineeCustomerIDContainer" style="display:none;">
           <label>Customer ID</label>
           <div class="input-icon-box">
+            <%-- FIX 1: 'disabled' attribute removed from nomineeCustomerIDInput.
+                 Disabled inputs are excluded from form POST, so with multiple joint holders
+                 the nomineeCustomerID[] array would be shorter than other arrays,
+                 causing wrong data to be saved for each joint holder by index.
+                 Now the input is always submitted — empty string when "No" is chosen. --%>
             <input type="text" class="nomineeCustomerIDInput" name="nomineeCustomerID[]"
-                   onclick="openJHCardCustomerLookup(this)" readonly disabled>
-            <button type="button" class="inside-icon-btn" onclick="openJHCardCustomerLookup(this)" title="Search Customer">🔍</button>
+                   onclick="openJHCardCustomerLookup(this)" readonly>
+            <button type="button" class="inside-icon-btn" onclick="openJHCardCustomerLookup(this)" title="Search Customer">&#128269;</button>
           </div>
         </div>
       </div>
@@ -471,7 +458,6 @@
 
   <div class="form-buttons">
     <button type="reset" onclick="resetLockerInfo()" style="background:#dc3545;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Cancel</button>
-    <!-- CHANGE 2: type="button" + onclick="openSaveConfirm()" -->
     <button type="button" onclick="openSaveConfirm()" style="background:#28a745;color:#fff;border:none;padding:8px 24px;border-radius:5px;cursor:pointer;font-size:14px;">Save</button>
   </div>
 
@@ -479,10 +465,9 @@
 
 
 <!-- ════════ SAVE CONFIRMATION MODAL ════════ -->
-<!-- CHANGE 3: New modal added here, above the other modals -->
 <div id="saveConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(80,70,160,0.18);backdrop-filter:blur(3px);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:20px;width:90%;max-width:460px;padding:36px 32px 28px;box-shadow:0 16px 48px rgba(55,50,121,0.22);font-family:'Segoe UI',Arial,sans-serif;text-align:center;animation:popIn 0.22s cubic-bezier(.34,1.56,.64,1);">
-    <div style="width:60px;height:60px;background:#e8f8ef;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;color:#28a745;">✔</div>
+    <div style="width:60px;height:60px;background:#e8f8ef;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;color:#28a745;">&#10004;</div>
     <h2 style="margin:0 0 6px;font-size:1.35rem;font-weight:700;color:#1a1a3e;">Confirm Save Joint Holder?</h2>
     <p style="margin:0 0 22px;font-size:0.92rem;color:#666;">Are you sure you want to <strong>save</strong> this joint holder?</p>
     <div style="background:#f7f6fd;border-radius:10px;overflow:hidden;margin-bottom:24px;border:1px solid #e0daf5;">
@@ -512,7 +497,7 @@
     <div style="background:#fff;border-radius:14px;width:35%;max-width:380px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(55,50,121,0.18);font-family:Arial,sans-serif;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#373279,#2b0d73);border-radius:14px 14px 0 0;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">🔒</div>
+                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">&#128274;</div>
                 <span style="font-size:1.05rem;font-weight:700;color:#fff;">Select Locker Type</span>
             </div>
             <span onclick="closeLockerTypeLookup()" style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.75);cursor:pointer;line-height:1;padding:0 4px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
@@ -536,7 +521,7 @@
     <div style="background:#fff;border-radius:14px;width:50%;max-width:560px;max-height:72vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(55,50,121,0.18);font-family:Arial,sans-serif;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#373279,#2b0d73);border-radius:14px 14px 0 0;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">🗄️</div>
+                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">&#128452;</div>
                 <div>
                     <div style="font-size:1.05rem;font-weight:700;color:#fff;">Hired Lockers</div>
                     <div id="lockerNumberModalSubtitle" style="font-size:0.78rem;color:rgba(255,255,255,0.7);margin-top:1px;"></div>
@@ -575,7 +560,7 @@
     <div style="background:#fff;border-radius:14px;width:85%;max-width:920px;max-height:84vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(55,50,121,0.18);font-family:Arial,sans-serif;">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,#373279,#2b0d73);border-radius:14px 14px 0 0;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">🔍</div>
+                <div style="width:34px;height:34px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:17px;">&#128269;</div>
                 <span style="font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:0.02em;">Customer Lookup</span>
             </div>
             <span onclick="closeJHCardCustomerLookup()" style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.75);cursor:pointer;line-height:1;padding:0 4px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">&times;</span>
@@ -668,7 +653,7 @@ function openLockerNumberLookup() {
     if (!lockerType) { showToast('Please select a Locker Type first.', true); return; }
     document.getElementById('lockerNumberLookupModal').style.display = 'flex';
     document.getElementById('lockerNumberSearchInput').value = '';
-    document.getElementById('lockerNumberModalSubtitle').textContent = 'Type: ' + lockerType + '  •  Status: Hired';
+    document.getElementById('lockerNumberModalSubtitle').textContent = 'Type: ' + lockerType + '  \u2022  Status: Hired';
     if (_allLockerNumbers.length > 0) { renderLockerNumberRows(_allLockerNumbers); return; }
     document.getElementById('lockerNumberTableBody').innerHTML =
         '<tr><td colspan="4" style="text-align:center;padding:24px;color:#888;">Loading...</td></tr>';
@@ -849,7 +834,10 @@ function addNominee() {
     if (cidContainer) {
         cidContainer.style.display = 'none';
         var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
-        if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
+        // FIX 2: Only clear value — do NOT set disabled=true.
+        // Keeping the input always enabled ensures nomineeCustomerID[]
+        // array length equals all other joint holder arrays on form submit.
+        if (cidInput) { cidInput.value = ''; }
     }
     newCard.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
     newCard.querySelectorAll('.dd-spinner').forEach(function(sp) { sp.classList.remove('done'); });
@@ -883,10 +871,14 @@ function toggleNomineeCustomerID(radio) {
     var input = container.querySelector('.nomineeCustomerIDInput');
     if (radio.value === 'yes') {
         container.style.display = 'flex';
-        if (input) input.disabled = false;
+        // FIX 3: Input is never disabled — nothing to enable here.
+        // It always participates in form submission to keep arrays aligned.
     } else {
         container.style.display = 'none';
-        if (input) { input.value = ''; input.disabled = true; }
+        // FIX 3: Only clear the value — do NOT set disabled=true.
+        // An empty string is submitted instead, keeping nomineeCustomerID[]
+        // the same length as nomineeName[] and all other joint holder arrays.
+        if (input) { input.value = ''; }
     }
 }
 
@@ -1024,12 +1016,11 @@ function validateForm() {
 }
 
 // ── Save Confirmation Modal ──────────────────────────────────────────
-// CHANGE 4: New functions — open modal, close modal, AJAX submit + form reset
 function openSaveConfirm() {
     if (!validateForm()) return;
-    document.getElementById('scm-custName').textContent   = document.getElementById('customerName').value || '—';
-    document.getElementById('scm-lockerType').textContent = document.getElementById('lockerType').value   || '—';
-    document.getElementById('scm-lockerNum').textContent  = document.getElementById('lockerNumber').value  || '—';
+    document.getElementById('scm-custName').textContent   = document.getElementById('customerName').value || '\u2014';
+    document.getElementById('scm-lockerType').textContent = document.getElementById('lockerType').value   || '\u2014';
+    document.getElementById('scm-lockerNum').textContent  = document.getElementById('lockerNumber').value  || '\u2014';
     document.getElementById('saveConfirmModal').style.display = 'flex';
 }
 
@@ -1040,60 +1031,70 @@ function closeSaveConfirm() {
 function doFormSubmit() {
     closeSaveConfirm();
 
-    // Create hidden iframe to absorb the servlet redirect
     var iframe = document.createElement('iframe');
     iframe.name = 'submitTarget';
     iframe.style.cssText = 'display:none;width:0;height:0;border:0;';
     document.body.appendChild(iframe);
 
+    iframe.onload = function() {
+        try {
+            var iframeUrl = iframe.contentWindow.location.href;
+            document.body.removeChild(iframe);
+            document.querySelector('form').target = '';
+            if (iframeUrl.indexOf('status=success') !== -1) {
+                showToast('Joint holder saved successfully!', false);
+                // Reset locker info
+                document.getElementById('lockerType').value   = '';
+                document.getElementById('lockerNumber').value = '';
+                document.getElementById('customerId').value   = '';
+                document.getElementById('customerName').value = '';
+                document.getElementById('lockerNumberBtn').disabled     = true;
+                document.getElementById('lockerNumberBtn').title        = 'Select Locker Type first';
+                document.getElementById('lockerNumberHint').textContent = 'Select locker type first';
+                _allLockerTypes   = [];
+                _allLockerNumbers = [];
+                // Remove extra cards, reset first card
+                var fieldset = document.getElementById('nomineeFieldset');
+                var cards    = fieldset.querySelectorAll('.nominee-block');
+                cards.forEach(function(card, idx) {
+                    if (idx === 0) {
+                        card.querySelectorAll('input, select, textarea').forEach(function(el) {
+                            if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
+                            if (el.type === 'checkbox') { el.checked = false; return; }
+                            el.value = '';
+                        });
+                        var cidContainer = card.querySelector('.nomineeCustomerIDContainer');
+                        if (cidContainer) {
+                            cidContainer.style.display = 'none';
+                            var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
+                            // FIX 4: Only clear value — do NOT set disabled=true.
+                            if (cidInput) { cidInput.value = ''; }
+                        }
+                        card.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
+                    } else {
+                        card.remove();
+                    }
+                });
+                renumberNominees();
+            } else if (iframeUrl.indexOf('status=error') !== -1) {
+                var match = iframeUrl.match(/message=([^&]*)/);
+                var msg   = match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : 'Save failed.';
+                showToast('Error: ' + msg, true);
+            } else {
+                showToast('Unexpected response. Please check and retry.', true);
+            }
+        } catch(e) {
+            document.body.removeChild(iframe);
+            document.querySelector('form').target = '';
+            showToast('Could not verify save status. Please check the record.', true);
+        }
+    };
+
     var form = document.querySelector('form');
     form.target = 'submitTarget';
     form.submit();
-
-    // After servlet has time to process, reset the form
-    setTimeout(function() {
-        // Remove iframe
-        document.body.removeChild(iframe);
-        // Reset form target back to default
-        form.target = '';
-
-        showToast('Joint holder saved successfully!', false);
-
-        // Reset locker info
-        document.getElementById('lockerType').value   = '';
-        document.getElementById('lockerNumber').value = '';
-        document.getElementById('customerId').value   = '';
-        document.getElementById('customerName').value = '';
-        document.getElementById('lockerNumberBtn').disabled     = true;
-        document.getElementById('lockerNumberBtn').title        = 'Select Locker Type first';
-        document.getElementById('lockerNumberHint').textContent = 'Select locker type first';
-        _allLockerTypes   = [];
-        _allLockerNumbers = [];
-
-        // Remove extra cards, reset first card
-        var fieldset = document.getElementById('nomineeFieldset');
-        var cards    = fieldset.querySelectorAll('.nominee-block');
-        cards.forEach(function(card, idx) {
-            if (idx === 0) {
-                card.querySelectorAll('input, select, textarea').forEach(function(el) {
-                    if (el.type === 'radio')    { el.checked = (el.value === 'no'); return; }
-                    if (el.type === 'checkbox') { el.checked = false; return; }
-                    el.value = '';
-                });
-                var cidContainer = card.querySelector('.nomineeCustomerIDContainer');
-                if (cidContainer) {
-                    cidContainer.style.display = 'none';
-                    var cidInput = cidContainer.querySelector('.nomineeCustomerIDInput');
-                    if (cidInput) { cidInput.value = ''; cidInput.disabled = true; }
-                }
-                card.querySelectorAll('.zipError').forEach(function(el) { el.textContent = ''; });
-            } else {
-                card.remove();
-            }
-        });
-        renumberNominees();
-    }, 2000);
 }
+
 // ── Show toast on redirect from servlet (success / error) ───────────
 window.onload = function() {
     if (window.parent && window.parent.updateParentBreadcrumb) {
